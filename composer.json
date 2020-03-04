@@ -1,0 +1,10 @@
+{
+    "name": "magentoese/module-data-install",
+    "type": "magento2-module",
+    "autoload": {
+        "files": [ "registration.php" ],
+        "psr-4": {
+            "MagentoEse\\DataInstall\\": ""
+        }
+    }
+}

@@ -1,2 +1,23 @@
-﻿site_code,site_name,store_code,store_name,store_root_category,is_default_store,view_code,view_name,is_default_view
-base,Changing Site name,main_website_store,Changing Store Name,,,default,Changing View Name,
+﻿testname,site_code,site_name,site_order,store_code,store_name,store_root_category,is_default_store,view_code,view_name,is_default_view,view_order,view_status
+empty row,,,,,,,,,,,,
+missing site code,,missing site code,missing site code,,,,,,,,,
+update site name,base,updating site name,,,,,,,,,,
+update site order,base,,updating site order,,,,,,,,,
+update site name and order,base,updating site name,updating site order,,,,,,,,,
+new site name only,newsite,new site name,,,,,,,,,,
+new stite name and order,newsite,new site name,new site order,,,,,,,,,
+new site missing name,newsite,,,,,,,,,,,
+missing store code,base,,,,,,,,,,,
+update store name,base,,,storebase,updating store name,,,,,,,
+update store root cat,base,,,storebase,,rootcatbase,,,,,,
+update store is default,base,,,storebase,,,Y,,,,,
+create new root category,base,,,storebase,,new root category,,,,,,
+create new store w/base root,base,,,new store,new store name,rootcatbase,Y,,,,,
+update missing store name,base,,,storebase,,,,,,,,
+create store missing elements,base,,,new store,,,,,,,,
+view with missing store code,base,,,,,,,viewbase,,,,
+new view with missing name,base,,,storebase,,,,viewnew,,,,
+update view name,base,,,storebase,,,,viewbase,new name,,,
+update view store,base,,,new store,,,,viewbase,,Y,,
+update view status,base,,,storebase,,,,viewbase,,,,Y
+create new view,base,,,storebase,,,,newview,new view,Y,1,Y

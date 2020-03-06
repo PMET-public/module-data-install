@@ -4,15 +4,20 @@
  * Copyright © Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
+//TODO: Catch duplicate new site codes and store codes
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Store\Api\Data\WebsiteInterfaceFactory;
 use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Api\Data\GroupInterfaceFactory;
-use Magento\Store\Api\StoreRepositoryInterfaceFactory;
+use Magento\Store\Api\Data\GroupInterface;
+use Magento\Store\Api\GroupRepositoryInterface;
 use Magento\Store\Api\GroupRepositoryInterfaceFactory;
-use Magento\Store\Model\ResourceModel\Group;
+use Magento\Store\Api\StoreRepositoryInterface;
+use Magento\Store\Model\ResourceModel\Group as GroupResourceModel;
 use Magento\Store\Model\ResourceModel\Website as WebsiteResourceModel;
+use Magento\Catalog\Api\Data\CategoryInterfaceFactory;
+use Magento\Catalog\Api\CategoryRepositoryInterface;
 
 class Stores
 {
@@ -23,11 +28,36 @@ class Stores
     /** @var WebsiteResourceModel  */
     protected $websiteResourceModel;
 
-    public function __construct(WebsiteInterfaceFactory $websiteInterfaceFactory, WebsiteResourceModel $websiteResourceModel)
+    /** @var GroupResourceModel  */
+    protected $groupResourceModel;
+
+    /** @var GroupInterfaceFactory  */
+    protected $groupInterfaceFactory;
+
+    /** @var GroupRepositoryInterfaceFactory  */
+    protected $groupRepository;
+
+    /** @var CategoryInterfaceFactory  */
+    protected $categoryInterfaceFactory;
+
+    /** @var CategoryRepositoryInterface  */
+    protected $categoryRepository;
+
+    public function __construct(WebsiteInterfaceFactory $websiteInterfaceFactory,
+                                WebsiteResourceModel $websiteResourceModel,
+                                GroupResourceModel $groupResourceModel,
+                                GroupInterfaceFactory $groupInterfaceFactory,
+                                GroupRepositoryInterfaceFactory $groupRepository,
+                                CategoryInterfaceFactory $categoryInterfaceFactory,
+                                CategoryRepositoryInterface $categoryRepository)
     {
         $this->websiteInterfaceFactory = $websiteInterfaceFactory;
         $this->websiteResourceModel = $websiteResourceModel;
-
+        $this->groupResourceModel = $groupResourceModel;
+        $this->groupInterfaceFactory = $groupInterfaceFactory;
+        $this->groupRepository = $groupRepository;
+        $this->categoryInterfaceFactory = $categoryInterfaceFactory;
+        $this->categoryRepository = $categoryRepository;
     }
 
     /**
@@ -38,20 +68,22 @@ class Stores
         //site_code,site_name,site_order,store_code,store_name,store_root_category,is_default_store,view_code,view_name,is_default_view
         echo "--------------------\n";
         echo $data['testname']."\n";
-        //TODO:Validate codes
-        //TODO:Validate numeric (sort order)
-        //TODO:Validate Y/N (is default)
-        //TODO:Convert Y/N to true/false
         if(!empty($data['site_code'])){
+            //fix site code if its not correct
+            $data['site_code'] = $this->validateCode($data['site_code']);
             //echo "-updating site\n";
             $this->setSite($data);
             //if there is no store code, skip store and view
             if(!empty($data['store_code'])){
                 //echo "-updating stores\n";
+                //fix store code if its not correct
+                $data['store_code'] = $this->validateCode($data['store_code']);
                 $this->setStore($data);
                 //if there is not view code and store code, skip view updates
                 if(!empty($data['view_code'])&&!empty($data['store_code'])){
                     echo "-updating views\n";
+                    //fix view code if its not correct
+                    $data['view_code'] = $this->validateCode($data['view_code']);
                     $this->setView($data);
                     //if there is not view code, skip view update
                 }else{
@@ -62,6 +94,10 @@ class Stores
             }else{
                 echo "skipping store updates\n";
             }
+            /*
+             * TODO:Cleanup: make sure there is a default site
+             * Make sure each site has a default Group (store)
+             * Make sure each Group(store) has a default view (store)*/
 
         }else{
             echo "site_code column needs to be included with a value\n";
@@ -70,11 +106,11 @@ class Stores
 
     //site requires name and code
     private function setSite($data){
-        //site_code, site_name, site_order, is_default_site
         //no name,sort order, or default update - we can skip
         if(!empty($data['site_name'])||!empty($data['site_order'])||!empty($data['is_default_site'])) {
             echo $data['site_code']." eligable for add or update\n";
             //load site from the code.
+            /** @var WebsiteInterface $website */
             $website = $this->getWebsite($data);
             //if the site exists - update
             if($website->getId()){
@@ -83,7 +119,7 @@ class Stores
                     $website->setName($data['site_name']);
                 }
                 if(!empty($data['site_order'])){
-                    $website->setSortOrder($data['site_order']);
+                    $website->setSortOrder((is_int($data['site_order'])?:0));
                 }
                 if(!empty($data['is_default_site'])){
                     $website->setIsDefault($data['is_default_site']);
@@ -95,7 +131,7 @@ class Stores
                 $website->setCode($data['site_code']);
                 $website->setName($data['site_name']);
                 if(!empty($data['site_order'])){
-                    $website->setSortOrder($data['site_order']);
+                    $website->setSortOrder((is_int($data['site_order'])?:0));
                 }
                 if(!empty($data['is_default_site'])){
                     $website->setIsDefault($data['is_default_site']);
@@ -110,36 +146,58 @@ class Stores
         }
     }
     //store requires site, name, code, and root category
+    //Stores are referred to as groups in code
     private function setStore($data){
-        //$siteCode,$storeCode,$storeName,$rootCategoryName,$isDefaultStore
         //no name, root category, or isDefault we can skip
         if(!empty($data['store_name'])||!empty($data['store_root_category'])||!empty($data['is_default_store'])) {
+            /** @var WebsiteInterface $website */
+            $website = $this->getWebsite($data);
             echo $data['store_code']." eligable for add or update\n";
             //load store with the code.
-            if($data['store_code']=='storebase'){
-                $store = true;
-            }else{
-                $store = false;
-            }
-            //load or create root category if defined
-            //TODO:This may be able to happen after creation
+            /** @var GroupInterface $store */
+            $store = $this->getStore($data);
+            //load or create root category if defined - default to 0
+            $rootCategoryId = 2;
             if(!empty($data['store_root_category'])){
+                $rootCategoryId = $this->getRootCategoryByName($data);
                 if($data['store_root_category']=='rootcatbase'){
                     echo "using existing root cat\n";
                 }else{
-                    echo "creating new root cat\n";
+                   $rootCategoryId = $this->createRootCategory($data);
                 }
             }
 
-
             //if the store exists - update
-            if($store){
-                echo "update store ".$data['store_code']."\n";
+            if($store->getId()){
                 //update name or isdefault
-            }elseif(!empty($data['site_name'])||!empty($data['store_root_category'])){
+                if(!empty($data['store_name'])){
+                    $store->setName($data['store_name']);
+                    $this->groupResourceModel->save($store);
+                }
+                if(!empty($data['store_root_category'])){
+                    $store->setRootCategoryId($rootCategoryId);
+                    $this->groupResourceModel->save($store);
+                }
+                if(!empty($data['is_default_store'])){
+                    $website->setDefaultGroupId($store->getId());
+                    $this->websiteResourceModel->save($website);
+                }
+
+            }elseif(!empty($data['store_name'])){
                 //create store, set default and root category
-                //TODO:if this is the only store will it be set to the default for the site?
                 echo "create store\n";
+                if(!empty($data['store_name'])){
+                    $store->setName($data['store_name']);
+                    $store->setCode($data['store_code']);
+                    $store->setRootCategoryId($rootCategoryId);
+                    $store->setWebsiteId($website->getId());
+                    $this->groupResourceModel->save($store);
+                }
+                if(!empty($data['is_default_store'])){
+                    $website->setDefaultGroupId($store->getId());
+                    $this->websiteResourceModel->save($website);
+                }
+
             }else{
                 //if the site doesnt exist and the name isn't provided, error out
                 echo "store_name and store_root_category column need to be included with a value when creating a store\n";
@@ -150,6 +208,7 @@ class Stores
 
     }
     //view requires store, name, code
+    //Views are referred to stores in code
     private function setView($data){
         //$storeCode,$viewName,$viewCode,$viewStatus,$viewSortOrder,$isDefaultView
         //cannot do a wholesale skip as we may be assigning the view to a different store
@@ -174,16 +233,77 @@ class Stores
 
     /**
      * @param $data
-     * @return WebsiteInterface
+     * @return WebsiteResourceModel
      */
     private function getWebsite($data)
     {
-        /** @var WebsiteInterface $website */
-        $website = $this->websiteInterfaceFactory->create()->load($data['site_code']);
-        return $website;
+        return  $this->websiteInterfaceFactory->create()->load($data['site_code']);
+
     }
 
+    private function getStore($data){
+        /** @var GroupRepositoryInterface $groupRepository */
+        $groupId = -1;
+        $groupRepository = $this->groupRepository->create();
+        $groups = $groupRepository->getList();
+        foreach($groups as $group) {
+            if ($group->getCode() == $data['store_code']) {
+                $groupId = $group->getId();
+                break;
+            }
+        }
+        $store = $this->groupInterfaceFactory->create();
+        if($groupId!=-1){
+            $store->load($groupId);
+        }
+        return $store;
+    }
+
+    /**
+     * @param $code
+     * @return string|string[]|null
+     */
     private function validateCode($code){
         //Code may only contain letters (a-z), numbers (0-9) or underscore (_), and the first character must be a letter.
+        //remove all invalid characters
+        $code = preg_replace("/[^A-Za-z0-9_]/", '', $code);
+        //if the first character is not a letter, add an "m"
+        if(!ctype_alpha($code[0])){
+            $code = "m".$code;
+        }
+        return $code;
+    }
+
+    private function createRootCategory($data)
+    {
+        $data = [
+            'parent_id' => 1,
+            'name' => $data['store_root_category'],
+            'is_active' => 1,
+            'is_anchor' => 1,
+            'include_in_menu' => 0,
+            'position'=>10,
+            'store_id'=>0
+        ];
+        $category = $this->categoryInterfaceFactory->create();
+        $category->getDefaultAttributeSetId();
+        $category->setData($data)
+            ->setPath('1')
+            ->setAttributeSetId($category->getDefaultAttributeSetId());
+        //using repository save wont generate tree properly
+        //$this->categoryRepository->save($category);
+        $category->save();
+        return $category->getId();
+    }
+
+    private function getRootCategoryByName($data){
+        $categories = $this->categoryInterfaceFactory->create()
+            ->getCollection()
+            ->addAttributeToFilter('name',$data['store_root_category'])
+            ->addAttributeToFilter('parent_id',1)
+            ->addAttributeToSelect(['entity_id']);
+
+        $id = $categories->getFirstItem()->getEntityId();
+        return $categories->getFirstItem()->getEntityId();
     }
 }

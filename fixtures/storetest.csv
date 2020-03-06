@@ -1,0 +1,9 @@
+﻿testname,site_code,site_name,site_order,is_default_site,store_code,store_name,store_root_category,is_default_store,view_code,view_name,is_default_view,view_order,view_status
+missing store code,base,,,,,,,,,,,,
+update store name,base,,,,storebase,updating store name,,,,,,,
+update store root cat,base,,,,storebase,,rootcatbase,,,,,,
+update store is default,base,,,,storebase,,,Y,,,,,
+create new root category,base,,,,storebase,,new root category,,,,,,
+create new store w/base root,base,,,,new store,new store name,rootcatbase,Y,,,,,
+update missing store name,base,,,,storebase,,,,,,,,
+create store missing elements,base,,,,new store,,,,,,,,

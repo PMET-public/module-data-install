@@ -1,4 +1,0 @@
-﻿testname,site_code,site_name,site_order,is_default_site,store_code,store_name,store_root_category,is_default_store,view_code,view_name,is_default_view,view_order,view_status
-New Site,newsite,New Site,,,store1,Store 1,,,,,,,
-Store 2,newsite,,,,store3,Store 2,,,,,,,
-Store 3,newsite,,,,store2,Store 3,,,,,,,

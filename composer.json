@@ -1,10 +1,14 @@
 {
     "name": "magentoese/module-data-install",
     "type": "magento2-module",
+    "version" : "0.0.1",
     "autoload": {
         "files": [ "registration.php" ],
         "psr-4": {
             "MagentoEse\\DataInstall\\": ""
         }
+    },
+    "require": {
+
     }
 }

@@ -25,4 +25,5 @@ is_default_view //TODO: same verification as in store
 
 view_order - optional, default is zero
 
-view_status - optional:enabled or disabled - default is enabled
+view_status - optional:enabled or disabled - default is disabled
+You cannot disable a view that is set as the default for the store.  If you need to do this, first set another view as default

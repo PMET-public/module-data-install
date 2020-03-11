@@ -62,11 +62,16 @@ class Process
                 foreach ($row as $key => $value) {
                     $data[$header[$key]] = $value;
                 }
-                    if(basename($fileName)=='stores.csv'){
+                    switch(basename($fileName)){
+                        case "stores.csv":
+                            $this->storeInstall->processStores($data);
+                            break;
 
-                        $this->storeInstall->processStores($data);
-
+                        case "customers.csv":
+                            $this->customerInstall->processStores($data);
+                            break;
                     }
+
                 }
             }
         echo "\n\n\n\n\n\n\n";

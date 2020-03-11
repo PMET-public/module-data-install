@@ -4,8 +4,6 @@
  * Copyright © Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
-//TODO: Catch duplicate new site codes and store codes
-//TODO: (validate) Default store is inactive
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -114,10 +112,6 @@ class Stores
             }else{
                 echo "skipping store updates\n";
             }
-            /*
-             * TODO:Cleanup: make sure there is a default site
-             * Make sure each site has a default Group (store)
-             * Make sure each Group(store) has a default view (store)*/
 
         }else{
             echo "site_code column needs to be included with a value\n";
@@ -243,9 +237,7 @@ class Stores
     private function setView($data,$store){
         //if there is no store or view code we can skip
         if(!empty($data['store_code'])||!empty($data['view_code'])) {
-            /** @var GroupInterface $store */
-            //$store = $this->getStore($data);
-            //TODO:only get store once...use created store and site as you cant retrieve the second
+
             /** @var WebsiteInterface $website */
             $website = $this->getWebsite($data);
             echo $data['view_code']." view eligible for add or update\n";

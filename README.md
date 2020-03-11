@@ -1,29 +1,36 @@
-stores.csv
+# Magento 2 Data Install Modules
+**Purpose** :  To facilitate the loading of sample data by a series of generic .csv files
 
-site_code - always required. If the site_code exists it will update the site with any additional information.  If it is a new site code, it will create a new site. Website code may only contain letters (a-z), numbers (0-9) or underscore (_), and the first character must be a letter.  Code will be fixed automatically if needed
 
-site_name - required when updating a site name, or creating a new site
+## Sites, Stores, Views, Root Category
+This file is used to add and update Stores, Store Views and Root Categories. The codes provided in the file are used do determine if a new element will be created or updated.
 
-site_order - optional, default is zero
+*File Name* - stores.csv
 
-is_default_site	- optional: value = Y. There can only be one default site. If it is defined muliple times, the last site updated will be the default. Default cannot be removed, only added to an existing or new site
+*Columns*
 
-store_code - required when updating or adding a store or view. Store code may only contain letters (a-z), numbers (0-9) or underscore (_), and the first character must be a letter. Code will be fixed automatically if needed
+**site\_code** - Always required. If the site\_code exists it will update the site with the provided information.  If it is a new site code, it will create a new site. Website code may only contain letters (a-z), numbers (0-9) or underscore (\_), and the first character must be a letter.  Code will be fixed automatically if needed
 
-store_name- - required when updating a store name, or creating a store
+**site\_name** - Required when updating a site name, or creating a new site
 
-store_root_category	- required when creating a new store. If the root category given does not exist, one will be created and set to the store.
+**site\_order** - Optional, default is zero
 
-is_default_store optional: value = Y. There can only be one default store per site. If it is defined muliple times, the last store updated will be the default. Default cannot be removed, only added to an existing or new site
-//TODO: check if default store is automatically set on single store site
-	
-view_code - required when updating or adding a view. View code may only contain letters (a-z), numbers (0-9) or underscore (_), and the first character must be a letter.  Code will be fixed automatically if needed
+**is\_default\_site** - Optional, value =Y. There can only be one default site. If it is set muliple times, the last site updated will be the default. Default cannot be removed, it can only be assigned to a different site.
 
-view_name - required when updating a view name, or creating a view
+**store\_code **- Required when updating or adding a store or view. Store code may only contain letters (a-z), numbers (0-9) or underscore (\_), and the first character must be a letter. Code will be fixed automatically if needed
 
-is_default_view //TODO: same verification as in store
+**store\_name** - Required when updating a store name, or creating a store
 
-view_order - optional, default is zero
+**store\_root\_category** - Required when creating a new store or changing a Root Category. If the Root Category given does not exist, one will be created and assigned to the store.
 
-view_status - optional:enabled or disabled - default is disabled
-You cannot disable a view that is set as the default for the store.  If you need to do this, first set another view as default
+**is\_default\_store** Optional: value = Y. There can only be one default store per site. If it is defined muliple times, the last store updated will be the default. The default store cannot be removed from a site, only changed to a different store.
+
+**view\_code** - Required when updating or adding a view. View code may only contain letters (a-z), numbers (0-9) or underscore (\_), and the first character must be a letter.  Code will be fixed automatically if needed
+
+**view\_name** - Required when updating a view name, or creating a view
+
+**is\_default\_view** - Optional: value = Y. There can only be one default view per store. If it is defined muliple times, the last view updated will be the default. The default view cannot be removed from a store, only changed to a different view.
+
+**view\_order** - Optional Default is zero
+
+**view\_is\_active** - Optional: values = Y/N. Default = N. If a view is set as default for a store, it cannot be deactivated.

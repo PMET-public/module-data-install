@@ -12,7 +12,7 @@ class Customers
     {
     }
 
-    public function processCustomers(array $data){
+    public function install(array $data){
 
     }
 

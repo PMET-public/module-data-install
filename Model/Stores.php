@@ -25,6 +25,12 @@ use Magento\Catalog\Api\CategoryRepositoryInterface;
 class Stores
 {
 
+    const DEFAULT_WEBSITECODE = 'base';
+    const DEFAULT_STORECODE = 'main_website_store';
+    const DEFAULT_VIEWCODE = 'default';
+    const DEFAULT_ROOTCATEGORY = 'Default Category';
+    const DEFAULT_ROOTCATEGORY_ID = 2;
+
     /** @var  WebsiteInterfaceFactory */
     protected $websiteInterfaceFactory;
 
@@ -82,7 +88,7 @@ class Stores
      * @param array $data
      * @throws \Exception
      */
-    public function processStores(array $data){
+    public function install(array $data){
         //site_code,site_name,site_order,store_code,store_name,store_root_category,is_default_store,view_code,view_name,is_default_view
         echo "--------------------\n";
         //echo $data['testname']."\n";
@@ -178,7 +184,7 @@ class Stores
             /** @var GroupInterface $store */
             //$store = $this->getStore($data);
             //load or create root category if defined - default to 2
-            $rootCategoryId = 2;
+            $rootCategoryId = self::DEFAULT_ROOTCATEGORY_ID;
             if(!empty($data['store_root_category'])){
                 $rootCategoryId = $this->getRootCategoryByName($data);
                 //echo "requested root cat=".$data['store_root_category']."Id=".$rootCategoryId."\n";

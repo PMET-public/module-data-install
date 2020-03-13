@@ -23,15 +23,21 @@ class Process
     /** @var Stores  */
     protected $storeInstall;
 
+    /** @var ProductAttributes  */
+    protected $productAttributesInstall;
+
     /**
-     * Stores constructor.
+     * Process constructor.
      * @param SampleDataContext $sampleDataContext
+     * @param Stores $stores
+     * @param ProductAttributes $productAttributes
      */
-    public function __construct(SampleDataContext $sampleDataContext, Stores $stores)
+    public function __construct(SampleDataContext $sampleDataContext, Stores $stores, ProductAttributes $productAttributes)
     {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
         $this->storeInstall = $stores;
+        $this->productAttributesInstall = $productAttributes;
     }
 
     /**
@@ -64,11 +70,15 @@ class Process
                 }
                     switch(basename($fileName)){
                         case "stores.csv":
-                            $this->storeInstall->processStores($data);
+                            //$this->storeInstall->install($data);
                             break;
 
                         case "customers.csv":
-                            $this->customerInstall->processStores($data);
+                            //$this->customerInstall->install($data);
+                            break;
+
+                        case "product_attributes.csv":
+                            $this->productAttributesInstall->install($data);
                             break;
                     }
 

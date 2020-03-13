@@ -22,7 +22,8 @@ class Test implements DataPatchInterface
 
     public function apply()
     {
-        $this->process->loadFiles(['MagentoEse_DataInstall::fixtures/stores.csv']);
+        $this->process->loadFiles(['MagentoEse_DataInstall::fixtures/stores.csv',
+            'MagentoEse_DataInstall::fixtures/product_attributes.csv']);
     }
 
     public static function getDependencies()

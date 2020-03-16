@@ -16,8 +16,6 @@ use Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\CollectionFactory as
 use Magento\Catalog\Helper\Product;
 use Magento\Eav\Model\Config as EavConfig;
 
-
-
 class ProductAttributes
 {
 
@@ -57,7 +55,6 @@ class ProductAttributes
      */
     protected $storeManager;
 
-
     public function __construct(
         AttributeFactory $attributeFactory,
         SetFactory $attributeSetFactory,
@@ -73,7 +70,6 @@ class ProductAttributes
         $this->eavConfig = $eavConfig;
         $this->storeManager = $storeManager;
     }
-
 
     public function install(array $data)
     {
@@ -108,9 +104,9 @@ class ProductAttributes
         $attribute->save();
         $attributeId = $attribute->getId();
         //if attribute_set is empty, or not included, set to default
-        if(empty($data['attribute_set'])){
+        if (empty($data['attribute_set'])) {
             $data['attribute_set'] = [self::DEFAULT_ATTRIBUTE_SET];
-        }else{
+        } else {
             $data['attribute_set'] = explode("\n", $data['attribute_set']);
         }
         if (is_array($data['attribute_set'])) {
@@ -173,7 +169,6 @@ class ProductAttributes
         return $result;
     }
 
-
     protected function getEntityTypeId()
     {
         if (!$this->entityTypeId) {
@@ -181,7 +176,6 @@ class ProductAttributes
         }
         return $this->entityTypeId;
     }
-
 
     protected function processAttributeSet($setName)
     {
@@ -210,12 +204,14 @@ class ProductAttributes
      * @param $code
      * @return string|string[]|null
      */
-    private function validateCode($code){
-        //Code may only contain letters (a-z), numbers (0-9) or underscore (_), and the first character must be a letter.
+    private function validateCode($code)
+    {
+        /*Code may only contain letters (a-z), numbers (0-9) or underscore (_),
+        and the first character must be a letter.*/
         //remove all invalid characters
         $code = preg_replace("/[^A-Za-z0-9_]/", '', $code);
         //if the first character is not a letter, add an "m"
-        if(!ctype_alpha($code[0])){
+        if (!ctype_alpha($code[0])) {
             $code = "m".$code;
         }
         return $code;

@@ -6,7 +6,6 @@
 
 namespace MagentoEse\DataInstall\Setup\Patch\Data;
 
-
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use MagentoEse\DataInstall\Model\Process;
 

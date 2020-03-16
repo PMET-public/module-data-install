@@ -3,7 +3,6 @@
 
 namespace MagentoEse\DataInstall\Model;
 
-
 class Customers
 {
 
@@ -12,8 +11,7 @@ class Customers
     {
     }
 
-    public function install(array $data){
-
+    public function install(array $data)
+    {
     }
-
 }

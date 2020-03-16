@@ -3,10 +3,10 @@
 
 namespace MagentoEse\DataInstall\Model;
 
-
 class Validate
 {
-    public function validateStores($data){
+    public function validateStores($data)
+    {
         //check the header for required columns
         //site_code,site_name,store_code,store_name,store_root_category,view_code,view_name,is_default_view
         //site_code needs to be in the file and populated
@@ -19,7 +19,5 @@ class Validate
         //create store
         //update view name
         //create view
-
-
     }
 }

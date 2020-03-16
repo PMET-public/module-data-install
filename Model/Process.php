@@ -3,7 +3,7 @@
 /**
  * This class will take in an array of files, convert them to data arrays
 and pass them on to the correct data loader
-*/
+ */
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Framework\File\Csv;
@@ -32,8 +32,11 @@ class Process
      * @param Stores $stores
      * @param ProductAttributes $productAttributes
      */
-    public function __construct(SampleDataContext $sampleDataContext, Stores $stores, ProductAttributes $productAttributes)
-    {
+    public function __construct(
+        SampleDataContext $sampleDataContext,
+        Stores $stores,
+        ProductAttributes $productAttributes
+    ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
         $this->storeInstall = $stores;
@@ -68,26 +71,23 @@ class Process
                 foreach ($row as $key => $value) {
                     $data[$header[$key]] = $value;
                 }
-                    switch(basename($fileName)){
-                        case "stores.csv":
-                            //$this->storeInstall->install($data);
-                            break;
+                switch (basename($fileName)) {
+                    case "stores.csv":
+                        //$this->storeInstall->install($data);
+                        break;
 
-                        case "customers.csv":
-                            //$this->customerInstall->install($data);
-                            break;
+                    case "customers.csv":
+                        //$this->customerInstall->install($data);
+                        break;
 
-                        case "product_attributes.csv":
-                            $this->productAttributesInstall->install($data);
-                            break;
-                    }
-
+                    case "product_attributes.csv":
+                        $this->productAttributesInstall->install($data);
+                        break;
                 }
+
             }
+        }
         echo "\n\n\n\n\n\n\n";
         //$f=$RRRRf;
-
-
     }
-
 }

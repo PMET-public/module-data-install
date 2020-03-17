@@ -6,6 +6,7 @@
  */
 namespace MagentoEse\DataInstall\Model;
 
+use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\Data\StoreInterfaceFactory;
 use Magento\Store\Api\Data\StoreInterface;
@@ -60,6 +61,20 @@ class Stores
 
     /** @var StoreInterfaceFactory  */
     protected $storeInterfaceFactory;
+
+    /**
+     * Stores constructor.
+     * @param WebsiteInterfaceFactory $websiteInterfaceFactory
+     * @param WebsiteResourceModel $websiteResourceModel
+     * @param GroupResourceModel $groupResourceModel
+     * @param GroupInterfaceFactory $groupInterfaceFactory
+     * @param GroupRepositoryInterface $groupRepository
+     * @param CategoryInterfaceFactory $categoryInterfaceFactory
+     * @param CategoryRepositoryInterface $categoryRepository
+     * @param StoreResourceModel $storeResourceModel
+     * @param StoreRepositoryInterface $storeRepository
+     * @param StoreInterfaceFactory $storeInterfaceFactory
+     */
 
     public function __construct(
         WebsiteInterfaceFactory $websiteInterfaceFactory,
@@ -127,6 +142,12 @@ class Stores
     }
 
     //site requires name and code
+
+    /**
+     * @param $data
+     * @return WebsiteInterface|null
+     * @throws AlreadyExistsException
+     */
     private function setSite($data)
     {
         //load site from the code.
@@ -175,6 +196,12 @@ class Stores
     }
     //store requires site, name, code, and root category
     //Stores are referred to as groups in code
+    /**
+     * @param $data
+     * @param $website
+     * @return GroupInterface|null
+     * @throws AlreadyExistsException
+     */
     private function setStore($data, $website)
     {
         /** @var GroupInterface $store */
@@ -244,6 +271,11 @@ class Stores
     }
     //view requires store, name, code
     //Views are referred to as stores in code
+    /**
+     * @param $data
+     * @param $store
+     * @throws AlreadyExistsException
+     */
     private function setView($data, $store)
     {
         //if there is no store or view code we can skip
@@ -322,6 +354,10 @@ class Stores
         return  $this->websiteInterfaceFactory->create()->load($data['site_code']);
     }
 
+    /**
+     * @param $data
+     * @return GroupInterface
+     */
     private function getStore($data)
     {
         /** @var GroupRepositoryInterface $groupRepository */
@@ -341,6 +377,10 @@ class Stores
         return $store;
     }
 
+    /**
+     * @param $data
+     * @return StoreInterface
+     */
     public function getView($data)
     {
         try {
@@ -368,6 +408,10 @@ class Stores
         return $code;
     }
 
+    /**
+     * @param $data
+     * @return int|null
+     */
     private function createRootCategory($data)
     {
         $data = [
@@ -390,6 +434,10 @@ class Stores
         return $category->getId();
     }
 
+    /**
+     * @param $data
+     * @return mixed
+     */
     private function getRootCategoryByName($data)
     {
         $categories = $this->categoryInterfaceFactory->create()

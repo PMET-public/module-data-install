@@ -4,6 +4,7 @@ This file is optional.  If it is not included, the installation defaults will be
 
 ## Sites, Stores, Views, Root Category
 This file is used to add and update Stores, Store Views and Root Categories. The codes provided in the file are used to determine if a new element will be created or updated.
+> Out of Scope: Updating of Codes and Root Category Name
 
 *File Name* - stores.csv
 
@@ -39,6 +40,7 @@ This file is used to add and update Stores, Store Views and Root Categories. The
 ## Product Attributes
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
 Product attribute configurations can be complex. The purpose of this file is to address the most common settings.
+> Out of Scope: Updating Attribute codes. Any attribute setting not currently listed
 
 *File Name* - product_attributes.csv
 
@@ -53,11 +55,9 @@ frontend_label	frontend_input	is_required	option	default	attribute_code	position
 
 **is\_required** - Optional: Values = Y/N. Default = N
 
-**options** - Required when input is Multi or Select
-
-**option_default????** -
+**options** - Required when input is Multi or Select. Carriage return delimited
 
 **position** - Optional, Numeric.  Indicates the position of the attribute within the Attribute Group
 
-**attribute\_set** - 
+**attribute\_set** - Carriage return delimited list of Attribute Sets that the Attribute will be added to.  Sets will be created as needed based on the Default set. If no value is given, the Attribute will be added to the Default set.
 

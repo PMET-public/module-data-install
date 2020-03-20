@@ -12,7 +12,7 @@ use Magento\Framework\Setup\SampleData\FixtureManager;
 
 class Process
 {
-    const FILE_ORDER = ['stores.csv'];
+    const FILE_ORDER = ['stores.csv','customers.csv','product_attributes.csv','categories.csv'];
 
     /** @var FixtureManager  */
     protected $fixtureManager;
@@ -26,21 +26,27 @@ class Process
     /** @var ProductAttributes  */
     protected $productAttributesInstall;
 
+    /** @var Categories  */
+    protected $categoryInstall;
+
     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
      * @param Stores $stores
      * @param ProductAttributes $productAttributes
+     * @param Categories $categories
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
         Stores $stores,
-        ProductAttributes $productAttributes
+        ProductAttributes $productAttributes,
+        Categories $categories
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
         $this->storeInstall = $stores;
         $this->productAttributesInstall = $productAttributes;
+        $this->categoryInstall = $categories;
     }
 
     /**
@@ -50,44 +56,59 @@ class Process
     public function loadFiles(array $fixtures)
     {
         //validate files
-        foreach ($fixtures as $fileName) {
-            $fileName = $this->fixtureManager->getFixture($fileName);
-            if (!file_exists($fileName)) {
-                continue;
-            }
-        }
+        foreach (self::FILE_ORDER as $nextFile) {
+            foreach ($fixtures as $fileName) {
+                $fileName = $this->fixtureManager->getFixture($fileName);
+                if (basename($fileName)==$nextFile && file_exists($fileName)) {
 
-        foreach ($fixtures as $fileName) {
-            $fileName = $this->fixtureManager->getFixture($fileName);
-            if (!file_exists($fileName)) {
-                continue;
-            }
-            $rows = $this->csvReader->getData($fileName);
-            $header = array_shift($rows);
-            //Remove hidden character Excel adds to the first cell of a document
-            $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
-            foreach ($rows as $row) {
-                $data = [];
-                foreach ($row as $key => $value) {
-                    $data[$header[$key]] = $value;
+                    $rows = $this->csvReader->getData($fileName);
+                    $header = array_shift($rows);
+                    //Remove hidden character Excel adds to the first cell of a document
+                    $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
+
+                    switch (basename($fileName)) {
+                        case "stores.csv":
+                            echo "loading Stores\n";
+                            $this->processRows($rows, $header, $this->storeInstall);
+                            break;
+
+                        case "customers.csv":
+                            echo "loading Customers\n";
+                           // $this->processRows($rows, $header, $this->customerInstall);
+                            break;
+
+                        case "product_attributes.csv":
+                            echo "loading Product Attributes\n";
+                            $this->processRows($rows, $header, $this->productAttributesInstall);
+                            //$this->productAttributesInstall->install($data);
+                            break;
+
+                        case "categories.csv":
+                            echo "loading Categories\n";
+                            $this->processRows($rows, $header, $this->categoryInstall);
+                            //$this->categoryInstall->install($data);
+                            break;
+                    }
+
+
                 }
-                switch (basename($fileName)) {
-                    case "stores.csv":
-                        //$this->storeInstall->install($data);
-                        break;
-
-                    case "customers.csv":
-                        //$this->customerInstall->install($data);
-                        break;
-
-                    case "product_attributes.csv":
-                        $this->productAttributesInstall->install($data);
-                        break;
-                }
-
             }
-        }
+
+           }
         echo "\n\n\n\n\n\n\n";
         //$f=$RRRRf;
     }
+
+
+    private function processRows(array $rows, $header, $process): void
+    {
+        foreach ($rows as $row) {
+            $data = [];
+            foreach ($row as $key => $value) {
+                $data[$header[$key]] = $value;
+            }
+                $process->install($data);
+            }
+
+        }
 }

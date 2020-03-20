@@ -1,0 +1,12 @@
+name,url_key,path,active,is_anchor,include_in_menu,position,page_layout,display_mode,landing_page,custom_layout_update,image
+Accessories,venia-accessories,,1,1,1,4,,,,,carefree.jpg
+Belts,venia-belts,Accessories,1,1,1,1,,,,,
+Jewelry,venia-jewelry,Accessories,1,1,1,2,,,,,
+Scarves,venia-scarves,Accessories,1,1,1,3,,,,,
+Tops,venia-tops,,1,1,1,3,,,,,outside.jpg
+Blouses & Shirts,venia-blouses,Tops,1,1,1,1,,,,,
+Sweaters,venia-sweaters,Tops,1,1,1,2,,,,,
+Bottoms,venia-bottoms,,1,1,1,2,,,,,minimalist.jpg
+Pants & Shorts,venia-pants,Bottoms,1,1,1,1,,,,,
+Skirts,venia-skirts,Bottoms,1,1,1,2,,,,,
+Dresses,venia-dresses,,1,1,1,3,,,,,timeless.jpg

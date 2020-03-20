@@ -26,11 +26,6 @@ use Magento\Catalog\Api\CategoryRepositoryInterface;
 class Stores
 {
 
-    const DEFAULT_WEBSITECODE = 'base';
-    const DEFAULT_STORECODE = 'main_website_store';
-    const DEFAULT_VIEWCODE = 'default';
-    const DEFAULT_ROOTCATEGORY = 'Default Category';
-    const DEFAULT_ROOTCATEGORY_ID = 2;
 
     /** @var  WebsiteInterfaceFactory */
     protected $websiteInterfaceFactory;
@@ -62,6 +57,9 @@ class Stores
     /** @var StoreInterfaceFactory  */
     protected $storeInterfaceFactory;
 
+    /** @var Configuration  */
+    protected $configuration;
+
     /**
      * Stores constructor.
      * @param WebsiteInterfaceFactory $websiteInterfaceFactory
@@ -86,7 +84,8 @@ class Stores
         CategoryRepositoryInterface $categoryRepository,
         StoreResourceModel $storeResourceModel,
         StoreRepositoryInterface $storeRepository,
-        StoreInterfaceFactory $storeInterfaceFactory
+        StoreInterfaceFactory $storeInterfaceFactory,
+        Configuration $configuration
     ) {
         $this->websiteInterfaceFactory = $websiteInterfaceFactory;
         $this->websiteResourceModel = $websiteResourceModel;
@@ -98,6 +97,7 @@ class Stores
         $this->storeResourceModel = $storeResourceModel;
         $this->storeRepository = $storeRepository;
         $this->storeInterfaceFactory = $storeInterfaceFactory;
+        $this->configuration = $configuration;
     }
 
     /**
@@ -215,7 +215,7 @@ class Stores
             /** @var GroupInterface $store */
             //$store = $this->getStore($data);
             //load or create root category if defined - default to 2
-            $rootCategoryId = self::DEFAULT_ROOTCATEGORY_ID;
+            $rootCategoryId = $this->configuration->getDefaultRootCategoryId();
             if (!empty($data['store_root_category'])) {
                 $rootCategoryId = $this->getRootCategoryByName($data);
                 //echo "requested root cat=".$data['store_root_category']."Id=".$rootCategoryId."\n";

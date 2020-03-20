@@ -1,5 +1,21 @@
-﻿frontend_label,frontend_input,is_required,option,default,attribute_code,is_searchable,is_visible_in_advanced_search,is_comparable,is_filterable,is_filterable_in_search,position,is_used_for_promo_rules,is_html_allowed_on_front,is_visible_on_front,used_in_product_listing,used_for_sort_by,attribute_set
-Description Extra,textarea,0,,,description_extra,0,0,0,0,0,,0,1,0,0,0,"Fashion Accessories
+frontend_label,frontend_input,is_required,option,default,attribute_code,is_global,default_value_text,default_value_yesno,default_value_date,default_value_textarea,is_unique,is_searchable,is_visible_in_advanced_search,is_comparable,is_filterable,is_filterable_in_search,position,is_used_for_promo_rules,is_html_allowed_on_front,is_visible_on_front,used_in_product_listing,used_for_sort_by,attribute_set
+Description Extra,textarea,0,,,description_extra,1,,0,,,0,0,0,0,0,0,,0,1,0,0,0,"Fashion Accessories
+Dresses
+Fashion Tops
+Fashion Bottoms"
+"Color
+Fashion Color",select,0,"Gold
+Silver",,fashion_color,1,,0,,,0,1,1,1,1,1,,0,1,0,1,0,"Fashion Accessories
+Dresses
+Fashion Tops
+Fashion Bottoms"
+"Material
+Fashion Material",multiselect,0,"14K Gold
+Sterling Silver",,fashion_material,1,,0,,,0,1,1,1,1,1,,1,1,0,1,0,"Fashion Accessories
+Dresses
+Fashion Tops
+Fashion Bottoms"
+Description Extra,textarea,0,,,description_extra,1,,0,,,0,0,0,0,0,0,,0,1,0,0,0,"Fashion Accessories
 Dresses
 Fashion Tops
 Fashion Bottoms"
@@ -13,7 +29,7 @@ Lily
 Latte
 Gold
 Silver
-Cocoa",,fashion_color,1,1,1,1,1,,0,1,0,1,0,"Fashion Accessories
+Cocoa",,fashion_color,1,,0,,,0,1,1,1,1,1,,0,1,0,1,0,"Fashion Accessories
 Dresses
 Fashion Tops
 Fashion Bottoms"
@@ -27,11 +43,11 @@ XS
 6
 8
 10
-12",,fashion_size,0,0,,1,0,,1,1,0,0,0,"Fashion Accessories
+12",,fashion_size,1,,0,,,0,0,0,,1,0,,1,1,0,0,0,"Fashion Accessories
 Dresses
 Fashion Tops
 Fashion Bottoms"
-Video File,text,0,,,video_file,1,1,1,1,1,,0,1,0,1,0,"Fashion Accessories
+Video File,text,0,,,video_file,1,,0,,,0,0,0,0,0,0,,0,1,0,1,0,"Fashion Accessories
 Dresses
 Fashion Tops
 Fashion Bottoms"
@@ -45,13 +61,12 @@ Leather
 Nylon
 Organic Cotton
 Polyester
-Polyester
 Rayon
 Silk
 Spandex
 Sterling Silver
 Viscose
-Wool",,fashion_material,1,1,1,1,1,,1,1,0,1,0,"Fashion Accessories
+Wool",,fashion_material,1,,0,,,0,1,1,1,1,1,,1,1,0,1,0,"Fashion Accessories
 Dresses
 Fashion Tops
 Fashion Bottoms"
@@ -79,10 +94,10 @@ Rectangle
 Infinity
 Braided
 Lasercut
-Woven",,fashion_style,1,1,1,1,1,,1,1,0,1,0,"Dresses
+Woven",,fashion_style,1,,0,,,0,1,1,1,1,1,,1,1,0,1,0,"Dresses
 Fashion Tops
 Fashion Bottoms"
-Has Video,boolean,0,,,has_video,1,1,1,1,1,,1,1,0,1,0,"Fashion Accessories
+Has Video,boolean,0,,,has_video,1,,0,,,0,1,1,1,1,1,,1,1,0,1,0,"Fashion Accessories
 Dresses
 Fashion Tops
 Fashion Bottoms"

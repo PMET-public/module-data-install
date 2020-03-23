@@ -1,5 +1,0 @@
-﻿testname,site_code,site_name,site_order,is_default_site,store_code,store_name,store_root_category,is_default_store,view_code,view_name,is_default_view,view_order,view_is_active
-Change Default Names,base,Luma B2C Website,,,main_website_store,Luma B2C Store,,Y,default,US English,Y,1,Y
-Add German,base,,,,main_website_store,,,,luma_de,Deutsch,,2,Y
-Add Venia,base,,,,venia_store,Venia Store,Venia Catalog,,venia_us,US English,Y,,Y
-Add Custom,base,,,,custom_b2b_store,Custom B2C Store,Custom Catalog,,custom_b2b_us,Cusom Us English,Y,,Y

@@ -1,6 +1,0 @@
-category,name,sku,price,qty,description,material,bundle_options,attribute_set
-"Accessories
-Jewelry","Night Out Collection",VA24,,100,"Tired of stressing over the right accessory combination? We’ve done the work for you. All combinations shown here have been vetted and tested out on the town by our in-house stylists.",,"Necklace|checkbox|1|1:VA13-GO-NA|1|1|0,VA14-SI-NA|0|1|0
-Cirque Earrings|drop-down|0|2:VA18-GO-NA|1|1|1,VA17-SI-NA|0|1|1
-Sol Earrings|radio|0|3:VA16-GO-NA|1|1|0,VA15-SI-NA|0|1|0
-Bangles|multi|1|4:VA19-GO-NA|1|1|0,VA20-SI-NA|0|1|0,VA22-SI-NA|0|1|0",Fashion Accessories

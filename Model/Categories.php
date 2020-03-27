@@ -21,7 +21,6 @@ use Magento\Store\Model\StoreManagerInterface;
 class Categories
 {
 
-
     /**
      * @var CategoryInterfaceFactory
      */
@@ -36,7 +35,6 @@ class Categories
      * @var TreeFactory
      */
     protected $resourceCategoryTreeFactory;
-
 
     /**
      * @var Node
@@ -86,6 +84,8 @@ class Categories
      */
     public function install($row)
     {
+        //TODO:Support for non default settings
+        //TODO:Content block additions to categories
         $category = $this->getCategoryByPath($row['path'] . '/' . $row['name']);
         if (!$category) {
             $parentCategory = $this->getCategoryByPath($row['path']);
@@ -120,17 +120,16 @@ class Categories
             'position',
             'display_mode',
             'page_layout',
-            //'custom_layout_update',
-            'look_book_main_image',
+            'image',
             'description',
             'landing_page'
         ];
 
         foreach ($additionalAttributes as $categoryAttribute) {
             if (!empty($row[$categoryAttribute])) {
-                if($categoryAttribute == 'landing_page'){
+                if ($categoryAttribute == 'landing_page') {
                     $attributeData = [$categoryAttribute => $this->getCmsBlockId($row[$categoryAttribute])];
-                }else {
+                } else {
                     $attributeData = [$categoryAttribute => $row[$categoryAttribute]];
                 }
                 $category->addData($attributeData);
@@ -222,6 +221,5 @@ class Categories
         $block = $this->blockFactory->create();
         $block->load($blockName, 'identifier');
         return $block->getId();
-
     }
 }

@@ -78,8 +78,9 @@ class ProductAttributes
         if (!$attribute) {
             $attribute = $this->attributeFactory->create();
         }
-        //TODO:split out between default_label (frontend)and default store view lable * may not be necessary
+        //TODO:split out between default_label (frontend)and default store view label * may not be necessary
         //TODO: validate frontend_input values
+        //TODO: swatch colors or images
         $frontendLabel = explode("\n", $data['frontend_label']);
         if (count($frontendLabel) > 1) {
             $data['frontend_label'] = [];

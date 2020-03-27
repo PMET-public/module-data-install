@@ -26,7 +26,6 @@ use Magento\Catalog\Api\CategoryRepositoryInterface;
 class Stores
 {
 
-
     /** @var  WebsiteInterfaceFactory */
     protected $websiteInterfaceFactory;
 

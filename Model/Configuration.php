@@ -3,7 +3,6 @@
 
 namespace MagentoEse\DataInstall\Model;
 
-
 class Configuration
 {
 
@@ -56,5 +55,4 @@ class Configuration
     {
         return $this->defaultViewCode;
     }
-
 }

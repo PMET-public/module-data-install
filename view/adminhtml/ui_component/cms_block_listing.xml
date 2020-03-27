@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <listingToolbar name="listing_top">
+        <massaction name="listing_massaction">
+            <action name="exportblock">
+                <settings>
+                    <url path="datainstall/export/block"/> <!-- your custom controller to handle request -->
+                    <type>exportblock</type>
+                    <label translate="true">Export Content</label>
+                </settings>
+            </action>
+        </massaction>
+    </listingToolbar>
+</listing>

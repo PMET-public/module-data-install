@@ -7,12 +7,13 @@ and pass them on to the correct data loader
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Framework\File\Csv;
+use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 
 class Process
 {
-    const FILE_ORDER = ['stores.csv','customers.csv','product_attributes.csv','categories.csv'];
+    const FILE_ORDER = ['stores.csv','customers.csv','product_attributes.csv','categories.csv','products.csv'];
 
     /** @var FixtureManager  */
     protected $fixtureManager;
@@ -29,24 +30,36 @@ class Process
     /** @var Categories  */
     protected $categoryInstall;
 
+    /** @var Products  */
+    protected $productInstall;
+
+    /** @var DirectoryList  */
+    protected $directoryList;
+
     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
      * @param Stores $stores
      * @param ProductAttributes $productAttributes
      * @param Categories $categories
+     * @param Products $products
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
         Stores $stores,
         ProductAttributes $productAttributes,
-        Categories $categories
+        Categories $categories,
+        Products $products,
+        DirectoryList $directoryList
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
         $this->storeInstall = $stores;
         $this->productAttributesInstall = $productAttributes;
         $this->categoryInstall = $categories;
+        $this->productInstall = $products;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -65,6 +78,9 @@ class Process
                     $header = array_shift($rows);
                     //Remove hidden character Excel adds to the first cell of a document
                     $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
+
+                    //determine path to module code for image import
+                    $modulePath =  str_replace("/fixtures/".basename($fileName), "", $fileName);
 
                     switch (basename($fileName)) {
                         case "stores.csv":
@@ -88,19 +104,21 @@ class Process
                             $this->processRows($rows, $header, $this->categoryInstall);
                             //$this->categoryInstall->install($data);
                             break;
+
+                        case "products.csv":
+                            echo "loading products\n";
+                            $this->processFile($rows, $header, $this->productInstall, $modulePath);
+                            //$this->categoryInstall->install($data);
+                            break;
                     }
-
-
                 }
             }
-
-           }
-        echo "\n\n\n\n\n\n\n";
+        }
+        echo "\n\n";
         //$f=$RRRRf;
     }
 
-
-    private function processRows(array $rows, $header, $process): void
+    private function processRows(array $rows, array $header, object $process): void
     {
         foreach ($rows as $row) {
             $data = [];
@@ -108,7 +126,11 @@ class Process
                 $data[$header[$key]] = $value;
             }
                 $process->install($data);
-            }
-
         }
+    }
+
+    private function processFile(array $rows, array $header, object $process, string $modulePath): void
+    {
+        $process->install($rows, $header, $modulePath);
+    }
 }

@@ -222,4 +222,18 @@ class Categories
         $block->load($blockName, 'identifier');
         return $block->getId();
     }
+
+
+    protected function setCategoryLandingPage($blockId, $categoryId)
+    {
+        $categoryCms = [
+            'landing_page' => $blockId,
+            'display_mode' => 'PRODUCTS_AND_PAGE',
+        ];
+        if (!empty($categoryId)) {
+            $category = $this->categoryRepository->get($categoryId);
+            $category->setData($categoryCms);
+            $this->categoryRepository->save($categoryId);
+        }
+    }
 }

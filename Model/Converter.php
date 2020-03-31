@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Magento. All rights reserved.
+ * Copyright © Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace MagentoEse\DataInstall\Model;
@@ -21,6 +21,7 @@ use Magento\Cms\Api\BlockRepositoryInterface;
 use Magento\Banner\Model\ResourceModel\Banner\CollectionFactory as BannerCollection;
 use Magento\Eav\Api\AttributeSetRepositoryInterface;
 use Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory as CustomerAttributeCollectionFactory;
+use Magento\Store\Api\StoreRepositoryInterface;
 
 /**
  * Class Converter
@@ -91,6 +92,9 @@ class Converter
     /** @var SearchCriteriaBuilder  */
     protected $searchCriteriaBuilder;
 
+    /** @var StoreRepositoryInterface  */
+    protected $storeRepository;
+
     /**
      * Converter constructor.
      * @param CategoryCollectionFactory $categoryFactory
@@ -118,7 +122,8 @@ class Converter
         BannerCollection $bannerCollection,
         AttributeSetRepositoryInterface $attributeSetRepository,
         GroupRepositoryInterface $groupRepository,
-        CustomerAttributeCollectionFactory $customerAttributeCollectionFactory
+        CustomerAttributeCollectionFactory $customerAttributeCollectionFactory,
+        StoreRepositoryInterface $storeRepository
     ) {
         $this->categoryFactory = $categoryFactory;
         $this->eavConfig = $eavConfig;
@@ -132,17 +137,13 @@ class Converter
         $this->attributeSetRepository = $attributeSetRepository;
         $this->groupRepository = $groupRepository;
         $this->customerAttributeCollectionFactory = $customerAttributeCollectionFactory;
+        $this->storeRepository = $storeRepository;
     }
     //TODO: What to return if something is missing, like a block that requires a banner that doesnt exist yet
-    /**
-     * Convert CSV format row to array
-     *
-     * @param array $row
-     * @return array
-     */
-    public function convertRow($value)
+
+    public function convertContent($content)
     {
-        return $this->replaceMatches($value);
+        return $this->replaceMatches($content);
     }
 
     /**
@@ -597,5 +598,9 @@ class Converter
         } else {
             return $value;
         }
+    }
+
+    public function getStoreidByCode($storeCode){
+        return $this->storeRepository->get($storeCode)->getId();
     }
 }

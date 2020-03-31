@@ -11,9 +11,10 @@ use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 
+
 class Process
 {
-    const FILE_ORDER = ['stores.csv','customers.csv','product_attributes.csv','categories.csv','products.csv'];
+    const FILE_ORDER = ['stores.csv','customers.csv','product_attributes.csv','categories.csv','products.csv','blocks.csv','dynamic_blocks.csv','pages.csv'];
 
     /** @var FixtureManager  */
     protected $fixtureManager;
@@ -36,6 +37,15 @@ class Process
     /** @var DirectoryList  */
     protected $directoryList;
 
+    /** @var Pages  */
+    protected $pageInstall;
+
+    /** @var Blocks  */
+    protected $blockInstall;
+
+    /** @var DynamicBlocks  */
+    protected $dynamicBlockInstall;
+
     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
@@ -51,7 +61,10 @@ class Process
         ProductAttributes $productAttributes,
         Categories $categories,
         Products $products,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        Pages $pages,
+        Blocks $blocks,
+        DynamicBlocks $dynamicBlocks
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -60,6 +73,9 @@ class Process
         $this->categoryInstall = $categories;
         $this->productInstall = $products;
         $this->directoryList = $directoryList;
+        $this->pageInstall = $pages;
+        $this->blockInstall = $blocks;
+        $this->dynamicBlockInstall = $dynamicBlocks;
     }
 
     /**
@@ -96,19 +112,31 @@ class Process
                         case "product_attributes.csv":
                             echo "loading Product Attributes\n";
                             $this->processRows($rows, $header, $this->productAttributesInstall);
-                            //$this->productAttributesInstall->install($data);
                             break;
 
                         case "categories.csv":
                             echo "loading Categories\n";
                             $this->processRows($rows, $header, $this->categoryInstall);
-                            //$this->categoryInstall->install($data);
                             break;
 
                         case "products.csv":
                             echo "loading products\n";
                             $this->processFile($rows, $header, $this->productInstall, $modulePath);
-                            //$this->categoryInstall->install($data);
+                            break;
+
+                        case "pages.csv":
+                            echo "loading Pages\n";
+                            $this->processRows($rows, $header, $this->pageInstall);
+                            break;
+
+                        case "blocks.csv":
+                            echo "loading Blocks\n";
+                            $this->processRows($rows, $header, $this->blockInstall);
+                            break;
+
+                        case "dynamic_blocks.csv":
+                            echo "loading Dynamic Blocks\n";
+                            $this->processRows($rows, $header, $this->dynamicBlockInstall);
                             break;
                     }
                 }

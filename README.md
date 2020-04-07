@@ -61,3 +61,5 @@ frontend_label	frontend_input	is_required	option	default	attribute_code	position
 
 **attribute\_set** - Carriage return delimited list of Attribute Sets that the Attribute will be added to.  Sets will be created as needed based on the Default set. If no value is given, the Attribute will be added to the Default set.
 
+Content
+Note on pages...names to use to replace the default install pages

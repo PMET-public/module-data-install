@@ -86,6 +86,8 @@ class Pages
                 ->setStores($this->getStoreIds($row['stores']))
                 ->save();
         }
+
+        return true;
     }
 
     public function getStoreIds($storeCodes){

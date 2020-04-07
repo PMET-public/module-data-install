@@ -42,7 +42,7 @@ class Blocks
         $row['content'] = $this->converter->convertContent($row['content']);
         $cmsBlock = $this->saveCmsBlock($row);
         $cmsBlock->unsetData();
-
+        return true;
     }
 
     /**

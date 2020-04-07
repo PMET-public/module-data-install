@@ -16,6 +16,8 @@ class Process
 {
     const FILE_ORDER = ['stores.csv','customers.csv','product_attributes.csv','categories.csv','products.csv','blocks.csv','dynamic_blocks.csv','pages.csv'];
 
+    protected $redo=array();
+
     /** @var FixtureManager  */
     protected $fixtureManager;
 
@@ -54,6 +56,9 @@ class Process
      * @param Categories $categories
      * @param Products $products
      * @param DirectoryList $directoryList
+     * @param Pages $pages
+     * @param Blocks $blocks
+     * @param DynamicBlocks $dynamicBlocks
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -143,6 +148,7 @@ class Process
             }
         }
         echo "\n\n";
+        $this->processRedos();
         //$f=$RRRRf;
     }
 
@@ -153,12 +159,45 @@ class Process
             foreach ($row as $key => $value) {
                 $data[$header[$key]] = $value;
             }
-                $process->install($data);
+                $this->collectRedos($process->install($data),$row, $header,$process);
         }
     }
 
     private function processFile(array $rows, array $header, object $process, string $modulePath): void
     {
         $process->install($rows, $header, $modulePath);
+    }
+
+    private function collectRedos($success,$row,$header,$process){
+        if(!$success){
+            $failed = [];
+            $failed['row'][]= $row;
+            $failed['header']= $header;
+            $failed['process']= $process;
+            $this->redo[] = $failed;
+            print_r(count($this->redo));
+            //echo "failed " . $this->get_class_name(get_class($process)) . "\n";
+        }
+    }
+
+    private function processRedos(){
+        //copy over and reset redo
+        $redos = $this->redo;
+        $this->redo = array();
+        foreach($redos as $redo){
+            $this->processRows($redo['row'],$redo['header'],$redo['process']);
+        }
+        ///if its failed again, fail the process
+        if(count($this->redo) > 0){
+            foreach($this->redo as $redo){
+                echo "Installing ".$this->get_class_name(get_class($redo['process']))." was not fully successful, likely due to a dependency on other sample data that doesnt exist";
+            }
+        }
+    }
+
+    private function get_class_name($classname)
+    {
+        if ($pos = strrpos($classname, '\\')) return substr($classname, $pos + 1);
+        return $pos;
     }
 }

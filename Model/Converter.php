@@ -273,7 +273,7 @@ class Converter
         $groupList = $this->groupRepository->getList($search)->getItems();
         foreach ($groupList as $group) {
             $groupId = $group->getId();
-            $replaceData['regexp'][] = '/{{customergroup name="' . $matchValue . '"}}/';
+            $replaceData['regexp'][] = '/{{customergroup name="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = $groupId;
         }
         return $replaceData;
@@ -292,7 +292,7 @@ class Converter
         $attributeSetList = $this->attributeSetRepository->getList($search)->getItems();
         foreach ($attributeSetList as $attributeSet) {
             $attributeSetId = $attributeSet->getId();
-            $replaceData['regexp'][] = '/{{attributeset name="' . $matchValue . '"}}/';
+            $replaceData['regexp'][] = '/{{attributeset name="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = $attributeSetId;
         }
 
@@ -316,7 +316,7 @@ class Converter
         $blockList = $this->blockRepository->getList($search)->getItems();
         foreach ($blockList as $block) {
             $blockId = $block->getId();
-            $replaceData['regexp'][] = '/{{block code="' . $matchValue . '"}}/';
+            $replaceData['regexp'][] = '/{{block code="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = $blockId;
         }
 
@@ -338,7 +338,7 @@ class Converter
         $banner = $this->bannerCollection->create()->addFieldToFilter('name', $matchValue)->getFirstItem();
         if (!empty($banner)) {
             $bannerId = $banner->getId();
-            $replaceData['regexp'][] = '/{{dynamicblock name="' . $matchValue . '"}}/';
+            $replaceData['regexp'][] = '/{{dynamicblock name="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = $bannerId;
         }
 
@@ -359,7 +359,7 @@ class Converter
         $segment = $this->segmentCollectionFactory->create()->addFieldToFilter('name', $matchValue) ->getFirstItem();
         if (!empty($segment)) {
             $segmentId = $segment->getId();
-            $replaceData['regexp'][] = '/{{segment name="' . $matchValue . '"}}/';
+            $replaceData['regexp'][] = '/{{segment name="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = $segmentId;
         }
         return $replaceData;
@@ -380,7 +380,7 @@ class Converter
         $category = $this->getCategoryByUrlKey($matchValue);
         if (!empty($category)) {
             $categoryUrl = $category->getRequestPath();
-            $replaceData['regexp'][] = '/{{category key="' . $matchValue . '"}}/';
+            $replaceData['regexp'][] = '/{{category key="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = '{{store url=""}}' . $categoryUrl;
         }
         return $replaceData;
@@ -419,7 +419,7 @@ class Converter
         if ($productItem) {
             $productUrl = '{{store url=""}}' .  $productItem->getRequestPath();
         }
-        $replaceData['regexp'][] = '/{{product sku="' . $matchValue . '"}}/';
+        $replaceData['regexp'][] = '/{{product sku="' . preg_quote($matchValue) . '"}}/';
         $replaceData['value'][] = $productUrl;
         return $replaceData;
     }
@@ -441,7 +441,7 @@ class Converter
         list($code, $value) = explode(':', $matchValue);
 
         if (!empty($code) && !empty($value)) {
-            $replaceData['regexp'][] = '/{{customerattribute code="' . $matchValue . '"}}/';
+            $replaceData['regexp'][] = '/{{customerattribute code="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = sprintf('%03d', $this->getCustomerAttributeOptionValueId($code, $value));
         }
         return $replaceData;

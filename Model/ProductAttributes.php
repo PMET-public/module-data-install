@@ -128,6 +128,8 @@ class ProductAttributes
         }
 
         $this->eavConfig->clear();
+
+        return true;
     }
 
     /**

@@ -117,6 +117,7 @@ class DynamicBlocks
         }
         $this->bannerSegmentLink->saveBannerSegments($banner->getId(),$segmentIds);
         $this->setup->endSetup();
+        return true;
     }
 
     public function getSegmentIdByName($segmentName){

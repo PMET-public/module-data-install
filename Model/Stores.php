@@ -138,6 +138,7 @@ class Stores
         } else {
             echo "site_code column needs to be included with a value\n";
         }
+        return true;
     }
 
     //site requires name and code

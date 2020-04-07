@@ -107,6 +107,7 @@ class Categories
             $category->save();
 
         }
+        return true;
     }
 
     /**

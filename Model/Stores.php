@@ -347,11 +347,21 @@ class Stores
 
     /**
      * @param $data
-     * @return WebsiteResourceModel
+     * @return WebsiteInterface
      */
     private function getWebsite($data)
     {
         return  $this->websiteInterfaceFactory->create()->load($data['site_code']);
+    }
+
+    /**
+     * @param $websiteCode
+     * @return int
+     */
+    public function getWebsiteId($websiteCode){
+        $data = ['site_code'=>$websiteCode];
+        $website = $this->getWebsite($data);
+        return  $website->getId();
     }
 
     /**
@@ -378,10 +388,20 @@ class Stores
     }
 
     /**
+     * @param $storeCode
+     * @return int
+     */
+    public function getStoreId($storeCode){
+        $data = ['store_code'=>$storeCode];
+        $store = $this->getStore($data);
+        return  $store->getId();
+    }
+
+    /**
      * @param $data
      * @return StoreInterface
      */
-    public function getView($data)
+    private function getView($data)
     {
         try {
             $view = $this->storeRepository->get($data['view_code']);
@@ -389,6 +409,16 @@ class Stores
             $view = $this->storeInterfaceFactory->create();
         }
         return $view;
+    }
+
+    /**
+     * @param $viewCode
+     * @return int
+     */
+    public function getViewId($viewCode){
+        $data = ['view_code'=>$viewCode];
+        $view = $this->getView($data);
+        return  $view->getId();
     }
 
     /**

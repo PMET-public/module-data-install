@@ -11,10 +11,9 @@ use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 
-
 class Process
 {
-    const FILE_ORDER = ['stores.csv','customers.csv','product_attributes.csv','categories.csv','products.csv','blocks.csv','dynamic_blocks.csv','pages.csv'];
+    const FILE_ORDER = ['stores.csv','config_default.json','config.json','config.csv','customers.csv','product_attributes.csv','categories.csv','products.csv','blocks.csv','dynamic_blocks.csv','pages.csv'];
 
     protected $redo=array();
 
@@ -48,6 +47,9 @@ class Process
     /** @var DynamicBlocks  */
     protected $dynamicBlockInstall;
 
+    /** @var Configuration  */
+    protected $configurationInstall;
+
     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
@@ -59,6 +61,7 @@ class Process
      * @param Pages $pages
      * @param Blocks $blocks
      * @param DynamicBlocks $dynamicBlocks
+     * @param Configuration $configuration
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -69,7 +72,8 @@ class Process
         DirectoryList $directoryList,
         Pages $pages,
         Blocks $blocks,
-        DynamicBlocks $dynamicBlocks
+        DynamicBlocks $dynamicBlocks,
+        Configuration $configuration
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -81,6 +85,7 @@ class Process
         $this->pageInstall = $pages;
         $this->blockInstall = $blocks;
         $this->dynamicBlockInstall = $dynamicBlocks;
+        $this->configurationInstall = $configuration;
     }
 
     /**
@@ -95,11 +100,14 @@ class Process
                 $fileName = $this->fixtureManager->getFixture($fileName);
                 if (basename($fileName)==$nextFile && file_exists($fileName)) {
 
-                    $rows = $this->csvReader->getData($fileName);
-                    $header = array_shift($rows);
-                    //Remove hidden character Excel adds to the first cell of a document
-                    $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
-
+                    if(pathinfo($fileName, PATHINFO_EXTENSION)=='json'){
+                       $fileContent = file_get_contents($fileName);
+                    }else {
+                        $rows = $this->csvReader->getData($fileName);
+                        $header = array_shift($rows);
+                        //Remove hidden character Excel adds to the first cell of a document
+                        $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
+                    }
                     //determine path to module code for image import
                     $modulePath =  str_replace("/fixtures/".basename($fileName), "", $fileName);
 
@@ -143,6 +151,21 @@ class Process
                             echo "loading Dynamic Blocks\n";
                             $this->processRows($rows, $header, $this->dynamicBlockInstall);
                             break;
+
+                        case "default_config.json":
+                            echo "loading Default Config Json\n";
+                            $this->processJson($fileContent, $this->configurationInstall);
+                            break;
+
+                        case "config.json":
+                            echo "loading Config Json\n";
+                            $this->processJson($fileContent, $this->configurationInstall);
+                            break;
+
+                        case "config.csv":
+                            echo "loading Config.csv\n";
+                            $this->processRows($rows, $header, $this->configurationInstall);
+                            break;
                     }
                 }
             }
@@ -162,6 +185,12 @@ class Process
                 $this->collectRedos($process->install($data),$row, $header,$process);
         }
     }
+
+    private function processJson(string $fileContent, object $process): void
+    {
+        $process->installJson($fileContent);
+    }
+
 
     private function processFile(array $rows, array $header, object $process, string $modulePath): void
     {
@@ -200,4 +229,6 @@ class Process
         if ($pos = strrpos($classname, '\\')) return substr($classname, $pos + 1);
         return $pos;
     }
+
+
 }

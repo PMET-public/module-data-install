@@ -10,18 +10,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 class Configuration
 {
 
-    /** Default install site/store/view values  **/
-    protected $defaultWebsiteCode = 'base';
-
-    protected $defaultStoreCode = 'main_website_store';
-
-    protected $defaultViewCode = 'default';
-
-    protected $defaultRootCategory = 'Default Category';
-
-    protected $defaultRootCategoryId = 2;
-
-    /** @var ResourceConfig  */
+   /** @var ResourceConfig  */
     protected $resourceConfig;
 
     /** @var Stores  */
@@ -71,12 +60,12 @@ class Configuration
             if (is_object($item)) {
                 if(!empty($item->value)){
                     //TODO: handle encrypt flag
-                    if(!empty($item->scope_code)){
-                        if($item->scope_code=='websites'){
-                            $scopeCode = $item->scope_code;
+                    if(!empty($item->scope)){
+                        if($item->scope=='websites'||$item->scope=='website'){
+                            $scopeCode = $item->scope;
                             $scopeId = $this->stores->getWebsiteId($item->scope_code);
-                        }elseif($item->scope_code=='stores'){
-                            $scopeCode = $item->scope_code;
+                        }elseif($item->scope=='stores'||$item->scope=='store'){
+                            $scopeCode = $item->scope;
                             $scopeId = $this->stores->getViewId($item->scope_code);
                         }
                     }
@@ -92,50 +81,8 @@ class Configuration
 
     }
 
-
-
     private function saveConfig(string $path, string $value, string $scope, int $scopeId){
         $this->resourceConfig->saveConfig($path, $value, $scope, $scopeId);
     }
 
-
-    /**
-     * @return string
-     */
-    public function getDefaultRootCategory(): string
-    {
-        return $this->defaultRootCategory;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDefaultStoreCode(): string
-    {
-        return $this->defaultStoreCode;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDefaultWebsiteCode(): string
-    {
-        return $this->defaultWebsiteCode;
-    }
-
-    /**
-     * @return int
-     */
-    public function getDefaultRootCategoryId(): int
-    {
-        return $this->defaultRootCategoryId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDefaultViewCode(): string
-    {
-        return $this->defaultViewCode;
-    }
 }

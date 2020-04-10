@@ -26,6 +26,17 @@ use Magento\Catalog\Api\CategoryRepositoryInterface;
 class Stores
 {
 
+    /** Default install site/store/view values  **/
+    protected $defaultWebsiteCode = 'base';
+
+    protected $defaultStoreCode = 'main_website_store';
+
+    protected $defaultViewCode = 'default';
+
+    protected $defaultRootCategory = 'Default Category';
+
+    protected $defaultRootCategoryId = 2;
+
     /** @var  WebsiteInterfaceFactory */
     protected $websiteInterfaceFactory;
 
@@ -56,9 +67,6 @@ class Stores
     /** @var StoreInterfaceFactory  */
     protected $storeInterfaceFactory;
 
-    /** @var Configuration  */
-    protected $configuration;
-
     /**
      * Stores constructor.
      * @param WebsiteInterfaceFactory $websiteInterfaceFactory
@@ -83,8 +91,7 @@ class Stores
         CategoryRepositoryInterface $categoryRepository,
         StoreResourceModel $storeResourceModel,
         StoreRepositoryInterface $storeRepository,
-        StoreInterfaceFactory $storeInterfaceFactory,
-        Configuration $configuration
+        StoreInterfaceFactory $storeInterfaceFactory
     ) {
         $this->websiteInterfaceFactory = $websiteInterfaceFactory;
         $this->websiteResourceModel = $websiteResourceModel;
@@ -96,7 +103,6 @@ class Stores
         $this->storeResourceModel = $storeResourceModel;
         $this->storeRepository = $storeRepository;
         $this->storeInterfaceFactory = $storeInterfaceFactory;
-        $this->configuration = $configuration;
     }
 
     /**
@@ -215,7 +221,7 @@ class Stores
             /** @var GroupInterface $store */
             //$store = $this->getStore($data);
             //load or create root category if defined - default to 2
-            $rootCategoryId = $this->configuration->getDefaultRootCategoryId();
+            $rootCategoryId = $this->getDefaultRootCategoryId();
             if (!empty($data['store_root_category'])) {
                 $rootCategoryId = $this->getRootCategoryByName($data);
                 //echo "requested root cat=".$data['store_root_category']."Id=".$rootCategoryId."\n";
@@ -477,5 +483,47 @@ class Stores
             ->addAttributeToSelect(['entity_id']);
         $id = $categories->getFirstItem()->getEntityId();
         return $categories->getFirstItem()->getEntityId();
+    }
+
+
+
+    /**
+     * @return string
+     */
+    public function getDefaultRootCategory(): string
+    {
+        return $this->defaultRootCategory;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultStoreCode(): string
+    {
+        return $this->defaultStoreCode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultWebsiteCode(): string
+    {
+        return $this->defaultWebsiteCode;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDefaultRootCategoryId(): int
+    {
+        return $this->defaultRootCategoryId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultViewCode(): string
+    {
+        return $this->defaultViewCode;
     }
 }

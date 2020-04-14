@@ -13,7 +13,7 @@ use Magento\Framework\Setup\SampleData\FixtureManager;
 
 class Process
 {
-    const FILE_ORDER = ['stores.csv','config_default.json','config.json','config.csv','customers.csv','product_attributes.csv','categories.csv','products.csv','blocks.csv','dynamic_blocks.csv','pages.csv'];
+    const FILE_ORDER = ['stores.csv','config_default.json','config.json','config.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','categories.csv','products.csv','blocks.csv','dynamic_blocks.csv','pages.csv'];
 
     protected $redo=array();
 
@@ -50,6 +50,15 @@ class Process
     /** @var Configuration  */
     protected $configurationInstall;
 
+    /** @var CustomerGroups  */
+    protected $customerGroupInstall;
+
+    /** @var CustomerAttributes  */
+    protected $customerAttributeInstall;
+
+    /** @var Customers  */
+    protected $customerInstall;
+
     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
@@ -62,6 +71,9 @@ class Process
      * @param Blocks $blocks
      * @param DynamicBlocks $dynamicBlocks
      * @param Configuration $configuration
+     * @param CustomerGroups $customerGroups
+     * @param CustomerAttributes $customerAttributes
+     * @param Customers $customers
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -73,7 +85,10 @@ class Process
         Pages $pages,
         Blocks $blocks,
         DynamicBlocks $dynamicBlocks,
-        Configuration $configuration
+        Configuration $configuration,
+        CustomerGroups $customerGroups,
+        CustomerAttributes $customerAttributes,
+        Customers $customers
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -86,6 +101,9 @@ class Process
         $this->blockInstall = $blocks;
         $this->dynamicBlockInstall = $dynamicBlocks;
         $this->configurationInstall = $configuration;
+        $this->customerGroupInstall = $customerGroups;
+        $this->customerAttributeInstall = $customerAttributes;
+        $this->customerInstall = $customers;
     }
 
     /**
@@ -119,7 +137,7 @@ class Process
 
                         case "customers.csv":
                             echo "loading Customers\n";
-                           // $this->processRows($rows, $header, $this->customerInstall);
+                            $this->processRows($rows, $header, $this->customerInstall);
                             break;
 
                         case "product_attributes.csv":
@@ -166,6 +184,17 @@ class Process
                             echo "loading Config.csv\n";
                             $this->processRows($rows, $header, $this->configurationInstall);
                             break;
+
+                        case "customer_groups.csv":
+                            echo "loading Customer Groups\n";
+                            $this->processRows($rows, $header, $this->customerGroupInstall);
+                            break;
+
+                        case "customer_attributes.csv":
+                            echo "loading Customer Attributes\n";
+                            $this->processRows($rows, $header, $this->customerAttributeInstall);
+                            break;
+
                     }
                 }
             }

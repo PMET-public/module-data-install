@@ -137,7 +137,7 @@ class Process
 
                         case "customers.csv":
                             echo "loading Customers\n";
-                            $this->processRows($rows, $header, $this->customerInstall);
+                            $this->processFile($rows, $header, $this->customerInstall,'');
                             break;
 
                         case "product_attributes.csv":

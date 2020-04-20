@@ -16,11 +16,16 @@ class Configuration
     /** @var Stores  */
     protected $stores;
 
+    /** @var ScopeConfigInterface  */
+    protected $scopeConfig;
+
     //$scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT, $scopeId = 0
-    public function __construct(ResourceConfig $resourceConfig, Stores $stores)
+    public function __construct(ResourceConfig $resourceConfig, Stores $stores,
+                                ScopeConfigInterface $scopeConfig)
     {
         $this->resourceConfig = $resourceConfig;
         $this->stores = $stores;
+        $this->scopeConfig = $scopeConfig;
     }
 
     public function install(array $row){
@@ -81,8 +86,12 @@ class Configuration
 
     }
 
-    private function saveConfig(string $path, string $value, string $scope, int $scopeId){
+    public function saveConfig(string $path, string $value, string $scope, int $scopeId){
         $this->resourceConfig->saveConfig($path, $value, $scope, $scopeId);
+    }
+
+    public function getConfig(string $path, string $scope, string $scopeCode){
+        return $this->scopeConfig->getValue($path,$scope,$scopeCode);
     }
 
 }

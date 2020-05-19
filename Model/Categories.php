@@ -54,6 +54,9 @@ class Categories
     /** @var Configuration  */
     protected $configuration;
 
+    /** @var Stores  */
+    protected $stores;
+
     /**
      * Categories constructor.
      * @param CategoryInterfaceFactory $categoryFactory
@@ -69,7 +72,8 @@ class Categories
         StoreManagerInterface $storeManager,
         StoreInterfaceFactory $storeFactory,
         BlockInterfaceFactory $blockFactory,
-        Configuration $configuration
+        Configuration $configuration,
+        Stores $stores
     ) {
         $this->categoryFactory = $categoryFactory;
         $this->resourceCategoryTreeFactory = $resourceCategoryTreeFactory;
@@ -77,6 +81,7 @@ class Categories
         $this->storeFactory = $storeFactory;
         $this->blockFactory = $blockFactory;
         $this->configuration = $configuration;
+        $this->stores = $stores;
     }
 
     /**
@@ -147,7 +152,7 @@ class Categories
     protected function getCategoryByPath($path)
     {
         $store = $this->storeFactory->create();
-        $store->load($this->configuration->getDefaultViewCode());
+        $store->load($this->stores->getDefaultViewCode());
         $rootCatId = $store->getGroup()->getDefaultStore()->getRootCategoryId();
         $names = array_filter(explode('/', $path));
         $tree = $this->getTree($rootCatId);

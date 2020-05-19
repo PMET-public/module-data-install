@@ -47,6 +47,7 @@ class Configuration
     }
 
     public function installJson($json){
+        //TODO: Validate json
         $config = json_decode($json)->custom_demo->configuration;
         foreach($config as $key=>$item){
             array_walk_recursive($item, array($this,'getValuePath'),$key);

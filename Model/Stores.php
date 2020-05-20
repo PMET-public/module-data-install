@@ -22,6 +22,7 @@ use Magento\Store\Model\ResourceModel\Group as GroupResourceModel;
 use Magento\Store\Model\ResourceModel\Website as WebsiteResourceModel;
 use Magento\Catalog\Api\Data\CategoryInterfaceFactory;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
+use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
 
 class Stores
 {
@@ -67,6 +68,9 @@ class Stores
     /** @var StoreInterfaceFactory  */
     protected $storeInterfaceFactory;
 
+    /** @var ResourceConfig  */
+    protected $configuration;
+
     /**
      * Stores constructor.
      * @param WebsiteInterfaceFactory $websiteInterfaceFactory
@@ -79,6 +83,7 @@ class Stores
      * @param StoreResourceModel $storeResourceModel
      * @param StoreRepositoryInterface $storeRepository
      * @param StoreInterfaceFactory $storeInterfaceFactory
+     * @param ResourceConfig $configuration
      */
 
     public function __construct(
@@ -91,7 +96,8 @@ class Stores
         CategoryRepositoryInterface $categoryRepository,
         StoreResourceModel $storeResourceModel,
         StoreRepositoryInterface $storeRepository,
-        StoreInterfaceFactory $storeInterfaceFactory
+        StoreInterfaceFactory $storeInterfaceFactory,
+        ResourceConfig $configuration
     ) {
         $this->websiteInterfaceFactory = $websiteInterfaceFactory;
         $this->websiteResourceModel = $websiteResourceModel;
@@ -103,6 +109,7 @@ class Stores
         $this->storeResourceModel = $storeResourceModel;
         $this->storeRepository = $storeRepository;
         $this->storeInterfaceFactory = $storeInterfaceFactory;
+        $this->configuration = $configuration;
     }
 
     /**
@@ -119,6 +126,10 @@ class Stores
             $data['site_code'] = $this->validateCode($data['site_code']);
             echo "-updating site\n";
             $website = $this->setSite($data);
+            //if there is a host value, set base urls
+            if (!empty($data['host'])) {
+                $this->setBaseUrls($data['host'], $website->getId());
+            }
             //if there is no store code, skip store and view
             if (!empty($data['store_code'])) {
                 echo "-updating stores\n";
@@ -525,5 +536,15 @@ class Stores
     public function getDefaultViewCode(): string
     {
         return $this->defaultViewCode;
+    }
+
+    /**
+     * @param $host
+     * @param $websiteId
+     */
+    private function setBaseUrls($host, $websiteId): void
+    {
+        $this->configuration->saveConfig('web/unsecure/base_url', 'http://' . $host . '/', 'websites', $websiteId);
+        $this->configuration->saveConfig('web/secure/base_url', 'http://' . $host . '/', 'websites', $websiteId);
     }
 }

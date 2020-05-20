@@ -5,7 +5,8 @@ namespace MagentoEse\DataInstall\Model;
 
 use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
 use Magento\Framework\App\Config\ScopeConfigInterface;
-
+use Magento\Theme\Model\ResourceModel\Theme\Collection as ThemeCollection;
+use Magento\Theme\Model\Theme\Registration as ThemeRegistration;
 
 class Configuration
 {
@@ -19,16 +20,25 @@ class Configuration
     /** @var ScopeConfigInterface  */
     protected $scopeConfig;
 
-    //$scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT, $scopeId = 0
+    /** @var ThemeCollection */
+    private $themeCollection;
+
+    /** @var ThemeRegistration */
+    private $themeRegistration;
+
     public function __construct(ResourceConfig $resourceConfig, Stores $stores,
-                                ScopeConfigInterface $scopeConfig)
+                                ScopeConfigInterface $scopeConfig,
+                                ThemeCollection $themeCollection, ThemeRegistration $themeRegistration)
     {
         $this->resourceConfig = $resourceConfig;
         $this->stores = $stores;
         $this->scopeConfig = $scopeConfig;
+        $this->themeCollection = $themeCollection;
+        $this->themeRegistration = $themeRegistration;
     }
 
     public function install(array $row){
+        //TODO: handle encrypt flag for value
         if(!empty($row['path']) && !empty($row['value'])){
             $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
             $scopeId = 0;
@@ -37,8 +47,13 @@ class Configuration
             }
             if (!empty($row['scope_code'])) {
                 //TODO: look up scope id from scope_code for store and site
-                //TODO: handle encrypt flag
-                $scopeId = $row['scope_code'];
+                if($scope=='website'||$scope=='websites'){
+                    $scope = 'websites';
+                    $scopeId = $this->stores->getWebsiteId($row['scope_code']);
+                }elseif($scope=='store'||$scope=='stores'){
+                    $scope = 'stores';
+                    $scopeId = $this->stores->getStoreId($row['scope_code']);
+                }
             }
             $this->saveConfig($row['path'],$row['value'],$scope, $scopeId);
         }
@@ -54,6 +69,8 @@ class Configuration
            // print_r($setting);
         }
         //print_r($config);
+        //set theme - this will be incorporated into the config structure
+        //$this->setTheme('MagentoEse/venia',$this->stores->getStoreId($this->stores->getDefaultStoreCode()));
         return true;
     }
     public function getValuePath($item, $key,$path)
@@ -94,5 +111,13 @@ class Configuration
     public function getConfig(string $path, string $scope, string $scopeCode){
         return $this->scopeConfig->getValue($path,$scope,$scopeCode);
     }
+
+    private function setTheme($themePath, $storeCode){
+        //make sure theme is registered
+        $this->themeRegistration->register();
+        $themeId = $this->themeCollection->getThemeByFullPath('frontend/'.$themePath)->getThemeId();
+        //set theme for Venia store
+        $this->saveConfig("design/theme/theme_id", $themeId, "stores", $storeCode);
+}
 
 }

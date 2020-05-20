@@ -110,96 +110,92 @@ class Process
      * @param array $fixtures
      * @throws \Exception
      */
-    public function loadFiles(array $fixtures)
+    public function loadFiles($moduleName)
     {
-        //validate files
         foreach (self::FILE_ORDER as $nextFile) {
-            foreach ($fixtures as $fileName) {
-                $fileName = $this->fixtureManager->getFixture($fileName);
-                if (basename($fileName)==$nextFile && file_exists($fileName)) {
+            $fileName = $this->fixtureManager->getFixture($moduleName."::fixtures/".$nextFile);
+            if (basename($fileName)==$nextFile && file_exists($fileName)) {
 
-                    if(pathinfo($fileName, PATHINFO_EXTENSION)=='json'){
-                       $fileContent = file_get_contents($fileName);
-                    }else {
-                        $rows = $this->csvReader->getData($fileName);
-                        $header = array_shift($rows);
-                        //Remove hidden character Excel adds to the first cell of a document
-                        $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
-                    }
-                    //determine path to module code for image import
-                    $modulePath =  str_replace("/fixtures/".basename($fileName), "", $fileName);
+                if (pathinfo($fileName, PATHINFO_EXTENSION) == 'json') {
+                    $fileContent = file_get_contents($fileName);
+                } else {
+                    $rows = $this->csvReader->getData($fileName);
+                    $header = array_shift($rows);
+                    //Remove hidden character Excel adds to the first cell of a document
+                    $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
+                }
+                //determine path to module code for image import
+                $modulePath = str_replace("/fixtures/" . basename($fileName), "", $fileName);
 
-                    switch (basename($fileName)) {
-                        case "stores.csv":
-                            echo "loading Stores\n";
-                            $this->processRows($rows, $header, $this->storeInstall);
-                            break;
+                switch (basename($fileName)) {
+                    case "stores.csv":
+                        echo "loading Stores\n";
+                        $this->processRows($rows, $header, $this->storeInstall);
+                        break;
 
-                        case "customers.csv":
-                            echo "loading Customers\n";
-                            $this->processFile($rows, $header, $this->customerInstall,'');
-                            break;
+                    case "customers.csv":
+                        echo "loading Customers\n";
+                        $this->processFile($rows, $header, $this->customerInstall, '');
+                        break;
 
-                        case "product_attributes.csv":
-                            echo "loading Product Attributes\n";
-                            $this->processRows($rows, $header, $this->productAttributesInstall);
-                            break;
+                    case "product_attributes.csv":
+                        echo "loading Product Attributes\n";
+                        $this->processRows($rows, $header, $this->productAttributesInstall);
+                        break;
 
-                        case "categories.csv":
-                            echo "loading Categories\n";
-                            $this->processRows($rows, $header, $this->categoryInstall);
-                            break;
+                    case "categories.csv":
+                        echo "loading Categories\n";
+                        $this->processRows($rows, $header, $this->categoryInstall);
+                        break;
 
-                        case "products.csv":
-                            echo "loading products\n";
-                            $this->processFile($rows, $header, $this->productInstall, $modulePath);
-                            break;
+                    case "products.csv":
+                        echo "loading products\n";
+                        $this->processFile($rows, $header, $this->productInstall, $modulePath);
+                        break;
 
-                        case "pages.csv":
-                            echo "loading Pages\n";
-                            $this->processRows($rows, $header, $this->pageInstall);
-                            break;
+                    case "pages.csv":
+                        echo "loading Pages\n";
+                        $this->processRows($rows, $header, $this->pageInstall);
+                        break;
 
-                        case "blocks.csv":
-                            echo "loading Blocks\n";
-                            $this->processRows($rows, $header, $this->blockInstall);
-                            break;
+                    case "blocks.csv":
+                        echo "loading Blocks\n";
+                        $this->processRows($rows, $header, $this->blockInstall);
+                        break;
 
-                        case "dynamic_blocks.csv":
-                            echo "loading Dynamic Blocks\n";
-                            $this->processRows($rows, $header, $this->dynamicBlockInstall);
-                            break;
+                    case "dynamic_blocks.csv":
+                        echo "loading Dynamic Blocks\n";
+                        $this->processRows($rows, $header, $this->dynamicBlockInstall);
+                        break;
 
-                        case "default_config.json":
-                            echo "loading Default Config Json\n";
-                            $this->processJson($fileContent, $this->configurationInstall);
-                            break;
+                    case "default_config.json":
+                        echo "loading Default Config Json\n";
+                        $this->processJson($fileContent, $this->configurationInstall);
+                        break;
 
-                        case "config.json":
-                            echo "loading Config Json\n";
-                            $this->processJson($fileContent, $this->configurationInstall);
-                            break;
+                    case "config.json":
+                        echo "loading Config Json\n";
+                        $this->processJson($fileContent, $this->configurationInstall);
+                        break;
 
-                        case "config.csv":
-                            echo "loading Config.csv\n";
-                            $this->processRows($rows, $header, $this->configurationInstall);
-                            break;
+                    case "config.csv":
+                        echo "loading Config.csv\n";
+                        $this->processRows($rows, $header, $this->configurationInstall);
+                        break;
 
-                        case "customer_groups.csv":
-                            echo "loading Customer Groups\n";
-                            $this->processRows($rows, $header, $this->customerGroupInstall);
-                            break;
+                    case "customer_groups.csv":
+                        echo "loading Customer Groups\n";
+                        $this->processRows($rows, $header, $this->customerGroupInstall);
+                        break;
 
-                        case "customer_attributes.csv":
-                            echo "loading Customer Attributes\n";
-                            $this->processRows($rows, $header, $this->customerAttributeInstall);
-                            break;
+                    case "customer_attributes.csv":
+                        echo "loading Customer Attributes\n";
+                        $this->processRows($rows, $header, $this->customerAttributeInstall);
+                        break;
 
-                    }
                 }
             }
         }
-        echo "\n\n";
         $this->processRedos();
         //$f=$RRRRf;
     }

@@ -13,7 +13,7 @@ use Magento\Framework\Setup\SampleData\FixtureManager;
 
 class Process
 {
-    const FILE_ORDER = ['stores.csv','config_default.json','config.json','config.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','categories.csv','products.csv','blocks.csv','dynamic_blocks.csv','pages.csv'];
+    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config.json','config.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','categories.csv','products.csv','blocks.csv','dynamic_blocks.csv','pages.csv'];
 
     protected $redo=array();
 
@@ -170,6 +170,15 @@ class Process
 
                     case "default_config.json":
                         echo "loading Default Config Json\n";
+                        $this->processJson($fileContent, $this->configurationInstall);
+                        break;
+                    case "config_default.json":
+                        echo "loading Config Default Json\n";
+                        $this->processJson($fileContent, $this->configurationInstall);
+                        break;
+
+                    case "config_vertical.json":
+                        echo "loading Config Vertical Json\n";
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
 

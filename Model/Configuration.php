@@ -7,6 +7,7 @@ use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Theme\Model\ResourceModel\Theme\Collection as ThemeCollection;
 use Magento\Theme\Model\Theme\Registration as ThemeRegistration;
+use Magento\Framework\Encryption\EncryptorInterface;
 
 class Configuration
 {
@@ -21,20 +22,26 @@ class Configuration
     protected $scopeConfig;
 
     /** @var ThemeCollection */
-    private $themeCollection;
+    protected $themeCollection;
 
     /** @var ThemeRegistration */
-    private $themeRegistration;
+    protected $themeRegistration;
+
+    /** @var EncryptorInterface  */
+    protected $encryptor;
 
     public function __construct(ResourceConfig $resourceConfig, Stores $stores,
                                 ScopeConfigInterface $scopeConfig,
-                                ThemeCollection $themeCollection, ThemeRegistration $themeRegistration)
+                                ThemeCollection $themeCollection,
+                                ThemeRegistration $themeRegistration,
+                                EncryptorInterface $encryptor)
     {
         $this->resourceConfig = $resourceConfig;
         $this->stores = $stores;
         $this->scopeConfig = $scopeConfig;
         $this->themeCollection = $themeCollection;
         $this->themeRegistration = $themeRegistration;
+        $this->encryptor = $encryptor;
     }
 
     public function install(array $row){
@@ -63,12 +70,16 @@ class Configuration
 
     public function installJson($json){
         //TODO: Validate json
-        $config = json_decode($json)->custom_demo->configuration;
+        try{
+            $config = json_decode($json)->configuration;
+        }catch(\Exception $e){
+            echo "The JSON in your configuration file is invalid.\n";
+            return true;
+        }
         foreach($config as $key=>$item){
             array_walk_recursive($item, array($this,'getValuePath'),$key);
            // print_r($setting);
         }
-        //print_r($config);
         //set theme - this will be incorporated into the config structure
         //$this->setTheme('MagentoEse/venia',$this->stores->getStoreId($this->stores->getDefaultStoreCode()));
         return true;
@@ -78,34 +89,38 @@ class Configuration
         $scopeCode = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
         $scopeId = 0;
 
-        if($key != 'scope' && $key != 'scope_code'){
+        if($key != 'store_view' && $key != 'website'){
             $path = $path."/". $key;
             if (is_object($item)) {
-                if(!empty($item->value)){
+                if(!empty($item->website)){
                     //TODO: handle encrypt flag
-                    if(!empty($item->scope)){
-                        if($item->scope=='websites'||$item->scope=='website'){
-                            $scopeCode = $item->scope;
-                            $scopeId = $this->stores->getWebsiteId($item->scope_code);
-                        }elseif($item->scope=='stores'||$item->scope=='store'){
-                            $scopeCode = $item->scope;
-                            $scopeId = $this->stores->getViewId($item->scope_code);
-                        }
+                    foreach($item->website as $scopeCode=>$value ){
+                        $scopeId = $this->stores->getWebsiteId($scopeCode);
+                        $this->saveConfig($path, $value,'websites',$scopeId);
                     }
-                    $this->saveConfig($path,  $item->value,  $scopeCode,$scopeId);
-                }else{
+
+                }
+                elseif(!empty($item->store_view)){
+                    //TODO: handle encrypt flag
+                    foreach($item->store_view as $scopeCode=>$value ){
+                        $scopeId = $this->stores->getViewId($scopeCode);
+                        $this->saveConfig($path, $value,'stores',$scopeId);
+                    }
+
+                }
+                else{
                     array_walk_recursive($item, array($this, 'getValuePath'),$path);
                 }
             }else{
                 //echo $path.'----'.$item. "\n";
-                $this->saveConfig($path,  $item,  $scopeCode,$scopeId);
+                $this->saveConfig($path, $item, $scopeCode,$scopeId);
             }
         }
 
     }
 
     public function saveConfig(string $path, string $value, string $scope, int $scopeId){
-        $this->resourceConfig->saveConfig($path, $value, $scope, $scopeId);
+        $this->resourceConfig->saveConfig($path, $this->setEncryption($value), $scope, $scopeId);
     }
 
     public function getConfig(string $path, string $scope, string $scopeCode){
@@ -116,8 +131,16 @@ class Configuration
         //make sure theme is registered
         $this->themeRegistration->register();
         $themeId = $this->themeCollection->getThemeByFullPath('frontend/'.$themePath)->getThemeId();
-        //set theme for Venia store
+        //set theme
         $this->saveConfig("design/theme/theme_id", $themeId, "stores", $storeCode);
-}
+    }
+
+    private function setEncryption($value){
+        if(preg_match('/encrypt\((.*)\)/', $value)){
+            return $this->encryptor->encrypt(preg_replace('/encrypt\((.*)\)/', '$1', $value));;
+        }else{
+            return $value;
+        }
+    }
 
 }

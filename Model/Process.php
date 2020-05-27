@@ -107,13 +107,14 @@ class Process
     }
 
     /**
-     * @param array $fixtures
-     * @throws \Exception
+     * @param $moduleName
+     * @param string $fixtureDirectory
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function loadFiles($moduleName)
+    public function loadFiles($moduleName, $fixtureDirectory = "fixtures")
     {
         foreach (self::FILE_ORDER as $nextFile) {
-            $fileName = $this->fixtureManager->getFixture($moduleName."::fixtures/".$nextFile);
+            $fileName = $this->fixtureManager->getFixture($moduleName."::".$fixtureDirectory."/".$nextFile);
             if (basename($fileName)==$nextFile && file_exists($fileName)) {
 
                 if (pathinfo($fileName, PATHINFO_EXTENSION) == 'json') {
@@ -125,7 +126,7 @@ class Process
                     $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
                 }
                 //determine path to module code for image import
-                $modulePath = str_replace("/fixtures/" . basename($fileName), "", $fileName);
+                $modulePath = str_replace("/".$fixtureDirectory."/" . basename($fileName), "", $fileName);
 
                 switch (basename($fileName)) {
                     case "stores.csv":

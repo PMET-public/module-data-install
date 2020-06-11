@@ -5,7 +5,8 @@
  * See COPYING.txt for license details.
  */
 namespace MagentoEse\DataInstall\Model;
-
+use Magento\Framework\App\Area as AppArea;
+use Magento\Framework\App\State;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\Data\StoreInterfaceFactory;
@@ -23,6 +24,10 @@ use Magento\Store\Model\ResourceModel\Website as WebsiteResourceModel;
 use Magento\Catalog\Api\Data\CategoryInterfaceFactory;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
+use Magento\UrlRewrite\Model\UrlPersistInterface;
+use Magento\Cms\Api\PageRepositoryInterface;
+use Magento\CmsUrlRewrite\Model\CmsPageUrlRewriteGenerator;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 
 class Stores
 {
@@ -71,6 +76,21 @@ class Stores
     /** @var ResourceConfig  */
     protected $configuration;
 
+    /** @var UrlPersistInterface  */
+    protected $urlPersist;
+
+    /** @var SearchCriteriaBuilder  */
+    protected $searchCriteriaBuilder;
+
+    /** @var PageRepositoryInterface  */
+    protected $pageRepository;
+
+    /** @var CmsPageUrlRewriteGenerator  */
+    protected $cmsPageUrlRewriteGenerator;
+
+    /** @var State  */
+    protected $appState;
+
     /**
      * Stores constructor.
      * @param WebsiteInterfaceFactory $websiteInterfaceFactory
@@ -84,6 +104,10 @@ class Stores
      * @param StoreRepositoryInterface $storeRepository
      * @param StoreInterfaceFactory $storeInterfaceFactory
      * @param ResourceConfig $configuration
+     * @param UrlPersistInterface $urlPersist
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param PageRepositoryInterface $pageRepository
+     * @param CmsPageUrlRewriteGenerator $cmsPageUrlRewriteGenerator
      */
 
     public function __construct(
@@ -97,7 +121,12 @@ class Stores
         StoreResourceModel $storeResourceModel,
         StoreRepositoryInterface $storeRepository,
         StoreInterfaceFactory $storeInterfaceFactory,
-        ResourceConfig $configuration
+        ResourceConfig $configuration,
+        UrlPersistInterface $urlPersist,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        PageRepositoryInterface $pageRepository,
+        CmsPageUrlRewriteGenerator $cmsPageUrlRewriteGenerator,
+        State $appState
     ) {
         $this->websiteInterfaceFactory = $websiteInterfaceFactory;
         $this->websiteResourceModel = $websiteResourceModel;
@@ -110,6 +139,11 @@ class Stores
         $this->storeRepository = $storeRepository;
         $this->storeInterfaceFactory = $storeInterfaceFactory;
         $this->configuration = $configuration;
+        $this->urlPersist = $urlPersist;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->pageRepository = $pageRepository;
+        $this->cmsPageUrlRewriteGenerator = $cmsPageUrlRewriteGenerator;
+        $this->appState = $appState;
     }
 
     /**
@@ -326,9 +360,18 @@ class Stores
                 if (!empty($data['is_default_view']) && $data['is_default_view']=='Y') {
                     //default needs to be active
                     $view->setIsActive(1);
-                    $this->storeResourceModel->save($view);
+                    $this->appState->emulateAreaCode(
+                        AppArea::AREA_ADMINHTML,
+                        [$this->storeResourceModel, 'save'],
+                        [$view]
+                    );
                     $store->setDefaultStoreId($view->getId());
-                    $this->groupResourceModel->save($store);
+                    $this->appState->emulateAreaCode(
+                        AppArea::AREA_ADMINHTML,
+                        [$this->groupResourceModel, 'save'],
+                        [$store]
+                    );
+
                 }
                 echo $data['view_code']." view updated\n";
             } elseif (!empty($data['view_name'])) {
@@ -343,14 +386,37 @@ class Stores
                     if (!empty($data['view_order'])) {
                         $view->setSortOrder($data['view_order']);
                     }
-                    $this->storeResourceModel->save($view);
+
+                    $this->appState->emulateAreaCode(
+                        AppArea::AREA_ADMINHTML,
+                        [$this->storeResourceModel, 'save'],
+                        [$view]
+                    );
+
+
+
+                    //$this->appState->emulateAreaCode(AppArea::AREA_ADMINHTML, [$this->storeResourceModel,'save',[$view]]);
+                    //$this->storeResourceModel->save($view);
+                    //set cms page url rewrites for new view
+                    $this->urlPersist->replace(
+                        $this->generateCmsPagesUrls((int)$view->getId())
+                    );
                 }
                 if (!empty($data['is_default_view']) && $data['is_default_view']=='Y') {
                     //default needs to be active
                     $view->setIsActive(1);
-                    $this->storeResourceModel->save($view);
+                    $this->appState->emulateAreaCode(
+                        AppArea::AREA_ADMINHTML,
+                        [$this->storeResourceModel, 'save'],
+                        [$view]
+                    );
                     $store->setDefaultStoreId($view->getId());
-                    $this->groupResourceModel->save($store);
+                    $this->appState->emulateAreaCode(
+                        AppArea::AREA_ADMINHTML,
+                        [$this->groupResourceModel, 'save'],
+                        [$store]
+                    );
+
                 }
                 echo $data['view_code']." view created\n";
             } else {
@@ -360,6 +426,27 @@ class Stores
         } else {
             echo $data['view_code']." skipping view add/update\n";
         }
+    }
+
+    /**
+     * Generate url rewrites for cms pages to store view
+     *
+     * @param int $storeId
+     * @return array
+     */
+    private function generateCmsPagesUrls(int $storeId): array
+    {
+        $rewrites = [];
+        $urls = [];
+        $searchCriteria = $this->searchCriteriaBuilder->create();
+        $cmsPagesCollection = $this->pageRepository->getList($searchCriteria)->getItems();
+        foreach ($cmsPagesCollection as $page) {
+            $page->setStoreId($storeId);
+            $rewrites[] = $this->cmsPageUrlRewriteGenerator->generate($page);
+        }
+        $urls = array_merge($urls, ...$rewrites);
+
+        return $urls;
     }
 
     /**

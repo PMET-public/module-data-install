@@ -30,6 +30,15 @@ class Configuration
     /** @var EncryptorInterface  */
     protected $encryptor;
 
+    /**
+     * Configuration constructor.
+     * @param ResourceConfig $resourceConfig
+     * @param Stores $stores
+     * @param ScopeConfigInterface $scopeConfig
+     * @param ThemeCollection $themeCollection
+     * @param ThemeRegistration $themeRegistration
+     * @param EncryptorInterface $encryptor
+     */
     public function __construct(ResourceConfig $resourceConfig, Stores $stores,
                                 ScopeConfigInterface $scopeConfig,
                                 ThemeCollection $themeCollection,
@@ -53,7 +62,6 @@ class Configuration
                 $scope = $row['scope'];
             }
             if (!empty($row['scope_code'])) {
-                //TODO: look up scope id from scope_code for store and site
                 if($scope=='website'||$scope=='websites'){
                     $scope = 'websites';
                     $scopeId = $this->stores->getWebsiteId($row['scope_code']);
@@ -80,7 +88,7 @@ class Configuration
             array_walk_recursive($item, array($this,'getValuePath'),$key);
            // print_r($setting);
         }
-        //set theme - this will be incorporated into the config structure
+        //TODO:set theme - this will be incorporated into the config structure
         //$this->setTheme('MagentoEse/venia',$this->stores->getStoreId($this->stores->getDefaultStoreCode()));
         return true;
     }
@@ -112,21 +120,41 @@ class Configuration
                     array_walk_recursive($item, array($this, 'getValuePath'),$path);
                 }
             }else{
-                //echo $path.'----'.$item. "\n";
                 $this->saveConfig($path, $item, $scopeCode,$scopeId);
             }
         }
 
     }
 
-    public function saveConfig(string $path, string $value, string $scope, int $scopeId){
-        $this->resourceConfig->saveConfig($path, $this->setEncryption($value), $scope, $scopeId);
+    /**
+     * @param string $path
+     * @param string $value
+     * @param string $scope
+     * @param $scopeId
+     */
+    public function saveConfig(string $path, string $value, string $scope, $scopeId){
+        if($scopeId){
+            $this->resourceConfig->saveConfig($path, $this->setEncryption($value), $scope, $scopeId);
+        }else{
+            echo "Error setting configuration. Check your scope codes as a ".$scope. " code does not exist\n";
+        }
+
     }
 
+    /**
+     * @param string $path
+     * @param string $scope
+     * @param string $scopeCode
+     * @return mixed
+     */
     public function getConfig(string $path, string $scope, string $scopeCode){
         return $this->scopeConfig->getValue($path,$scope,$scopeCode);
     }
 
+    /**
+     * @param $themePath
+     * @param $storeCode
+     */
     private function setTheme($themePath, $storeCode){
         //make sure theme is registered
         $this->themeRegistration->register();
@@ -135,6 +163,10 @@ class Configuration
         $this->saveConfig("design/theme/theme_id", $themeId, "stores", $storeCode);
     }
 
+    /**
+     * @param $value
+     * @return string
+     */
     private function setEncryption($value){
         if(preg_match('/encrypt\((.*)\)/', $value)){
             return $this->encryptor->encrypt(preg_replace('/encrypt\((.*)\)/', '$1', $value));;

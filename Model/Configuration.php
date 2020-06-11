@@ -55,9 +55,9 @@ class Configuration
 
     public function install(array $row){
         //TODO: handle encrypt flag for value
-        if(!empty($row['path']) && !empty($row['value'])){
+        if(!empty($row['path'])){
             $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
-            $scopeId = 0;
+            $scopeId = "0";
             if (!empty($row['scope'])) {
                 $scope = $row['scope'];
             }
@@ -133,10 +133,10 @@ class Configuration
      * @param $scopeId
      */
     public function saveConfig(string $path, string $value, string $scope, $scopeId){
-        if($scopeId){
+        if(!is_null($scopeId)){
             $this->resourceConfig->saveConfig($path, $this->setEncryption($value), $scope, $scopeId);
         }else{
-            echo "Error setting configuration. Check your scope codes as a ".$scope. " code does not exist\n";
+            echo "Error setting configuration ".$path.". Check your scope codes as the ".$scope. " code you used does not exist\n";
         }
 
     }

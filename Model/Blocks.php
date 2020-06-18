@@ -1,23 +1,17 @@
 <?php
 /**
- * Copyright © 2016 Magento. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright © Magento. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Cms\Model\BlockFactory;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Model\Store;
 
-/**
- * Class Block
- */
 class Blocks
 {
 
-
-    /**
-     * @var BlockFactory
-     */
+    /** @var BlockFactory  */
     protected $blockFactory;
 
     /** @var Converter  */
@@ -26,17 +20,26 @@ class Blocks
     /** @var Store  */
     protected $storeView;
 
+    /**
+     * Blocks constructor.
+     * @param BlockFactory $blockFactory
+     * @param Converter $converter
+     * @param Store $storeView
+     */
     public function __construct(
         BlockFactory $blockFactory,
         Converter $converter,
         Store $storeView
-    )
-    {
+    ) {
         $this->blockFactory = $blockFactory;
         $this->converter = $converter;
         $this->storeView = $storeView;
     }
 
+    /**
+     * @param array $row
+     * @return bool
+     */
     public function install(array $row)
     {
         $row['content'] = $this->converter->convertContent($row['content']);
@@ -46,8 +49,9 @@ class Blocks
     }
 
     /**
-     * @param array $data
-     * @return \Magento\Cms\Model\Block
+     * @param $data
+     * @return mixed
+     * @throws LocalizedException
      */
     protected function saveCmsBlock($data)
     {

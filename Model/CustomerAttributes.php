@@ -1,11 +1,8 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright © Magento. All rights reserved.
  */
-
 namespace MagentoEse\DataInstall\Model;
-
 
 use Magento\Eav\Api\AttributeRepositoryInterface;
 use Magento\Customer\Api\CustomerMetadataInterface;
@@ -57,7 +54,7 @@ class CustomerAttributes
         Crossfit
         Pilates
         Yoga";*/
-        if(empty($data["position"])){
+        if (empty($data["position"])) {
             $data["position"]=100;
         }
         $mainSettings = [
@@ -86,10 +83,11 @@ class CustomerAttributes
             CustomerMetadataInterface::ENTITY_TYPE_CUSTOMER,
             CustomerMetadataInterface::ATTRIBUTE_SET_ID_CUSTOMER,
             null,
-            $data["attribute_code"]);
+            $data["attribute_code"]
+        );
 
-        if(!empty($data["options"])){
-            $this->addOptions(0, $data["attribute_code"], explode(PHP_EOL,$data["options"]));
+        if (!empty($data["options"])) {
+            $this->addOptions(0, $data["attribute_code"], explode(PHP_EOL, $data["options"]));
         }
 
 
@@ -112,14 +110,14 @@ class CustomerAttributes
             'source' => 'Magento\Eav\Model\Entity\Attribute\Source\Table'
         ];
         return true;
-
     }
 
-    private function addOptions($store, $attributeCode, array $options){
-        $attribute = $this->attributeRepository->get(Customer::ENTITY,$attributeCode);
-        $option=array();
+    private function addOptions($store, $attributeCode, array $options)
+    {
+        $attribute = $this->attributeRepository->get(Customer::ENTITY, $attributeCode);
+        $option=[];
         $option['attribute_id'] = $attribute->getAttributeId();
-        foreach($options as $key=>$value){
+        foreach ($options as $key => $value) {
             $option['value'][$value][$store]=$value;
             //foreach($allStores as $store){
             //    $option['value'][$value][$store->getId()] = $value;
@@ -128,7 +126,6 @@ class CustomerAttributes
         $eavSetup = $this->eavSetupFactory->create();
 
         $eavSetup->addAttributeOption($option);
-
     }
 
     public static function getDependencies()

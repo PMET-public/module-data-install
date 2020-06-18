@@ -1,10 +1,9 @@
 <?php
-
 /**
  * Copyright © Magento. All rights reserved.
- * See COPYING.txt for license details.
  */
 namespace MagentoEse\DataInstall\Model;
+
 use Magento\Framework\App\Area as AppArea;
 use Magento\Framework\App\State;
 use Magento\Framework\Exception\AlreadyExistsException;
@@ -24,6 +23,7 @@ use Magento\Store\Model\ResourceModel\Website as WebsiteResourceModel;
 use Magento\Catalog\Api\Data\CategoryInterfaceFactory;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
+use Magento\UrlRewrite\Model\Exception\UrlAlreadyExistsException;
 use Magento\UrlRewrite\Model\UrlPersistInterface;
 use Magento\Cms\Api\PageRepositoryInterface;
 use Magento\CmsUrlRewrite\Model\CmsPageUrlRewriteGenerator;
@@ -31,17 +31,7 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 
 class Stores
 {
-
-    /** Default install site/store/view values  **/
-    protected $defaultWebsiteCode = 'base';
-
-    protected $defaultStoreCode = 'main_website_store';
-
-    protected $defaultViewCode = 'default';
-
-    protected $defaultRootCategory = 'Default Category';
-
-    protected $defaultRootCategoryId = 2;
+    protected $settings;
 
     /** @var  WebsiteInterfaceFactory */
     protected $websiteInterfaceFactory;
@@ -148,17 +138,18 @@ class Stores
 
     /**
      * @param array $data
-     * @throws \Exception
+     * @param array $settings
+     * @return bool
+     * @throws AlreadyExistsException
      */
-    public function install(array $data)
+    public function install(array $data, array $settings)
     {
-        //site_code,site_name,site_order,store_code,store_name,store_root_category,is_default_store,view_code,view_name,is_default_view
-        echo "--------------------\n";
-        //echo $data['testname']."\n";
+        $this->settings = $settings;
+        print_r("--------------------\n");
         if (!empty($data['site_code'])) {
             //fix site code if its not correct
             $data['site_code'] = $this->validateCode($data['site_code']);
-            echo "-updating site\n";
+            print_r("-updating site\n");
             $website = $this->setSite($data);
             //if there is a host value, set base urls
             if (!empty($data['host'])) {
@@ -166,28 +157,28 @@ class Stores
             }
             //if there is no store code, skip store and view
             if (!empty($data['store_code'])) {
-                echo "-updating stores\n";
+                print_r("-updating stores\n)");
                 //fix store code if its not correct
                 $data['store_code'] = $this->validateCode($data['store_code']);
                 $store = $this->setStore($data, $website);
                 //if there is not view code and store code, skip view updates
                 if (!empty($data['view_code']) && !empty($data['store_code'])) {
-                    echo "-updating views\n";
+                    print_r("-updating views\n");
                     //fix view code if its not correct
                     $data['view_code'] = $this->validateCode($data['view_code']);
                     $this->setView($data, $store);
                     //if there is not view code, skip view update
                 } else {
-                    echo "skipping view updates\n";
+                    print_r("skipping view updates\n");
                 }
             } elseif (!empty($data['view_code']) && empty($data['store_code'])) {
-                    echo "store_code is required to update or create a view\n";
+                    print_r("store_code is required to update or create a view\n");
             } else {
-                echo "skipping store updates\n";
+                print_r("skipping store updates\n");
             }
 
         } else {
-            echo "site_code column needs to be included with a value\n";
+            print_r("site_code column needs to be included with a value\n");
         }
         return true;
     }
@@ -195,22 +186,22 @@ class Stores
     //site requires name and code
 
     /**
-     * @param $data
+     * @param array $data
      * @return WebsiteInterface|null
      * @throws AlreadyExistsException
      */
-    private function setSite($data)
+    private function setSite(array $data)
     {
         //load site from the code.
         /** @var WebsiteInterface $website */
         $website = $this->getWebsite($data);
         //no name,sort order, or default update - we can skip
         if (!empty($data['site_name']) || !empty($data['site_order']) || !empty($data['is_default_site'])) {
-            echo $data['site_code']." eligible for add or update\n";
+            print_r($data['site_code']." eligible for add or update\n");
 
             //if the site exists - update
             if ($website->getId()) {
-                echo "update site ".$data['site_code']."\n";
+                print_r("update site ".$data['site_code']."\n");
                 if (!empty($data['site_name'])) {
                     $website->setName($data['site_name']);
                 }
@@ -224,7 +215,7 @@ class Stores
                 return $website;
             } elseif (!empty($data['site_name'])) {
                 //create site
-                echo "create site ".$data['site_code']."\n";
+                print_r("create site ".$data['site_code']."\n");
                 $website->setCode($data['site_code']);
                 $website->setName($data['site_name']);
                 if (!empty($data['site_order'])) {
@@ -237,23 +228,23 @@ class Stores
                 return $website;
             } else {
                 //if the site doesnt exist and the name isn't provided, error out
-                echo "site_name column needs to be included with a value when creating a site\n";
+                print_r("site_name column needs to be included with a value when creating a site\n");
                 return null;
             }
         } else {
-            echo $data['site_code']." skipping site add/update\n";
+            print_r($data['site_code']." skipping site add/update\n");
             return $website;
         }
     }
     //store requires site, name, code, and root category
     //Stores are referred to as groups in code
     /**
-     * @param $data
-     * @param $website
+     * @param array $data
+     * @param WebsiteInterface $website
      * @return GroupInterface|null
      * @throws AlreadyExistsException
      */
-    private function setStore($data, $website)
+    private function setStore(array $data, WebsiteInterface $website)
     {
         /** @var GroupInterface $store */
         $store = $this->getStore($data);
@@ -261,18 +252,18 @@ class Stores
         if (!empty($data['store_name']) || !empty($data['store_root_category']) || !empty($data['is_default_store'])) {
             /** @var WebsiteInterface $website */
             //$website = $this->getWebsite($data);
-            echo $data['store_code']." eligible for add or update\n";
+            print_r($data['store_code']." eligible for add or update\n");
             //load store with the code.
             /** @var GroupInterface $store */
             //$store = $this->getStore($data);
             //load or create root category if defined - default to 2
-            $rootCategoryId = $this->getDefaultRootCategoryId();
+            $rootCategoryId = $this->settings['root_category_id'];
             if (!empty($data['store_root_category'])) {
                 $rootCategoryId = $this->getRootCategoryByName($data);
-                //echo "requested root cat=".$data['store_root_category']."Id=".$rootCategoryId."\n";
+                //print_r( "requested root cat=".$data['store_root_category']."Id=".$rootCategoryId."\n");
                 if (!$rootCategoryId) {
                     $rootCategoryId = $this->createRootCategory($data);
-                    echo $data['store_root_category']." root category created\n";
+                    print_r($data['store_root_category']." root category created\n");
                 }
             }
 
@@ -291,11 +282,11 @@ class Stores
                 }
 
                 $this->groupResourceModel->save($store);
-                echo $data['store_code']." store updated\n";
+                print_r($data['store_code']." store updated\n");
                 return $store;
             } elseif (!empty($data['store_name'])) {
                 //create store, set default and root category
-                echo "create store\n";
+                print_r("create store\n");
                 if (!empty($data['store_name'])) {
                     $store->setName($data['store_name']);
                     $store->setCode($data['store_code']);
@@ -307,34 +298,35 @@ class Stores
                     $website->setDefaultGroupId($store->getId());
                     $this->websiteResourceModel->save($website);
                 }
-                echo $data['store_code']." store created\n";
+                print_r($data['store_code']." store created\n");
                 return $store;
             } else {
                 //if the store doesnt exist and the name isn't provided, error out
-                echo "store_name and store_root_category column need to be included
-                with a value when creating a store\n";
+                print_r("store_name and store_root_category column need to be included
+                with a value when creating a store\n");
                 return null;
             }
         } else {
-            echo $data['store_code']." skipping store add/update\n";
+            print_r($data['store_code']." skipping store add/update\n");
             return $store;
         }
     }
     //view requires store, name, code
     //Views are referred to as stores in code
     /**
-     * @param $data
-     * @param $store
+     * @param array $data
+     * @param StoreInterface $store
      * @throws AlreadyExistsException
+     * @throws UrlAlreadyExistsException
      */
-    private function setView($data, $store)
+    private function setView(array $data, StoreInterface $store)
     {
         //if there is no store or view code we can skip
         if (!empty($data['store_code']) || !empty($data['view_code'])) {
 
             /** @var WebsiteInterface $website */
             $website = $this->getWebsite($data);
-            echo $data['view_code']." view eligible for add or update\n";
+            print_r($data['view_code']." view eligible for add or update\n");
             //load View with the code.
             /** @var StoreInterface $store */
             $view = $this->getView($data);
@@ -373,10 +365,10 @@ class Stores
                     );
 
                 }
-                echo $data['view_code']." view updated\n";
+                print_r($data['view_code']." view updated\n");
             } elseif (!empty($data['view_name'])) {
                 //create view, set default, status and order
-                echo "create view\n";
+                print_r("create view\n");
                 if (!empty($data['view_name'])) {
                     $view->setName($data['view_name']);
                     $view->setCode($data['view_code']);
@@ -393,10 +385,6 @@ class Stores
                         [$view]
                     );
 
-
-
-                    //$this->appState->emulateAreaCode(AppArea::AREA_ADMINHTML, [$this->storeResourceModel,'save',[$view]]);
-                    //$this->storeResourceModel->save($view);
                     //set cms page url rewrites for new view
                     $this->urlPersist->replace(
                         $this->generateCmsPagesUrls((int)$view->getId())
@@ -418,13 +406,13 @@ class Stores
                     );
 
                 }
-                echo $data['view_code']." view created\n";
+                print_r($data['view_code']." view created\n");
             } else {
                 //if the view doesnt exist and the view isn't provided, error out
-                echo "view_name needs to be included with a value when creating a view\n";
+                print_r("view_name needs to be included with a value when creating a view\n");
             }
         } else {
-            echo $data['view_code']." skipping view add/update\n";
+            print_r($data['view_code']." skipping view add/update\n");
         }
     }
 
@@ -450,29 +438,30 @@ class Stores
     }
 
     /**
-     * @param $data
-     * @return WebsiteInterface
+     * @param array $data
+     * @return mixed
      */
-    private function getWebsite($data)
+    private function getWebsite(array $data)
     {
         return  $this->websiteInterfaceFactory->create()->load($data['site_code']);
     }
 
     /**
-     * @param $websiteCode
-     * @return int
+     * @param string $websiteCode
+     * @return mixed
      */
-    public function getWebsiteId($websiteCode){
+    public function getWebsiteId(string $websiteCode)
+    {
         $data = ['site_code'=>$websiteCode];
         $website = $this->getWebsite($data);
         return  $website->getId();
     }
 
     /**
-     * @param $data
+     * @param array $data
      * @return GroupInterface
      */
-    private function getStore($data)
+    private function getStore(array $data)
     {
         /** @var GroupRepositoryInterface $groupRepository */
         $groupId = -1;
@@ -492,20 +481,21 @@ class Stores
     }
 
     /**
-     * @param $storeCode
+     * @param string $storeCode
      * @return int
      */
-    public function getStoreId($storeCode){
+    public function getStoreId(string $storeCode)
+    {
         $data = ['store_code'=>$storeCode];
         $store = $this->getStore($data);
         return  $store->getId();
     }
 
     /**
-     * @param $data
+     * @param array $data
      * @return StoreInterface
      */
-    private function getView($data)
+    private function getView(array $data)
     {
         try {
             $view = $this->storeRepository->get($data['view_code']);
@@ -516,20 +506,21 @@ class Stores
     }
 
     /**
-     * @param $viewCode
+     * @param string $viewCode
      * @return int
      */
-    public function getViewId($viewCode){
+    public function getViewId(string $viewCode)
+    {
         $data = ['view_code'=>$viewCode];
         $view = $this->getView($data);
         return  $view->getId();
     }
 
     /**
-     * @param $code
-     * @return string|string[]|null
+     * @param string $code
+     * @return string
      */
-    private function validateCode($code)
+    private function validateCode(string $code)
     {
         /*Code may only contain letters (a-z), numbers (0-9) or underscore (_), and
         the first character must be a letter.*/
@@ -543,12 +534,12 @@ class Stores
     }
 
     /**
-     * @param $data
+     * @param array $data
      * @return int|null
      */
-    private function createRootCategory($data)
+    private function createRootCategory(array $data)
     {
-        $data = [
+        $catData = [
             'parent_id' => 1,
             'name' => $data['store_root_category'],
             'is_active' => 1,
@@ -559,7 +550,7 @@ class Stores
         ];
         $category = $this->categoryInterfaceFactory->create();
         $category->getDefaultAttributeSetId();
-        $category->setData($data)
+        $category->setData($catData)
             ->setPath('1')
             ->setAttributeSetId($category->getDefaultAttributeSetId());
         //using repository save wont generate tree properly
@@ -569,10 +560,10 @@ class Stores
     }
 
     /**
-     * @param $data
+     * @param array $data
      * @return mixed
      */
-    private function getRootCategoryByName($data)
+    private function getRootCategoryByName(array $data)
     {
         $categories = $this->categoryInterfaceFactory->create()
             ->getCollection()
@@ -583,55 +574,13 @@ class Stores
         return $categories->getFirstItem()->getEntityId();
     }
 
-
-
     /**
-     * @return string
+     * @param string $host
+     * @param int $websiteId
      */
-    public function getDefaultRootCategory(): string
-    {
-        return $this->defaultRootCategory;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDefaultStoreCode(): string
-    {
-        return $this->defaultStoreCode;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDefaultWebsiteCode(): string
-    {
-        return $this->defaultWebsiteCode;
-    }
-
-    /**
-     * @return int
-     */
-    public function getDefaultRootCategoryId(): int
-    {
-        return $this->defaultRootCategoryId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDefaultViewCode(): string
-    {
-        return $this->defaultViewCode;
-    }
-
-    /**
-     * @param $host
-     * @param $websiteId
-     */
-    private function setBaseUrls($host, $websiteId): void
+    private function setBaseUrls(string $host, int $websiteId): void
     {
         $this->configuration->saveConfig('web/unsecure/base_url', 'http://' . $host . '/', 'websites', $websiteId);
-        $this->configuration->saveConfig('web/secure/base_url', 'http://' . $host . '/', 'websites', $websiteId);
+        $this->configuration->saveConfig('web/secure/base_url', 'https://' . $host . '/', 'websites', $websiteId);
     }
 }

@@ -1,7 +1,6 @@
 <?php
 /**
  * Copyright © Magento. All rights reserved.
- * See COPYING.txt for license details.
  */
 namespace MagentoEse\DataInstall\Model;
 
@@ -11,6 +10,7 @@ use Magento\Customer\Api\GroupRepositoryInterface;
 use Magento\CustomerSegment\Model\ResourceModel\Segment\CollectionFactory as SegmentCollectionFactory;
 use Magento\Eav\Model\Config;
 use Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory as ProductAttributeCollectionFactory;
+use Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\Collection;
 use Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\CollectionFactory  as AttributeOptionCollectionFactory;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Framework\DataObject;
@@ -23,49 +23,30 @@ use Magento\Eav\Api\AttributeSetRepositoryInterface;
 use Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory as CustomerAttributeCollectionFactory;
 use Magento\Store\Api\StoreRepositoryInterface;
 
-/**
- * Class Converter
- */
 class Converter
 {
-    /**
-     * @var CategoryCollectionFactory
-     */
+    /** @var CategoryCollectionFactory  */
     protected $categoryFactory;
 
-    /**
-     * @var ProductAttributeCollectionFactory
-     */
+    /** @var ProductAttributeCollectionFactory  */
     protected $productAttributeCollectionFactory;
 
-    /**
-     * @var AttributeOptionCollectionFactory
-     */
+    /** @var AttributeOptionCollectionFactory  */
     protected $attrOptionCollectionFactory;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $productAttributeCodeOptionsPair;
 
-    /**
-     * @var array
-     */
+   /** @var  array */
     protected $productAttributeCodeOptionValueIdsPair;
 
-    /**
-     * @var array
-     */
+   /** @var  array */
     protected $customerAttributeCodeOptionsPair;
 
-    /**
-     * @var array
-     */
+    /** @var  array */
     protected $customerAttributeCodeOptionValueIdsPair;
 
-    /**
-     * @var ProductCollectionFactory
-     */
+    /** @var ProductCollectionFactory  */
     protected $productCollectionFactory;
 
     /** @var Config  */
@@ -109,6 +90,7 @@ class Converter
      * @param AttributeSetRepositoryInterface $attributeSetRepository
      * @param GroupRepositoryInterface $groupRepository
      * @param CustomerAttributeCollectionFactory $customerAttributeCollectionFactory
+     * @param StoreRepositoryInterface $storeRepository
      */
     public function __construct(
         CategoryCollectionFactory $categoryFactory,
@@ -141,7 +123,11 @@ class Converter
     }
     //TODO: What to return if something is missing, like a block that requires a banner that doesnt exist yet
 
-    public function convertContent($content)
+    /**
+     * @param string $content
+     * @return string
+     */
+    public function convertContent(string $content)
     {
         return $this->replaceMatches($content);
     }
@@ -166,9 +152,9 @@ class Converter
 
     /**
      * @param string $content
-     * @return mixed
+     * @return string
      */
-    protected function replaceMatches($content)
+    protected function replaceMatches(string $content)
     {
         $matches = $this->getMatches($content);
         if (!empty($matches['value'])) {
@@ -182,7 +168,7 @@ class Converter
      * @param string $content
      * @return array
      */
-    protected function getMatches($content)
+    protected function getMatches(string $content)
     {
         $regexp = '/{{(category[^ ]*) key="([^"]+)"}}/';
         preg_match_all($regexp, $content, $matchesCategory);
@@ -226,7 +212,7 @@ class Converter
      * @param array $matches
      * @return array
      */
-    protected function getReplaces($matches)
+    protected function getReplaces(array $matches)
     {
         $replaceData = [];
 
@@ -244,7 +230,7 @@ class Converter
      * @param string $urlAttributes
      * @return string
      */
-    protected function getUrlFilter($urlAttributes)
+    protected function getUrlFilter(string $urlAttributes)
     {
         $separatedAttributes = $this->getArrayValue($urlAttributes, ';');
         $urlFilter = null;
@@ -283,7 +269,11 @@ class Converter
     /**  ATTRIBUTE SET    */
     /**  *************   */
 
-    public function matcherAttributeset($matchValue)
+    /**
+     * @param string $matchValue
+     * @return array
+     */
+    public function matcherAttributeset(string $matchValue)
     {
         $replaceData = [];
         $search = $this->searchCriteriaBuilder
@@ -304,11 +294,11 @@ class Converter
     /**  *******   */
 
     /**
-     * @param $matchValue
+     * @param string $matchValue
      * @return array
      * @throws LocalizedException
      */
-    protected function matcherBlock($matchValue)
+    protected function matcherBlock(string $matchValue)
     {
         $replaceData = [];
         $search = $this->searchCriteriaBuilder
@@ -328,11 +318,11 @@ class Converter
     /**  **************   */
 
     /**
-     * @param $matchValue
+     * @param string $matchValue
      * @return array
      * @throws LocalizedException
      */
-    protected function matcherDynamicblock($matchValue)
+    protected function matcherDynamicblock(string $matchValue)
     {
         $replaceData = [];
         $banner = $this->bannerCollection->create()->addFieldToFilter('name', $matchValue)->getFirstItem();
@@ -350,10 +340,10 @@ class Converter
     /**  ********   */
 
     /**
-     * @param $matchValue
+     * @param string $matchValue
      * @return array
      */
-    protected function matcherSegment($matchValue)
+    protected function matcherSegment(string $matchValue)
     {
         $replaceData = [];
         $segment = $this->segmentCollectionFactory->create()->addFieldToFilter('name', $matchValue) ->getFirstItem();
@@ -374,7 +364,7 @@ class Converter
      * @return array
      * @throws LocalizedException
      */
-    protected function matcherCategory($matchValue)
+    protected function matcherCategory(string $matchValue)
     {
         $replaceData = [];
         $category = $this->getCategoryByUrlKey($matchValue);
@@ -387,11 +377,11 @@ class Converter
     }
 
     /**
-     * @param $urlKey
+     * @param string $urlKey
      * @return DataObject
      * @throws LocalizedException
      */
-    protected function getCategoryByUrlKey($urlKey)
+    protected function getCategoryByUrlKey(string $urlKey)
     {
         $category = $this->categoryFactory->create()
             ->addAttributeToFilter('url_key', $urlKey)
@@ -408,7 +398,7 @@ class Converter
      * @param string $matchValue
      * @return array
      */
-    protected function matcherProductUrl($matchValue)
+    protected function matcherProductUrl(string $matchValue)
     {
         $replaceData = [];
         $productCollection = $this->productCollectionFactory->create();
@@ -432,7 +422,7 @@ class Converter
      * @param string $matchValue
      * @return array
      */
-    protected function matcherCustomerattribute($matchValue)
+    protected function matcherCustomerattribute(string $matchValue)
     {
         $replaceData = [];
         if (strpos($matchValue, ':') === false) {
@@ -451,9 +441,9 @@ class Converter
      * Get attribute options by attribute code
      *
      * @param string $attributeCode
-     * @return \Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\Collection|null
+     * @return Collection|null
      */
-    protected function getCustomerAttributeOptions($attributeCode)
+    protected function getCustomerAttributeOptions(string $attributeCode)
     {
         if (!$this->customerAttributeCodeOptionsPair || !isset($this->customerAttributeCodeOptionsPair[$attributeCode])) {
             $this->loadCustomerAttributeOptions($attributeCode);
@@ -469,7 +459,7 @@ class Converter
      * @param string $attributeCode
      * @return $this
      */
-    protected function loadCustomerAttributeOptions($attributeCode)
+    protected function loadCustomerAttributeOptions(string $attributeCode)
     {
         /** @var \Magento\Catalog\Model\ResourceModel\Product\Attribute\Collection $collection */
         $collection = $this->customerAttributeCollectionFactory->create();
@@ -491,7 +481,7 @@ class Converter
      * @param string $value
      * @return mixed
      */
-    protected function getCustomerAttributeOptionValueId($attributeCode, $value)
+    protected function getCustomerAttributeOptionValueId(string $attributeCode, string $value)
     {
         if (!empty($this->customerAttributeCodeOptionValueIdsPair[$attributeCode][$value])) {
             return $this->customerAttributeCodeOptionValueIdsPair[$attributeCode][$value];
@@ -520,7 +510,7 @@ class Converter
      * @param string $matchValue
      * @return array
      */
-    protected function matcherProductAttribute($matchValue)
+    protected function matcherProductAttribute(string $matchValue)
     {
         $replaceData = [];
         if (strpos($matchValue, ':') === false) {
@@ -539,9 +529,9 @@ class Converter
      * Get attribute options by attribute code
      *
      * @param string $attributeCode
-     * @return \Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\Collection|null
+     * @return Collection|null
      */
-    protected function getProductAttributeOptions($attributeCode)
+    protected function getProductAttributeOptions(string $attributeCode)
     {
         if (!$this->productAttributeCodeOptionsPair || !isset($this->productAttributeCodeOptionsPair[$attributeCode])) {
             $this->loadProductAttributeOptions($attributeCode);
@@ -557,7 +547,7 @@ class Converter
      * @param string $attributeCode
      * @return $this
      */
-    protected function loadProductAttributeOptions($attributeCode)
+    protected function loadProductAttributeOptions(string $attributeCode)
     {
         /** @var \Magento\Catalog\Model\ResourceModel\Product\Attribute\Collection $collection */
         $collection = $this->productAttributeCollectionFactory->create();
@@ -579,7 +569,7 @@ class Converter
      * @param string $value
      * @return mixed
      */
-    protected function getProductAttributeOptionValueId($attributeCode, $value)
+    protected function getProductAttributeOptionValueId(string $attributeCode, string $value)
     {
         if (!empty($this->productAttributeCodeOptionValueIdsPair[$attributeCode][$value])) {
             return $this->productAttributeCodeOptionValueIdsPair[$attributeCode][$value];
@@ -600,7 +590,13 @@ class Converter
         }
     }
 
-    public function getStoreidByCode($storeCode){
+    /**
+     * @param string $storeCode
+     * @return int
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getStoreidByCode(string $storeCode)
+    {
         return $this->storeRepository->get($storeCode)->getId();
     }
 }

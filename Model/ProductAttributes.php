@@ -1,13 +1,14 @@
 <?php
 /**
- * Copyright © 2016 Magento. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright © Magento. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Eav\Model\Entity\Attribute\Set;
 use Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\Collection;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Model\AbstractModel;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\ResourceModel\Eav\AttributeFactory;
@@ -20,41 +21,37 @@ class ProductAttributes
 {
 
     const DEFAULT_ATTRIBUTE_SET = 'Default';
-    /**
-     * @var AttributeFactory
-     */
+
+    /** @var AttributeFactory  */
     protected $attributeFactory;
 
-    /**
-     * @var SetFactory
-     */
+    /** @var SetFactory  */
     protected $attributeSetFactory;
 
-    /**
-     * @var CollectionFactory
-     */
+    /** @var OptionCollectionFactory  */
     protected $attrOptionCollectionFactory;
 
-    /**
-     * @var Product
-     */
+   /** @var Product  */
     protected $productHelper;
 
-    /**
-     * @var EavConfig
-     */
+   /** @var EavConfig  */
     protected $eavConfig;
 
-    /**
-     * @var int
-     */
+   /** @var  */
     protected $entityTypeId;
 
-    /**
-     * @var StoreManagerInterface
-     */
+    /** @var StoreManagerInterface  */
     protected $storeManager;
 
+    /**
+     * ProductAttributes constructor.
+     * @param AttributeFactory $attributeFactory
+     * @param SetFactory $attributeSetFactory
+     * @param OptionCollectionFactory $attrOptionCollectionFactory
+     * @param Product $productHelper
+     * @param EavConfig $eavConfig
+     * @param StoreManagerInterface $storeManager
+     */
     public function __construct(
         AttributeFactory $attributeFactory,
         SetFactory $attributeSetFactory,
@@ -71,6 +68,11 @@ class ProductAttributes
         $this->storeManager = $storeManager;
     }
 
+    /**
+     * @param array $data
+     * @return bool
+     * @throws LocalizedException
+     */
     public function install(array $data)
     {
         /** @var Attribute $attribute */
@@ -113,7 +115,6 @@ class ProductAttributes
         if (is_array($data['attribute_set'])) {
             foreach ($data['attribute_set'] as $setName) {
                 $setName = trim($setName);
-                //$attributeCount++;
                 $attributeSet = $this->processAttributeSet($setName);
                 $attributeGroupId = $attributeSet->getDefaultGroupId();
 
@@ -137,7 +138,7 @@ class ProductAttributes
      * @param array $data
      * @return array
      */
-    protected function getOption($attribute, $data)
+    protected function getOption(Attribute $attribute, array $data)
     {
         $result = [];
         $data['option'] = explode("\n", $data['option']);
@@ -160,7 +161,7 @@ class ProductAttributes
      * @param array $values
      * @return array
      */
-    protected function convertOption($values)
+    protected function convertOption(array $values)
     {
         $result = ['order' => [], 'value' => []];
         $i = 0;
@@ -172,6 +173,10 @@ class ProductAttributes
         return $result;
     }
 
+    /**
+     * @return mixed
+     * @throws LocalizedException
+     */
     protected function getEntityTypeId()
     {
         if (!$this->entityTypeId) {
@@ -180,7 +185,12 @@ class ProductAttributes
         return $this->entityTypeId;
     }
 
-    protected function processAttributeSet($setName)
+    /**
+     * @param string $setName
+     * @return bool|Set|AbstractModel
+     * @throws LocalizedException
+     */
+    protected function processAttributeSet(string $setName)
     {
         /** @var Set $attributeSet */
         $attributeSet = $this->attributeSetFactory->create();
@@ -204,10 +214,10 @@ class ProductAttributes
     }
 
     /**
-     * @param $code
-     * @return string|string[]|null
+     * @param string $code
+     * @return string
      */
-    private function validateCode($code)
+    private function validateCode(string $code)
     {
         /*Code may only contain letters (a-z), numbers (0-9) or underscore (_),
         and the first character must be a letter.*/

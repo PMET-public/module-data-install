@@ -1,6 +1,7 @@
 <?php
-
-
+/**
+ * Copyright © Magento. All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Model;
 
 class Validate

@@ -1,11 +1,17 @@
 <?php
-
+/**
+ * Copyright © Magento. All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Model;
 
+use Exception;
 use Magento\Cms\Api\Data\PageInterface;
 use Magento\Cms\Api\Data\PageInterfaceFactory;
 use Magento\Cms\Api\PageRepositoryInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\File\Csv;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
+use Magento\Framework\Setup\SampleData\FixtureManager;
 use Magento\Store\Api\StoreRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollection;
@@ -13,11 +19,10 @@ use Magento\UrlRewrite\Model\ResourceModel\UrlRewrite;
 
 class Pages
 {
-    /**
-     * @var \Magento\Framework\File\Csv
-     */
+    /** @var Csv  */
     protected $csvReader;
 
+    /** @var FixtureManager  */
     protected $fixtureManager;
 
     /** @var PageInterfaceFactory  */
@@ -52,12 +57,16 @@ class Pages
      * @param UrlRewrite $urlRewrite
      * @param UrlRewriteCollection $urlRewriteCollection
      */
-    public function __construct( SampleDataContext $sampleDataContext,PageInterfaceFactory $pageInterfaceFactory,
-                                 Converter $converter, StoreRepositoryInterface $storeRepository,
-                                 PageRepositoryInterface $pageRepository,
-                                 SearchCriteriaBuilder $searchCriteria,
-                                 UrlRewrite $urlRewrite, UrlRewriteCollection $urlRewriteCollection)
-    {
+    public function __construct(
+        SampleDataContext $sampleDataContext,
+        PageInterfaceFactory $pageInterfaceFactory,
+        Converter $converter,
+        StoreRepositoryInterface $storeRepository,
+        PageRepositoryInterface $pageRepository,
+        SearchCriteriaBuilder $searchCriteria,
+        UrlRewrite $urlRewrite,
+        UrlRewriteCollection $urlRewriteCollection
+    ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
         $this->pageInterfaceFactory = $pageInterfaceFactory;
@@ -72,9 +81,10 @@ class Pages
     /**
      * @param array $row
      * @return bool
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    public function install(array $row){
+    public function install(array $row)
+    {
         //TODO: set stores to use configuration if stores not in file
         //TODO: check on multiple stores for a page
         $row['content'] = $this->converter->convertContent($row['content']);
@@ -93,12 +103,12 @@ class Pages
                     //->setStores([3,4,5])
                     ->save();
             } else {
-                foreach($pages as $updatePage) {
+                foreach ($pages as $updatePage) {
                     $page = $this->pageInterfaceFactory->create();
                     //is it a single page
                     if (count($pages) == 1) {
                         //is the exiting page a store zero && are we requesting a different store/stores
-                        if($updatePage->getStores()[0]==0 && $this->getStoreIds($row['store_view_code'])[0] !=0){
+                        if ($updatePage->getStores()[0]==0 && $this->getStoreIds($row['store_view_code'])[0] !=0) {
                             //Save the exiting page under all other stores
                             $storeIds = $this->getAllStoreIds();
                             if (($key = array_search($this->getStoreIds($row['store_view_code'])[0], $storeIds)) !== false) {
@@ -106,20 +116,19 @@ class Pages
                             }
                             $updatePage->load($row['identifier'], 'identifier')->setStores($storeIds)->save();
                             //remove urls rewrite from existing page so new page can be added
-                            $this->removeUrlRewrite($row['identifier'],$this->getStoreIds($row['store_view_code']));
+                            $this->removeUrlRewrite($row['identifier'], $this->getStoreIds($row['store_view_code']));
                             //create a new page for the new stores
                             $page = $this->pageInterfaceFactory->create();
                             $page->addData($row)->setStores($this->getStoreIds($row['store_view_code']))->save();
                         }
                         //else is the exsiting store different than requested
-                        elseif($updatePage->getStores() != $this->getStoreIds($row['store_view_code'])) {
+                        elseif ($updatePage->getStores() != $this->getStoreIds($row['store_view_code'])) {
                             //create a new page for the new stores
                             $page = $this->pageInterfaceFactory->create();
                             $page->addData($row)
                                 ->setStores($this->getStoreIds($row['store_view_code']))
                                 ->save();
-                        }
-                        else{
+                        } else {
                             //update current page
                             $updatePage->load($row['identifier'], 'identifier');
                             $this->pageRepository->save($updatePage->addData($row));
@@ -127,7 +136,7 @@ class Pages
 
                     } else {
                         //multiple pages exist
-                        if($updatePage->getStores()[0]==$this->getStoreIds($row['store_view_code'])[0]){
+                        if ($updatePage->getStores()[0]==$this->getStoreIds($row['store_view_code'])[0]) {
                             //update when store is found
                             $updatePage->load($row['identifier'], 'identifier');
                             $this->pageRepository->save($updatePage->addData($row));
@@ -136,7 +145,7 @@ class Pages
                     }
                 }
                 //if its an existing page, but needs to be created for a store
-                if(count($pages) > 1 && $foundPage==0){
+                if (count($pages) > 1 && $foundPage==0) {
                     $page = $this->pageInterfaceFactory->create();
                     $page->addData($row)
                         ->setStores($this->getStoreIds($row['store_view_code']))
@@ -148,35 +157,37 @@ class Pages
     }
 
     /**
-     * @param $identifier
-     * @param $storeId
-     * @throws \Exception
+     * @param string $identifier
+     * @param array $storeId
+     * @throws Exception
      */
-    protected function removeUrlRewrite($identifier,$storeId){
-        $urls = $this->urlRewriteCollection->addFilter('request_path',$identifier,'eq')->addFilter('store_id',$storeId,'eq')->getItems();
-        foreach($urls as $url){
+    protected function removeUrlRewrite(string $identifier, array $storeId)
+    {
+        $urls = $this->urlRewriteCollection->
+            addFilter('request_path', $identifier, 'eq')->addFilter('store_id', $storeId, 'eq')->getItems();
+        foreach ($urls as $url) {
             $this->urlRewrite->delete($url);
         }
     }
 
-
     /**
-     * @param $storeCodes
+     * @param string $storeCodes
      * @return array
      */
-    public function getStoreIds($storeCodes){
-        $storeList = explode(",",$storeCodes);
+    public function getStoreIds($storeCodes)
+    {
+        $storeList = explode(",", $storeCodes);
         $returnArray = [];
-        foreach($storeList as $storeCode){
+        foreach ($storeList as $storeCode) {
             $stores =$this->storeRepository->getList();
-            foreach($stores as $store){
-                if($store->getCode()==$storeCode){
+            foreach ($stores as $store) {
+                if ($store->getCode()==$storeCode) {
                     $returnArray[]= $store->getId();
                     break;
                 }
             }
         }
-        if(count($returnArray)==0){
+        if (count($returnArray)==0) {
             $returnArray[]=0;
         }
         return $returnArray;
@@ -185,7 +196,8 @@ class Pages
     /**
      * @return array
      */
-    private function getAllStoreIds(){
+    private function getAllStoreIds()
+    {
         $storeList=[];
         $stores = $this->storeRepository->getList();
         foreach ($stores as $store) {
@@ -198,5 +210,3 @@ class Pages
         return $storeList;
     }
 }
-
-

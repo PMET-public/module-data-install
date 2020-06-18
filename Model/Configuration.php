@@ -1,10 +1,13 @@
 <?php
-
+/**
+ * Copyright © Magento. All rights reserved.
+ */
 
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Tests\NamingConvention\true\mixed;
 use Magento\Theme\Model\ResourceModel\Theme\Collection as ThemeCollection;
 use Magento\Theme\Model\Theme\Registration as ThemeRegistration;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -39,12 +42,14 @@ class Configuration
      * @param ThemeRegistration $themeRegistration
      * @param EncryptorInterface $encryptor
      */
-    public function __construct(ResourceConfig $resourceConfig, Stores $stores,
-                                ScopeConfigInterface $scopeConfig,
-                                ThemeCollection $themeCollection,
-                                ThemeRegistration $themeRegistration,
-                                EncryptorInterface $encryptor)
-    {
+    public function __construct(
+        ResourceConfig $resourceConfig,
+        Stores $stores,
+        ScopeConfigInterface $scopeConfig,
+        ThemeCollection $themeCollection,
+        ThemeRegistration $themeRegistration,
+        EncryptorInterface $encryptor
+    ) {
         $this->resourceConfig = $resourceConfig;
         $this->stores = $stores;
         $this->scopeConfig = $scopeConfig;
@@ -53,77 +58,90 @@ class Configuration
         $this->encryptor = $encryptor;
     }
 
-    public function install(array $row){
+    /**
+     * @param array $row
+     * @return bool
+     */
+    public function install(array $row)
+    {
         //TODO: handle encrypt flag for value
-        if(!empty($row['path'])){
+        if (!empty($row['path'])) {
             $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
             $scopeId = "0";
             if (!empty($row['scope'])) {
                 $scope = $row['scope'];
             }
             if (!empty($row['scope_code'])) {
-                if($scope=='website'||$scope=='websites'){
+                if ($scope=='website' || $scope=='websites') {
                     $scope = 'websites';
                     $scopeId = $this->stores->getWebsiteId($row['scope_code']);
-                }elseif($scope=='store'||$scope=='stores'){
+                } elseif ($scope=='store' || $scope=='stores') {
                     $scope = 'stores';
                     $scopeId = $this->stores->getStoreId($row['scope_code']);
                 }
             }
-            $this->saveConfig($row['path'],$row['value'],$scope, $scopeId);
+            $this->saveConfig($row['path'], $row['value'], $scope, $scopeId);
         }
 
         return true;
     }
 
-    public function installJson($json){
+    /**
+     * @param string $json
+     * @return bool
+     */
+    public function installJson(string $json)
+    {
         //TODO: Validate json
-        try{
+        try {
             $config = json_decode($json)->configuration;
-        }catch(\Exception $e){
-            echo "The JSON in your configuration file is invalid.\n";
+        } catch (\Exception $e) {
+            print_r("The JSON in your configuration file is invalid.\n");
             return true;
         }
-        foreach($config as $key=>$item){
-            array_walk_recursive($item, array($this,'getValuePath'),$key);
+        foreach ($config as $key => $item) {
+            array_walk_recursive($item, [$this,'getValuePath'], $key);
            // print_r($setting);
         }
         //TODO:set theme - this will be incorporated into the config structure
         //$this->setTheme('MagentoEse/venia',$this->stores->getStoreId($this->stores->getDefaultStoreCode()));
         return true;
     }
-    public function getValuePath($item, $key,$path)
+
+    /**
+     * @param $item
+     * @param string $key
+     * @param string $path
+     */
+    public function getValuePath($item, string $key, string $path)
     {
         $scopeCode = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
         $scopeId = 0;
 
-        if($key != 'store_view' && $key != 'website'){
+        if ($key != 'store_view' && $key != 'website') {
             $path = $path."/". $key;
             if (is_object($item)) {
-                if(!empty($item->website)){
+                if (!empty($item->website)) {
                     //TODO: handle encrypt flag
-                    foreach($item->website as $scopeCode=>$value ){
+                    foreach ($item->website as $scopeCode => $value) {
                         $scopeId = $this->stores->getWebsiteId($scopeCode);
-                        $this->saveConfig($path, $value,'websites',$scopeId);
+                        $this->saveConfig($path, $value, 'websites', $scopeId);
                     }
 
-                }
-                elseif(!empty($item->store_view)){
+                } elseif (!empty($item->store_view)) {
                     //TODO: handle encrypt flag
-                    foreach($item->store_view as $scopeCode=>$value ){
+                    foreach ($item->store_view as $scopeCode => $value) {
                         $scopeId = $this->stores->getViewId($scopeCode);
-                        $this->saveConfig($path, $value,'stores',$scopeId);
+                        $this->saveConfig($path, $value, 'stores', $scopeId);
                     }
 
+                } else {
+                    array_walk_recursive($item, [$this, 'getValuePath'], $path);
                 }
-                else{
-                    array_walk_recursive($item, array($this, 'getValuePath'),$path);
-                }
-            }else{
-                $this->saveConfig($path, $item, $scopeCode,$scopeId);
+            } else {
+                $this->saveConfig($path, $item, $scopeCode, $scopeId);
             }
         }
-
     }
 
     /**
@@ -132,13 +150,14 @@ class Configuration
      * @param string $scope
      * @param $scopeId
      */
-    public function saveConfig(string $path, string $value, string $scope, $scopeId){
-        if(!is_null($scopeId)){
+    public function saveConfig(string $path, string $value, string $scope, $scopeId)
+    {
+        if ($scopeId==null) {
             $this->resourceConfig->saveConfig($path, $this->setEncryption($value), $scope, $scopeId);
-        }else{
-            echo "Error setting configuration ".$path.". Check your scope codes as the ".$scope. " code you used does not exist\n";
+        } else {
+            print_r("Error setting configuration ".$path.". Check your scope codes as the ".
+                $scope. " code you used does not exist\n");
         }
-
     }
 
     /**
@@ -147,15 +166,17 @@ class Configuration
      * @param string $scopeCode
      * @return mixed
      */
-    public function getConfig(string $path, string $scope, string $scopeCode){
-        return $this->scopeConfig->getValue($path,$scope,$scopeCode);
+    public function getConfig(string $path, string $scope, string $scopeCode)
+    {
+        return $this->scopeConfig->getValue($path, $scope, $scopeCode);
     }
 
     /**
-     * @param $themePath
-     * @param $storeCode
+     * @param string $themePath
+     * @param string $storeCode
      */
-    private function setTheme($themePath, $storeCode){
+    private function setTheme(string $themePath, string $storeCode)
+    {
         //make sure theme is registered
         $this->themeRegistration->register();
         $themeId = $this->themeCollection->getThemeByFullPath('frontend/'.$themePath)->getThemeId();
@@ -164,15 +185,16 @@ class Configuration
     }
 
     /**
-     * @param $value
+     * @param string $value
      * @return string
      */
-    private function setEncryption($value){
-        if(preg_match('/encrypt\((.*)\)/', $value)){
-            return $this->encryptor->encrypt(preg_replace('/encrypt\((.*)\)/', '$1', $value));;
-        }else{
+    private function setEncryption(string $value)
+    {
+        if (preg_match('/encrypt\((.*)\)/', $value)) {
+            return $this->encryptor->encrypt(preg_replace('/encrypt\((.*)\)/', '$1', $value));
+            ;
+        } else {
             return $value;
         }
     }
-
 }

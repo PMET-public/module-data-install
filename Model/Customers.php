@@ -1,4 +1,8 @@
 <?php
+/**
+ * Copyright © Magento. All rights reserved.
+ */
+
 //TODO:Support for multiple addresses
 
 namespace MagentoEse\DataInstall\Model;
@@ -12,15 +16,15 @@ use Magento\Directory\Model\CountryFactory;
 use Magento\Framework\Api\DataObjectHelper;
 use Magento\Framework\App\State;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\LocalizedException;
 
 class Customers
 {
+    /** @var array */
+    protected $settings;
 
     /** @var array $autoFillElements */
     protected $autoFillElements;
-
-    /** @var array $customerDataProfile */
-    //protected $customerDataProfile;
 
     /** @var array $customerDataAddress */
     protected $customerDataAddress;
@@ -55,14 +59,31 @@ class Customers
     /** @var CountryFactory  */
     protected $countryFactory;
 
-    public function __construct(CustomerGroups $customerGroups,
-                                Stores $stores,AccountManagementInterface $accountManagement,
-                                AddressInterfaceFactory $addressInterfaceFactory,
-                                CustomerInterfaceFactory $customerInterfaceFactory,
-                                RegionInterfaceFactory $regionInterfaceFactory,
-                                DataObjectHelper $dataObjectHelper,State $appState,
-                                Configuration $configuration, CountryFactory $countryFactory)
-    {
+    /**
+     * Customers constructor.
+     * @param CustomerGroups $customerGroups
+     * @param Stores $stores
+     * @param AccountManagementInterface $accountManagement
+     * @param AddressInterfaceFactory $addressInterfaceFactory
+     * @param CustomerInterfaceFactory $customerInterfaceFactory
+     * @param RegionInterfaceFactory $regionInterfaceFactory
+     * @param DataObjectHelper $dataObjectHelper
+     * @param State $appState
+     * @param Configuration $configuration
+     * @param CountryFactory $countryFactory
+     */
+    public function __construct(
+        CustomerGroups $customerGroups,
+        Stores $stores,
+        AccountManagementInterface $accountManagement,
+        AddressInterfaceFactory $addressInterfaceFactory,
+        CustomerInterfaceFactory $customerInterfaceFactory,
+        RegionInterfaceFactory $regionInterfaceFactory,
+        DataObjectHelper $dataObjectHelper,
+        State $appState,
+        Configuration $configuration,
+        CountryFactory $countryFactory
+    ) {
         $this->customerGroups=$customerGroups;
         $this->stores = $stores;
         $this->accountManagement = $accountManagement;
@@ -75,8 +96,18 @@ class Customers
         $this->countryFactory = $countryFactory;
     }
     //TODO: validate input fields
-    public function install($rows, $header, $modulePath)
+
+    /**
+     * @param array $rows
+     * @param array $header
+     * @param string $modulePath
+     * @param array $settings
+     * @return bool
+     * @throws LocalizedException
+     */
+    public function install(array $rows, array $header, string $modulePath, array $settings)
     {
+        $this->settings = $settings;
         $startingElement = 1;
         foreach ($rows as $row) {
             $data = [];
@@ -99,8 +130,6 @@ class Customers
             $addresses = $this->convertAddresses($row);
             $customer->setAddresses([$addresses]);
 
-
-
             $this->appState->emulateAreaCode(
                 'frontend',
                 [$this->accountManagement, 'createAccount'],
@@ -108,15 +137,19 @@ class Customers
             );
 
             if (!empty($row['add_to_autofill']) && $row['add_to_autofill'] == 1) {
-                $startingElement = $this->addToAutofill($row,$startingElement);
+                $startingElement = $this->addToAutofill($row, $startingElement);
             }
-            //$t=$r;
-
         }
         return true;
     }
 
-    protected function convertAddresses($row){
+    /**
+     * @param array $row
+     * @return mixed
+     * @throws LocalizedException
+     */
+    protected function convertAddresses(array $row)
+    {
         $customerData['address'] = $this->convertRowData($row, $this->getDefaultCustomerAddress());
         $customerData['address']['region_id'] = $this->getRegionId($customerData['address']);
         //$customerData['address']['country_id'] = $customerData['address']['country'];
@@ -147,50 +180,60 @@ class Customers
         return $addresses;
     }
 
-    protected function addToAutofill(array $row, int $startingElement){
+    /**
+     * @param array $row
+     * @param int $startingElement
+     * @return int
+     */
+    protected function addToAutofill(array $row, int $startingElement)
+    {
         $pathPrefix = 'magentoese_autofill/persona_';
         $elementCount = 17;
 
         //turn on autofill
-        $this->configuration->saveConfig('magentoese_autofill/general/enable_autofill','1',ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
+        $this->configuration->saveConfig('magentoese_autofill/general/enable_autofill', '1', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
 
         //find next empty autofill
         //TODO:get region id
-        for($x=$startingElement;$x <= $elementCount;$x++){
+        for ($x=$startingElement; $x <= $elementCount; $x++) {
             //echo "---".$pathPrefix.$x.'/email_value'.'___'.$this->configuration->getConfig($pathPrefix.$x.'/email_value',ScopeConfigInterface::SCOPE_TYPE_DEFAULT,'default')."---";
-            if(!$this->configuration->getConfig($pathPrefix.$x.'/email_value',ScopeConfigInterface::SCOPE_TYPE_DEFAULT,'default')){
-                $this->configuration->saveConfig($pathPrefix.$x.'/cc_month','02',ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/cc_year','2029',ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/cc_number','4111111111111111',ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/cc_type','VI',ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/cc_verification_number','123',ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/enable','1',ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/address_value',$row['street'],ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/city_value',$row['city'],ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/country_value',$row['country_id'],ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                if(!empty($row['company'])){
-                    $this->configuration->saveConfig($pathPrefix.$x.'/company_value',$row['company'],ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
+            if (!$this->configuration->getConfig($pathPrefix.$x.'/email_value', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 'default')) {
+                $this->configuration->saveConfig($pathPrefix.$x.'/cc_month', '02', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/cc_year', '2029', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/cc_number', '4111111111111111', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/cc_type', 'VI', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/cc_verification_number', '123', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/enable', '1', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/address_value', $row['street'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/city_value', $row['city'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/country_value', $row['country_id'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                if (!empty($row['company'])) {
+                    $this->configuration->saveConfig($pathPrefix.$x.'/company_value', $row['company'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
                 }
-                $this->configuration->saveConfig($pathPrefix.$x.'/email_value',$row['email'],ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                if(!empty($row['fax'])){
-                    $this->configuration->saveConfig($pathPrefix.$x.'/fax_value',$row['fax'],ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/email_value', $row['email'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                if (!empty($row['fax'])) {
+                    $this->configuration->saveConfig($pathPrefix.$x.'/fax_value', $row['fax'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
                 }
-                $this->configuration->saveConfig($pathPrefix.$x.'/firstname_value',$row['firstname'],ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/label',$row['firstname'].' '.$row['lastname'],ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/lastname_value',$row['lastname'],ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/password_value',$row['password'],ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/state_value',$this->getRegionId($row),ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/telephone_value',$row['telephone'],ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/zip_value',$row['postcode'],ScopeConfigInterface::SCOPE_TYPE_DEFAULT,0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/firstname_value', $row['firstname'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/label', $row['firstname'].' '.$row['lastname'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/lastname_value', $row['lastname'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/password_value', $row['password'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/state_value', $this->getRegionId($row), ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/telephone_value', $row['telephone'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix.$x.'/zip_value', $row['postcode'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
                 return $x + 1;
             }
         }
-
     }
+
+    /**
+     * @return array
+     * @throws LocalizedException
+     */
     protected function getDefaultCustomerProfile()
     {
         $customerDataProfile = [
-                'website_id' => $this->stores->getStoreId($this->stores->getDefaultWebsiteCode()),
+                'website_id' => $this->stores->getStoreId($this->settings['site_code']),
                 'group_id' => $this->customerGroups->getCustomerGroupId($this->customerGroups->getDefaultCustomerGroup()),
                 'disable_auto_group_change' => '0',
                 'prefix',
@@ -210,6 +253,9 @@ class Customers
         return $customerDataProfile;
     }
 
+    /**
+     * @return array
+     */
     protected function getDefaultCustomerAddress()
     {
         if (!$this->customerDataAddress) {
@@ -238,9 +284,13 @@ class Customers
         return $this->customerDataAddress;
     }
 
-
+    /**
+     * @param array $row
+     * @param array $data
+     * @return array
+     * @throws LocalizedException
+     */
     protected function convertRowData(array $row, array $data)
-        //TODO: what if store or group is invalid
     {
         foreach ($row as $rowField => $rowValue) {
             if (isset($data[$rowField])) {
@@ -266,10 +316,9 @@ class Customers
      * @param array $address
      * @return mixed
      */
-    protected function getRegionId($address)
+    protected function getRegionId(array $address)
     {
         $country = $this->countryFactory->create()->loadByCode($address['country_id']);
         return $country->getRegionCollection()->addFieldToFilter('name', $address['region'])->getFirstItem()->getId();
     }
-
 }

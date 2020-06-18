@@ -29,14 +29,10 @@ class Block extends Action implements HttpPostActionInterface
      */
     const ADMIN_RESOURCE = 'Magento_Cms::block';
 
-    /**
-     * @var Filter
-     */
+    /** @var Filter  */
     protected $filter;
 
-    /**
-     * @var CollectionFactory
-     */
+    /** @var CollectionFactory  */
     protected $collectionFactory;
 
     /**
@@ -93,7 +89,6 @@ class Block extends Action implements HttpPostActionInterface
         $collection = $this->filter->getCollection($this->collectionFactory->create());
 
         $result = $this->generateData($collection);
-
 
         $this->csvProcessor
             ->setDelimiter(',')

@@ -1,34 +1,26 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright © Magento. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model;
 
-use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Banner\Model\BannerFactory;
 use Magento\Banner\Model\Banner as BannerModel;
 use Magento\BannerCustomerSegment\Model\ResourceModel\BannerSegmentLink;
-use MagentoEse\DataInstall\Model\Converter;
 use Magento\CustomerSegment\Model\ResourceModel\Segment\CollectionFactory as SegmentCollection;
+use Magento\Framework\Exception\AlreadyExistsException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Banner\Model\ResourceModel\Banner as BannerResourceModel;
 use Magento\Banner\Model\ResourceModel\Banner\CollectionFactory as BannerCollection;
 
-/**
- * Class Banner
- */
 class DynamicBlocks
 {
 
-    /**
-     * @var BannerFactory
-     */
+    /** @var BannerFactory  */
     protected $bannerFactory;
 
-    /**
-     * @var BannerSegmentLink
-     */
+    /** @var BannerSegmentLink  */
     private $bannerSegmentLink;
 
     /** @var Converter  */
@@ -65,8 +57,7 @@ class DynamicBlocks
         SchemaSetupInterface $setup,
         BannerResourceModel $bannerResourceModel,
         BannerCollection $bannerCollection
-    )
-    {
+    ) {
         $this->bannerFactory = $bannerFactory;
         $this->bannerSegmentLink = $bannerSegmentLink;
         $this->converter = $converter;
@@ -77,18 +68,21 @@ class DynamicBlocks
     }
 
     /**
-     * {@inheritdoc}
+     * @param array $row
+     * @return bool
+     * @throws AlreadyExistsException
+     * @throws NoSuchEntityException
      */
     public function install(array $row)
     {
         //get existing banner to see if we need to create or update content for different store view
         $bannerCollection = $this->bannerCollection->create();
-        $banners = $bannerCollection->addFilter('name',$row['name'],'eq');
+        $banners = $bannerCollection->addFilter('name', $row['name'], 'eq');
         //echo $banners->count()."\n";
-        if($banners->count()!=0){
+        if ($banners->count()!=0) {
             $bannerId = $banners->getAllIds()[0];
             $banner = $this->bannerFactory->create()->load($bannerId);
-        }else{
+        } else {
             $banner = $this->bannerFactory->create();
         }
         /** @var BannerModel $banner */
@@ -100,29 +94,34 @@ class DynamicBlocks
         $banner->setStoreContents([$this->converter->getStoreidByCode($row['store']) => $this->converter->convertContent($row['banner_content'])]);
         $this->bannerResourceModel->save($banner);
         //set default if this is a new banner
-        if($banners->count()==0) {
+        if ($banners->count()==0) {
             $this->bannerResourceModel->saveStoreContents($banner->getId(), ['0' => $this->converter->convertContent($row['banner_content'])]);
         }
         //set content for store
        // $this->bannerResourceModel->saveStoreContents($banner->getId(), [$this->replaceIds->getStoreidByCode($row['store']) => $this->replaceIds->replaceAll($row['banner_content'])]);
 
-        $segments = explode(",",$row['segments']);
+        $segments = explode(",", $row['segments']);
         $segmentIds=[];
-        foreach($segments as $segment){
+        foreach ($segments as $segment) {
             $segmentId = $this->getSegmentIdByName($segment);
-            if(!is_null($segmentId)){
+            if ($segmentId != null) {
                 $segmentIds[]=$segmentId;
             }
 
         }
-        $this->bannerSegmentLink->saveBannerSegments($banner->getId(),$segmentIds);
+        $this->bannerSegmentLink->saveBannerSegments($banner->getId(), $segmentIds);
         $this->setup->endSetup();
         return true;
     }
 
-    public function getSegmentIdByName($segmentName){
+    /**
+     * @param string $segmentName
+     * @return mixed
+     */
+    public function getSegmentIdByName(string $segmentName)
+    {
         $collection = $this->segmentCollection->create();
-        $segment = $collection->addFilter('name',$segmentName,'eq')->getFirstItem();
+        $segment = $collection->addFilter('name', $segmentName, 'eq')->getFirstItem();
         return $segment->getId();
     }
 }

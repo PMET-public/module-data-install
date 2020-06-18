@@ -94,7 +94,6 @@ class Page extends Action implements HttpPostActionInterface
 
         $result = $this->generateData($collection);
 
-
         $this->csvProcessor
             ->setDelimiter(',')
             ->setEnclosure('"')

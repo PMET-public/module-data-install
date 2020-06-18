@@ -1,11 +1,11 @@
 <?php
 
 /**
- * This class will take in an array of files, convert them to data arrays
-and pass them on to the correct data loader
+ * Copyright © Magento. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Csv;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
@@ -13,9 +13,13 @@ use Magento\Framework\Setup\SampleData\FixtureManager;
 
 class Process
 {
-    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config.json','config.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','categories.csv','products.csv','blocks.csv','dynamic_blocks.csv','pages.csv'];
+    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config.json','config.csv',
+        'customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','categories.csv',
+        'products.csv','blocks.csv','dynamic_blocks.csv','pages.csv'];
 
-    protected $redo=array();
+    protected $redo=[];
+
+    protected $settings = ['site_code'=>'base', 'store_code'=>'default','store_view_code'=>'default'];
 
     /** @var FixtureManager  */
     protected $fixtureManager;
@@ -109,10 +113,13 @@ class Process
     /**
      * @param $moduleName
      * @param string $fixtureDirectory
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function loadFiles($moduleName, $fixtureDirectory = "fixtures")
     {
+        //set module configuration
+        $this->settings = $this->getConfiguration($moduleName, $fixtureDirectory);
+
         foreach (self::FILE_ORDER as $nextFile) {
             $fileName = $this->fixtureManager->getFixture($moduleName."::".$fixtureDirectory."/".$nextFile);
             if (basename($fileName)==$nextFile && file_exists($fileName)) {
@@ -130,76 +137,76 @@ class Process
 
                 switch (basename($fileName)) {
                     case "stores.csv":
-                        echo "loading Stores\n";
+                        print_r("loading Stores\n");
                         $this->processRows($rows, $header, $this->storeInstall);
                         break;
 
                     case "customers.csv":
-                        echo "loading Customers\n";
+                        print_r("loading Customers\n");
                         $this->processFile($rows, $header, $this->customerInstall, '');
                         break;
 
                     case "product_attributes.csv":
-                        echo "loading Product Attributes\n";
+                        print_r("loading Product Attributes\n");
                         $this->processRows($rows, $header, $this->productAttributesInstall);
                         break;
 
                     case "categories.csv":
-                        echo "loading Categories\n";
+                        print_r("loading Categories\n");
                         $this->processRows($rows, $header, $this->categoryInstall);
                         break;
 
                     case "products.csv":
-                        echo "loading products\n";
+                        print_r("loading Products\n");
                         $this->processFile($rows, $header, $this->productInstall, $modulePath);
                         break;
 
                     case "pages.csv":
-                        echo "loading Pages\n";
+                        print_r("loading Pages\n");
                         $this->processRows($rows, $header, $this->pageInstall);
                         break;
 
                     case "blocks.csv":
-                        echo "loading Blocks\n";
+                        print_r("loading Blocks\n");
                         $this->processRows($rows, $header, $this->blockInstall);
                         break;
 
                     case "dynamic_blocks.csv":
-                        echo "loading Dynamic Blocks\n";
+                        print_r("loading Dynamic Blocks\n");
                         $this->processRows($rows, $header, $this->dynamicBlockInstall);
                         break;
 
                     case "default_config.json":
-                        echo "loading Default Config Json\n";
+                        print_r("loading Default Config Json\n");
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
                     case "config_default.json":
-                        echo "loading Config Default Json\n";
+                        print_r("loading Config Default Json\n");
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
 
                     case "config_vertical.json":
-                        echo "loading Config Vertical Json\n";
+                        print_r("loading Config Vertical Json\n");
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
 
                     case "config.json":
-                        echo "loading Config Json\n";
+                        print_r("loading Config Json\n");
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
 
                     case "config.csv":
-                        echo "loading Config.csv\n";
+                        print_r("loading Config.csv\n");
                         $this->processRows($rows, $header, $this->configurationInstall);
                         break;
 
                     case "customer_groups.csv":
-                        echo "loading Customer Groups\n";
+                        print_r("loading Customer Groups\n");
                         $this->processRows($rows, $header, $this->customerGroupInstall);
                         break;
 
                     case "customer_attributes.csv":
-                        echo "loading Customer Attributes\n";
+                        print_r("loading Customer Attributes\n");
                         $this->processRows($rows, $header, $this->customerAttributeInstall);
                         break;
 
@@ -210,6 +217,11 @@ class Process
         //$f=$RRRRf;
     }
 
+    /**
+     * @param array $rows
+     * @param array $header
+     * @param object $process
+     */
     private function processRows(array $rows, array $header, object $process): void
     {
         foreach ($rows as $row) {
@@ -217,53 +229,94 @@ class Process
             foreach ($row as $key => $value) {
                 $data[$header[$key]] = $value;
             }
-                $this->collectRedos($process->install($data),$row, $header,$process);
+                $this->collectRedos($process->install($data, $this->settings), $row, $header, $process);
         }
     }
 
+    /**
+     * @param string $fileContent
+     * @param object $process
+     */
     private function processJson(string $fileContent, object $process): void
     {
         $process->installJson($fileContent);
     }
 
-
+    /**
+     * @param array $rows
+     * @param array $header
+     * @param object $process
+     * @param string $modulePath
+     */
     private function processFile(array $rows, array $header, object $process, string $modulePath): void
     {
-        $process->install($rows, $header, $modulePath);
+        $process->install($rows, $header, $modulePath, $this->settings);
     }
 
-    private function collectRedos($success,$row,$header,$process){
-        if(!$success){
+    private function collectRedos($success, $row, $header, $process)
+    {
+        if (!$success) {
             $failed = [];
             $failed['row'][]= $row;
             $failed['header']= $header;
             $failed['process']= $process;
             $this->redo[] = $failed;
             print_r(count($this->redo));
-            //echo "failed " . $this->get_class_name(get_class($process)) . "\n";
+            //print_r("failed " . $this->getClassName(get_class($process)) . "\n";
         }
     }
 
-    private function processRedos(){
+    /**
+     *
+     */
+    private function processRedos()
+    {
         //copy over and reset redo
         $redos = $this->redo;
-        $this->redo = array();
-        foreach($redos as $redo){
-            $this->processRows($redo['row'],$redo['header'],$redo['process']);
+        $this->redo = [];
+        foreach ($redos as $redo) {
+            $this->processRows($redo['row'], $redo['header'], $redo['process']);
         }
         ///if its failed again, fail the process
-        if(count($this->redo) > 0){
-            foreach($this->redo as $redo){
-                echo "Installing ".$this->get_class_name(get_class($redo['process']))." was not fully successful, likely due to a dependency on other sample data that doesnt exist";
+        if (count($this->redo) > 0) {
+            foreach ($this->redo as $redo) {
+                print_r("Installing ".$this->getClassName(get_class($redo['process'])).
+                    " was not fully successful, likely due to a dependency on other sample data that doesnt exist");
             }
         }
     }
 
-    private function get_class_name($classname)
+    /**
+     * @param string $classname
+     * @return false|int|string
+     */
+    private function getClassName(string $classname)
     {
-        if ($pos = strrpos($classname, '\\')) return substr($classname, $pos + 1);
+        if ($pos = strrpos($classname, '\\')) {
+            return substr($classname, $pos + 1);
+        }
         return $pos;
     }
 
-
+    /**
+     * @param string $moduleName
+     * @param string $fixtureDirectory
+     * @return array
+     * @throws LocalizedException
+     */
+    private function getConfiguration(string $moduleName, string $fixtureDirectory): array
+    {
+        $setupArray=['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default','root_category' => 'Default Category', 'root_category_id' => '2'];
+        $setupFile = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/settings.csv");
+        if (file_exists($setupFile)) {
+            $setupRows = $this->csvReader->getData($setupFile);
+            $setupHeader = array_shift($setupRows);
+            //Remove hidden character Excel adds to the first cell of a document
+            $setupHeader = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $setupHeader);
+            foreach ($setupRows as $setupRow) {
+                $setupArray[$setupRow[0]] = $setupRow[1];
+            }
+        }
+        return $setupArray;
+    }
 }

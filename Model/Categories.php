@@ -1,61 +1,42 @@
 <?php
 /**
- * Copyright © 2016 Magento. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright © Magento. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model;
 
-use Exception;
 use Magento\Catalog\Api\Data\CategoryInterfaceFactory;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\ResourceModel\Category\TreeFactory;
 use Magento\Cms\Api\Data\BlockInterfaceFactory;
 use Magento\Framework\Data\Tree\Node;
-use Magento\Framework\Setup\SampleData\FixtureManager;
 use Magento\Store\Api\Data\StoreInterfaceFactory;
 use Magento\Store\Model\StoreManagerInterface;
 
-/**
- * Class Category
- */
 class Categories
 {
+    /** @var array */
+    protected $settings;
 
-    /**
-     * @var CategoryInterfaceFactory
-     */
+    /** @var CategoryInterfaceFactory  */
     protected $categoryFactory;
 
-    /**
-     * @var StoreManagerInterface
-     */
+   /** @var StoreManagerInterface  */
     protected $storeManager;
 
-    /**
-     * @var TreeFactory
-     */
+   /** @var TreeFactory  */
     protected $resourceCategoryTreeFactory;
 
-    /**
-     * @var Node
-     */
+    /** @var Node */
     protected $categoryTree;
 
-    /**
-     * @var StoreInterfaceFactory
-     */
+    /** @var StoreInterfaceFactory  */
     protected $storeFactory;
 
-    /**
-     * @var BlockInterfaceFactory
-     */
+    /** @var BlockInterfaceFactory  */
     protected $blockFactory;
 
     /** @var Configuration  */
     protected $configuration;
-
-    /** @var Stores  */
-    protected $stores;
 
     /**
      * Categories constructor.
@@ -72,8 +53,7 @@ class Categories
         StoreManagerInterface $storeManager,
         StoreInterfaceFactory $storeFactory,
         BlockInterfaceFactory $blockFactory,
-        Configuration $configuration,
-        Stores $stores
+        Configuration $configuration
     ) {
         $this->categoryFactory = $categoryFactory;
         $this->resourceCategoryTreeFactory = $resourceCategoryTreeFactory;
@@ -81,16 +61,18 @@ class Categories
         $this->storeFactory = $storeFactory;
         $this->blockFactory = $blockFactory;
         $this->configuration = $configuration;
-        $this->stores = $stores;
     }
 
     /**
-     * @param $row array
+     * @param array $row
+     * @param array $settings
+     * @return bool
      */
-    public function install($row)
+    public function install(array $row, array $settings)
     {
         //TODO:Support for non default settings
         //TODO:Content block additions to categories
+        $this->settings = $settings;
         $category = $this->getCategoryByPath($row['path'] . '/' . $row['name']);
         if (!$category) {
             $parentCategory = $this->getCategoryByPath($row['path']);
@@ -120,7 +102,7 @@ class Categories
      * @param Category $category
      * @return void
      */
-    protected function setAdditionalData($row, $category)
+    protected function setAdditionalData(array $row, Category $category)
     {
         $additionalAttributes = [
             'position',
@@ -149,10 +131,10 @@ class Categories
      * @param string $path
      * @return Node
      */
-    protected function getCategoryByPath($path)
+    protected function getCategoryByPath(string $path)
     {
         $store = $this->storeFactory->create();
-        $store->load($this->stores->getDefaultViewCode());
+        $store->load($this->settings['store_view_code']);
         $rootCatId = $store->getGroup()->getDefaultStore()->getRootCategoryId();
         $names = array_filter(explode('/', $path));
         $tree = $this->getTree($rootCatId);
@@ -175,7 +157,7 @@ class Categories
      * @param string $name
      * @return mixed
      */
-    protected function findTreeChild($tree, $name)
+    protected function findTreeChild(Node $tree, string $name)
     {
         $foundChild = null;
         if ($name) {
@@ -222,15 +204,18 @@ class Categories
      * @param string $blockName
      * @return int
      */
-    protected function getCmsBlockId($blockName)
+    protected function getCmsBlockId(string $blockName)
     {
         $block = $this->blockFactory->create();
         $block->load($blockName, 'identifier');
         return $block->getId();
     }
 
-
-    protected function setCategoryLandingPage($blockId, $categoryId)
+    /**
+     * @param int $blockId
+     * @param int $categoryId
+     */
+    protected function setCategoryLandingPage(int $blockId, int $categoryId)
     {
         $categoryCms = [
             'landing_page' => $blockId,

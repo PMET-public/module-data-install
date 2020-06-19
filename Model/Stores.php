@@ -240,13 +240,12 @@ class Stores
     //Stores are referred to as groups in code
     /**
      * @param array $data
-     * @param WebsiteInterface $website
+     * @param $website
      * @return GroupInterface|null
      * @throws AlreadyExistsException
      */
-    private function setStore(array $data, WebsiteInterface $website)
+    private function setStore(array $data, $website)
     {
-        /** @var GroupInterface $store */
         $store = $this->getStore($data);
         //no name, root category, or isDefault we can skip
         if (!empty($data['store_name']) || !empty($data['store_root_category']) || !empty($data['is_default_store'])) {
@@ -315,11 +314,11 @@ class Stores
     //Views are referred to as stores in code
     /**
      * @param array $data
-     * @param StoreInterface $store
+     * @param $store
      * @throws AlreadyExistsException
      * @throws UrlAlreadyExistsException
      */
-    private function setView(array $data, StoreInterface $store)
+    private function setView(array $data, $store)
     {
         //if there is no store or view code we can skip
         if (!empty($data['store_code']) || !empty($data['view_code'])) {

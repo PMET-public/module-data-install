@@ -1,6 +1,6 @@
 # Magento 2 Data Install Modules
 **Purpose** :  To facilitate the loading of sample data by a series of generic .csv files
-This file is optional.  If it is not included, the installation defaults will be used
+
 
 ## Sites, Stores, Views, Root Category
 This file is used to add and update Stores, Store Views and Root Categories. The codes provided in the file are used to determine if a new element will be created or updated.
@@ -36,6 +36,8 @@ This file is used to add and update Stores, Store Views and Root Categories. The
 
 **view\_is\_active** - Optional: values = Y/N. Default = N. If a view is set as default for a store, it cannot be deactivated.
 
+**host** - Optional: Used to set the Base Urls for a site.  Should just be the domain name (example: luma.com)
+
 
 ## Product Attributes
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
@@ -45,11 +47,10 @@ Product attribute configurations can be complex. The purpose of this file is to 
 *File Name* - product_attributes.csv
 
 *Columns*
-frontend_label	frontend_input	is_required	option	default	attribute_code	position
 
 **attribute\_code** - Always required. If the attribute\_code exists it will update the attribute with the provided information.  If it is a new code, it will create a new attribute. Attribute code may only contain letters (a-z), numbers (0-9) or underscore (\_), and the first character must be a letter.  Code will be fixed automatically if needed
 
-**default_label** - Required when creating a new attribute.
+**frontend_label** - Required when creating a new attribute.
 
 **frontend\_input** - Required when creating a new attribute. Catalog Input Type for Store Owner. Allowed values are xxxxxx
 

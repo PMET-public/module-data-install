@@ -152,7 +152,7 @@ class Configuration
      */
     public function saveConfig(string $path, string $value, string $scope, $scopeId)
     {
-        if ($scopeId==null) {
+        if ($scopeId!=null) {
             $this->resourceConfig->saveConfig($path, $this->setEncryption($value), $scope, $scopeId);
         } else {
             print_r("Error setting configuration ".$path.". Check your scope codes as the ".

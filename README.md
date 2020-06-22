@@ -13,13 +13,13 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**config.json & config.csv**](#Config) - Adds to or overrides settings from the default and vertical files. These can be used to add more specific customizations. It can be done in the .json format or in .csv
 
-[**customer_groups.csv**](#Customer Groups) - Creates customer groups
+[**customer\_groups.csv**](#Customer Groups) - Creates customer groups
 
 **customer_attributes.csv** - Creates customer attributes
 
 **customers.csv** - Creates customers. Also used to add customer data to autofill.
 
-[**product_attributes.csv**](#Product Attributes) - Creates product attributes and set
+[**product\_attributes.csv**](#Product Attributes) - Creates product attributes and set
 
 **categories.csv** - Creates categories
 
@@ -114,7 +114,7 @@ Optional file. These files are used to set values that would normally be set in 
 **scope\_code** - Required if scope is websites or stores. Include the scope_code of the site or store you want the value set for
 
 ### Customer Groups
-*File Name* - customer_groups.csv
+*File Name* - customer\_groups.csv
 
 Optional file: Used to create customer groups
 > Out of Scope: Updating existing customer groups
@@ -124,7 +124,7 @@ Optional file: Used to create customer groups
 **name** - Required. Name of the customer group
 
 ###Product Attributes
-*File Name* - product_attributes.csv
+*File Name* - product\_attributes.csv
 
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
 Product attribute configurations can be complex. The purpose of this file is to address the most common settings.
@@ -136,7 +136,7 @@ Product attribute configurations can be complex. The purpose of this file is to 
 
 **attribute\_code** - Always required. If the attribute\_code exists it will update the attribute with the provided information.  If it is a new code, it will create a new attribute. Attribute code may only contain letters (a-z), numbers (0-9) or underscore (\_), and the first character must be a letter.  Code will be fixed automatically if needed
 
-**frontend_label** - Required when creating a new attribute.
+**frontend\_label** - Required when creating a new attribute.
 
 **frontend\_input** - Required when creating a new attribute. Catalog Input Type for Store Owner. Allowed values are xxxxxx
 

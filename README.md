@@ -1,12 +1,58 @@
-# Magento 2 Data Install Modules
-**Purpose** :  To facilitate the loading of sample data by a series of generic .csv files
+# Magento 2 Data Install Module
+The Data Install module facilitates the loading of sample data by a series of generic .csv files. This allows for the easy creation/editing of data sets for particular scenerios. It also helps facilitate packaging of demos or verticals so they can be added to an existing site with demo data, or an empty site.
+
+Each element of potential sample data is encapsulated in its own file:
+
+**settings.csv** - This file contains settings used by the install process. This file is optional if you are adding data to a base installation.  It will be used in a multi-store scenerio, or if you are going outside of some of the defaults
+
+[**stores.csv**](#stores.csv) - Used to create sites, stores, store views and root categories
+
+**config_default.json** - Generally not edited.  This contains settings that are common across all demos, and would normaly be set in Stores->Configuration: Payment methods, basics store information, admin settings, etc.
+
+**config_vertical.json** - Adds to or overrides settings from config_default.json. These would normally be things that are applicable to the specific data set like Venia or Luma German
+
+**config.json & config.csv** - Adds to or overrides settings from the default and vertical files. These can be used to add more specific customizations. It can be done in the .json format or in .csv
+
+**customer_groups.csv** - Creates customer groups
+
+**customer_attributes.csv** - Creates customer attributes
+
+**customers.csv** - Creates customers. Also used to add customer data to autofill.
+
+[**product_attributes.csv**](#product_attributes.csv) - Creates product attributes and set
+
+**categories.csv** - Creates categories
+
+**products.csv** - Creates simple and configurable products
+
+**blocks.csv** - Creates Blocks. Includes Page Builder compatibility
+
+**dynamic_blocks.csv** - Creates Dynamic Blocks. Includes Page Builder compatibility
+
+**pages.csv** - Creates pages. Includes Page Builder compatibility
+
+*To be added*
+**widgets.csv**
+**downloadable_products.csv**
+**bundled_products.csv**
+**grouped_products.csv**
+**virtual_products.csv**
+**customer_segments.csv**
+**cart_rules.csv**
+**catalog_rules.csv**
+**Staging**
+**MSI**
+**orders, refunds, credit memos**
+
+Files are processed in the order as listed above.  This does potentially present a chicken/egg situation for some data points.  For example, Categories can contain Blocks that can contain Categories. There is a mechanism in place to defer adding sample data if the required elements arent yet installed. At this point it is mostly untested and not supported.
 
 
-## Sites, Stores, Views, Root Category
+# Files
+
+### stores.csv
 This file is used to add and update Stores, Store Views and Root Categories. The codes provided in the file are used to determine if a new element will be created or updated.
 > Out of Scope: Updating of Codes and Root Category Name
 
-*File Name* - stores.csv
 
 *Columns*
 
@@ -39,7 +85,7 @@ This file is used to add and update Stores, Store Views and Root Categories. The
 **host** - Optional: Used to set the Base Urls for a site.  Should just be the domain name (example: luma.com)
 
 
-## Product Attributes
+### product_attributes.csv
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
 Product attribute configurations can be complex. The purpose of this file is to address the most common settings.
 > Out of Scope: Updating Attribute codes. Any attribute setting not currently listed
@@ -64,3 +110,7 @@ Product attribute configurations can be complex. The purpose of this file is to 
 
 Content
 Note on pages...names to use to replace the default install pages
+
+## Content export
+## Content subsitution
+## Creating your own data import module

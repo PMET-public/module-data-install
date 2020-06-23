@@ -77,7 +77,7 @@ class Configuration
                     $scopeId = $this->stores->getWebsiteId($row['scope_code']);
                 } elseif ($scope=='store' || $scope=='stores') {
                     $scope = 'stores';
-                    $scopeId = $this->stores->getStoreId($row['scope_code']);
+                    $scopeId = $this->stores->getViewId($row['scope_code']);
                 }
             }
             $this->saveConfig($row['path'], $row['value'], $scope, $scopeId);

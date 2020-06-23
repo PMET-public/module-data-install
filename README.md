@@ -113,7 +113,7 @@ Optional file. These files are used to set values that would normally be set in 
 **scope** - Optional. Allowed scopes are websites, stores, default. Defaults to default.
 **scope\_code** - Required if scope is websites or stores. Include the scope_code of the site or store you want the value set for
 
-### Customer-Groups
+### Customer Groups
 *File Name* - customer\_groups.csv
 
 Optional file: Used to create customer groups
@@ -186,42 +186,42 @@ For example, the following code would be seen in Page Builder content when inclu
 
 The block included (Contact us info) in the current installation has an id of 3, which may not be the case in any new data installation. In order to have the content work in other installations, we need to replace the ID of the block we want to include (3) with a string that includes its idendifier (contact-us-info).  
 
-`{{widget type="Magento\Cms\Block\Widget\Block" template="widget/static_block/default.phtml" block_id="{{block code="contact-us-info"}" type_name="CMS Static Block"}}`
+`{{widget type="Magento\Cms\Block\Widget\Block" template="widget/static_block/default.phtml" block_id="{{block code="contact-us-info"}}" type_name="CMS Static Block"}}`
 
 If no correct replacement is found, the substituion will not occur.
 
 Here is a list of all substitutions currently supported
 
-**Category** - `{{category key="<url key of category>"}`\
+**Category** - `{{category key="<url key of category>"}}`\
 *example* - `{{category key="shorts-men"}`
 
-**Product Url** - `{{producturl sku="<sku>"}`\
-*example* - `{{producturl sku="24-MB01"}`
+**Product Url** - `{{producturl sku="<sku>"}}`\
+*example* - `{{producturl sku="24-MB01"}}`
 
-**Product Attribute** - `{{productattribute code="<product attribute code>:<attribute value>"}`\
-*example* - `{{productattribute code="activity:Running"}`
+**Product Attribute** - `{{productattribute code="<product attribute code>:<attribute value>"}}`\
+*example* - `{{productattribute code="activity:Running"}}`
 
-**Product Attribute Set** - `{{attributeset name="<product attribute set name>"}`\
-*example* -  `{{attributeset name="Bag"}`
+**Product Attribute Set** - `{{attributeset name="<product attribute set name>"}}`\
+*example* -  `{{attributeset name="Bag"}}`
 
-**Customer Attribute** - `{{customerattribute code="<customer attribute code>":<attribute value>}`\
-*example* - `{{customerattribute code="gender:Male"}`
+**Customer Attribute** - `{{customerattribute code="<customer attribute code>:<attribute value>"}}`\
+*example* - `{{customerattribute code="gender:Male"}}`
 
-**Customer Group** - `{{customergroup name="<customer group name>"}`\
-*example* - `{{customergroup name="VIP"}`
+**Customer Group** - `{{customergroup name="<customer group name>"}}`\
+*example* - `{{customergroup name="VIP"}}`
 
-**Customer Segment** - `{{segment name="<segment name>"}`\
-*example* - `{{segment name="High Lifetime Value"}`
+**Customer Segment** - `{{segment name="<segment name>"}}`\
+*example* - `{{segment name="High Lifetime Value"}}`
 
-**Block** - `{{block code="<block identifier>"}`\
-*example* - `{{block code="contact-us-info"}`
+**Block** - `{{block code="<block identifier>"}}`\
+*example* - `{{block code="contact-us-info"}}`
 
-**Dynamic Block** - `{{dynamicblock name="<block name>"}`\
-*example* - `{{dynamicblock name="VIP Header"}`
-
-
+**Dynamic Block** - `{{dynamicblock name="<block name>"}}`\
+*example* - `{{dynamicblock name="VIP Header"}}`
 
 
-## Content export
 
-## Creating your own data import module
+
+# Content export
+
+# Creating your own data import module

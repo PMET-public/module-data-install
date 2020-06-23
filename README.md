@@ -13,13 +13,13 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**config.json & config.csv**](#Config) - Adds to or overrides settings from the default and vertical files. These can be used to add more specific customizations. It can be done in the .json format or in .csv
 
-[**customer\_groups.csv**](#Customer Groups) - Creates customer groups
+[**customer\_groups.csv**](#customer-groups) - Creates customer groups
 
-**customer_attributes.csv** - Creates customer attributes
+[**customer\_attributes.csv**](#customer-attributes) - Creates customer attributes
 
 **customers.csv** - Creates customers. Also used to add customer data to autofill.
 
-[**product\_attributes.csv**](#Product Attributes) - Creates product attributes and set
+[**product_attributes.csv**](#product-attributes) - Creates product attributes and set
 
 **categories.csv** - Creates categories
 
@@ -113,7 +113,7 @@ Optional file. These files are used to set values that would normally be set in 
 **scope** - Optional. Allowed scopes are websites, stores, default. Defaults to default.
 **scope\_code** - Required if scope is websites or stores. Include the scope_code of the site or store you want the value set for
 
-### Customer Groups
+### Customer-Groups
 *File Name* - customer\_groups.csv
 
 Optional file: Used to create customer groups
@@ -123,7 +123,32 @@ Optional file: Used to create customer groups
 *Column*
 **name** - Required. Name of the customer group
 
-###Product Attributes
+### Customer Attributes
+*File Name* - customer\_attributes.csv
+
+This file is used to add and update customer attributes
+Customer attribute configurations can be complex. The purpose of this file is to address the most common settings.
+> Out of Scope: Updating Attribute codes. Any attribute setting not currently listed
+
+
+
+*Columns*
+
+**attribute\_code** - Always required. If the attribute\_code exists it will update the attribute with the provided information.  If it is a new code, it will create a new attribute. Attribute code may only contain letters (a-z), numbers (0-9) or underscore (\_), and the first character must be a letter.  Code will be fixed automatically if needed
+
+**frontend\_label** - Required when creating a new attribute.
+
+**frontend\_input** - Required when creating a new attribute. Catalog Input Type for Store Owner. Allowed values are text, textarea, texteditor, date, boolean, multiselect, price
+
+**is\_required** - Optional: Values = Y/N. Default = N
+
+**options** - Required when input is Multi or Select. Values to show, carriage return delimited
+
+**position** - Optional, Numeric.  Indicates the position of the attribute within the Attribute Group
+
+
+
+### Product Attributes
 *File Name* - product\_attributes.csv
 
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
@@ -138,11 +163,11 @@ Product attribute configurations can be complex. The purpose of this file is to 
 
 **frontend\_label** - Required when creating a new attribute.
 
-**frontend\_input** - Required when creating a new attribute. Catalog Input Type for Store Owner. Allowed values are xxxxxx
+**frontend\_input** - Required when creating a new attribute. Catalog Input Type for Store Owner. Allowed values are text, textarea, texteditor, date, boolean, multiselect, price
 
 **is\_required** - Optional: Values = Y/N. Default = N
 
-**options** - Required when input is Multi or Select. Carriage return delimited
+**options** - Required when input is Multi or Select. Values to show, carriage return delimited
 
 **position** - Optional, Numeric.  Indicates the position of the attribute within the Attribute Group
 
@@ -151,6 +176,52 @@ Product attribute configurations can be complex. The purpose of this file is to 
 Content
 Note on pages...names to use to replace the default install pages
 
+# Content subsitution
+
+There are some elements of content, particularily from Page Builder, that reference IDs of blocks, categories, etc. Because those IDs aren't known until something is installed, there needs to be a mechanism to reference those elements to be replaced with IDs later.
+
+For example, the following code would be seen in Page Builder content when including a block 
+
+`{{widget type="Magento\Cms\Block\Widget\Block" template="widget/static_block/default.phtml" block_id="3" type_name="CMS Static Block"}}`
+
+The block included (Contact us info) in the current installation has an id of 3, which may not be the case in any new data installation. In order to have the content work in other installations, we need to replace the ID of the block we want to include (3) with a string that includes its idendifier (contact-us-info).  
+
+`{{widget type="Magento\Cms\Block\Widget\Block" template="widget/static_block/default.phtml" block_id="{{block code="contact-us-info"}" type_name="CMS Static Block"}}`
+
+If no correct replacement is found, the substituion will not occur.
+
+Here is a list of all substitutions currently supported
+
+**Category** - `{{category key="<url key of category>"}`\
+*example* - `{{category key="shorts-men"}`
+
+**Product Url** - `{{producturl sku="<sku>"}`\
+*example* - `{{producturl sku="24-MB01"}`
+
+**Product Attribute** - `{{productattribute code="<product attribute code>:<attribute value>"}`\
+*example* - `{{productattribute code="activity:Running"}`
+
+**Product Attribute Set** - `{{attributeset name="<product attribute set name>"}`\
+*example* -  `{{attributeset name="Bag"}`
+
+**Customer Attribute** - `{{customerattribute code="<customer attribute code>":<attribute value>}`\
+*example* - `{{customerattribute code="gender:Male"}`
+
+**Customer Group** - `{{customergroup name="<customer group name>"}`\
+*example* - `{{customergroup name="VIP"}`
+
+**Customer Segment** - `{{segment name="<segment name>"}`\
+*example* - `{{segment name="High Lifetime Value"}`
+
+**Block** - `{{block code="<block identifier>"}`\
+*example* - `{{block code="contact-us-info"}`
+
+**Dynamic Block** - `{{dynamicblock name="<block name>"}`\
+*example* - `{{dynamicblock name="VIP Header"}`
+
+
+
+
 ## Content export
-## Content subsitution
+
 ## Creating your own data import module

@@ -11,11 +11,9 @@ use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 
-class Process
+class ProcessStore
 {
-    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config.json','config.csv',
-        'customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','categories.csv',
-        'products.csv','blocks.csv','dynamic_blocks.csv','pages.csv'];
+    const FILE_ORDER = ['stores.csv'];
 
     protected $redo=[];
 

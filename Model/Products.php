@@ -9,7 +9,6 @@ use Magento\Framework\ObjectManagerInterface;
 
 class Products
 {
-
     const DEFAULT_IMAGE_PATH = '/media/catalog/product';
     //TODO: flexibility for other than default category
     //TODO: Check on using Export as import file
@@ -37,7 +36,7 @@ class Products
         if (!empty($configuration['product_image_import_directory'])) {
             $imgDir = $configuration['product_image_import_directory'];
         } else {
-            $imgDir = $modulePath.self::DEFAULT_IMAGE_PATH;
+            $imgDir = $modulePath . self::DEFAULT_IMAGE_PATH;
         }
         foreach ($rows as $row) {
             $productsArray[] = array_combine($header, $row);

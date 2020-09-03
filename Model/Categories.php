@@ -20,10 +20,10 @@ class Categories
     /** @var CategoryInterfaceFactory  */
     protected $categoryFactory;
 
-   /** @var StoreManagerInterface  */
+    /** @var StoreManagerInterface  */
     protected $storeManager;
 
-   /** @var TreeFactory  */
+    /** @var TreeFactory  */
     protected $resourceCategoryTreeFactory;
 
     /** @var Node */
@@ -73,26 +73,30 @@ class Categories
         //TODO:Support for non default settings
         //TODO:Content block additions to categories
         $this->settings = $settings;
+
         $category = $this->getCategoryByPath($row['path'] . '/' . $row['name']);
         if (!$category) {
             $parentCategory = $this->getCategoryByPath($row['path']);
-            $data = [
-                'parent_id' => $parentCategory->getId(),
-                'name' => $row['name'],
-                'is_active' => $row['active'],
-                'is_anchor' => $row['is_anchor'],
-                'include_in_menu' => $row['include_in_menu'],
-                'url_key' => $row['url_key'],
-                'store_id' => 0
-            ];
-            $category = $this->categoryFactory->create();
-            $category->setData($data)
-                ->setPath($parentCategory->getData('path'))
-                ->setAttributeSetId($category->getDefaultAttributeSetId());
-            $this->setAdditionalData($row, $category);
+            if ($parentCategory) {
+                $data = [
+                    'parent_id' => $parentCategory->getId(),
+                    'name' => $row['name'],
+                    'is_active' => $row['active'],
+                    'is_anchor' => $row['is_anchor'],
+                    'include_in_menu' => $row['include_in_menu'],
+                    'url_key' => $row['url_key'],
+                    'store_id' => 0
+                ];
+                $category = $this->categoryFactory->create();
+                $category->setData($data)
+                    ->setPath($parentCategory->getData('path'))
+                    ->setAttributeSetId($category->getDefaultAttributeSetId());
+                $this->setAdditionalData($row, $category);
 
-            $category->save();
-
+                $category->save();
+            } else {
+                print_r("-Cannot find the parent category for " . $row['name'] . " in the path " . $row['path'] . ". That category has been skipped\n");
+            }
         }
         return true;
     }

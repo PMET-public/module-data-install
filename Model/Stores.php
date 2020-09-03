@@ -4,30 +4,30 @@
  */
 namespace MagentoEse\DataInstall\Model;
 
+use Magento\Catalog\Api\CategoryRepositoryInterface;
+use Magento\Catalog\Api\Data\CategoryInterfaceFactory;
+use Magento\Cms\Api\PageRepositoryInterface;
+use Magento\CmsUrlRewrite\Model\CmsPageUrlRewriteGenerator;
+use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Area as AppArea;
 use Magento\Framework\App\State;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Store\Api\Data\StoreInterfaceFactory;
-use Magento\Store\Api\Data\StoreInterface;
-use Magento\Store\Api\Data\WebsiteInterfaceFactory;
-use Magento\Store\Api\Data\WebsiteInterface;
-use Magento\Store\Api\Data\GroupInterfaceFactory;
 use Magento\Store\Api\Data\GroupInterface;
+use Magento\Store\Api\Data\GroupInterfaceFactory;
+use Magento\Store\Api\Data\StoreInterface;
+use Magento\Store\Api\Data\StoreInterfaceFactory;
+use Magento\Store\Api\Data\WebsiteInterface;
+use Magento\Store\Api\Data\WebsiteInterfaceFactory;
 use Magento\Store\Api\GroupRepositoryInterface;
 use Magento\Store\Api\GroupRepositoryInterfaceFactory;
 use Magento\Store\Api\StoreRepositoryInterface;
-use Magento\Store\Model\ResourceModel\Store as StoreResourceModel;
 use Magento\Store\Model\ResourceModel\Group as GroupResourceModel;
+use Magento\Store\Model\ResourceModel\Store as StoreResourceModel;
 use Magento\Store\Model\ResourceModel\Website as WebsiteResourceModel;
-use Magento\Catalog\Api\Data\CategoryInterfaceFactory;
-use Magento\Catalog\Api\CategoryRepositoryInterface;
-use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
 use Magento\UrlRewrite\Model\Exception\UrlAlreadyExistsException;
 use Magento\UrlRewrite\Model\UrlPersistInterface;
-use Magento\Cms\Api\PageRepositoryInterface;
-use Magento\CmsUrlRewrite\Model\CmsPageUrlRewriteGenerator;
-use Magento\Framework\Api\SearchCriteriaBuilder;
 
 class Stores
 {
@@ -157,7 +157,7 @@ class Stores
             }
             //if there is no store code, skip store and view
             if (!empty($data['store_code'])) {
-                print_r("-updating stores\n)");
+                print_r("-updating stores\n");
                 //fix store code if its not correct
                 $data['store_code'] = $this->validateCode($data['store_code']);
                 $store = $this->setStore($data, $website);
@@ -167,16 +167,15 @@ class Stores
                     //fix view code if its not correct
                     $data['view_code'] = $this->validateCode($data['view_code']);
                     $this->setView($data, $store);
-                    //if there is not view code, skip view update
+                //if there is not view code, skip view update
                 } else {
                     print_r("skipping view updates\n");
                 }
             } elseif (!empty($data['view_code']) && empty($data['store_code'])) {
-                    print_r("store_code is required to update or create a view\n");
+                print_r("store_code is required to update or create a view\n");
             } else {
                 print_r("skipping store updates\n");
             }
-
         } else {
             print_r("site_code column needs to be included with a value\n");
         }
@@ -197,11 +196,11 @@ class Stores
         $website = $this->getWebsite($data);
         //no name,sort order, or default update - we can skip
         if (!empty($data['site_name']) || !empty($data['site_order']) || !empty($data['is_default_site'])) {
-            print_r($data['site_code']." eligible for add or update\n");
+            print_r($data['site_code'] . " eligible for add or update\n");
 
             //if the site exists - update
             if ($website->getId()) {
-                print_r("update site ".$data['site_code']."\n");
+                print_r("update site " . $data['site_code'] . "\n");
                 if (!empty($data['site_name'])) {
                     $website->setName($data['site_name']);
                 }
@@ -215,7 +214,7 @@ class Stores
                 return $website;
             } elseif (!empty($data['site_name'])) {
                 //create site
-                print_r("create site ".$data['site_code']."\n");
+                print_r("create site " . $data['site_code'] . "\n");
                 $website->setCode($data['site_code']);
                 $website->setName($data['site_name']);
                 if (!empty($data['site_order'])) {
@@ -232,7 +231,7 @@ class Stores
                 return null;
             }
         } else {
-            print_r($data['site_code']." skipping site add/update\n");
+            print_r($data['site_code'] . " skipping site add/update\n");
             return $website;
         }
     }
@@ -251,7 +250,7 @@ class Stores
         if (!empty($data['store_name']) || !empty($data['store_root_category']) || !empty($data['is_default_store'])) {
             /** @var WebsiteInterface $website */
             //$website = $this->getWebsite($data);
-            print_r($data['store_code']." eligible for add or update\n");
+            print_r($data['store_code'] . " eligible for add or update\n");
             //load store with the code.
             /** @var GroupInterface $store */
             //$store = $this->getStore($data);
@@ -262,7 +261,7 @@ class Stores
                 //print_r( "requested root cat=".$data['store_root_category']."Id=".$rootCategoryId."\n");
                 if (!$rootCategoryId) {
                     $rootCategoryId = $this->createRootCategory($data);
-                    print_r($data['store_root_category']." root category created\n");
+                    print_r($data['store_root_category'] . " root category created\n");
                 }
             }
 
@@ -281,7 +280,7 @@ class Stores
                 }
 
                 $this->groupResourceModel->save($store);
-                print_r($data['store_code']." store updated\n");
+                print_r($data['store_code'] . " store updated\n");
                 return $store;
             } elseif (!empty($data['store_name'])) {
                 //create store, set default and root category
@@ -297,7 +296,7 @@ class Stores
                     $website->setDefaultGroupId($store->getId());
                     $this->websiteResourceModel->save($website);
                 }
-                print_r($data['store_code']." store created\n");
+                print_r($data['store_code'] . " store created\n");
                 return $store;
             } else {
                 //if the store doesnt exist and the name isn't provided, error out
@@ -306,7 +305,7 @@ class Stores
                 return null;
             }
         } else {
-            print_r($data['store_code']." skipping store add/update\n");
+            print_r($data['store_code'] . " skipping store add/update\n");
             return $store;
         }
     }
@@ -325,7 +324,7 @@ class Stores
 
             /** @var WebsiteInterface $website */
             $website = $this->getWebsite($data);
-            print_r($data['view_code']." view eligible for add or update\n");
+            print_r($data['view_code'] . " view eligible for add or update\n");
             //load View with the code.
             /** @var StoreInterface $store */
             $view = $this->getView($data);
@@ -342,7 +341,7 @@ class Stores
                 if (!empty($data['view_is_active'])) {
                     //dont deactivate if it is the default
                     if ($store->getDefaultStoreId()!=$store->getId()) {
-                        $view->setIsActive($data['view_is_active']=='Y'? 1:0);
+                        $view->setIsActive($data['view_is_active']=='Y' ? 1 : 0);
                     }
                 }
 
@@ -362,16 +361,15 @@ class Stores
                         [$this->groupResourceModel, 'save'],
                         [$store]
                     );
-
                 }
-                print_r($data['view_code']." view updated\n");
+                print_r($data['view_code'] . " view updated\n");
             } elseif (!empty($data['view_name'])) {
                 //create view, set default, status and order
                 print_r("create view\n");
                 if (!empty($data['view_name'])) {
                     $view->setName($data['view_name']);
                     $view->setCode($data['view_code']);
-                    $view->setIsActive($data['view_is_active']=='Y'? 1:0);
+                    $view->setIsActive($data['view_is_active']=='Y' ? 1 : 0);
                     $view->setStoreGroupId($store->getId());
                     $view->setWebsiteId($website->getId());
                     if (!empty($data['view_order'])) {
@@ -403,15 +401,14 @@ class Stores
                         [$this->groupResourceModel, 'save'],
                         [$store]
                     );
-
                 }
-                print_r($data['view_code']." view created\n");
+                print_r($data['view_code'] . " view created\n");
             } else {
                 //if the view doesnt exist and the view isn't provided, error out
                 print_r("view_name needs to be included with a value when creating a view\n");
             }
         } else {
-            print_r($data['view_code']." skipping view add/update\n");
+            print_r($data['view_code'] . " skipping view add/update\n");
         }
     }
 
@@ -527,7 +524,7 @@ class Stores
         $code = preg_replace("/[^A-Za-z0-9_]/", '', $code);
         //if the first character is not a letter, add an "m"
         if (!ctype_alpha($code[0])) {
-            $code = "m".$code;
+            $code = "m" . $code;
         }
         return $code;
     }

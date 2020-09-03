@@ -7,10 +7,10 @@ namespace MagentoEse\DataInstall\Model;
 
 use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Tests\NamingConvention\true\mixed;
 use Magento\Theme\Model\ResourceModel\Theme\Collection as ThemeCollection;
 use Magento\Theme\Model\Theme\Registration as ThemeRegistration;
-use Magento\Framework\Encryption\EncryptorInterface;
 
 class Configuration
 {
@@ -60,9 +60,10 @@ class Configuration
 
     /**
      * @param array $row
+     * @param array $settings
      * @return bool
      */
-    public function install(array $row)
+    public function install(array $row, array $settings)
     {
         //TODO: handle encrypt flag for value
         if (!empty($row['path'])) {
@@ -88,9 +89,10 @@ class Configuration
 
     /**
      * @param string $json
+     * @param array $settings
      * @return bool
      */
-    public function installJson(string $json)
+    public function installJson(string $json, array $settings)
     {
         //TODO: Validate json
         try {
@@ -101,7 +103,7 @@ class Configuration
         }
         foreach ($config as $key => $item) {
             array_walk_recursive($item, [$this,'getValuePath'], $key);
-           // print_r($setting);
+            // print_r($setting);
         }
         //TODO:set theme - this will be incorporated into the config structure
         //$this->setTheme('MagentoEse/venia',$this->stores->getStoreId($this->stores->getDefaultStoreCode()));
@@ -119,7 +121,7 @@ class Configuration
         $scopeId = 0;
 
         if ($key != 'store_view' && $key != 'website') {
-            $path = $path."/". $key;
+            $path = $path . "/" . $key;
             if (is_object($item)) {
                 if (!empty($item->website)) {
                     //TODO: handle encrypt flag
@@ -127,14 +129,12 @@ class Configuration
                         $scopeId = $this->stores->getWebsiteId($scopeCode);
                         $this->saveConfig($path, $value, 'websites', $scopeId);
                     }
-
                 } elseif (!empty($item->store_view)) {
                     //TODO: handle encrypt flag
                     foreach ($item->store_view as $scopeCode => $value) {
                         $scopeId = $this->stores->getViewId($scopeCode);
                         $this->saveConfig($path, $value, 'stores', $scopeId);
                     }
-
                 } else {
                     array_walk_recursive($item, [$this, 'getValuePath'], $path);
                 }
@@ -152,11 +152,11 @@ class Configuration
      */
     public function saveConfig(string $path, string $value, string $scope, $scopeId)
     {
-        if ($scopeId!=null) {
+        if ($scopeId!==null) {
             $this->resourceConfig->saveConfig($path, $this->setEncryption($value), $scope, $scopeId);
         } else {
-            print_r("Error setting configuration ".$path.". Check your scope codes as the ".
-                $scope. " code you used does not exist\n");
+            print_r("Error setting configuration " . $path . ". Check your scope codes as the " .
+                $scope . " code you used does not exist\n");
         }
     }
 
@@ -179,7 +179,7 @@ class Configuration
     {
         //make sure theme is registered
         $this->themeRegistration->register();
-        $themeId = $this->themeCollection->getThemeByFullPath('frontend/'.$themePath)->getThemeId();
+        $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $themePath)->getThemeId();
         //set theme
         $this->saveConfig("design/theme/theme_id", $themeId, "stores", $storeCode);
     }
@@ -192,7 +192,6 @@ class Configuration
     {
         if (preg_match('/encrypt\((.*)\)/', $value)) {
             return $this->encryptor->encrypt(preg_replace('/encrypt\((.*)\)/', '$1', $value));
-            ;
         } else {
             return $value;
         }

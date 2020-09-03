@@ -113,14 +113,15 @@ class Process
     /**
      * @param $moduleName
      * @param string $fixtureDirectory
+     * @param array|string[] $fileOrder
      * @throws LocalizedException
      */
-    public function loadFiles($moduleName, $fixtureDirectory = "fixtures")
+    public function loadFiles($moduleName, $fixtureDirectory = "fixtures", array $fileOrder = self::FILE_ORDER)
     {
         //set module configuration
         $this->settings = $this->getConfiguration($moduleName, $fixtureDirectory);
 
-        foreach (self::FILE_ORDER as $nextFile) {
+        foreach ($fileOrder as $nextFile) {
             $fileName = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/" . $nextFile);
             if (basename($fileName)==$nextFile && file_exists($fileName)) {
                 if (pathinfo($fileName, PATHINFO_EXTENSION) == 'json') {

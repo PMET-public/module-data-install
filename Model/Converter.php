@@ -170,8 +170,10 @@ class Converter
      */
     protected function getMatches(string $content)
     {
-        $regexp = '/{{(category[^ ]*) key="([^"]+)"}}/';
-        preg_match_all($regexp, $content, $matchesCategory);
+        $regexp = '/{{(categoryurl[^ ]*) key="([^"]+)"}}/';
+        preg_match_all($regexp, $content, $matchesCategoryUrl);
+        $regexp = '/{{(categoryid[^ ]*) key="([^"]+)"}}/';
+        preg_match_all($regexp, $content, $matchesCategoryId);
         $regexp = '/{{(producturl[^ ]*) sku="([^"]+)"}}/';
         preg_match_all($regexp, $content, $matchesProductUrl);
         $regexp = '/{{(productattribute) code="([^"]*)"}}/';
@@ -189,7 +191,7 @@ class Converter
         $regexp = '/{{(customergroup) name="([^"]*)"}}/';
         preg_match_all($regexp, $content, $matchesCustomerGroup);
         return [
-            'type' => $matchesCategory[1] + $matchesProductAttribute[1]
+            'type' => $matchesCategoryUrl[1]  +$matchesCategoryId[1] +  $matchesProductAttribute[1]
                 + $matchesCustomerAttribute[1]
                 + $matchesSegment[1]
                 + $matchesBlock[1]
@@ -197,7 +199,7 @@ class Converter
                 + $matchesAttributeSet[1]
                 + $matchesCustomerGroup[1]
                 + $matchesProductUrl[1],
-            'value' => $matchesCategory[2] + $matchesProductAttribute[2]
+            'value' => $matchesCategoryUrl[2] + $matchesCategoryId[2] +$matchesProductAttribute[2]
                 + $matchesCustomerAttribute[2]
                 + $matchesSegment[2]
                 + $matchesBlock[2]
@@ -370,8 +372,25 @@ class Converter
         $category = $this->getCategoryByUrlKey($matchValue);
         if (!empty($category)) {
             $categoryUrl = $category->getRequestPath();
-            $replaceData['regexp'][] = '/{{category key="' . preg_quote($matchValue) . '"}}/';
+            $replaceData['regexp'][] = '/{{categoryurl key="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = '{{store url=""}}' . $categoryUrl;
+        }
+        return $replaceData;
+    }
+
+    /**
+     * @param string $matchValue
+     * @return array
+     * @throws LocalizedException
+     */
+    protected function matcherCategoryId(string $matchValue)
+    {
+        $replaceData = [];
+        $category = $this->getCategoryByUrlKey($matchValue);
+        if (!empty($category)) {
+            $categoryId = $category->getId();
+            $replaceData['regexp'][] = '/{{categoryid key="' . preg_quote($matchValue) . '"}}/';
+            $replaceData['value'][] = $categoryId;
         }
         return $replaceData;
     }

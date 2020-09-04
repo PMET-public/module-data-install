@@ -16,13 +16,17 @@ class Products
     /** @var ObjectManagerInterface  */
     protected $objectManager;
 
+    /** @var Stores */
+    protected $stores;
+
     /**
      * Products constructor.
      * @param ObjectManagerInterface $objectManager
      */
-    public function __construct(ObjectManagerInterface $objectManager)
+    public function __construct(ObjectManagerInterface $objectManager, Stores $stores)
     {
         $this->objectManager=$objectManager;
+        $this->stores = $stores;
     }
 
     /**
@@ -41,6 +45,7 @@ class Products
         foreach ($rows as $row) {
             $productsArray[] = array_combine($header, $row);
         }
+
         $this->importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
         $this->importerModel->setImportImagesFileDir($imgDir);
         $this->importerModel->setValidationStrategy('validation-skip-errors');
@@ -52,7 +57,43 @@ class Products
 
         print_r($this->importerModel->getLogTrace());
         print_r($this->importerModel->getErrorMessages());
-        unset($_productsArray);
+
         unset($this->importerModel);
+
+        ///add rows to file to restrict products from other views
+        $productsArray = $this->restrictProductsFromOtherStoreViews($productsArray);
+        $this->importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
+        $this->importerModel->setImportImagesFileDir($imgDir);
+        $this->importerModel->setValidationStrategy('validation-skip-errors');
+        try {
+            $this->importerModel->processImport($productsArray);
+        } catch (\Exception $e) {
+            print_r($e->getMessage());
+        }
+
+        print_r($this->importerModel->getLogTrace());
+        print_r($this->importerModel->getErrorMessages());
+
+        unset($productsArray);
+        unset($this->importerModel);
+
+
+    }
+
+    private function restrictProductsFromOtherStoreViews($products)
+    {
+        $newProductArray = [];
+        $allStoreCodes = $this->stores->getAllViewCodes();
+        foreach ($products as $product) {
+            //write out original line
+            //$newProductArray[]=$product;
+            //add restrictive line for each
+            foreach ($allStoreCodes as $storeCode) {
+                if ($storeCode != $product['store_view_code']) {
+                    $newProductArray[] = ['sku'=>$product['sku'],'store_view_code'=>$storeCode,'visibility'=>'Not Visible Individually'];
+                }
+            }
+        }
+        return $newProductArray;
     }
 }

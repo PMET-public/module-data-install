@@ -502,6 +502,23 @@ class Stores
     }
 
     /**
+     * @return array
+     */
+    public function getAllViewCodes()
+    {
+        $viewList=[];
+        $views = $this->storeRepository->getList();
+        foreach ($views as $view) {
+            ///remove admin because its not a valid view for these purposes
+            if($view->getCode()!='admin'){
+                $viewList[]=$view->getCode();
+            }
+
+        }
+        return $viewList;
+    }
+
+    /**
      * @param string $viewCode
      * @return int
      */

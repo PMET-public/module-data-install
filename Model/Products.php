@@ -61,7 +61,7 @@ class Products
         unset($this->importerModel);
 
         ///add rows to file to restrict products from other views
-        $productsArray = $this->restrictProductsFromOtherStoreViews($productsArray);
+        //$productsArray = $this->restrictProductsFromOtherStoreViews($productsArray);
         $this->importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
         $this->importerModel->setImportImagesFileDir($imgDir);
         $this->importerModel->setValidationStrategy('validation-skip-errors');

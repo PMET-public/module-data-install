@@ -85,7 +85,7 @@ Optional file: This file is used to add and update Sites, Stores, Store Views an
 
 **is\_default\_store** Optional: Allowed value = Y. There can only be one default store per site. If it is defined muliple times, the last store updated will be the default. The default store cannot be removed from a site, only changed to a different store.
 
-**view\_code** - Required when updating or adding a view. View code may only contain letters (a-z), numbers (0-9) or underscore (\_), and the first character must be a letter.  Code will be fixed automatically if needed
+**store\_view\_code** - Required when updating or adding a view. View code may only contain letters (a-z), numbers (0-9) or underscore (\_), and the first character must be a letter.  Code will be fixed automatically if needed
 
 **view\_name** - Required when updating a view name, or creating a view
 
@@ -96,6 +96,9 @@ Optional file: This file is used to add and update Sites, Stores, Store Views an
 **view\_is\_active** - Optional: values = Y/N. Default = N. If a view is set as default for a store, it cannot be deactivated.
 
 **host** - Optional: Used to set the Base Urls for a site.  Should just be the domain name (example: luma.com)
+
+**theme** - Optional: Assigns a theme to the store view. This should be the path of the theme directory from the Vendor namespace. For example Magento/luma or MagentoEse/venia
+
 
 ### Config
 *File Name* - config.json & config.csv

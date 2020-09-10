@@ -137,10 +137,13 @@ class Categories
      */
     protected function getCategoryByPath(string $path)
     {
+        $names = array_filter(explode('/', $path));
+        //if the first element in the path is a root category, use that root id and drop from array
+        //else, use the root category for the default store
         $store = $this->storeFactory->create();
         $store->load($this->settings['store_view_code']);
         $rootCatId = $store->getGroup()->getDefaultStore()->getRootCategoryId();
-        $names = array_filter(explode('/', $path));
+
         $tree = $this->getTree($rootCatId);
         foreach ($names as $name) {
             $tree = $this->findTreeChild($tree, $name);

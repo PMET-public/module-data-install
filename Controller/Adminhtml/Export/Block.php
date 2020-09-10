@@ -7,18 +7,18 @@
 namespace MagentoEse\DataInstall\Controller\Adminhtml\Export;
 
 use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
+use Magento\Cms\Model\ResourceModel\Block\CollectionFactory;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Response\Http\FileFactory;
 use Magento\Framework\App\ResponseInterface;
-use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Csv;
 use Magento\Ui\Component\MassAction\Filter;
-use Magento\Cms\Model\ResourceModel\Block\CollectionFactory;
 
 class Block extends Action implements HttpPostActionInterface
 {
@@ -114,7 +114,7 @@ class Block extends Action implements HttpPostActionInterface
      * @param AbstractDb $collection
      * @return array
      */
-    private function generateData(AbstractDb $collection): array
+    protected function generateData(AbstractDb $collection): array
     {
         $result = [];
         //$customerData = $customer->getData();
@@ -132,6 +132,7 @@ class Block extends Action implements HttpPostActionInterface
             ];
             // echo $block->getContent();
         }
+
         return $result;
     }
 }

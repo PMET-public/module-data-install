@@ -13,7 +13,6 @@ use Magento\Customer\Model\Customer;
 class CustomerAttributes
 {
 
-
     /** @var EavSetupFactory  */
     private $eavSetupFactory;
 
@@ -39,9 +38,6 @@ class CustomerAttributes
         $this->attributeRepository = $attributeRepository;
     }
 
-
-
-
     public function install(array $data)
     {
         //TODO; Check for minimum requirements - frontend_label,frontend_input, attribute_code
@@ -57,6 +53,7 @@ class CustomerAttributes
         if (empty($data["position"])) {
             $data["position"]=100;
         }
+
         $mainSettings = [
             'type'         => 'varchar',
             'label'        => $data["frontend_label"],
@@ -123,6 +120,7 @@ class CustomerAttributes
             //    $option['value'][$value][$store->getId()] = $value;
             //}
         }
+
         $eavSetup = $this->eavSetupFactory->create();
 
         $eavSetup->addAttributeOption($option);

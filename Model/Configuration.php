@@ -72,6 +72,7 @@ class Configuration
             if (!empty($row['scope'])) {
                 $scope = $row['scope'];
             }
+
             if (!empty($row['scope_code'])) {
                 if ($scope=='website' || $scope=='websites') {
                     $scope = 'websites';
@@ -81,6 +82,7 @@ class Configuration
                     $scopeId = $this->stores->getViewId($row['scope_code']);
                 }
             }
+
             $this->saveConfig($row['path'], $row['value'], $scope, $scopeId);
         }
 
@@ -101,10 +103,12 @@ class Configuration
             print_r("The JSON in your configuration file is invalid.\n");
             return true;
         }
+
         foreach ($config as $key => $item) {
             array_walk_recursive($item, [$this,'getValuePath'], $key);
             // print_r($setting);
         }
+
         //TODO:set theme - this will be incorporated into the config structure
         //$this->setTheme('MagentoEse/venia',$this->stores->getStoreId($this->stores->getDefaultStoreCode()));
         return true;
@@ -155,8 +159,10 @@ class Configuration
         if ($scopeId!==null) {
             $this->resourceConfig->saveConfig($path, $this->setEncryption($value), $scope, $scopeId);
         } else {
-            print_r("Error setting configuration " . $path . ". Check your scope codes as the " .
-                $scope . " code you used does not exist\n");
+            print_r(
+                "Error setting configuration " . $path . ". Check your scope codes as the " .
+                $scope . " code you used does not exist\n"
+            );
         }
     }
 

@@ -14,8 +14,8 @@ use Magento\Customer\Api\Data\RegionInterface;
 use Magento\Customer\Api\Data\RegionInterfaceFactory;
 use Magento\Directory\Model\CountryFactory;
 use Magento\Framework\Api\DataObjectHelper;
-use Magento\Framework\App\State;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\State;
 use Magento\Framework\Exception\LocalizedException;
 
 class Customers
@@ -114,12 +114,14 @@ class Customers
             foreach ($row as $key => $value) {
                 $data[$header[$key]] = $value;
             }
+
             $row = $data;
             $customerData['profile'] = $this->convertRowData($row, $this->getDefaultCustomerProfile());
             //if the email exists, skip
             if (!$this->accountManagement->isEmailAvailable($customerData['profile']['email'])) {
                 return true;
             }
+
             $customer = $this->customerInterfaceFactory->create();
             $this->dataObjectHelper->populateWithArray(
                 $customer,
@@ -140,6 +142,7 @@ class Customers
                 $startingElement = $this->addToAutofill($row, $startingElement);
             }
         }
+
         return true;
     }
 
@@ -197,30 +200,32 @@ class Customers
         //TODO:get region id
         for ($x=$startingElement; $x <= $elementCount; $x++) {
             //echo "---".$pathPrefix.$x.'/email_value'.'___'.$this->configuration->getConfig($pathPrefix.$x.'/email_value',ScopeConfigInterface::SCOPE_TYPE_DEFAULT,'default')."---";
-            if (!$this->configuration->getConfig($pathPrefix.$x.'/email_value', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 'default')) {
-                $this->configuration->saveConfig($pathPrefix.$x.'/cc_month', '02', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/cc_year', '2029', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/cc_number', '4111111111111111', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/cc_type', 'VI', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/cc_verification_number', '123', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/enable', '1', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/address_value', $row['street'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/city_value', $row['city'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/country_value', $row['country_id'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+            if (!$this->configuration->getConfig($pathPrefix . $x . '/email_value', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 'default')) {
+                $this->configuration->saveConfig($pathPrefix . $x . '/cc_month', '02', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/cc_year', '2029', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/cc_number', '4111111111111111', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/cc_type', 'VI', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/cc_verification_number', '123', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/enable', '1', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/address_value', $row['street'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/city_value', $row['city'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/country_value', $row['country_id'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
                 if (!empty($row['company'])) {
-                    $this->configuration->saveConfig($pathPrefix.$x.'/company_value', $row['company'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                    $this->configuration->saveConfig($pathPrefix . $x . '/company_value', $row['company'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
                 }
-                $this->configuration->saveConfig($pathPrefix.$x.'/email_value', $row['email'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+
+                $this->configuration->saveConfig($pathPrefix . $x . '/email_value', $row['email'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
                 if (!empty($row['fax'])) {
-                    $this->configuration->saveConfig($pathPrefix.$x.'/fax_value', $row['fax'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                    $this->configuration->saveConfig($pathPrefix . $x . '/fax_value', $row['fax'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
                 }
-                $this->configuration->saveConfig($pathPrefix.$x.'/firstname_value', $row['firstname'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/label', $row['firstname'].' '.$row['lastname'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/lastname_value', $row['lastname'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/password_value', $row['password'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/state_value', $this->getRegionId($row), ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/telephone_value', $row['telephone'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
-                $this->configuration->saveConfig($pathPrefix.$x.'/zip_value', $row['postcode'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+
+                $this->configuration->saveConfig($pathPrefix . $x . '/firstname_value', $row['firstname'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/label', $row['firstname'] . ' ' . $row['lastname'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/lastname_value', $row['lastname'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/password_value', $row['password'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/state_value', $this->getRegionId($row), ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/telephone_value', $row['telephone'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+                $this->configuration->saveConfig($pathPrefix . $x . '/zip_value', $row['postcode'], ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
                 return $x + 1;
             }
         }
@@ -281,6 +286,7 @@ class Customers
                 'default_shipping' => true,
             ];
         }
+
         return $this->customerDataAddress;
     }
 
@@ -298,17 +304,21 @@ class Customers
                     $data['website_id'] = $this->stores->getStoreId($rowValue);
                     continue;
                 }
+
                 if ($rowField == 'group_id') {
                     $data['group'] = $this->customerGroups->getCustomerGroupId($rowValue);
                     continue;
                 }
+
                 if ($rowField == 'street') {
                     $data[$rowField][0] = $rowValue;
                     continue;
                 }
+
                 $data[$rowField] = $rowValue;
             }
         }
+
         return $data;
     }
 

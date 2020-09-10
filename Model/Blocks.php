@@ -39,6 +39,7 @@ class Blocks
     /**
      * @param array $row
      * @return bool
+     * @throws LocalizedException
      */
     public function install(array $row)
     {
@@ -66,6 +67,7 @@ class Blocks
         } else {
             $cmsBlock->addData($data);
         }
+
         $cmsBlock->setStoreId($_viewId);
         $cmsBlock->setIsActive(1);
         $cmsBlock->save();

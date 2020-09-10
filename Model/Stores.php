@@ -13,6 +13,7 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Area as AppArea;
 use Magento\Framework\App\State;
 use Magento\Framework\Exception\AlreadyExistsException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\Data\GroupInterface;
 use Magento\Store\Api\Data\GroupInterfaceFactory;
@@ -170,6 +171,7 @@ class Stores
             if (!empty($data['host'])) {
                 $this->setBaseUrls($data['host'], $website->getId());
             }
+
             //if there is no store code, skip store and view
             if (!empty($data['store_code'])) {
                 print_r("-updating stores\n");
@@ -194,6 +196,7 @@ class Stores
         } else {
             print_r("site_code column needs to be included with a value\n");
         }
+
         return true;
     }
 
@@ -219,12 +222,15 @@ class Stores
                 if (!empty($data['site_name'])) {
                     $website->setName($data['site_name']);
                 }
+
                 if (!empty($data['site_order'])) {
                     $website->setSortOrder($data['site_order']);
                 }
+
                 if (!empty($data['is_default_site'])) {
                     $website->setIsDefault($data['is_default_site']);
                 }
+
                 $this->websiteResourceModel->save($website);
                 return $website;
             } elseif (!empty($data['site_name'])) {
@@ -235,9 +241,11 @@ class Stores
                 if (!empty($data['site_order'])) {
                     $website->setSortOrder($data['site_order']);
                 }
+
                 if (!empty($data['is_default_site'])) {
                     $website->setIsDefault($data['is_default_site']);
                 }
+
                 $this->websiteResourceModel->save($website);
                 return $website;
             } else {
@@ -286,9 +294,11 @@ class Stores
                 if (!empty($data['store_name'])) {
                     $store->setName($data['store_name']);
                 }
+
                 if (!empty($data['store_root_category'])) {
                     $store->setRootCategoryId($rootCategoryId);
                 }
+
                 if (!empty($data['is_default_store']) && $data['is_default_store']=='Y') {
                     $website->setDefaultGroupId($store->getId());
                     $this->websiteResourceModel->save($website);
@@ -307,16 +317,20 @@ class Stores
                     $store->setWebsiteId($website->getId());
                     $this->groupResourceModel->save($store);
                 }
+
                 if (!empty($data['is_default_store']) && $data['is_default_store']=='Y') {
                     $website->setDefaultGroupId($store->getId());
                     $this->websiteResourceModel->save($website);
                 }
+
                 print_r($data['store_code'] . " store created\n");
                 return $store;
             } else {
                 //if the store doesnt exist and the name isn't provided, error out
-                print_r("store_name and store_root_category column need to be included
-                with a value when creating a store\n");
+                print_r(
+                    "store_name and store_root_category column need to be included
+                with a value when creating a store\n"
+                );
                 return null;
             }
         } else {
@@ -350,9 +364,11 @@ class Stores
                 if (!empty($data['view_name'])) {
                     $view->setName($data['view_name']);
                 }
+
                 if (!empty($data['view_order'])) {
                     $view->setSortOrder($data['view_order']);
                 }
+
                 if (!empty($data['view_is_active'])) {
                     //dont deactivate if it is the default
                     if ($store->getDefaultStoreId()!=$store->getId()) {
@@ -377,6 +393,7 @@ class Stores
                         [$store]
                     );
                 }
+
                 //add theme to view if provided
                 $this->setTheme($data, $view->getId());
                 print_r($data['store_view_code'] . " view updated\n");
@@ -404,6 +421,7 @@ class Stores
                         $this->generateCmsPagesUrls((int)$view->getId())
                     );
                 }
+
                 if (!empty($data['is_default_view']) && $data['is_default_view']=='Y') {
                     //default needs to be active
                     $view->setIsActive(1);
@@ -419,6 +437,7 @@ class Stores
                         [$store]
                     );
                 }
+
                 //add theme to view if provided
                 $this->setTheme($data, $view->getId());
                 print_r($data['store_view_code'] . " view created\n");
@@ -432,10 +451,9 @@ class Stores
     }
 
     /**
-     * Generate url rewrites for cms pages to store view
-     *
      * @param int $storeId
      * @return array
+     * @throws LocalizedException
      */
     private function generateCmsPagesUrls(int $storeId): array
     {
@@ -447,6 +465,7 @@ class Stores
             $page->setStoreId($storeId);
             $rewrites[] = $this->cmsPageUrlRewriteGenerator->generate($page);
         }
+
         $urls = array_merge($urls, ...$rewrites);
 
         return $urls;
@@ -488,10 +507,12 @@ class Stores
                 break;
             }
         }
+
         $store = $this->groupInterfaceFactory->create();
         if ($groupId!=-1) {
             $store->load($groupId);
         }
+
         return $store;
     }
 
@@ -517,6 +538,7 @@ class Stores
         } catch (NoSuchEntityException $e) {
             $view = $this->storeInterfaceFactory->create();
         }
+
         return $view;
     }
 
@@ -533,6 +555,7 @@ class Stores
                 $viewList[]=$view->getCode();
             }
         }
+
         return $viewList;
     }
 
@@ -561,6 +584,7 @@ class Stores
         if (!ctype_alpha($code[0])) {
             $code = "m" . $code;
         }
+
         return $code;
     }
 
@@ -615,7 +639,11 @@ class Stores
         $this->configuration->saveConfig('web/secure/base_url', 'https://' . $host . '/', 'websites', $websiteId);
     }
 
-    private function setTheme($data, $storeViewId)
+    /**
+     * @param array $data
+     * @param int $storeViewId
+     */
+    private function setTheme(array $data, int $storeViewId)
     {
         if (!empty($data['theme'])) {
             //make sure theme is registered

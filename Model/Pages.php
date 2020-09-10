@@ -8,14 +8,14 @@ use Exception;
 use Magento\Cms\Api\Data\PageInterface;
 use Magento\Cms\Api\Data\PageInterfaceFactory;
 use Magento\Cms\Api\PageRepositoryInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Csv;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 use Magento\Store\Api\StoreRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollection;
 use Magento\UrlRewrite\Model\ResourceModel\UrlRewrite;
+use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollection;
 
 class Pages
 {
@@ -98,9 +98,7 @@ class Pages
             if (count($pages) == 0) {
                 $page = $this->pageInterfaceFactory->create();
                 $page->addData($row)
-                    //->setStores([\Magento\Store\Model\Store::DEFAULT_STORE_ID])
                     ->setStores($this->getStoreIds($row['store_view_code']))
-                    //->setStores([3,4,5])
                     ->save();
             } else {
                 foreach ($pages as $updatePage) {
@@ -114,6 +112,7 @@ class Pages
                             if (($key = array_search($this->getStoreIds($row['store_view_code'])[0], $storeIds)) !== false) {
                                 unset($storeIds[$key]);
                             }
+
                             $updatePage->load($row['identifier'], 'identifier')->setStores($storeIds)->save();
                             //remove urls rewrite from existing page so new page can be added
                             $this->removeUrlRewrite($row['identifier'], $this->getStoreIds($row['store_view_code']));
@@ -133,7 +132,6 @@ class Pages
                             $updatePage->load($row['identifier'], 'identifier');
                             $this->pageRepository->save($updatePage->addData($row));
                         }
-
                     } else {
                         //multiple pages exist
                         if ($updatePage->getStores()[0]==$this->getStoreIds($row['store_view_code'])[0]) {
@@ -144,6 +142,7 @@ class Pages
                         }
                     }
                 }
+
                 //if its an existing page, but needs to be created for a store
                 if (count($pages) > 1 && $foundPage==0) {
                     $page = $this->pageInterfaceFactory->create();
@@ -153,6 +152,7 @@ class Pages
                 }
             }
         }
+
         return true;
     }
 
@@ -187,9 +187,11 @@ class Pages
                 }
             }
         }
+
         if (count($returnArray)==0) {
             $returnArray[]=0;
         }
+
         return $returnArray;
     }
 
@@ -203,10 +205,12 @@ class Pages
         foreach ($stores as $store) {
             $storeList[]=$store->getId();
         }
+
         //remove store zero
         if (($key = array_search(0, $storeList)) !== false) {
             unset($storeList[$key]);
         }
+
         return $storeList;
     }
 }

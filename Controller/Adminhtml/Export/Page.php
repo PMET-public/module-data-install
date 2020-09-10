@@ -145,6 +145,7 @@ class Page extends Action implements HttpPostActionInterface
                 $block->getContentHeading()
             ];
         }
+
         return $result;
     }
 }

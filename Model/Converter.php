@@ -144,9 +144,11 @@ class Converter
         if (is_array($value)) {
             return $value;
         }
+
         if (false !== strpos($value, $separator)) {
             $value = array_filter(explode($separator, $value));
         }
+
         return !is_array($value) ? [$value] : $value;
     }
 
@@ -161,6 +163,7 @@ class Converter
             $replaces = $this->getReplaces($matches);
             $content = preg_replace($replaces['regexp'], $replaces['value'], $content);
         }
+
         return $content;
     }
 
@@ -225,6 +228,7 @@ class Converter
                 $replaceData = array_merge_recursive($replaceData, $matchResult);
             }
         }
+
         return $replaceData;
     }
 
@@ -244,8 +248,10 @@ class Converter
                 $urlFilter = $attributeData[0] . '=' . $attributeValue->getId();
                 continue;
             }
+
             $urlFilter .= '&' . $attributeData[0] . '=' . $attributeValue->getId();
         }
+
         return $urlFilter;
     }
 
@@ -264,6 +270,7 @@ class Converter
             $replaceData['regexp'][] = '/{{customergroup name="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = $groupId;
         }
+
         return $replaceData;
     }
 
@@ -354,6 +361,7 @@ class Converter
             $replaceData['regexp'][] = '/{{segment name="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = $segmentId;
         }
+
         return $replaceData;
     }
 
@@ -375,6 +383,7 @@ class Converter
             $replaceData['regexp'][] = '/{{categoryurl key="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = '{{store url=""}}' . $categoryUrl;
         }
+
         return $replaceData;
     }
 
@@ -392,6 +401,7 @@ class Converter
             $replaceData['regexp'][] = '/{{categoryid key="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = $categoryId;
         }
+
         return $replaceData;
     }
 
@@ -428,6 +438,7 @@ class Converter
         if ($productItem) {
             $productUrl = '{{store url=""}}' .  $productItem->getRequestPath();
         }
+
         $replaceData['regexp'][] = '/{{product sku="' . preg_quote($matchValue) . '"}}/';
         $replaceData['value'][] = $productUrl;
         return $replaceData;
@@ -447,12 +458,14 @@ class Converter
         if (strpos($matchValue, ':') === false) {
             return $replaceData;
         }
+
         list($code, $value) = explode(':', $matchValue);
 
         if (!empty($code) && !empty($value)) {
             $replaceData['regexp'][] = '/{{customerattribute code="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = sprintf('%03d', $this->getCustomerAttributeOptionValueId($code, $value));
         }
+
         return $replaceData;
     }
 
@@ -467,6 +480,7 @@ class Converter
         if (!$this->customerAttributeCodeOptionsPair || !isset($this->customerAttributeCodeOptionsPair[$attributeCode])) {
             $this->loadCustomerAttributeOptions($attributeCode);
         }
+
         return isset($this->customerAttributeCodeOptionsPair[$attributeCode])
             ? $this->customerAttributeCodeOptionsPair[$attributeCode]
             : null;
@@ -490,6 +504,7 @@ class Converter
                 ->setAttributeFilter($item->getAttributeId())->setPositionOrder('asc', true)->load();
             $this->customerAttributeCodeOptionsPair[$item->getAttributeCode()] = $options;
         }
+
         return $this;
     }
 
@@ -513,6 +528,7 @@ class Converter
                 $opt[$option->getValue()] = $option->getId();
             }
         }
+
         $this->customerAttributeCodeOptionValueIdsPair[$attributeCode] = $opt;
         if (isset($this->customerAttributeCodeOptionValueIdsPair[$attributeCode][$value])) {
             return $this->customerAttributeCodeOptionValueIdsPair[$attributeCode][$value];
@@ -535,12 +551,14 @@ class Converter
         if (strpos($matchValue, ':') === false) {
             return $replaceData;
         }
+
         list($code, $value) = explode(':', $matchValue);
 
         if (!empty($code) && !empty($value)) {
             $replaceData['regexp'][] = '/{{productattribute code="' . $matchValue . '"}}/';
             $replaceData['value'][] = sprintf('%03d', $this->getProductAttributeOptionValueId($code, $value));
         }
+
         return $replaceData;
     }
 
@@ -555,6 +573,7 @@ class Converter
         if (!$this->productAttributeCodeOptionsPair || !isset($this->productAttributeCodeOptionsPair[$attributeCode])) {
             $this->loadProductAttributeOptions($attributeCode);
         }
+
         return isset($this->productAttributeCodeOptionsPair[$attributeCode])
             ? $this->productAttributeCodeOptionsPair[$attributeCode]
             : null;
@@ -578,6 +597,7 @@ class Converter
                 ->setAttributeFilter($item->getAttributeId())->setPositionOrder('asc', true)->load();
             $this->productAttributeCodeOptionsPair[$item->getAttributeCode()] = $options;
         }
+
         return $this;
     }
 
@@ -601,6 +621,7 @@ class Converter
                 $opt[$option->getValue()] = $option->getId();
             }
         }
+
         $this->productAttributeCodeOptionValueIdsPair[$attributeCode] = $opt;
         if (isset($this->productAttributeCodeOptionValueIdsPair[$attributeCode][$value])) {
             return $this->productAttributeCodeOptionValueIdsPair[$attributeCode][$value];

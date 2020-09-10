@@ -1,21 +1,22 @@
 <?php
-
+/**
+ * Copyright © Magento. All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Model;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Csv;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 
 class Settings
 {
-
     protected $site_code;
     protected $store_code;
     protected $store_view_code;
     protected $root_category;
     protected $root_category_id;
     protected $product_image_import_directory;
-
 
     /** @var FixtureManager  */
     protected $fixtureManager;
@@ -28,9 +29,15 @@ class Settings
         $this->csvReader = $sampleDataContext->getCsvReader();
     }
 
+    /**
+     * @param string $moduleName
+     * @param string $fixtureDirectory
+     * @throws LocalizedException
+     */
     public function setSettings(string $moduleName, string $fixtureDirectory)
     {
-        $setupArray=['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default','root_category' => 'Default Category', 'root_category_id' => '2','product_image_import_directory' =>''];
+        $setupArray=['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
+            'root_category' => 'Default Category', 'root_category_id' => '2','product_image_import_directory' =>''];
         $setupFile = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/settings.csv");
         if (file_exists($setupFile)) {
             $setupRows = $this->csvReader->getData($setupFile);
@@ -41,6 +48,7 @@ class Settings
                 $setupArray[$setupRow[0]] = $setupRow[1];
             }
         }
+
         $this->site_code = $setupArray['site_code'];
         $this->store_code = $setupArray['$store_code'];
         $this->store_view_code = $setupArray['$store_view_code'];

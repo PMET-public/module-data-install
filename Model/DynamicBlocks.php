@@ -4,15 +4,15 @@
  */
 namespace MagentoEse\DataInstall\Model;
 
-use Magento\Banner\Model\BannerFactory;
 use Magento\Banner\Model\Banner as BannerModel;
+use Magento\Banner\Model\BannerFactory;
+use Magento\Banner\Model\ResourceModel\Banner as BannerResourceModel;
+use Magento\Banner\Model\ResourceModel\Banner\CollectionFactory as BannerCollection;
 use Magento\BannerCustomerSegment\Model\ResourceModel\BannerSegmentLink;
 use Magento\CustomerSegment\Model\ResourceModel\Segment\CollectionFactory as SegmentCollection;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Banner\Model\ResourceModel\Banner as BannerResourceModel;
-use Magento\Banner\Model\ResourceModel\Banner\CollectionFactory as BannerCollection;
 
 class DynamicBlocks
 {
@@ -85,6 +85,7 @@ class DynamicBlocks
         } else {
             $banner = $this->bannerFactory->create();
         }
+
         /** @var BannerModel $banner */
         $banner->setName($row['name']);
         $banner->setIsEnabled(1);
@@ -97,8 +98,9 @@ class DynamicBlocks
         if ($banners->count()==0) {
             $this->bannerResourceModel->saveStoreContents($banner->getId(), ['0' => $this->converter->convertContent($row['banner_content'])]);
         }
+
         //set content for store
-       // $this->bannerResourceModel->saveStoreContents($banner->getId(), [$this->replaceIds->getStoreidByCode($row['store']) => $this->replaceIds->replaceAll($row['banner_content'])]);
+        // $this->bannerResourceModel->saveStoreContents($banner->getId(), [$this->replaceIds->getStoreidByCode($row['store']) => $this->replaceIds->replaceAll($row['banner_content'])]);
 
         $segments = explode(",", $row['segments']);
         $segmentIds=[];
@@ -107,8 +109,8 @@ class DynamicBlocks
             if ($segmentId != null) {
                 $segmentIds[]=$segmentId;
             }
-
         }
+
         $this->bannerSegmentLink->saveBannerSegments($banner->getId(), $segmentIds);
         $this->setup->endSetup();
         return true;

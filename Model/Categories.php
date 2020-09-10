@@ -98,6 +98,7 @@ class Categories
                 print_r("-Cannot find the parent category for " . $row['name'] . " in the path " . $row['path'] . ". That category has been skipped\n");
             }
         }
+
         return true;
     }
 
@@ -124,6 +125,7 @@ class Categories
                 } else {
                     $attributeData = [$categoryAttribute => $row[$categoryAttribute]];
                 }
+
                 $category->addData($attributeData);
             }
         }
@@ -150,10 +152,12 @@ class Categories
             if (!$tree) {
                 $tree = $this->findTreeChild($this->getTree($rootCatId, true), $name);
             }
+
             if (!$tree) {
                 break;
             }
         }
+
         return $tree;
     }
 
@@ -175,6 +179,7 @@ class Categories
                 }
             }
         }
+
         return $foundChild;
     }
 
@@ -199,6 +204,7 @@ class Categories
 
             $this->categoryTree = $node;
         }
+
         return $this->categoryTree;
     }
 

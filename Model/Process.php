@@ -132,6 +132,7 @@ class Process
                     //Remove hidden character Excel adds to the first cell of a document
                     $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
                 }
+
                 //determine path to module code for image import
                 $modulePath = str_replace("/" . $fixtureDirectory . "/" . basename($fileName), "", $fileName);
 
@@ -209,10 +210,10 @@ class Process
                         print_r("loading Customer Attributes\n");
                         $this->processRows($rows, $header, $this->customerAttributeInstall);
                         break;
-
                 }
             }
         }
+
         $this->processRedos();
         //$f=$RRRRf;
     }
@@ -229,6 +230,7 @@ class Process
             foreach ($row as $key => $value) {
                 $data[$header[$key]] = $value;
             }
+
             $this->collectRedos($process->install($data, $this->settings), $row, $header, $process);
         }
     }
@@ -277,11 +279,14 @@ class Process
         foreach ($redos as $redo) {
             $this->processRows($redo['row'], $redo['header'], $redo['process']);
         }
+
         ///if its failed again, fail the process
         if (count($this->redo) > 0) {
             foreach ($this->redo as $redo) {
-                print_r("Installing " . $this->getClassName(get_class($redo['process'])) .
-                    " was not fully successful, likely due to a dependency on other sample data that doesnt exist");
+                print_r(
+                    "Installing " . $this->getClassName(get_class($redo['process'])) .
+                    " was not fully successful, likely due to a dependency on other sample data that doesnt exist"
+                );
             }
         }
     }
@@ -295,6 +300,7 @@ class Process
         if ($pos = strrpos($classname, '\\')) {
             return substr($classname, $pos + 1);
         }
+
         return $pos;
     }
 
@@ -306,7 +312,8 @@ class Process
      */
     private function getConfiguration(string $moduleName, string $fixtureDirectory): array
     {
-        $setupArray=['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default','root_category' => 'Default Category', 'root_category_id' => '2'];
+        $setupArray=['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
+            'root_category' => 'Default Category', 'root_category_id' => '2'];
         $setupFile = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/settings.csv");
         if (file_exists($setupFile)) {
             $setupRows = $this->csvReader->getData($setupFile);
@@ -317,6 +324,7 @@ class Process
                 $setupArray[$setupRow[0]] = $setupRow[1];
             }
         }
+
         return $setupArray;
     }
 }

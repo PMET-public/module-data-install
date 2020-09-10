@@ -4,22 +4,21 @@
  */
 namespace MagentoEse\DataInstall\Model;
 
+use Magento\Catalog\Helper\Product;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+use Magento\Catalog\Model\ResourceModel\Eav\AttributeFactory;
+use Magento\Eav\Model\Config as EavConfig;
 use Magento\Eav\Model\Entity\Attribute\Set;
+use Magento\Eav\Model\Entity\Attribute\SetFactory;
 use Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\Collection;
+use Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\CollectionFactory as OptionCollectionFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Catalog\Model\ResourceModel\Eav\AttributeFactory;
-use Magento\Eav\Model\Entity\Attribute\SetFactory;
-use Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\CollectionFactory as OptionCollectionFactory;
-use Magento\Catalog\Helper\Product;
-use Magento\Eav\Model\Config as EavConfig;
 
 class ProductAttributes
 {
-
     const DEFAULT_ATTRIBUTE_SET = 'Default';
 
     /** @var AttributeFactory  */
@@ -31,13 +30,13 @@ class ProductAttributes
     /** @var OptionCollectionFactory  */
     protected $attrOptionCollectionFactory;
 
-   /** @var Product  */
+    /** @var Product  */
     protected $productHelper;
 
-   /** @var EavConfig  */
+    /** @var EavConfig  */
     protected $eavConfig;
 
-   /** @var  */
+    /** @var  */
     protected $entityTypeId;
 
     /** @var StoreManagerInterface  */
@@ -80,6 +79,7 @@ class ProductAttributes
         if (!$attribute) {
             $attribute = $this->attributeFactory->create();
         }
+
         //TODO:split out between default_label (frontend)and default store view label * may not be necessary
         //TODO: validate frontend_input values
         //TODO: swatch colors or images
@@ -90,6 +90,7 @@ class ProductAttributes
             $data['frontend_label'][$this->storeManager->getDefaultStoreView()->getStoreId()] =
                 $frontendLabel[1];
         }
+
         $data['option'] = $this->getOption($attribute, $data);
         $data['source_model'] = $this->productHelper->getAttributeSourceModelByInputType(
             $data['frontend_input']
@@ -112,6 +113,7 @@ class ProductAttributes
         } else {
             $data['attribute_set'] = explode("\n", $data['attribute_set']);
         }
+
         if (is_array($data['attribute_set'])) {
             foreach ($data['attribute_set'] as $setName) {
                 $setName = trim($setName);
@@ -123,7 +125,7 @@ class ProductAttributes
                     ->setAttributeGroupId($attributeGroupId)
                     ->setAttributeSetId($attributeSet->getId())
                     ->setEntityTypeId($this->getEntityTypeId())
-                    ->setSortOrder(!empty($data['position']) ?$data['position'] : 999)
+                    ->setSortOrder(!empty($data['position']) ? $data['position'] : 999)
                     ->save();
             }
         }
@@ -152,6 +154,7 @@ class ProductAttributes
                 $result[] = $value;
             }
         }
+
         return $result ? $this->convertOption($result) : $result;
     }
 
@@ -170,6 +173,7 @@ class ProductAttributes
             $result['value']['option_' . $i] = [0 => $value, 1 => ''];
             $i++;
         }
+
         return $result;
     }
 
@@ -182,6 +186,7 @@ class ProductAttributes
         if (!$this->entityTypeId) {
             $this->entityTypeId = $this->eavConfig->getEntityType(\Magento\Catalog\Model\Product::ENTITY)->getId();
         }
+
         return $this->entityTypeId;
     }
 
@@ -210,6 +215,7 @@ class ProductAttributes
             $attributeSet->initFromSkeleton($defaultSetId);
             $attributeSet->save();
         }
+
         return $attributeSet;
     }
 
@@ -225,8 +231,9 @@ class ProductAttributes
         $code = preg_replace("/[^A-Za-z0-9_]/", '', $code);
         //if the first character is not a letter, add an "m"
         if (!ctype_alpha($code[0])) {
-            $code = "m".$code;
+            $code = "m" . $code;
         }
+
         return $code;
     }
 }

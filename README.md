@@ -56,9 +56,10 @@ Optional file. This file contains settings used by the install process. This fil
 *Columns* - **name,value**
 *Recoginzed name/value pairs*
 **site\_code** - Default : base
-**store\_code** - Default : default
+**store\_code** - Default : main_website_store
 **store\_view\_code** - Default : default
-**product\_image\_import\_directory** - Path from server root to directory where images should be read during product import.  (TODO) Defaults to `<module with data files>\media\products`
+**product\_image\_import\_directory** - Path from server root to directory where images should be read during product import.  Defaults to `<module with data files>\media\products`
+**restrict\_products\_from\_views** - (Y/N, Default: Y) Used to set the visibility of products, so products from one store view don't show in the search from another. When installing new products, the visibility for existing products is set to **Not Visible Individually** for the view defined by **store\_view\_code**. Visibility for products added from the products.csv file will be set to **Not Visible Individually** for all views (including *default*) except for the **store\_view\_code** defined in that row of the products.csv data file.
 
 ### Stores
 *File Name* - stores.csv
@@ -195,8 +196,11 @@ If no correct replacement is found, the substituion will not occur.
 
 Here is a list of all substitutions currently supported
 
-**Category** - `{{category key="<url key of category>"}}`\
-*example* - `{{category key="shorts-men"}`
+**Category Id** - `{{categoryid key="<url key of category>"}}`\
+*example* - `{{categoryid key="shorts-men"}`
+
+**Category Url** - `{{categoryurl key="<url key of category>"}}`\
+*example* - `{{categoryurl key="shorts-men"}`
 
 **Product Url** - `{{producturl sku="<sku>"}}`\
 *example* - `{{producturl sku="24-MB01"}}`

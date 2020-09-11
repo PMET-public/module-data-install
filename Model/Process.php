@@ -19,7 +19,8 @@ class Process
 
     protected $redo=[];
 
-    protected $settings = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default'];
+    protected $settings = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
+        'root_category' => 'Default Category', 'root_category_id' => '2'];
 
     /** @var FixtureManager  */
     protected $fixtureManager;
@@ -312,8 +313,7 @@ class Process
      */
     private function getConfiguration(string $moduleName, string $fixtureDirectory): array
     {
-        $setupArray=['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
-            'root_category' => 'Default Category', 'root_category_id' => '2'];
+        $setupArray=$this->settings;
         $setupFile = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/settings.csv");
         if (file_exists($setupFile)) {
             $setupRows = $this->csvReader->getData($setupFile);

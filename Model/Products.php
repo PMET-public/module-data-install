@@ -54,34 +54,43 @@ class Products
      */
     public function install(array $rows, array $header, string $modulePath, array $settings)
     {
-        if (!empty($configuration['product_image_import_directory'])) {
-            $imgDir = $configuration['product_image_import_directory'];
+        if (!empty($settings['product_image_import_directory'])) {
+            $imgDir = $settings['product_image_import_directory'];
         } else {
             $imgDir = $modulePath . self::DEFAULT_IMAGE_PATH;
+        }
+
+        if (!empty($settings['restrict_products_from_views'])) {
+            $restrictProductsFromViews = $settings['restrict_products_from_views'];
+        } else {
+            $restrictProductsFromViews =  'Y';
         }
 
         foreach ($rows as $row) {
             $productsArray[] = array_combine($header, $row);
         }
 
-        /// create file to restrict existing products from the store view
-        $restrictProducts = $this->restrictExistingProducts($this->stores->getStoreId($settings['store_view_code']));
-        if (!empty($restrictProducts)) {
-            print_r("Restricting existing products from store\n");
-            $importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
-            $importerModel->setImportImagesFileDir($imgDir);
-            $importerModel->setValidationStrategy('validation-skip-errors');
-            try {
-                $importerModel->processImport($restrictProducts);
-            } catch (\Exception $e) {
-                print_r($e->getMessage());
+        /// create array to restrict existing products from the store view
+        if($restrictProductsFromViews=='Y'){
+            $restrictProducts = $this->restrictExistingProducts($this->stores->getStoreId($settings['store_view_code']));
+            if (!empty($restrictProducts)) {
+                print_r("Restricting existing products from store\n");
+                $importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
+                $importerModel->setImportImagesFileDir($imgDir);
+                $importerModel->setValidationStrategy('validation-skip-errors');
+                try {
+                    $importerModel->processImport($restrictProducts);
+                } catch (\Exception $e) {
+                    print_r($e->getMessage());
+                }
+
+                print_r($importerModel->getLogTrace());
+                print_r($importerModel->getErrorMessages());
+
+                unset($importerModel);
             }
-
-            print_r($importerModel->getLogTrace());
-            print_r($importerModel->getErrorMessages());
-
-            unset($importerModel);
         }
+
 
         print_r("Import new products\n");
         $importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
@@ -98,25 +107,27 @@ class Products
 
         unset($importerModel);
 
-        /// create file to restrict new products from other views
-        $restrictNewProducts = $this->restrictProductsFromOtherStoreViews($productsArray);
-        if (!empty($restrictNewProducts)) {
-            print_r("Restrict new products from existing stores\n");
-            $importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
-            $importerModel->setImportImagesFileDir($imgDir);
-            $importerModel->setValidationStrategy('validation-skip-errors');
-            try {
-                $importerModel->processImport($restrictNewProducts);
-            } catch (\Exception $e) {
-                print_r($e->getMessage());
+        /// create array to restrict new products from other views. Only run if there are products under another store
+        if($restrictProductsFromViews=='Y' && !empty($restrictProducts)) {
+            $restrictNewProducts = $this->restrictProductsFromOtherStoreViews($productsArray);
+            if (!empty($restrictNewProducts)) {
+                print_r("Restrict new products from existing stores\n");
+                $importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
+                $importerModel->setImportImagesFileDir($imgDir);
+                $importerModel->setValidationStrategy('validation-skip-errors');
+                try {
+                    $importerModel->processImport($restrictNewProducts);
+                } catch (\Exception $e) {
+                    print_r($e->getMessage());
+                }
+
+                print_r($importerModel->getLogTrace());
+                print_r($importerModel->getErrorMessages());
             }
 
-            print_r($importerModel->getLogTrace());
-            print_r($importerModel->getErrorMessages());
+            unset($productsArray);
+            unset($importerModel);
         }
-
-        unset($productsArray);
-        unset($importerModel);
     }
 
     /**
@@ -127,14 +138,11 @@ class Products
     {
         $newProductArray = [];
         $allStoreCodes = $this->stores->getAllViewCodes();
-        //if count($allStoreCodes) <= 2 it would be default plus a single store so no need to restrict
-        if (count($allStoreCodes)>2) {
-            foreach ($products as $product) {
-                //add restrictive line for each
-                foreach ($allStoreCodes as $storeCode) {
-                    if ($storeCode != $product['store_view_code']) {
-                        $newProductArray[] = ['sku'=>$product['sku'],'store_view_code'=>$storeCode,'visibility'=>'Not Visible Individually'];
-                    }
+        foreach ($products as $product) {
+            //add restrictive line for each
+            foreach ($allStoreCodes as $storeCode) {
+                if ($storeCode != $product['store_view_code']) {
+                    $newProductArray[] = ['sku'=>$product['sku'],'store_view_code'=>$storeCode,'visibility'=>'Not Visible Individually'];
                 }
             }
         }

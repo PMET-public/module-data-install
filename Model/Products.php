@@ -72,7 +72,7 @@ class Products
 
         /// create array to restrict existing products from the store view
         if($restrictProductsFromViews=='Y'){
-            $restrictProducts = $this->restrictExistingProducts($this->stores->getStoreId($settings['store_view_code']));
+            $restrictProducts = $this->restrictExistingProducts($settings['store_view_code']);
             if (!empty($restrictProducts)) {
                 print_r("Restricting existing products from store\n");
                 $importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
@@ -151,17 +151,17 @@ class Products
     }
 
     /**
-     * @param $storeIdToRestrict
+     * @param $storeViewCodeToRestrict
      * @return array
      */
-    private function restrictExistingProducts($storeIdToRestrict)
+    private function restrictExistingProducts($storeViewCodeToRestrict)
     {
         $newProductArray = [];
         $search = $this->searchCriteriaBuilder
             ->addFilter(ProductInterface::SKU, '', 'neq')->create();
         $productCollection = $this->productRepository->getList($search)->getItems();
         foreach ($productCollection as $product) {
-            $newProductArray[] = ['sku'=>$product->getSku(),'store_view_code'=>$storeIdToRestrict,'visibility'=>'Not Visible Individually'];
+            $newProductArray[] = ['sku'=>$product->getSku(),'store_view_code'=>$storeViewCodeToRestrict,'visibility'=>'Not Visible Individually'];
         }
 
         return $newProductArray;

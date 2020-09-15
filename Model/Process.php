@@ -15,7 +15,7 @@ class Process
 {
     const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config.json','config.csv',
         'customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','categories.csv',
-        'products.csv','blocks.csv','dynamic_blocks.csv','pages.csv'];
+        'products.csv','blocks.csv','dynamic_blocks.csv','pages.csv','reviews.csv'];
 
     protected $redo=[];
 
@@ -64,6 +64,9 @@ class Process
     /** @var Customers  */
     protected $customerInstall;
 
+    /** @var Reviews  */
+    protected $reviewsInstall;
+
     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
@@ -79,6 +82,7 @@ class Process
      * @param CustomerGroups $customerGroups
      * @param CustomerAttributes $customerAttributes
      * @param Customers $customers
+     * @param Reviews $reviews
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -93,7 +97,8 @@ class Process
         Configuration $configuration,
         CustomerGroups $customerGroups,
         CustomerAttributes $customerAttributes,
-        Customers $customers
+        Customers $customers,
+        Reviews $reviews
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -109,6 +114,7 @@ class Process
         $this->customerGroupInstall = $customerGroups;
         $this->customerAttributeInstall = $customerAttributes;
         $this->customerInstall = $customers;
+        $this->reviewsInstall = $reviews;
     }
 
     /**
@@ -211,12 +217,16 @@ class Process
                         print_r("loading Customer Attributes\n");
                         $this->processRows($rows, $header, $this->customerAttributeInstall);
                         break;
+
+                    case "reviews.csv":
+                        print_r("loading Reviews & Ratings\n");
+                        $this->processRows($rows, $header, $this->reviewsInstall);
+                        break;
                 }
             }
         }
 
         $this->processRedos();
-        //$f=$RRRRf;
     }
 
     /**

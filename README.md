@@ -31,6 +31,8 @@ Each element of potential sample data is encapsulated in its own file:
 
 **pages.csv** - Creates pages. Includes Page Builder compatibility
 
+[**reviews.csv**](#reviews) - Creates reviews and ratings
+
 *To be added*
 **widgets.csv**
 **downloadable_products.csv**
@@ -182,6 +184,36 @@ Product attribute configurations can be complex. The purpose of this file is to 
 **position** - Optional, Numeric.  Indicates the position of the attribute within the Attribute Group
 
 **attribute\_set** - Carriage return delimited list of Attribute Sets that the Attribute will be added to.  Sets will be created as needed based on the Default set. If no value is given, the Attribute will be added to the Default set.
+
+### Reviews
+*File Name* - reviews.csv
+
+This file is used to add reviews and ratings to products. If a review already exists with the same summary for a product, it is skipped.
+
+Quality, Price and Value rating codes are installed by default but the visibility is not set for a website, so those values could not be used unless activated in the admin before the data is imported.
+
+
+> Out of Scope: Support for mulitple ratings per review. Updating of existing reviews or ratings.
+
+
+sku,rating_code,rating_value,summary,review,reviewer,email
+*Columns*
+
+**sku** - Required. Product to add the review to. If the product doesn't exist the row will be skipped
+
+**rating\_code** - Required. Type of rating. This can be any value: e.g. Rating, Satisfaction, etc. Quality, Price and Value rating codes are installed by default but the visibility is not set for a website, so those values could not be used unless activated in the admin before the data is imported.
+
+**summary** - Required. This is what a user would enter in the Summary field of the review form
+
+**review** - Required. The text of the review
+
+**reviewer** - Required. This is what a user would enter in the Nickname field of the review form
+
+**email** - Optional. Email of a registered customer to attach review to.
+
+
+
+
 
 Content
 Note on pages...names to use to replace the default install pages

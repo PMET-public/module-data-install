@@ -78,7 +78,13 @@ class ProductAttributes
         $attribute = $this->eavConfig->getAttribute('catalog_product', $this->validateCode($data['attribute_code']));
         if (!$attribute) {
             $attribute = $this->attributeFactory->create();
+        } elseif(!empty($data['only_update_sets']) && $data['only_update_sets']=='Y'){
+            //facilitate adding existing attributes to set without changes.  Most likely used for system attributes
+            $this->setAttributeSets($data, $attribute);
+            $this->eavConfig->clear();
+            return true;
         }
+        //attribute_code,frontend_label,frontend_input,option,attribute_set
 
         //TODO:split out between default_label (frontend)and default store view label * may not be necessary
         //TODO: validate frontend_input values
@@ -106,29 +112,8 @@ class ProductAttributes
 
         $attribute->setEntityTypeId($this->getEntityTypeId());
         $attribute->save();
-        $attributeId = $attribute->getId();
-        //if attribute_set is empty, or not included, set to default
-        if (empty($data['attribute_set'])) {
-            $data['attribute_set'] = [self::DEFAULT_ATTRIBUTE_SET];
-        } else {
-            $data['attribute_set'] = explode("\n", $data['attribute_set']);
-        }
-
-        if (is_array($data['attribute_set'])) {
-            foreach ($data['attribute_set'] as $setName) {
-                $setName = trim($setName);
-                $attributeSet = $this->processAttributeSet($setName);
-                $attributeGroupId = $attributeSet->getDefaultGroupId();
-
-                $attribute = $this->attributeFactory->create()->load($attributeId);
-                $attribute
-                    ->setAttributeGroupId($attributeGroupId)
-                    ->setAttributeSetId($attributeSet->getId())
-                    ->setEntityTypeId($this->getEntityTypeId())
-                    ->setSortOrder(!empty($data['position']) ? $data['position'] : 999)
-                    ->save();
-            }
-        }
+        //$attributeId = $attribute->getId();
+        $this->setAttributeSets($data, $attribute);
 
         $this->eavConfig->clear();
 
@@ -235,5 +220,36 @@ class ProductAttributes
         }
 
         return $code;
+    }
+
+    /**
+     * @param array $data
+     * @param Attribute $attribute
+     * @throws LocalizedException
+     */
+    private function setAttributeSets(array $data, Attribute $attribute): void
+    {
+//if attribute_set is empty, or not included, set to default
+        if (empty($data['attribute_set'])) {
+            $data['attribute_set'] = [self::DEFAULT_ATTRIBUTE_SET];
+        } else {
+            $data['attribute_set'] = explode("\n", $data['attribute_set']);
+        }
+
+        if (is_array($data['attribute_set'])) {
+            foreach ($data['attribute_set'] as $setName) {
+                $setName = trim($setName);
+                $attributeSet = $this->processAttributeSet($setName);
+                $attributeGroupId = $attributeSet->getDefaultGroupId();
+
+                $attribute = $this->attributeFactory->create()->load($attribute->getId());
+                $attribute
+                    ->setAttributeGroupId($attributeGroupId)
+                    ->setAttributeSetId($attributeSet->getId())
+                    ->setEntityTypeId($this->getEntityTypeId())
+                    ->setSortOrder(!empty($data['position']) ? $data['position'] : 999)
+                    ->save();
+            }
+        }
     }
 }

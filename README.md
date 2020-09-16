@@ -165,7 +165,7 @@ Customer attribute configurations can be complex. The purpose of this file is to
 
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
 Product attribute configurations can be complex. The purpose of this file is to address the most common settings.
-> Out of Scope: Updating Attribute codes. Any attribute setting not currently listed
+> Out of Scope: Updating Attribute codes. Any attribute setting not currently listed. Swatches
 
 
 
@@ -183,7 +183,10 @@ Product attribute configurations can be complex. The purpose of this file is to 
 
 **position** - Optional, Numeric.  Indicates the position of the attribute within the Attribute Group
 
-**attribute\_set** - Carriage return delimited list of Attribute Sets that the Attribute will be added to.  Sets will be created as needed based on the Default set. If no value is given, the Attribute will be added to the Default set.
+**attribute\_set** - Optional. Carriage return delimited list of Attribute Sets that the Attribute will be added to.  Sets will be created as needed based on the Default set. If no value is given, the Attribute will be added to the Default set.
+
+**only\_update\_sets** - Optional Value=Y. Only requires attribute\_code. This would be flagged in the case where the only action is to add an attribute to a set.  Most likely usage would be for assigning default system attributes to a set.
+
 
 ### Reviews
 *File Name* - reviews.csv

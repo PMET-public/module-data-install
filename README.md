@@ -21,9 +21,9 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**product_attributes.csv**](#product-attributes) - Creates product attributes and set
 
-**categories.csv** - Creates categories
+[**categories.csv**](#categories) - Creates categories
 
-**products.csv** - Creates simple and configurable products
+[**products.csv**](#products) - Creates simple and configurable products
 
 **blocks.csv** - Creates Blocks. Includes Page Builder compatibility
 
@@ -158,6 +158,44 @@ Customer attribute configurations can be complex. The purpose of this file is to
 
 **position** - Optional, Numeric.  Indicates the position of the attribute within the Attribute Group
 
+### Categories
+*File Name* - categories.csv
+
+This file is used to create categories. Categories are also created during product import so this file may be optional. It can be used if you want control over position and visibility.
+
+> Out of Scope: Updating existing categories. Setting categories for specific views. Support for Layout, landing page, image and display mode attributes is coming. 
+
+
+
+*Columns*
+
+**name** - Required. This is what will show on the storefront
+
+**url\_key** - Required. Needs to be unique
+
+**path** - If left empty, the category will be top level. Subcategories will need to have their parents listed. For example
+- Women (no path)
+- - Tops (Path = Women)
+- - - Sweaters (Path = Women/Tops)
+- - - Jackets (Path = Women/Tops)
+
+Parent categories need to be in the file before the child categories 
+
+**active** - Optional: Values = 1/0. Default = 1
+
+**is\_anchor** - Optional: Values = 1/0. Default = 1
+
+**include\_in\_menu** - Optional: Values = 1/0. Default = 1
+
+**position** - Optional, Numeric.  Indicates the position of the category within its specific branch
+
+### Products
+*File Name* - products.csv
+
+The standard Magento product import file is used. If you export from an existing store, you may need to make the following adjustments:
+- Change any store codes, website, attribute set or category definitions to match your new configuration
+- Image references will be the path of the final image *example:* `i/m/image.jpg`. Those will need to be updated to the path of your import source.  Most likely the path will be removed and just the file name (`image.jpg`) will be used
+
 
 
 ### Product Attributes
@@ -175,11 +213,11 @@ Product attribute configurations can be complex. The purpose of this file is to 
 
 **frontend\_label** - Required when creating a new attribute.
 
-**frontend\_input** - Required when creating a new attribute. Catalog Input Type for Store Owner. Allowed values are text, textarea, texteditor, date, boolean, multiselect, price
+**frontend\_input** - Required when creating a new attribute. Catalog Input Type for Store Owner. Allowed values are text, textarea, texteditor, date, boolean, multiselect, select, price
 
 **is\_required** - Optional: Values = Y/N. Default = N
 
-**options** - Required when input is Multi or Select. Values to show, carriage return delimited
+**option** - Required when input is Multi or Select. Values to show, carriage return delimited
 
 **position** - Optional, Numeric.  Indicates the position of the attribute within the Attribute Group
 

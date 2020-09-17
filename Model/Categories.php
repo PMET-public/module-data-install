@@ -81,10 +81,10 @@ class Categories
                 $data = [
                     'parent_id' => $parentCategory->getId(),
                     'name' => $row['name'],
-                    'is_active' => $row['active'],
-                    'is_anchor' => $row['is_anchor'],
-                    'include_in_menu' => $row['include_in_menu'],
-                    'url_key' => $row['url_key'],
+                    'is_active' => $row['active'] ?? 1,
+                    'is_anchor' => $row['is_anchor'] ?? 1,
+                    'include_in_menu' => $row['include_in_menu'] ?? 1,
+                    'url_key' => $row['url_key'] ?? '',
                     'store_id' => 0
                 ];
                 $category = $this->categoryFactory->create();

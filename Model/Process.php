@@ -15,7 +15,7 @@ class Process
 {
     const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config.json','config.csv',
         'customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','categories.csv',
-        'products.csv','blocks.csv','dynamic_blocks.csv','pages.csv','reviews.csv'];
+        'products.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv'];
 
     protected $redo=[];
 
@@ -67,6 +67,10 @@ class Process
     /** @var Reviews  */
     protected $reviewsInstall;
 
+
+    /** @var Templates  */
+    ///protected $templatesInstall;
+
     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
@@ -83,6 +87,7 @@ class Process
      * @param CustomerAttributes $customerAttributes
      * @param Customers $customers
      * @param Reviews $reviews
+     * @param Templates $templates
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -98,7 +103,8 @@ class Process
         CustomerGroups $customerGroups,
         CustomerAttributes $customerAttributes,
         Customers $customers,
-        Reviews $reviews
+        Reviews $reviews,
+        Templates $templates
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -115,6 +121,7 @@ class Process
         $this->customerAttributeInstall = $customerAttributes;
         $this->customerInstall = $customers;
         $this->reviewsInstall = $reviews;
+        $this->templatesInstall = $templates;
     }
 
     /**
@@ -221,6 +228,11 @@ class Process
                     case "reviews.csv":
                         print_r("loading Reviews & Ratings\n");
                         $this->processRows($rows, $header, $this->reviewsInstall);
+                        break;
+
+                    case "templates.csv":
+                        print_r("loading Page Builder Templates\n");
+                        $this->processRows($rows, $header, $this->templatesInstall);
                         break;
                 }
             }

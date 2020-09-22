@@ -83,10 +83,12 @@ class Pages
      * @return bool
      * @throws LocalizedException
      */
-    public function install(array $row)
+    public function install(array $row, array $settings)
     {
         //TODO: set stores to use configuration if stores not in file
         //TODO: check on multiple stores for a page
+        //TODO: Set default layout of a page cms-full-width *check if necessary
+        //TODO:Validate design layout types
         $row['content'] = $this->converter->convertContent($row['content']);
         if (!empty($row['identifier'])) {
             $foundPage=0;

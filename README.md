@@ -29,7 +29,9 @@ Each element of potential sample data is encapsulated in its own file:
 
 **dynamic_blocks.csv** - Creates Dynamic Blocks. Includes Page Builder compatibility
 
-**pages.csv** - Creates pages. Includes Page Builder compatibility
+[**pages.csv**](#pages) - Creates and updates pages. Includes Page Builder compatibility
+
+[**templates.csv**](#templates) - Create Page Builder templates from existing Page Builder content
 
 [**reviews.csv**](#reviews) - Creates reviews and ratings
 
@@ -225,6 +227,49 @@ Product attribute configurations can be complex. The purpose of this file is to 
 
 **only\_update\_sets** - Optional Value=Y. Only requires attribute\_code. This would be flagged in the case where the only action is to add an attribute to a set.  Most likely usage would be for assigning default system attributes to a set.
 
+### Pages
+*File Name* - pages.csv
+
+This file is used to add or update pages.  Updates are made by using the key of store_view_code and identifier
+
+> Out of Scope: Any property of a page that is not listed.
+
+
+*Columns*
+**store_view_code** - Optional. Store View the page should be assigned to. If none is provided, the code of the view defind in settings.csv, or the global default of *default* is used.
+> If you want a page to be available across all All Store Views, use the value of **admin** as the store_view_cide
+
+**identifier** - Required. Url key of the page. 
+
+**title** - Required - Same as Page Title in the UI
+
+**page\_layout** - Optional. Default = cms-full-width. Value entered in Design->Layout section of UI.  Acceptable values include empty, 1column, 2columns-left, 2columns-right, 3columns, cms-full-width ,category-full-width, product-full-width
+
+**meta\_keywords** - Optional
+
+**meta\_description** - Optional
+
+**content\_heading** - Optional. Content Heading in UI
+
+**content** - Optional. Body of the page. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers for Page Builder compatibility
+
+*TODO: document page/block export
+
+### Templates
+*File Name* - templates.csv
+
+This file is used to create Page Builder templates
+
+*Columns*
+
+**name** - Required.
+
+**created_for** - Optional - Used to filter for selection UI. Values are page, block, dynamic_block, category, product.
+
+**preview_image** - Optional. Name of the Thumbnail image of the template that is used in template selection UI. This should be saved from the existing template and stored in `media/.template-manager`. It will be something like `homepage5f6a43805b54f.jpg`
+
+**content** - Optional (but then why bother). Body of the template. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers for Page Builder compatibility
+
 
 ### Reviews
 *File Name* - reviews.csv
@@ -237,7 +282,6 @@ Quality, Price and Value rating codes are installed by default but the visibilit
 > Out of Scope: Support for mulitple ratings per review. Updating of existing reviews or ratings.
 
 
-sku,rating_code,rating_value,summary,review,reviewer,email
 *Columns*
 
 **sku** - Required. Product to add the review to. If the product doesn't exist the row will be skipped

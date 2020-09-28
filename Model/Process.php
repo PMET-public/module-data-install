@@ -67,9 +67,11 @@ class Process
     /** @var Reviews  */
     protected $reviewsInstall;
 
+    /** @var Validate */
+    protected $validate;
 
     /** @var Templates  */
-    ///protected $templatesInstall;
+    protected $templatesInstall;
 
     /**
      * Process constructor.
@@ -88,6 +90,7 @@ class Process
      * @param Customers $customers
      * @param Reviews $reviews
      * @param Templates $templates
+     * @param Validate $validate
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -104,7 +107,8 @@ class Process
         CustomerAttributes $customerAttributes,
         Customers $customers,
         Reviews $reviews,
-        Templates $templates
+        Templates $templates,
+        Validate $validate
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -122,6 +126,7 @@ class Process
         $this->customerInstall = $customers;
         $this->reviewsInstall = $reviews;
         $this->templatesInstall = $templates;
+        $this->validate = $validate;
     }
 
     /**
@@ -145,6 +150,11 @@ class Process
                     $header = array_shift($rows);
                     //Remove hidden character Excel adds to the first cell of a document
                     $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
+                    //validate that number of elements in header and rows is equal
+                    if(!$this->validate->validateCsvFile($header,$rows)){
+                        print_r("Skipping File ".$nextFile.". The number of columns in the header does not match the number of column of data in one or more rows\n");
+                        continue;
+                    }
                 }
 
                 //determine path to module code for image import
@@ -335,6 +345,7 @@ class Process
      */
     private function getConfiguration(string $moduleName, string $fixtureDirectory): array
     {
+        $valid = false;
         $setupArray=$this->settings;
         $setupFile = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/settings.csv");
         if (file_exists($setupFile)) {
@@ -343,10 +354,28 @@ class Process
             //Remove hidden character Excel adds to the first cell of a document
             $setupHeader = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $setupHeader);
             foreach ($setupRows as $setupRow) {
-                $setupArray[$setupRow[0]] = $setupRow[1];
+                //if(!empty($setupRow[1])){
+                    switch ($setupRow[0]){
+                        case "site_code":
+                            $valid = $this->validate->validateWebsiteCode($setupRow[1]);
+                            break;
+                        case "store_code":
+                            $valid = $this->validate->validateStoreCode($setupRow[1]);
+                            break;
+                        case "store_view_code":
+                            $valid = $this->validate->validateStoreViewCode($setupRow[1]);
+                            break;
+                    }
+                    if($valid){
+                        $setupArray[$setupRow[0]] = $setupRow[1];
+                    }
+
+                //}
             }
         }
 
         return $setupArray;
     }
+
+
 }

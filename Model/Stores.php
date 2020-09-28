@@ -563,7 +563,7 @@ class Stores
      * @param string $viewCode
      * @return int
      */
-    public function     getViewId(string $viewCode)
+    public function getViewId(string $viewCode)
     {
         $data = ['store_view_code'=>$viewCode];
         $view = $this->getView($data);

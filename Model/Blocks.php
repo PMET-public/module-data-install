@@ -56,11 +56,22 @@ class Blocks
      */
     protected function saveCmsBlock($data)
     {
+        /** @var \Magento\Cms\Model\Block $cmsBlock */
         $cmsBlock = $this->blockFactory->create();
         $cmsBlock->getResource()->load($cmsBlock, $data['identifier']);
 
-        //get view id from view code
-        $_viewId = $this->storeView->load('default')->getStoreId();
+        //get view id from view code, use admin if not defined
+        if(!empty($data['store_view_code'])){
+            $viewId = $this->storeView->load($data['store_view_code'])->getStoreId();
+        } else{
+            $viewId = $this->storeView->load('admin')->getStoreId();
+        }
+
+        //set status as active if not defined
+        if(empty($data['is_active']) || $data['is_active']=='Y'){
+            $data['is_active'] = 1;
+        }
+
 
         if (!$cmsBlock->getData()) {
             $cmsBlock->setData($data);
@@ -68,8 +79,9 @@ class Blocks
             $cmsBlock->addData($data);
         }
 
-        $cmsBlock->setStoreId($_viewId);
-        $cmsBlock->setIsActive(1);
+        $cmsBlock->setStoreId($viewId);
+        //$cmsBlock->setIsActive(!empty($data['is_active']) ?? 'Y');
+        $cmsBlock->setIsActive($data['is_active']);
         $cmsBlock->save();
         return $cmsBlock;
     }

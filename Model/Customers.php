@@ -138,7 +138,7 @@ class Customers
                 [$customer, $row['password']]
             );
 
-            if (!empty($row['add_to_autofill']) && $row['add_to_autofill'] == 1) {
+            if (!empty($row['add_to_autofill']) && $row['add_to_autofill'] == 'Y') {
                 $startingElement = $this->addToAutofill($row, $startingElement);
             }
         }

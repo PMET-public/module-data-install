@@ -106,7 +106,7 @@ Optional file: This file is used to add and update Sites, Stores, Store Views an
 
 **view\_is\_active** - Optional: values = Y/N. Default = N. If a view is set as default for a store, it cannot be deactivated.
 
-**host** - Optional: Used to set the Base Urls for a site.  Should just be the domain name (example: luma.com)
+**host** - Optional: Used to set the Base Urls for a site.  Should just be the domain name (example: luma.com).  This is set at the website level. If it needs to be set for another scope, that can be done in the config.json or config.csv files.
 
 **theme** - Optional: Assigns a theme to the store view. This should be the path of the theme directory from the Vendor namespace. For example Magento/luma or MagentoEse/venia
 
@@ -191,6 +191,9 @@ Parent categories need to be in the file before the child categories
 
 **position** - Optional, Numeric.  Indicates the position of the category within its specific branch
 
+**description** - Optional.  Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers for Page Builder compatibility
+
+**display_mode** - Optional. Default=PRODUCTS. Allowed values: PRODUCTS, PAGE, PRODUCTS_AND_PAGE
 ### Products
 *File Name* - products.csv
 
@@ -320,10 +323,10 @@ If no correct replacement is found, the substituion will not occur.
 Here is a list of all substitutions currently supported
 
 **Category Id** - `{{categoryid key="<url key of category>"}}`\
-*example* - `{{categoryid key="shorts-men"}`
+*example* - `{{categoryid key="shorts-men"}}`
 
 **Category Url** - `{{categoryurl key="<url key of category>"}}`\
-*example* - `{{categoryurl key="shorts-men"}`
+*example* - `{{categoryurl key="shorts-men"}}`
 
 **Product Url** - `{{producturl sku="<sku>"}}`\
 *example* - `{{producturl sku="24-MB01"}}`

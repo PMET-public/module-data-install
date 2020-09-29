@@ -359,7 +359,6 @@ class Process
                 }
             }
         }
-        print_r($setupArray);
         return $setupArray;
     }
 }

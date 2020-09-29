@@ -354,28 +354,12 @@ class Process
             //Remove hidden character Excel adds to the first cell of a document
             $setupHeader = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $setupHeader);
             foreach ($setupRows as $setupRow) {
-                //if(!empty($setupRow[1])){
-                    switch ($setupRow[0]){
-                        case "site_code":
-                            $valid = $this->validate->validateWebsiteCode($setupRow[1]);
-                            break;
-                        case "store_code":
-                            $valid = $this->validate->validateStoreCode($setupRow[1]);
-                            break;
-                        case "store_view_code":
-                            $valid = $this->validate->validateStoreViewCode($setupRow[1]);
-                            break;
-                    }
-                    if($valid){
-                        $setupArray[$setupRow[0]] = $setupRow[1];
-                    }
-
-                //}
+                if(!empty($setupRow[1])){
+                    $setupArray[$setupRow[0]] = $setupRow[1];
+                }
             }
         }
-
+        print_r($setupArray);
         return $setupArray;
     }
-
-
 }

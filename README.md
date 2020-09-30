@@ -25,6 +25,8 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**products.csv**](#products) - Creates simple and configurable products
 
+[**upsells.csv**](#upsells) - Used to create the Related Products rules
+
 **blocks.csv** - Creates Blocks. Includes Page Builder compatibility
 
 **dynamic_blocks.csv** - Creates Dynamic Blocks. Includes Page Builder compatibility
@@ -229,6 +231,35 @@ Product attribute configurations can be complex. The purpose of this file is to 
 **attribute\_set** - Optional. Carriage return delimited list of Attribute Sets that the Attribute will be added to.  Sets will be created as needed based on the Default set. If no value is given, the Attribute will be added to the Default set.
 
 **only\_update\_sets** - Optional Value=Y. Only requires attribute\_code. This would be flagged in the case where the only action is to add an attribute to a set.  Most likely usage would be for assigning default system attributes to a set.
+
+### Upsells
+*File Name* - upsells.csv
+
+This file is used to add Related Products rules. At this time, the easiest method is to create the rules in an existing store, then take the serialized values from the database
+
+
+> Out of Scope: Updating of existing rules
+
+
+*Columns*
+
+**name** - Required.
+
+**is\_active** - Required. Y or N
+
+**conditions\_serialized** - Value taken from the` conditions_serialized` column in the `targetrule` table. Content is run through the [**Content Substitution**](#content-substitution) process that will replace identifiers, most likely category ids. Make sure to double quotes for csv file compatibilit.
+
+**conditions\_serialized** - Value taken from the`conditions_serialized` column in the `targetrule` table. Content is run through the [**Content Substitution**](#content-substitution) process that will replace identifiers, most likely category ids. Make sure to double quotes for csv file compatibility.
+
+**actions\_serialized** - Value taken from the`actions_serialized` column in the `targetrule` table. Content is run through the [**Content Substitution**](#content-substitution) process that will replace identifiers, most likely category ids. Make sure to double quotes for csv file compatibility.
+
+**positions\_limit** - Numeric. Max number of products to display
+
+**apply to** - Values: related, upsells, crosssells
+
+**sort_order** - Numeric
+
+
 
 ### Pages
 *File Name* - pages.csv

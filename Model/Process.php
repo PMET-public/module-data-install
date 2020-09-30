@@ -15,7 +15,7 @@ class Process
 {
     const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config.json','config.csv',
         'customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','categories.csv',
-        'products.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv'];
+        'products.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv'];
 
     protected $redo=[];
 
@@ -73,6 +73,9 @@ class Process
     /** @var Templates  */
     protected $templatesInstall;
 
+    /** @var Upsells */
+    protected $upsellsInstall;
+
     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
@@ -91,6 +94,7 @@ class Process
      * @param Reviews $reviews
      * @param Templates $templates
      * @param Validate $validate
+     * @param Upsells $upsells
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -108,7 +112,8 @@ class Process
         Customers $customers,
         Reviews $reviews,
         Templates $templates,
-        Validate $validate
+        Validate $validate,
+        Upsells $upsells
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -127,6 +132,7 @@ class Process
         $this->reviewsInstall = $reviews;
         $this->templatesInstall = $templates;
         $this->validate = $validate;
+        $this->upsellsInstall = $upsells;
     }
 
     /**
@@ -243,6 +249,10 @@ class Process
                     case "templates.csv":
                         print_r("loading Page Builder Templates\n");
                         $this->processRows($rows, $header, $this->templatesInstall);
+                        break;
+                    case "upsells.csv":
+                        print_r("loading Related Proudcts, Cross Sells and Upsells\n");
+                        $this->processRows($rows, $header, $this->upsellsInstall);
                         break;
                 }
             }

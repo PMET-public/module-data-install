@@ -76,6 +76,9 @@ class Process
     /** @var Upsells */
     protected $upsellsInstall;
 
+    /** @var CopyMedia */
+    protected $copyMedia;
+
     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
@@ -95,6 +98,7 @@ class Process
      * @param Templates $templates
      * @param Validate $validate
      * @param Upsells $upsells
+     * @param CopyMedia $copyMedia
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -113,7 +117,8 @@ class Process
         Reviews $reviews,
         Templates $templates,
         Validate $validate,
-        Upsells $upsells
+        Upsells $upsells,
+        CopyMedia $copyMedia
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -133,6 +138,7 @@ class Process
         $this->templatesInstall = $templates;
         $this->validate = $validate;
         $this->upsellsInstall = $upsells;
+        $this->copyMedia = $copyMedia;
     }
 
     /**
@@ -143,8 +149,12 @@ class Process
      */
     public function loadFiles($moduleName, $fixtureDirectory = "fixtures", array $fileOrder = self::FILE_ORDER)
     {
+
+
         //set module configuration
         $this->settings = $this->getConfiguration($moduleName, $fixtureDirectory);
+
+        $this->copyMedia->moveFiles($moduleName);
 
         foreach ($fileOrder as $nextFile) {
             $fileName = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/" . $nextFile);

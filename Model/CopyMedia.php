@@ -32,7 +32,7 @@ class CopyMedia
     protected $directoryList;
 
     protected $directoryMappings=[['from'=>'wysiwyg','to'=>'pub/media/wysiwyg'],['from'=>'logo','to'=>'pub/media/logo/stores'],
-        ['from'=>'favicon','to'=>'pub/media/favicon/stores'],['from'=>'theme','to'=>'app/design/frontend'],
+        ['from'=>'favicon','to'=>'pub/media/favicon/stores'],//['from'=>'theme','to'=>'app/design/frontend'],
         ['from'=>'template_manager','to'=>'pub/media/.template-manager'],['from'=>'downloadable_products','to'=>'/pub/media/import'],
         ['from'=>'.template-manager','to'=>'pub/media/.template-manager']];
 

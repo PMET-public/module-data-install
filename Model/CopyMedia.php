@@ -52,7 +52,7 @@ class CopyMedia
             $fromName = $this->fixtureManager->getFixture($moduleName . "::" . "media/" . $nextDirectory['from']);
             $toName = $this->directoryList->getRoot()."/".$nextDirectory['to'];
             $this->copyFilesFromTo($fromName,$toName);
-        }$r = $t;
+        }
     }
 
 

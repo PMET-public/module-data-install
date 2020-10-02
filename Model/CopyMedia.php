@@ -3,6 +3,7 @@
 
 namespace MagentoEse\DataInstall\Model;
 
+use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 use Magento\Framework\App\Filesystem\DirectoryList;
@@ -32,7 +33,7 @@ class CopyMedia
     protected $directoryList;
 
     protected $directoryMappings=[['from'=>'wysiwyg','to'=>'pub/media/wysiwyg'],['from'=>'logo','to'=>'pub/media/logo/stores'],
-        ['from'=>'favicon','to'=>'pub/media/favicon/stores'],//['from'=>'theme','to'=>'app/design/frontend'],
+        ['from'=>'favicon','to'=>'pub/media/favicon/stores'],['from'=>'theme','to'=>'app/design/frontend'],
         ['from'=>'template_manager','to'=>'pub/media/.template-manager'],['from'=>'downloadable_products','to'=>'/pub/media/import'],
         ['from'=>'.template-manager','to'=>'pub/media/.template-manager']];
 
@@ -51,7 +52,7 @@ class CopyMedia
             $fromName = $this->fixtureManager->getFixture($moduleName . "::" . "media/" . $nextDirectory['from']);
             $toName = $this->directoryList->getRoot()."/".$nextDirectory['to'];
             $this->copyFilesFromTo($fromName,$toName);
-        }
+        }$r = $t;
     }
 
 
@@ -63,10 +64,12 @@ class CopyMedia
                 $file = $this->directoryList->getRoot()."/".$file;
                 $newFileName = str_replace($fromPath, $toPath, $file);
                 if ($this->directoryRead->isFile($file)) {
-                    $this->directoryWrite->copyFile($file, $newFileName);
-                    //$this->directoryWrite->changePermissions($newFileName, 0660);
-                } elseif($this->directoryRead->isDirectory($newFileName)) {
-                    //$this->directoryWrite->changePermissions($newFileName, 0755);
+                    try{
+                        $this->directoryWrite->copyFile($file, $newFileName);
+                    }
+                    catch(FileSystemException $exception){
+                        print_r("Unable to copy file ".$file. " --- ".$exception->getMessage()."\n");
+                    }
                 }
             }
         }

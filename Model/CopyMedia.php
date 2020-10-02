@@ -64,9 +64,9 @@ class CopyMedia
                 $newFileName = str_replace($fromPath, $toPath, $file);
                 if ($this->directoryRead->isFile($file)) {
                     $this->directoryWrite->copyFile($file, $newFileName);
-                    $this->directoryWrite->changePermissions($newFileName, 0660);
+                    //$this->directoryWrite->changePermissions($newFileName, 0660);
                 } elseif($this->directoryRead->isDirectory($newFileName)) {
-                    $this->directoryWrite->changePermissions($newFileName, 0755);
+                    //$this->directoryWrite->changePermissions($newFileName, 0755);
                 }
             }
         }

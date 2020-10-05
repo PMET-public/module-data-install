@@ -63,7 +63,7 @@ class Products
         if (!empty($settings['restrict_products_from_views'])) {
             $restrictProductsFromViews = $settings['restrict_products_from_views'];
         } else {
-            $restrictProductsFromViews =  'Y';
+            $restrictProductsFromViews =  'N';
         }
 
         foreach ($rows as $row) {

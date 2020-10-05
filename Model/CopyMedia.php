@@ -20,17 +20,17 @@ class CopyMedia
         ['from'=>'template_manager','to'=>'pub/media/.template-manager','type'=>'image'],['from'=>'downloadable_products','to'=>'/pub/media/import','type'=>'download'],
         ['from'=>'.template-manager','to'=>'pub/media/.template-manager','type'=>'image']];
 
-    protected $allowedImageFiles = ['png' => 'image/png', 'jpe' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'jpg' => 'image/jpeg',
-        'gif'  => 'image/gif', 'bmp'  => 'image/bmp', 'svg' => 'image/svg+xml', 'svgz' => 'image/svg+xml','md'=>'application/octet-stream|text/plain',
+    protected $allowedImageFiles = [ 'jpg' => 'image/jpeg','png' => 'image/png',  'jpeg' => 'image/jpeg','gif'  => 'image/gif','jpe' => 'image/jpeg',
+         'bmp'  => 'image/bmp', 'svg' => 'image/svg+xml', 'svgz' => 'image/svg+xml','md'=>'application/octet-stream|text/plain',
         'ico'=>'image/vnd.microsoft.icon|image/x-icon'];
 
-    protected $allowedDownloadableFiles = ['txt'  => 'text/plain', 'csv'  => 'text/plain', 'mp3'  => 'audio/mpeg', 'qt'   => 'video/quicktime',
-        'mov'  => 'video/quicktime', 'pdf'  => 'application/pdf', 'psd'  => 'image/vnd.adobe.photoshop', 'ai'   => 'application/postscript', 'eps'  => 'application/postscript'];
+    protected $allowedDownloadableFiles = ['pdf'  => 'application/pdf', 'mp3'  => 'audio/mpeg', 'qt'   => 'video/quicktime',
+        'mov'  => 'video/quicktime','txt'  => 'text/plain', 'csv'  => 'text/plain',  'psd'  => 'image/vnd.adobe.photoshop', 'ai'   => 'application/postscript', 'eps'  => 'application/postscript'];
 
     protected $allowedThemeFiles = ['xml'=>'application/xml','less'=>'text/plain','phtml'=>'text/html|text/x-php',
         'css'=>'text/html','md'=>'application/octet-stream|text/plain','json'=>'application/json','csv'=>'text/plain',
         'php'=>'text/html|text/x-php','eot'=>'application/vnd.ms-fontobject','svg'=>'image/svg+xml','woff'=>'application/octet-stream',
-        'woff2'=>'application/octet-stream','ttf'=>'font/sfnt','txt'=>'text/plain'];
+        'woff2'=>'application/octet-stream','ttf'=>'application/font-sfnt','txt'=>'text/plain'];
 
     /** @var SampleDataContext */
     protected $sampleDataContext;
@@ -127,8 +127,13 @@ class CopyMedia
                 break;
         }
         foreach($validFiles as $extension=>$type){
-            if($extension == $this->getFileExtension($file) && strpos($type,$this->fileMime->getMimeType($file)) >= 0){
-                return true;
+            $fileExtension=$this->getFileExtension($file);
+            $fileType=$this->fileMime->getMimeType($file);
+            $pos = strpos($type,$this->fileMime->getMimeType($file));
+            if($extension == $this->getFileExtension($file)){
+                if(is_integer(strpos($type,$this->fileMime->getMimeType($file)))) {
+                    return true;
+                }
             }
         }
         return false;

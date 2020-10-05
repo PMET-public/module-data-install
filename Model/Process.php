@@ -153,7 +153,7 @@ class Process
 
         //set module configuration
         $this->settings = $this->getConfiguration($moduleName, $fixtureDirectory);
-
+        print_r("Copying media files\n");
         $this->copyMedia->moveFiles($moduleName);
 
         foreach ($fileOrder as $nextFile) {

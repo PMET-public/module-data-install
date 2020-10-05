@@ -54,7 +54,14 @@ class CopyMedia
     protected $fileMime;
 
 
-
+    /**
+     * CopyMedia constructor.
+     * @param SampleDataContext $sampleDataContext
+     * @param Filesystem $fileSystem
+     * @param DirectoryList $directoryList
+     * @param Mime $fileMime
+     * @throws FileSystemException
+     */
 
     public function __construct(SampleDataContext $sampleDataContext,Filesystem $fileSystem,
                                 DirectoryList $directoryList,Mime $fileMime)
@@ -73,8 +80,7 @@ class CopyMedia
             $toName = $this->directoryList->getRoot()."/".$nextDirectory['to'];
             $this->copyFilesFromTo($fromName,$toName,$nextDirectory['type']);
         }
-        $r=$t;
-    }
+      }
 
 
     protected function copyFilesFromTo($fromPath, $toPath,$fileType)

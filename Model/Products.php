@@ -109,7 +109,7 @@ class Products
 
         /// create array to restrict new products from other views. Only run if there are products under another store
         if($restrictProductsFromViews=='Y' && !empty($restrictProducts)) {
-            $restrictNewProducts = $this->restrictProductsFromOtherStoreViews($productsArray);
+            $restrictNewProducts = $this->restrictProductsFromOtherStoreViews($productsArray,$settings['store_view_code']);
             if (!empty($restrictNewProducts)) {
                 print_r("Restrict new products from existing stores\n");
                 $importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
@@ -134,14 +134,17 @@ class Products
      * @param array $products
      * @return array
      */
-    private function restrictProductsFromOtherStoreViews(array $products)
+    private function restrictProductsFromOtherStoreViews(array $products,$storeViewCode)
     {
         $newProductArray = [];
         $allStoreCodes = $this->stores->getAllViewCodes();
         foreach ($products as $product) {
+            if(!empty($product['store_view_code'])){
+                $storeViewCode = $product['store_view_code'];
+            }
             //add restrictive line for each
             foreach ($allStoreCodes as $storeCode) {
-                if ($storeCode != $product['store_view_code']) {
+                 if ($storeCode != $storeViewCode) {
                     $newProductArray[] = ['sku'=>$product['sku'],'store_view_code'=>$storeCode,'visibility'=>'Not Visible Individually'];
                 }
             }

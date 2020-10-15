@@ -8,6 +8,7 @@ use Exception;
 use Magento\Cms\Api\Data\PageInterface;
 use Magento\Cms\Api\Data\PageInterfaceFactory;
 use Magento\Cms\Api\PageRepositoryInterface;
+use Magento\CmsUrlRewrite\Model\CmsPageUrlRewriteGenerator;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Csv;
@@ -16,7 +17,8 @@ use Magento\Framework\Setup\SampleData\FixtureManager;
 use Magento\Store\Api\StoreRepositoryInterface;
 use Magento\UrlRewrite\Model\ResourceModel\UrlRewrite;
 use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollection;
-
+use Magento\UrlRewrite\Model\UrlPersistInterface;
+use Magento\UrlRewrite\Service\V1\Data\UrlRewrite as UrlRewriteService;
 class Pages
 {
     /** @var Csv  */
@@ -46,6 +48,9 @@ class Pages
     /** @var UrlRewriteCollection  */
     protected $urlRewriteCollection;
 
+    /** @var UrlPersistInterface */
+    protected $urlPersist;
+
     /**
      * Pages constructor.
      * @param SampleDataContext $sampleDataContext
@@ -56,6 +61,7 @@ class Pages
      * @param SearchCriteriaBuilder $searchCriteria
      * @param UrlRewrite $urlRewrite
      * @param UrlRewriteCollection $urlRewriteCollection
+     * @param UrlPersistInterface $urlPersist
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -65,7 +71,8 @@ class Pages
         PageRepositoryInterface $pageRepository,
         SearchCriteriaBuilder $searchCriteria,
         UrlRewrite $urlRewrite,
-        UrlRewriteCollection $urlRewriteCollection
+        UrlRewriteCollection $urlRewriteCollection,
+        UrlPersistInterface $urlPersist
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -76,6 +83,7 @@ class Pages
         $this->searchCriteria = $searchCriteria;
         $this->urlRewrite = $urlRewrite;
         $this->urlRewriteCollection = $urlRewriteCollection;
+        $this->urlPersist = $urlPersist;
     }
 
     /**
@@ -136,6 +144,8 @@ class Pages
                         }
                     } else {
                         //multiple pages exist
+                        $e=$updatePage->getStores();
+                        $f=$this->getStoreIds($row['store_view_code'])[0];
                         if ($updatePage->getStores()[0]==$this->getStoreIds($row['store_view_code'])[0]) {
                             //update when store is found
                             $updatePage->load($row['identifier'], 'identifier');
@@ -147,6 +157,13 @@ class Pages
 
                 //if its an existing page, but needs to be created for a store
                 if (count($pages) > 1 && $foundPage==0) {
+                    $this->urlPersist->deleteByData(
+                    [
+                        UrlRewriteService::ENTITY_TYPE =>CmsPageUrlRewriteGenerator::ENTITY_TYPE,
+                        UrlRewriteService::STORE_ID=>$this->getStoreIds($row['store_view_code']),
+                        UrlRewriteService::REQUEST_PATH=>$row['identifier']
+                        ]
+                    );
                     $page = $this->pageInterfaceFactory->create();
                     $page->addData($row)
                         ->setStores($this->getStoreIds($row['store_view_code']))

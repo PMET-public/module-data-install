@@ -462,11 +462,15 @@ class Stores
         $searchCriteria = $this->searchCriteriaBuilder->create();
         $cmsPagesCollection = $this->pageRepository->getList($searchCriteria)->getItems();
         foreach ($cmsPagesCollection as $page) {
-            $page->setStoreId($storeId);
-            $rewrites[] = $this->cmsPageUrlRewriteGenerator->generate($page);
+            //generate urls for pages shared across stores
+            if($page->getStoreId()[0]==0){
+                $page->setStoreId($storeId);
+                $rewrites[] = $this->cmsPageUrlRewriteGenerator->generate($page);
+            }
+
         }
 
-        $urls = array_merge($urls, ...$rewrites);
+        $urls = array_merge($urls, ... $rewrites);
 
         return $urls;
     }

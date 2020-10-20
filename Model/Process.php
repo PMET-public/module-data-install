@@ -232,6 +232,11 @@ class Process
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
 
+                    case "config_secret.json":
+                        print_r("loading Config Secret Json\n");
+                        $this->processJson($fileContent, $this->configurationInstall);
+                        break;
+
                     case "config.json":
                         print_r("loading Config Json\n");
                         $this->processJson($fileContent, $this->configurationInstall);

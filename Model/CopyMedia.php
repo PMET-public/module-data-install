@@ -22,7 +22,7 @@ class CopyMedia
 
     protected $allowedImageFiles = [ 'jpg' => 'image/jpeg','png' => 'image/png',  'jpeg' => 'image/jpeg','gif'  => 'image/gif','jpe' => 'image/jpeg',
          'bmp'  => 'image/bmp', 'svg' => 'image/svg+xml', 'svgz' => 'image/svg+xml','md'=>'application/octet-stream|text/plain',
-        'ico'=>'image/vnd.microsoft.icon|image/x-icon'];
+        'ico'=>'image/vnd.microsoft.icon|image/x-icon|image/png'];
 
     protected $allowedDownloadableFiles = ['pdf'  => 'application/pdf', 'mp3'  => 'audio/mpeg', 'qt'   => 'video/quicktime',
         'mov'  => 'video/quicktime','txt'  => 'text/plain', 'csv'  => 'text/plain',  'psd'  => 'image/vnd.adobe.photoshop', 'ai'   => 'application/postscript', 'eps'  => 'application/postscript'];

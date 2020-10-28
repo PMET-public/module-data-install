@@ -15,7 +15,7 @@ class Process
 {
     const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv',
         'customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','blocks.csv','categories.csv',
-        'products.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv'];
+        'products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv'];
 
     protected $redo=[];
 
@@ -79,6 +79,9 @@ class Process
     /** @var CopyMedia */
     protected $copyMedia;
 
+    /** @var MsiInventory */
+    protected $msiInventoryInstall;
+
     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
@@ -99,6 +102,7 @@ class Process
      * @param Validate $validate
      * @param Upsells $upsells
      * @param CopyMedia $copyMedia
+     * @param MsiInventory $msiInventory
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -118,7 +122,8 @@ class Process
         Templates $templates,
         Validate $validate,
         Upsells $upsells,
-        CopyMedia $copyMedia
+        CopyMedia $copyMedia,
+        MsiInventory $msiInventory
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -139,6 +144,7 @@ class Process
         $this->validate = $validate;
         $this->upsellsInstall = $upsells;
         $this->copyMedia = $copyMedia;
+        $this->msiInventoryInstall = $msiInventory;
     }
 
     /**
@@ -269,6 +275,11 @@ class Process
                     case "upsells.csv":
                         print_r("loading Related Proudcts, Cross Sells and Upsells\n");
                         $this->processRows($rows, $header, $this->upsellsInstall);
+                        break;
+
+                    case "msi_inventory.csv":
+                        print_r("loading Msi Inventory\n");
+                        $this->processFile($rows, $header, $this->msiInventoryInstall, $modulePath);
                         break;
                 }
             }

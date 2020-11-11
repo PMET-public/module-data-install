@@ -15,7 +15,8 @@ class Process
 {
     const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv',
         'customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','blocks.csv','categories.csv',
-        'products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv'];
+        'products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv',
+        'b2b_companies.csv'];
 
     protected $redo=[];
 
@@ -82,6 +83,9 @@ class Process
     /** @var MsiInventory */
     protected $msiInventoryInstall;
 
+    /** @var Companies */
+    protected $companiesInstall;
+
     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
@@ -123,7 +127,8 @@ class Process
         Validate $validate,
         Upsells $upsells,
         CopyMedia $copyMedia,
-        MsiInventory $msiInventory
+        MsiInventory $msiInventory,
+        Companies $companies
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -145,6 +150,7 @@ class Process
         $this->upsellsInstall = $upsells;
         $this->copyMedia = $copyMedia;
         $this->msiInventoryInstall = $msiInventory;
+        $this->companiesInstall = $companies;
     }
 
     /**
@@ -280,6 +286,11 @@ class Process
                     case "msi_inventory.csv":
                         print_r("loading Msi Inventory\n");
                         $this->processFile($rows, $header, $this->msiInventoryInstall, $modulePath);
+                        break;
+
+                    case "b2b_companies.csv":
+                        print_r("loading Companies\n");
+                        $this->processRows($rows, $header, $this->companiesInstall);
                         break;
                 }
             }

@@ -6,8 +6,13 @@
 
  namespace MagentoEse\DataInstall\Model;
 
+ use Magento\Company\Api\Data\StructureInterfaceFactory;
+ use Magento\Company\Model\ResourceModel\Customer;
+ use Magento\CompanyCredit\Api\CreditLimitManagementInterface;
+ use Magento\Customer\Api\CustomerRepositoryInterface;
  use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
-
+ use Magento\User\Model\UserFactory;
+ use Magento\Directory\Model\RegionFactory;
 
  class Companies
  {
@@ -23,17 +28,17 @@
      protected $companyCustomer;
 
      /**
-      * @var \Magento\Customer\Api\CustomerRepositoryInterface
+      * @var CustomerRepositoryInterface
       */
      protected $customer;
 
      /**
-      * @var \Magento\Company\Model\ResourceModel\Customer
+      * @var Customer
       */
      protected $customerResource;
 
      /**
-      * @var \Magento\Company\Api\Data\StructureInterfaceFactory
+      * @var StructureInterfaceFactory
       */
      protected $structure;
 
@@ -43,7 +48,7 @@
      protected $creditLimit;
 
      /**
-      * @var \Magento\CompanyCredit\Api\CreditLimitManagementInterface
+      * @var CreditLimitManagementInterface
       */
      protected $creditLimitManagement;
 
@@ -53,23 +58,29 @@
      protected $userFactory;
 
      /**
+      * @var RegionFactory
+      */
+     protected $region;
+
+     /**
       * Company constructor.
       * @param SampleDataContext $sampleDataContext
       * @param \Magento\Company\Model\Customer\Company $companyCustomer
-      * @param \Magento\Customer\Api\CustomerRepositoryInterface $customer
-      * @param \Magento\Company\Model\ResourceModel\Customer $customerResource
-      * @param \Magento\Company\Api\Data\StructureInterfaceFactory $structure
-      * @param \Magento\CompanyCredit\Api\CreditLimitManagementInterface $creditLimitManagement
+      * @param CustomerRepositoryInterface $customer
+      * @param Customer $customerResource
+      * @param StructureInterfaceFactory $structure
+      * @param CreditLimitManagementInterface $creditLimitManagement
       * @param \Magento\User\Api\Data\UserInterfaceFactory $userInterfaceFactory
       */
      public function __construct(
          SampleDataContext $sampleDataContext,
          \Magento\Company\Model\Customer\Company $companyCustomer,
-         \Magento\Customer\Api\CustomerRepositoryInterface $customer,
-         \Magento\Company\Model\ResourceModel\Customer $customerResource,
-        \Magento\Company\Api\Data\StructureInterfaceFactory $structure,
-        \Magento\CompanyCredit\Api\CreditLimitManagementInterface $creditLimitManagement,
-        \Magento\User\Model\UserFactory $userFactory
+         CustomerRepositoryInterface $customer,
+         Customer $customerResource,
+        StructureInterfaceFactory $structure,
+        CreditLimitManagementInterface $creditLimitManagement,
+        UserFactory $userFactory,
+        RegionFactory $region
      )
      {
          $this->fixtureManager = $sampleDataContext->getFixtureManager();
@@ -80,6 +91,7 @@
          $this->structure = $structure;
          $this->creditLimitManagement = $creditLimitManagement;
          $this->userFactory = $userFactory;
+         $this->region = $region;
      }
 
      /**
@@ -87,9 +99,12 @@
       */
      public function install(array $row, array $settings)
      {
+        //TODO: Enable Purchase Orders
 
-
-        $row['company_customers'] = explode(",", $row['company_customers']);
+        $region = $this->region->create();
+ 
+        $row['region_id'] = $region->loadByCode($row['region'], $row['country_id'])->getId();
+        //$row['company_customers'] = explode(",", $row['company_customers']);
         //get customer for admin user
         $adminCustomer = $this->customer->get($row['admin_email']);
         //get sales rep
@@ -100,7 +115,10 @@
         //create company
         $newCompany = $this->companyCustomer->createCompany($adminCustomer, $row);
         $newCompany->setSalesRepresentativeId($salesRep->getId());
-        $newCompany->setIsPurchaseOrderEnabled(true);
+        $newCompany->setLegalName($row['company_name']);
+        $newCompany->setStatus(1);
+        $extensionAttributes = $newCompany->getExtensionAttributes();
+        $newCompany->setExtensionAttributes($extensionAttributes->setIsPurchaseOrderEnabled(true));
         $newCompany->save();
         //set credit limit
         $creditLimit = $this->creditLimitManagement->getCreditByCompanyId($newCompany->getId());
@@ -108,18 +126,18 @@
         $creditLimit->save();
 
         ///taken out for testing as customers need to be created first in this scenerio
-        // if(count($row['company_customers']) > 0) {
-        //     foreach ($row['company_customers'] as $companyCustomerEmail) {
-        //         //tie other customers to company
-        //         $companyCustomer = $this->customer->get(trim($companyCustomerEmail));
-        //         $this->addCustomerToCompany($newCompany, $companyCustomer);
-        //         /* add the customer in the tree under the admin user
-        //         //They may be moved later on if they are part of a team */
-        //         $this->addToTree($companyCustomer->getId(), $adminCustomer->getId());
+        if(count($row['company_customers']) > 0) {
+            foreach ($row['company_customers'] as $companyCustomerEmail) {
+                //tie other customers to company
+                $companyCustomer = $this->customer->get(trim($companyCustomerEmail));
+                $this->addCustomerToCompany($newCompany, $companyCustomer);
+                /* add the customer in the tree under the admin user
+                //They may be moved later on if they are part of a team */
+                //$this->addToTree($companyCustomer->getId(), $adminCustomer->getId());
 
-        //     }
+            }
 
-        // }
+        }
         return true;
      }
 

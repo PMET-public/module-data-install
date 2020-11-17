@@ -131,6 +131,13 @@ class Customers
             //add address
             $addresses = $this->convertAddresses($row);
             $customer->setAddresses([$addresses]);
+            
+            //set website for customer
+            if(!empty($row['site_code'])){
+                $customer->setWebsiteId($this->stores->getWebsiteId($row['site_code']));
+            }else{
+                $customer->setWebsiteId($this->stores->getWebsiteId($this->settings['site_code']));
+            }
 
             $this->appState->emulateAreaCode(
                 'frontend',

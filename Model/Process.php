@@ -10,13 +10,17 @@ use Magento\Framework\File\Csv;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
+use Magento\Framework\ObjectManagerInterface;
+use StoryStore\B2B\Setup\Patch\Data\Install;
 
 class Process
 {
-    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv',
+    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv','admin_users.csv',
         'customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','blocks.csv','categories.csv',
         'products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv',
         'b2b_companies.csv'];
+
+    const B2B_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_salesreps.csv'];
 
     protected $redo=[];
 
@@ -83,8 +87,11 @@ class Process
     /** @var MsiInventory */
     protected $msiInventoryInstall;
 
-    /** @var Companies */
-    protected $companiesInstall;
+    /** @var ObjectManagerInterface  */
+    protected $objectManager;
+
+     /** @var AdminUsers  */
+     protected $adminUsersInstall;
 
     /**
      * Process constructor.
@@ -107,6 +114,8 @@ class Process
      * @param Upsells $upsells
      * @param CopyMedia $copyMedia
      * @param MsiInventory $msiInventory
+     * @param ObjectManagerInterface $objectManager
+     * @param AdminUsers $adminUsers
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -128,7 +137,8 @@ class Process
         Upsells $upsells,
         CopyMedia $copyMedia,
         MsiInventory $msiInventory,
-        Companies $companies
+        ObjectManagerInterface $objectManager,
+        AdminUsers $adminUsers
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -150,7 +160,8 @@ class Process
         $this->upsellsInstall = $upsells;
         $this->copyMedia = $copyMedia;
         $this->msiInventoryInstall = $msiInventory;
-        $this->companiesInstall = $companies;
+        $this->objectManager = $objectManager;
+        $this->adminUsersInstall = $adminUsers;
     }
 
     /**
@@ -245,7 +256,7 @@ class Process
                         break;
 
                     case "config_secret.json":
-                        print_r("loading Config Secret Json\n");
+                        print_r("loading Config Secretd Json\n");
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
 
@@ -284,13 +295,21 @@ class Process
                         break;
 
                     case "msi_inventory.csv":
-                        print_r("loading Msi Inventory\n");
+                        print_r("Loading Msi Inventory\n");
                         $this->processFile($rows, $header, $this->msiInventoryInstall, $modulePath);
                         break;
 
+                    case "admin_users.csv":
+                        print_r("Loading Admin Users\n");
+                        $this->processRows($rows, $header, $this->adminUsersInstall);
+                        break;
+
                     case "b2b_companies.csv":
-                        print_r("loading Companies\n");
-                        $this->processRows($rows, $header, $this->companiesInstall);
+                        print_r("Loading B2B\n");
+                        $this->processB2B($moduleName,$fixtureDirectory);
+                        //print_r("loading Companies\n");
+                        //$companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\Companies');
+                        //$this->processRows($rows, $header, $companiesInstall);
                         break;
                 }
             }
@@ -299,7 +318,7 @@ class Process
         $this->processRedos();
     }
 
-    /**
+     /**
      * @param array $rows
      * @param array $header
      * @param object $process
@@ -408,5 +427,107 @@ class Process
             }
         }
         return $setupArray;
+    }
+
+    private function processB2B($moduleName, $fixtureDirectory){
+        $b2bData = [];
+        //do we have all the files we need
+        foreach (self::B2B_FILES as $nextFile) {
+            $fileName = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/" . $nextFile);
+            if (basename($fileName)==$nextFile && file_exists($fileName)) {
+                $rows = $this->csvReader->getData($fileName);
+                $header = array_shift($rows);
+                //Remove hidden character Excel adds to the first cell of a document
+                 $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
+                //validate that number of elements in header and rows is equal
+                if(!$this->validate->validateCsvFile($header,$rows)){
+                   print_r($nextFile." is invalid. The number of columns in the header does not match the number of column of data in one or more rows\n");
+                   break;
+                }
+                $b2bData[$nextFile] = ['header'=>$header,'rows'=>$rows];
+            }else{
+                print_r("You are missing the required B2B file - ".$nextFile."\n");
+                break;
+            }
+        }
+        //validate referential integrity of the data
+        if(!$this->validate->validateB2bData($b2bData)){
+            print_r("Bad Data");
+                ///probaby need to throw an error to roll back everything
+        }
+        //load admin roles (normal process)
+        //load customers (normal process)
+        print_r("Loading B2B Customers\n");
+        $this->processFile($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $this->customerInstall, '');
+        //load sales reps (admin user process)
+        print_r("Loading B2B Sales Reps\n");
+        $this->processRows($b2bData['b2b_salesreps.csv']['rows'], $b2bData['b2b_salesreps.csv']['header'], $this->adminUsersInstall);
+        //create company (add on company admin from customers, and sales rep);
+
+        $salesReps = $this->buildB2bDataArrays($b2bData['b2b_salesreps.csv']);
+        $companies = $this->buildB2bDataArrays($b2bData['b2b_companies.csv']);
+        $customers = $this->buildB2bDataArrays($b2bData['b2b_customers.csv']);
+
+        $companiesData = $this->mergeCompanyData($companies,$customers,$salesReps);
+        print_r("Loading B2B Companies\n");
+        $companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\Companies');
+        foreach($companiesData as $companyData){
+            $companiesInstall->install($companyData,$this->settings);
+        }
+
+
+        //add roles
+
+        //assign roles and companies to customers
+        //assign roles and companies to companies
+        //add company structure
+        //$t=$r;
+    }
+    //copy data that may be needed from one array into another
+    private function mergeCompanyData($companies,$customers,$salesReps){
+
+        $revisedCompany = [];
+        foreach($companies as $company){
+             //copy email from customers to company admin_email
+             foreach($customers as $customer){
+                 if($customer['company']==$company['company_name'] && $customer['company_admin'] == 'Y'){
+                     $company['admin_email'] = $customer['email'];
+                 } elseif($customer['company']==$company['company_name']){
+                    $company['company_customers'][] = $customer['email'];
+                 }
+             }
+
+             //copy email from salesreps to company salesrep_email
+             foreach($salesReps as $rep){
+                if($rep['company']==$company['company_name']){
+                    $company['sales_rep'] = $rep['username'];
+                }
+            }
+            //add customers to company
+
+            $revisedCompany[]=$company;
+        }
+        return($revisedCompany);
+    }
+
+
+    private function buildB2bDataArrays($rowData){
+        $result = [];
+        foreach ($rowData['rows'] as $row) {
+            $data = [];
+            foreach ($row as $key => $value) {
+                $data[$rowData['header'][$key]] = $value;
+            }
+            $result[]=$data;
+        }
+        return $result;
+    }
+
+    private function matchKeyValue($array,$keyToFind,$valueToFind,$keyToReturn){
+        foreach($array as $key=>$value){
+            if($key==$keyToFind && $value==$valueToFind){
+               return [$key=>$value];
+            }
+        }
     }
 }

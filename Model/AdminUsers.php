@@ -7,7 +7,7 @@ namespace MagentoEse\DataInstall\Model;
 
 use Magento\User\Api\Data\UserInterfaceFactory;
 use Magento\Authorization\Model\RoleFactory;
-use Magento\Authorization\Model\RulesFactory;
+use Magento\Authorization\Model\ResourceModel\Role\CollectionFactory as RoleCollection;
 use Magento\Authorization\Model\Acl\Role\Group as RoleGroup;
 use Magento\Authorization\Model\UserContextInterface;
 
@@ -19,16 +19,16 @@ class AdminUsers{
     /** @var RoleFactory */
     protected $roleFactory;
 
-    /** @var RulesFactory */
-    protected $rulesFactory;
+    /** @var RoleCollection */
+    protected $roleCollection;
 
     public function __construct(UserInterfaceFactory $userFactory,
                                 RoleFactory $roleFactory,
-                                RulesFactory $rulesFactory)
+                                RoleCollection $roleCollection)
     {
         $this->userFactory = $userFactory;
         $this->roleFactory = $roleFactory;
-        $this->rulesFactory = $rulesFactory;
+        $this->roleCollection = $roleCollection;
     }
 
     public function install(array $row, array $settings){
@@ -46,21 +46,21 @@ class AdminUsers{
 
     private function addUserToRole($user,$row){
         if(!empty($row['role'])){
-            //look up roll and add user to it
-            //$userRole->setParentId($role->getId());
-        }else{
-            //add user to administrator role
-            $userRole=$this->roleFactory->create();
-            // add role for user
-            //$role = $this->createSalesrepRole();
-            
-            $userRole->setParentId(1);
-            $userRole->setTreeLevel(2);
-            $userRole->setRoleType('U');
-            $userRole->setUserId($user->getId());
-            $userRole->setUserType(2);
-            $userRole->setRoleName($user->getUserName());
-            $userRole->save();
+            $role = $this->roleCollection->create()
+            ->addFieldToFilter('role_name', ['eq' => $row['role']])->getFirstItem();
+            //create role if it doesnt exist
+            if($role->getData('role_name')){
+                $userRole=$this->roleFactory->create();
+                $userRole->setParentId($role->getId());
+                $userRole->setTreeLevel(2);
+                $userRole->setRoleType('U');
+                $userRole->setUserId($user->getId());
+                $userRole->setUserType(2);
+                $userRole->setRoleName($user->getUserName());
+                $userRole->save();
+            }else{
+                print_r("Role ".$row['role']." for user ".$row['username']." does not exist\n");
+            }
         }
     }
 

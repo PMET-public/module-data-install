@@ -15,12 +15,12 @@ use StoryStore\B2B\Setup\Patch\Data\Install;
 
 class Process
 {
-    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv','admin_users.csv',
-        'customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','blocks.csv','categories.csv',
+    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv','admin_roles.csv',
+        'admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','blocks.csv','categories.csv',
         'products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv',
         'b2b_companies.csv'];
 
-    const B2B_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_salesreps.csv'];
+    const B2B_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_salesreps.csv','b2b_teams.csv'];
 
     protected $redo=[];
 
@@ -93,6 +93,12 @@ class Process
      /** @var AdminUsers  */
      protected $adminUsersInstall;
 
+     /** @var AdminRoles  */
+     protected $adminRolesInstall;
+
+     /** @var Teams  */
+     protected $teamsInstall;
+
     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
@@ -116,6 +122,8 @@ class Process
      * @param MsiInventory $msiInventory
      * @param ObjectManagerInterface $objectManager
      * @param AdminUsers $adminUsers
+     * @param AdminRoles $adminRoles
+     * @param Teams $teams
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -138,7 +146,9 @@ class Process
         CopyMedia $copyMedia,
         MsiInventory $msiInventory,
         ObjectManagerInterface $objectManager,
-        AdminUsers $adminUsers
+        AdminUsers $adminUsers,
+        AdminRoles $adminRoles,
+        Teams $teams
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -162,6 +172,8 @@ class Process
         $this->msiInventoryInstall = $msiInventory;
         $this->objectManager = $objectManager;
         $this->adminUsersInstall = $adminUsers;
+        $this->adminRolesInstall = $adminRoles;
+        $this->teamsInstall = $teams;
     }
 
     /**
@@ -302,6 +314,11 @@ class Process
                     case "admin_users.csv":
                         print_r("Loading Admin Users\n");
                         $this->processRows($rows, $header, $this->adminUsersInstall);
+                        break;
+
+                    case "admin_roles.csv":
+                        print_r("Loading Admin Roles\n");
+                        $this->processFile($rows, $header, $this->adminRolesInstall,$modulePath);
                         break;
 
                     case "b2b_companies.csv":
@@ -474,14 +491,16 @@ class Process
         foreach($companiesData as $companyData){
             $companiesInstall->install($companyData,$this->settings);
         }
+        //create company structure
+        $this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $this->teamsInstall);
+        
 
-
-        //add roles
+        //add company roles
 
         //assign roles and companies to customers
         //assign roles and companies to companies
         //add company structure
-        //$t=$r;
+        $t=$r;
     }
     //copy data that may be needed from one array into another
     private function mergeCompanyData($companies,$customers,$salesReps){

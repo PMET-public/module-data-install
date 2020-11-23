@@ -6,7 +6,6 @@
 
 namespace MagentoEse\DataInstall\Model;
 
-use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Company\Api\Data\RoleInterface;
 use Magento\Company\Api\RoleRepositoryInterface;
 use Magento\Company\Model\RoleFactory;
@@ -14,77 +13,11 @@ use Magento\Company\Model\PermissionFactory;
 use Magento\Company\Api\Data\PermissionInterface;
 use Magento\Company\Api\CompanyRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Company\Api\Data\CompanyInterface;
 
 class CompanyUserRoles
 {
-    protected $userRoles = [['resource'=>'Magento_Company::index','permission'=>'allow'],
-        ['resource'=>'Magento_Sales::all','permission'=>'allow'],
-        ['resource'=>'Magento_Sales::place_order','permission'=>'allow'],
-        ['resource'=>'Magento_Sales::payment_account','permission'=>'allow'],
-        ['resource'=>'Magento_Sales::view_orders','permission'=>'allow'],
-        ['resource'=>'Magento_Sales::view_orders_sub','permission'=>'deny'],
-        ['resource'=>'Magento_NegotiableQuote::all','permission'=>'allow'],
-        ['resource'=>'Magento_NegotiableQuote::view_quotes','permission'=>'allow'],
-        ['resource'=>'Magento_NegotiableQuote::manage','permission'=>'allow'],
-        ['resource'=>'Magento_NegotiableQuote::checkout','permission'=>'allow'],
-        ['resource'=>'Magento_NegotiableQuote::view_quotes_sub','permission'=>'deny'],
-        ['resource'=>'Magento_PurchaseOrder::all','permission'=>'allow'],
-        ['resource'=>'Magento_PurchaseOrder::view_purchase_orders','permission'=>'allow'],
-        ['resource'=>'Magento_PurchaseOrder::view_purchase_orders_for_subordinates','permission'=>'deny'],
-        ['resource'=>'Magento_PurchaseOrder::view_purchase_orders_for_company','permission'=>'deny'],
-        ['resource'=>'Magento_PurchaseOrder::autoapprove_purchase_order','permission'=>'deny'],
-        ['resource'=>'Magento_PurchaseOrderRule::super_approve_purchase_order','permission'=>'deny'],
-        ['resource'=>'Magento_PurchaseOrderRule::view_approval_rules','permission'=>'deny'],
-        ['resource'=>'Magento_PurchaseOrderRule::manage_approval_rules','permission'=>'deny'],
-        ['resource'=>'Magento_Company::view','permission'=>'allow'],
-        ['resource'=>'Magento_Company::view_account','permission'=>'allow'],
-        ['resource'=>'Magento_Company::edit_account','permission'=>'deny'],
-        ['resource'=>'Magento_Company::view_address','permission'=>'allow'],
-        ['resource'=>'Magento_Company::edit_address','permission'=>'deny'],
-        ['resource'=>'Magento_Company::contacts','permission'=>'allow'],
-        ['resource'=>'Magento_Company::payment_information','permission'=>'allow'],
-        ['resource'=>'Magento_Company::user_management','permission'=>'deny'],
-        ['resource'=>'Magento_Company::roles_view','permission'=>'deny'],
-        ['resource'=>'Magento_Company::roles_edit','permission'=>'deny'],
-        ['resource'=>'Magento_Company::users_view','permission'=>'deny'],
-        ['resource'=>'Magento_Company::users_edit','permission'=>'deny'],
-        ['resource'=>'Magento_Company::credit','permission'=>'allow'],
-        ['resource'=>'Magento_Company::credit_history','permission'=>'allow']];
-
-    protected $managerRoles = [['resource'=>'Magento_Company::index','permission'=>'allow'],
-        ['resource'=>'Magento_Sales::all','permission'=>'allow'],
-        ['resource'=>'Magento_Sales::place_order','permission'=>'allow'],
-        ['resource'=>'Magento_Sales::payment_account','permission'=>'allow'],
-        ['resource'=>'Magento_Sales::view_orders','permission'=>'allow'],
-        ['resource'=>'Magento_Sales::view_orders_sub','permission'=>'allow'],
-        ['resource'=>'Magento_NegotiableQuote::all','permission'=>'allow'],
-        ['resource'=>'Magento_NegotiableQuote::view_quotes','permission'=>'allow'],
-        ['resource'=>'Magento_NegotiableQuote::manage','permission'=>'allow'],
-        ['resource'=>'Magento_NegotiableQuote::checkout','permission'=>'allow'],
-        ['resource'=>'Magento_NegotiableQuote::view_quotes_sub','permission'=>'allow'],
-        ['resource'=>'Magento_PurchaseOrder::all','permission'=>'allow'],
-        ['resource'=>'Magento_PurchaseOrder::view_purchase_orders','permission'=>'allow'],
-        ['resource'=>'Magento_PurchaseOrder::view_purchase_orders_for_subordinates','permission'=>'allow'],
-        ['resource'=>'Magento_PurchaseOrder::view_purchase_orders_for_company','permission'=>'allow'],
-        ['resource'=>'Magento_PurchaseOrder::autoapprove_purchase_order','permission'=>'allow'],
-        ['resource'=>'Magento_PurchaseOrderRule::super_approve_purchase_order','permission'=>'allow'],
-        ['resource'=>'Magento_PurchaseOrderRule::view_approval_rules','permission'=>'allow'],
-        ['resource'=>'Magento_PurchaseOrderRule::manage_approval_rules','permission'=>'allow'],
-        ['resource'=>'Magento_Company::view','permission'=>'allow'],
-        ['resource'=>'Magento_Company::view_account','permission'=>'allow'],
-        ['resource'=>'Magento_Company::edit_account','permission'=>'allow'],
-        ['resource'=>'Magento_Company::view_address','permission'=>'allow'],
-        ['resource'=>'Magento_Company::edit_address','permission'=>'allow'],
-        ['resource'=>'Magento_Company::contacts','permission'=>'allow'],
-        ['resource'=>'Magento_Company::payment_information','permission'=>'allow'],
-        ['resource'=>'Magento_Company::user_management','permission'=>'allow'],
-        ['resource'=>'Magento_Company::roles_view','permission'=>'allow'],
-        ['resource'=>'Magento_Company::roles_edit','permission'=>'allow'],
-        ['resource'=>'Magento_Company::users_view','permission'=>'allow'],
-        ['resource'=>'Magento_Company::users_edit','permission'=>'allow'],
-        ['resource'=>'Magento_Company::credit','permission'=>'allow'],
-        ['resource'=>'Magento_Company::credit_history','permission'=>'allow']];
-
+   
     /** @var RoleFactory */
     protected $roleFactory;
 
@@ -97,7 +30,7 @@ class CompanyUserRoles
     /**
      * @var CompanyRepositoryInterface
      */
-    private $companyRepository;
+    protected $companyRepository;
 
     /**
      * @var SearchCriteriaBuilder
@@ -115,49 +48,59 @@ class CompanyUserRoles
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
-    public function apply()
-    {
-         //set company roles
-        $filter = $this->searchCriteriaBuilder;
-        $filter->addFilter('entity_id','0','neq');
-        $companyList = $this->companyRepository->getList($filter->create())->getItems();
-        foreach($companyList as $company){
-            //$this->setManagerRoles($company->getId());
-            $this->setSalesRoles($company->getId());
+    function install($rows,$header){
+        $rolesData = [];
+        foreach ($rows as $row) {
+            $rolesArray[] = array_combine($header, $row);
+        }
+        //convert into company->role->permission structure
+        foreach($rolesArray as $roleRow){
+            $rolesData[$roleRow['company']][$roleRow['role']][]=$roleRow['resource_id'];
+        }
+       
+        foreach($rolesData as $companyName => $companyRoles){
+            $this->createCompanyRole($companyName, $companyRoles);
+        }
+        
+        return true;
+    }
+
+    private function createCompanyRole($companyName,$companyRoles){
+        $companyId = $this->getCompanyId($companyName);
+        if($companyId){
+            foreach($companyRoles as $rolename => $rolePermissions){
+                $this->setCompanyRole($companyId,$rolename,$rolePermissions);
+            }
         }
     }
 
+    private function getCompanyId($companyName){
 
-    private function setSalesRoles($companyId): void
+        $companySearch = $this->searchCriteriaBuilder
+            ->addFilter(CompanyInterface::NAME, $companyName, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        $companyList = $this->companyRepository->getList($companySearch);
+        /** @var CompanyInterface $company */
+        $company = current($companyList->getItems());
+        if(!$company){
+            print_r("The company ". $companyName ." requested in b2b_company_user_roles.csv does not exist\n");
+            return false;
+        }else{
+            return $company->getId();
+        }
+    }
+
+    private function setCompanyRole($companyId,$roleName, $rolePermissions)
     {
         /** @var RoleInterface $salesRole */
         $salesRole = $this->roleFactory->create();
         $salesRole->setCompanyId($companyId);
-        $salesRole->setRoleName('Purchaser');
+        $salesRole->setRoleName($roleName);
         /** @var PermissionInterface $permission */
         $permissionsToSet = [];
-        foreach ($this->userRoles as $userRole) {
+        foreach ($rolePermissions as $rolePermission) {
             $permission = $this->permissionFactory->create();
-            $permission->setResourceId($userRole['resource']);
-            $permission->setPermission($userRole['permission']);
-            $permissionsToSet[] = $permission;
-        }
-        $salesRole->setPermissions($permissionsToSet);
-        $this->roleRepository->save($salesRole);
-    }
-
-    private function setManagerRoles($companyId): void
-    {
-        /** @var RoleInterface $salesRole */
-        $salesRole = $this->roleFactory->create();
-        $salesRole->setCompanyId($companyId);
-        $salesRole->setRoleName('Manager');
-        /** @var PermissionInterface $permission */
-        $permissionsToSet = [];
-        foreach ($this->managerRoles as $managerRole) {
-            $permission = $this->permissionFactory->create();
-            $permission->setResourceId($managerRole['resource']);
-            $permission->setPermission($managerRole['permission']);
+            $permission->setResourceId($rolePermission);
+            //$permission->setPermission($userRole['permission']);
             $permissionsToSet[] = $permission;
         }
         $salesRole->setPermissions($permissionsToSet);

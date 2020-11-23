@@ -20,7 +20,7 @@ class Process
         'products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv',
         'b2b_companies.csv'];
 
-    const B2B_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_salesreps.csv','b2b_teams.csv'];
+    const B2B_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_user_roles.csv','b2b_salesreps.csv','b2b_teams.csv'];
 
     protected $redo=[];
 
@@ -96,10 +96,7 @@ class Process
      /** @var AdminRoles  */
      protected $adminRolesInstall;
 
-     /** @var Teams  */
-     protected $teamsInstall;
-
-    /**
+     /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
      * @param Stores $stores
@@ -123,7 +120,6 @@ class Process
      * @param ObjectManagerInterface $objectManager
      * @param AdminUsers $adminUsers
      * @param AdminRoles $adminRoles
-     * @param Teams $teams
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -147,8 +143,7 @@ class Process
         MsiInventory $msiInventory,
         ObjectManagerInterface $objectManager,
         AdminUsers $adminUsers,
-        AdminRoles $adminRoles,
-        Teams $teams
+        AdminRoles $adminRoles
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -173,7 +168,6 @@ class Process
         $this->objectManager = $objectManager;
         $this->adminUsersInstall = $adminUsers;
         $this->adminRolesInstall = $adminRoles;
-        $this->teamsInstall = $teams;
     }
 
     /**
@@ -484,7 +478,7 @@ class Process
         $salesReps = $this->buildB2bDataArrays($b2bData['b2b_salesreps.csv']);
         $companies = $this->buildB2bDataArrays($b2bData['b2b_companies.csv']);
         $customers = $this->buildB2bDataArrays($b2bData['b2b_customers.csv']);
-
+        
         $companiesData = $this->mergeCompanyData($companies,$customers,$salesReps);
         print_r("Loading B2B Companies\n");
         $companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\Companies');
@@ -492,15 +486,17 @@ class Process
             $companiesInstall->install($companyData,$this->settings);
         }
         //create company structure
-        $this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $this->teamsInstall);
+        //$this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $this->teamsInstall);
         
 
         //add company roles
+        print_r("Loading B2B Company Roles\n");
+        $companyRolesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\CompanyUserRoles');
+        $this->processFile($b2bData['b2b_company_user_roles.csv']['rows'], $b2bData['b2b_company_user_roles.csv']['header'], $companyRolesInstall, '');
+        //assign roles to customers
 
-        //assign roles and companies to customers
-        //assign roles and companies to companies
         //add company structure
-        $t=$r;
+       // $t=$r;
     }
     //copy data that may be needed from one array into another
     private function mergeCompanyData($companies,$customers,$salesReps){

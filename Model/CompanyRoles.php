@@ -14,10 +14,8 @@ use Magento\Company\Api\Data\PermissionInterface;
 use Magento\Company\Api\CompanyRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Company\Api\Data\CompanyInterface;
-use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Company\Api\AclInterface;
 
-class CompanyUserRoles
+class CompanyRoles
 {
    
     /** @var RoleFactory */
@@ -29,63 +27,51 @@ class CompanyUserRoles
     /** @var PermissionFactory */
     protected $permissionFactory;
 
-    /** @var CompanyRepositoryInterface */
+    /**
+     * @var CompanyRepositoryInterface
+     */
     protected $companyRepository;
 
-    /** @var SearchCriteriaBuilder */
+    /**
+     * @var SearchCriteriaBuilder
+     */
     protected $searchCriteriaBuilder;
-
-    /** @var CustomerRepositoryInterface */
-    protected $customerRepository;
-
-     /** @var AclInterface */
-     protected $acl;
-
 
     public function __construct(RoleFactory $roleFactory, RoleRepositoryInterface $roleRepositoryInterface,
                                 PermissionFactory $permissionFactory, CompanyRepositoryInterface $companyRepository,
-                                SearchCriteriaBuilder $searchCriteriaBuilder, CustomerRepositoryInterface $customerRepository,AclInterface $aclInterface)
+                                SearchCriteriaBuilder $searchCriteriaBuilder)
     {
         $this->roleRepository = $roleRepositoryInterface;
         $this->roleFactory = $roleFactory;
         $this->permissionFactory = $permissionFactory;
         $this->companyRepository = $companyRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->customerRepository = $customerRepository;
-        $this->acl = $aclInterface;
     }
 
-    function install($row,$settings){
-        //skip company admin roles
-        if(!empty($row['role']) && $row['company_admin']!='Y'){
-            //does role exist, print message if it doesnt
-            $role = $this->getCompanyRole($row['company'],$row['role']);
-            if($role){
-                //add user to role
-                $userId = $this->customerRepository->get(trim($row['email']))->getId();
-                //assign role to user
-                     $this->acl->assignUserDefaultRole($userId, $this->getCompanyId($row['company']));
-                     $this->acl->assignRoles($userId,[$role]);
-            }else{
-                print_r("The role ". $row['role'] ." for company ".$row['company']." does not exist\n");
-            }
-            
+    function install($rows,$header){
+        $rolesData = [];
+        foreach ($rows as $row) {
+            $rolesArray[] = array_combine($header, $row);
+        }
+        //convert into company->role->permission structure
+        foreach($rolesArray as $roleRow){
+            $rolesData[$roleRow['company']][$roleRow['role']][]=$roleRow['resource_id'];
+        }
+       
+        foreach($rolesData as $companyName => $companyRoles){
+            $this->createCompanyRole($companyName, $companyRoles);
         }
         
         return true;
     }
 
-    private function getCompanyRole($companyName,$role){
+    private function createCompanyRole($companyName,$companyRoles){
         $companyId = $this->getCompanyId($companyName);
         if($companyId){
-            //get role
-            $roleSearch = $this->searchCriteriaBuilder
-                ->addFilter(RoleInterface::ROLE_NAME,$role,'eq')
-                ->addFilter(RoleInterface::COMPANY_ID,$companyId,'eq')->create()->setPageSize(1)->setCurrentPage(1);
-            $roleList = $this->roleRepository->getList($roleSearch);
-            $role = current($roleList->getItems());
+            foreach($companyRoles as $rolename => $rolePermissions){
+                $this->setCompanyRole($companyId,$rolename,$rolePermissions);
+            }
         }
-        return $role;
     }
 
     private function getCompanyId($companyName){
@@ -96,14 +82,12 @@ class CompanyUserRoles
         /** @var CompanyInterface $company */
         $company = current($companyList->getItems());
         if(!$company){
-            print_r("The company ". $companyName ." requested in b2b_company_user_roles.csv does not exist\n");
+            print_r("The company ". $companyName ." requested in b2b_customers.csv does not exist\n");
             return false;
         }else{
             return $company->getId();
         }
     }
-
-
 
     private function setCompanyRole($companyId,$roleName, $rolePermissions)
     {

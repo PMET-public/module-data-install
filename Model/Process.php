@@ -20,7 +20,7 @@ class Process
         'products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv',
         'b2b_companies.csv'];
 
-    const B2B_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_user_roles.csv','b2b_salesreps.csv','b2b_teams.csv'];
+    const B2B_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv','b2b_salesreps.csv','b2b_teams.csv'];
 
     protected $redo=[];
 
@@ -466,7 +466,9 @@ class Process
             print_r("Bad Data");
                 ///probaby need to throw an error to roll back everything
         }
-        //load admin roles (normal process)
+        $salesReps = $this->buildB2bDataArrays($b2bData['b2b_salesreps.csv']);
+        $companies = $this->buildB2bDataArrays($b2bData['b2b_companies.csv']);
+        $customers = $this->buildB2bDataArrays($b2bData['b2b_customers.csv']);
         //load customers (normal process)
         print_r("Loading B2B Customers\n");
         $this->processFile($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $this->customerInstall, '');
@@ -475,9 +477,7 @@ class Process
         $this->processRows($b2bData['b2b_salesreps.csv']['rows'], $b2bData['b2b_salesreps.csv']['header'], $this->adminUsersInstall);
         //create company (add on company admin from customers, and sales rep);
 
-        $salesReps = $this->buildB2bDataArrays($b2bData['b2b_salesreps.csv']);
-        $companies = $this->buildB2bDataArrays($b2bData['b2b_companies.csv']);
-        $customers = $this->buildB2bDataArrays($b2bData['b2b_customers.csv']);
+        
         
         $companiesData = $this->mergeCompanyData($companies,$customers,$salesReps);
         print_r("Loading B2B Companies\n");
@@ -491,12 +491,13 @@ class Process
 
         //add company roles
         print_r("Loading B2B Company Roles\n");
-        $companyRolesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\CompanyUserRoles');
-        $this->processFile($b2bData['b2b_company_user_roles.csv']['rows'], $b2bData['b2b_company_user_roles.csv']['header'], $companyRolesInstall, '');
+        $companyRolesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\CompanyRoles');
+        $this->processFile($b2bData['b2b_company_roles.csv']['rows'], $b2bData['b2b_company_roles.csv']['header'], $companyRolesInstall, '');
         //assign roles to customers
+        $companyUserRolesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\CompanyUserRoles');
+        $this->processRows($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $companyUserRolesInstall);
 
-        //add company structure
-       // $t=$r;
+        //$t=$r;
     }
     //copy data that may be needed from one array into another
     private function mergeCompanyData($companies,$customers,$salesReps){

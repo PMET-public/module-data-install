@@ -7,84 +7,67 @@
  namespace MagentoEse\DataInstall\Model;
 
  use Magento\Company\Api\Data\StructureInterfaceFactory;
+ use Magento\Company\Model\StructureRepository;
+ use Magento\Company\Model\Customer\Company as CompanyCustomer;
  use Magento\Company\Model\ResourceModel\Customer;
  use Magento\CompanyCredit\Api\CreditLimitManagementInterface;
  use Magento\Customer\Api\CustomerRepositoryInterface;
- use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
+ use Magento\User\Api\Data\UserInterfaceFactory;
  use Magento\User\Model\UserFactory;
  use Magento\Directory\Model\RegionFactory;
 
  class Companies
  {
 
-     /**
-      * @var \Magento\Framework\Setup\SampleData\Context
-      */
-     protected $sampleDataContext;
-
-     /**
-      * @var \Magento\Company\Model\Customer\Company
-      */
+     /** @var CompanyCustomer  */
      protected $companyCustomer;
 
-     /**
-      * @var CustomerRepositoryInterface
-      */
+     /** @var CustomerRepositoryInterface  */
      protected $customer;
 
-     /**
-      * @var Customer
-      */
+     /** @var Customer  */
      protected $customerResource;
 
-     /**
-      * @var StructureInterfaceFactory
-      */
+     /** @var StructureInterfaceFactory  */
      protected $structure;
 
-     /**
-      * @var float
-      */
+     /** @var float */
      protected $creditLimit;
 
-     /**
-      * @var CreditLimitManagementInterface
-      */
+     /** @var CreditLimitManagementInterface  */
      protected $creditLimitManagement;
 
-     /**
-      * @var \Magento\User\Api\Data\UserInterfaceFactory
-      */
+     /** @var UserInterfaceFactory  */
      protected $userFactory;
 
-     /**
-      * @var RegionFactory
-      */
+     /** @var RegionFactory  */
      protected $region;
+     
+     /** @var StructureRepository  */
+     protected $structureRepository;
 
      /**
-      * Company constructor.
-      * @param SampleDataContext $sampleDataContext
-      * @param \Magento\Company\Model\Customer\Company $companyCustomer
+      * Companies constructor.
+      * @param CompanyCustomer $companyCustomer
       * @param CustomerRepositoryInterface $customer
       * @param Customer $customerResource
       * @param StructureInterfaceFactory $structure
       * @param CreditLimitManagementInterface $creditLimitManagement
-      * @param \Magento\User\Api\Data\UserInterfaceFactory $userInterfaceFactory
+      * @param UserFactory $userFactory
+      * @param RegionFactory $region
+      * @param StructureRepository $structureRepository
       */
      public function __construct(
-         SampleDataContext $sampleDataContext,
-         \Magento\Company\Model\Customer\Company $companyCustomer,
+         CompanyCustomer $companyCustomer,
          CustomerRepositoryInterface $customer,
          Customer $customerResource,
-        StructureInterfaceFactory $structure,
-        CreditLimitManagementInterface $creditLimitManagement,
-        UserFactory $userFactory,
-        RegionFactory $region
+         StructureInterfaceFactory $structure,
+         CreditLimitManagementInterface $creditLimitManagement,
+         UserFactory $userFactory,
+         RegionFactory $region,
+         StructureRepository $structureRepository
      )
      {
-         $this->fixtureManager = $sampleDataContext->getFixtureManager();
-         $this->csvReader = $sampleDataContext->getCsvReader();
          $this->companyCustomer = $companyCustomer;
          $this->customer = $customer;
          $this->customerResource = $customerResource;
@@ -92,17 +75,24 @@
          $this->creditLimitManagement = $creditLimitManagement;
          $this->userFactory = $userFactory;
          $this->region = $region;
+         $this->structureRepository = $structureRepository;
      }
 
      /**
-      * @param array $fixtures
+      * @param array $row
+      * @param array $settings
+      * @return bool
+      * @throws \Magento\Framework\Exception\CouldNotSaveException
+      * @throws \Magento\Framework\Exception\InputException
+      * @throws \Magento\Framework\Exception\LocalizedException
+      * @throws \Magento\Framework\Exception\NoSuchEntityException
       */
      public function install(array $row, array $settings)
      {
         //TODO: Enable Purchase Orders
 
         $region = $this->region->create();
- 
+
         $row['region_id'] = $region->loadByCode($row['region'], $row['country_id'])->getId();
         //$row['company_customers'] = explode(",", $row['company_customers']);
         //get customer for admin user
@@ -125,7 +115,6 @@
         $creditLimit->setCreditLimit($row['credit_limit']);
         $creditLimit->save();
 
-        ///taken out for testing as customers need to be created first in this scenerio
         if(count($row['company_customers']) > 0) {
             foreach ($row['company_customers'] as $companyCustomerEmail) {
                 //tie other customers to company
@@ -133,7 +122,10 @@
                 $this->addCustomerToCompany($newCompany, $companyCustomer);
                 /* add the customer in the tree under the admin user
                 //They may be moved later on if they are part of a team */
-                //$this->addToTree($companyCustomer->getId(), $adminCustomer->getId());
+                if($row['admin_email']!='Y'){
+                    $this->addToTree($companyCustomer->getId(), $adminCustomer->getId());
+                }
+
 
             }
 
@@ -143,8 +135,8 @@
 
 
      /**
-      * @param \Magento\Company\Model\Customer\Company $newCompany
-      * @param \Magento\Company\Model\Customer\Company $companyCustomer
+      * @param CompanyCustomer $newCompany
+      * @param CompanyCustomer $companyCustomer
       */
      private function addCustomerToCompany($newCompany,$companyCustomer){
 
@@ -167,8 +159,9 @@
          $newStruct->setEntityId($customerId);
          $newStruct->setEntityType(0);
          $newStruct->setParentId($parentId);
-         $newStruct->setPath('1/2');
          $newStruct->setLevel(1);
-         $newStruct->save();
+         $this->structureRepository->save($newStruct);
+         $newStruct->setPath($parentId.'/'.$newStruct->getId());
+         $this->structureRepository->save($newStruct);
      }
  }

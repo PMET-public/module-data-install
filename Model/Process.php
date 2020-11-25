@@ -519,8 +519,7 @@ class Process
                     $company['sales_rep'] = $rep['username'];
                 }
             }
-            //add customers to company
-
+           
             $revisedCompany[]=$company;
         }
         return($revisedCompany);

@@ -58,8 +58,8 @@ class Teams {
         if(!$company){
             print_r("The company ". $row['company_name'] ." requested in b2b_teams.csv does not exist\n");
         }else{
-            echo($row['team']." - ".$this->getCustomerId($row['team'])."\n");
-            $this->addToTeam($company,$row);
+            //Get the admin user for the company
+            //Remove structure the existing user is in
             
         }
         return true;
@@ -103,22 +103,19 @@ class Teams {
     }
 
     /**
-     * @param int $userId
-     * @param int $parentId
-     * @param string $path
-     * @return \Magento\Company\Model\Structure
-     */
-    private function addUserToTeamTree($userId,$parentId,$path){
-        $newStruct = $this->structureFactory->create();
-        $newStruct->setEntityId($userId);
+      * @param int $customerId
+      * @param int $parentId
+      */
+      private function addToTree($customerId,$parentId){
+        $newStruct = $this->structure->create();
+        $newStruct->setEntityId($customerId);
         $newStruct->setEntityType(0);
         $newStruct->setParentId($parentId);
-        //$newStruct->setPath('1/3');
-        $newStruct->setLevel(2);
-        $newStruct->save();
-        $newStruct->setPath($path.'/'.$newStruct->getId());
-        $newStruct->save();
-        return $newStruct;
+        //TODO: Level needs to be determined 
+        $newStruct->setLevel(1);
+        $this->structureRepository->save($newStruct);
+        $newStruct->setPath($parentId.'/'.$newStruct->getId());
+        $this->structureRepository->save($newStruct);
     }
 
     private function getCustomerId($email){

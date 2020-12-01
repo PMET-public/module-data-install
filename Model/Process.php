@@ -469,6 +469,14 @@ class Process
         $salesReps = $this->buildB2bDataArrays($b2bData['b2b_salesreps.csv']);
         $companies = $this->buildB2bDataArrays($b2bData['b2b_companies.csv']);
         $customers = $this->buildB2bDataArrays($b2bData['b2b_customers.csv']);
+
+        print_r("Loading B2B Teams and Compnay Structure\n");
+        //create company structure
+        $companyTeamsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\Teams');
+        $this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $companyTeamsInstall);
+        $t = $gg;
+
+
         //load customers (normal process)
         print_r("Loading B2B Customers\n");
         $this->processFile($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $this->customerInstall, '');
@@ -486,7 +494,8 @@ class Process
             $companiesInstall->install($companyData,$this->settings);
         }
         //create company structure
-        //$this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $this->teamsInstall);
+        $companyTeamsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\Teams');
+        $this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $companyTeamsInstall);
         
 
         //add company roles

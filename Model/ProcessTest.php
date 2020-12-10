@@ -12,7 +12,7 @@ use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 use Magento\Framework\ObjectManagerInterface;
 
-class Process
+class ProcessTest
 {
     const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv','admin_roles.csv',
         'admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','blocks.csv','categories.csv',
@@ -95,6 +95,9 @@ class Process
      /** @var AdminRoles  */
      protected $adminRolesInstall;
 
+    /** @var ApprovalRules */
+     protected $approvalRulesInstall;
+
      /**
      * Process constructor.
      * @param SampleDataContext $sampleDataContext
@@ -142,7 +145,8 @@ class Process
         MsiInventory $msiInventory,
         ObjectManagerInterface $objectManager,
         AdminUsers $adminUsers,
-        AdminRoles $adminRoles
+        AdminRoles $adminRoles,
+        ApprovalRules $approvalRules
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -167,6 +171,7 @@ class Process
         $this->objectManager = $objectManager;
         $this->adminUsersInstall = $adminUsers;
         $this->adminRolesInstall = $adminRoles;
+        $this->approvalRulesInstall = $approvalRules;
     }
 
     /**
@@ -314,9 +319,9 @@ class Process
                         $this->processFile($rows, $header, $this->adminRolesInstall,$modulePath);
                         break;
 
-                    case "b2b_companies.csv":
+                    case "b2b_approval_rules.csv":
                         print_r("Loading B2B\n");
-                        $this->processB2B($moduleName,$fixtureDirectory);
+                        $this->processRows($rows, $header, $this->approvalRulesInstall);
                         //print_r("loading Companies\n");
                         //$companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\Companies');
                         //$this->processRows($rows, $header, $companiesInstall);

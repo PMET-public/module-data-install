@@ -16,7 +16,7 @@ use  Magento\Framework\File\Mime;
 class CopyMedia
 {
     protected $directoryMappings=[['from'=>'wysiwyg','to'=>'pub/media/wysiwyg','type'=>'image'],['from'=>'logo','to'=>'pub/media/logo/stores','type'=>'image'],
-        ['from'=>'email','to'=>'pub/media/email/stores','type'=>'image'],
+        ['from'=>'email','to'=>'pub/media/email/logo/stores','type'=>'image'],
         ['from'=>'favicon','to'=>'pub/media/favicon/stores','type'=>'image'],['from'=>'theme','to'=>'app/design/frontend','type'=>'theme'],
         ['from'=>'template_manager','to'=>'pub/media/.template-manager','type'=>'image'],['from'=>'downloadable_products','to'=>'/pub/media/import','type'=>'download'],
         ['from'=>'.template-manager','to'=>'pub/media/.template-manager','type'=>'image']];

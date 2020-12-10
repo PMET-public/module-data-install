@@ -101,14 +101,9 @@ class Teams {
         }else{
             $this->companyId = $company->getId();
             $companyAdminId = $this->companyManagement->getAdminByCompanyId($company->getId())->getId();
-            //add team
-            $this->addTeamtoTree($this->getEntityType($row['team'])['id'],$companyAdminId);
-            //$entityToAdd = $this->getEntityType($row['team']);
-            //get parent
-            //print_r($entityToAdd);
-            //$newPath = $this->getPath($row['parent'],$companyAdminId);
-            //$currentTeams = $this->companyHierarchy->getCompanyHierarchy($this->companyId);
-            return true;
+            $entityToAdd = $this->getEntityType($row['team']);
+            //get path replaced with ids
+            $newPath = $this->getPath($row['parent'],$companyAdminId);
             if(!empty($newPath['parent'])){
                 $newStruct = $this->structureFactory->create();
                 $newStruct->setEntityId($entityToAdd['id']);
@@ -153,19 +148,17 @@ class Teams {
             $customer = $this->customerRepository->get($entity);
             $entityId = $customer->getId();
             $entityType = StructureInterface::TYPE_CUSTOMER;
-            //TODO:need to get the entity id from the structure
         }catch(NoSuchEntityException $e){
             //check does team exist
             //get teams under that name
-            $team = $this->getTeam($entity);
+            $teams = $this->getTeams($entity);
             //if there are none, then create
-            if(!$team){
+            if(count($teams)==0){
                 return ['type'=>StructureInterface::TYPE_TEAM,'id'=>$this->createTeam($entity)];
             }
             //if there is one, then get from company structure with that entity type and entity id
             else{
-                //$teamStructureId = $this->getEntityIdOfTeamInStructure($team);
-                $teamStructureId = $team->getId();
+                $teamStructureId = $this->getEntityIdOfTeamInStructure($teams);
                 if($teamStructureId){
                     return ['type'=>StructureInterface::TYPE_TEAM,'id'=>$teamStructureId];
                 }else{
@@ -179,18 +172,17 @@ class Teams {
         return ['type'=>$entityType,'id'=>$entityId];
     }
 
-    private function getTeam($entity){
+    private function getTeams($entity){
         $teamFilter = $this->filterBuilder
             ->setField("name")->setConditionType("eq")->setValue($entity)->create();
             $teamFilterGroup = $this->filterGroupBuilder
             ->addFilter($teamFilter)->create();
-            $teamSearch = $this->searchCriteriaBuilder->setFilterGroups([$teamFilterGroup])->create()->setPageSize(1)->setCurrentPage(1);
-            $team = $this->teamRepository->getList($teamSearch)->getItems();
-            return $team;
+            $teamSearch = $this->searchCriteriaBuilder->setFilterGroups([$teamFilterGroup])->create();
+            $teams = $this->teamRepository->getList($teamSearch)->getItems();
+            return $teams;
     }
 
     private function getEntityIdOfTeamInStructure($teams){
-
         foreach($teams as $team){
             $entityIdFilter = $this->filterBuilder
             ->setField("entity_id")->setConditionType("eq")->setValue($team->getId())->create();
@@ -202,16 +194,15 @@ class Teams {
             $entityTypeFilterGroup = $this->filterGroupBuilder
             ->addFilter($entityTypeFilter)->create();
 
-            $structSearch = $this->searchCriteriaBuilder->setFilterGroups([$entityIdFilterGroup,$entityTypeFilterGroup])->create()->setPageSize(1)->setCurrentPage(1);
+            $structSearch = $this->searchCriteriaBuilder->setFilterGroups([$entityIdFilterGroup,$entityTypeFilterGroup])->create();
             $companyStructures = $this->structureRepository->getList($structSearch)->getItems();
             if(count($companyStructures)==1){
                 return $team->getId();
-            } else {
-                    return false;
+                break;
             }
         }
-       
-       
+        //if team doesnt exist under that company return false
+        return false;
     }
 
     private function createTeam($name){
@@ -225,8 +216,8 @@ class Teams {
         //     echo "moving\n"; 
         //     $this->companyHierarchy->moveNode(15,14);
         // }
+       
         return $team->getId();
-        //return $this->getEntityIdOfTeamInStructure($team);
     }
 
     private function addTeamToTree($teamId,$parentId){

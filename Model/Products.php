@@ -9,6 +9,7 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\App\State;
 
 class Products
 {
@@ -26,6 +27,8 @@ class Products
 
     /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
+    /** @var State */
+    protected $state;
 
     /**
      * Products constructor.
@@ -33,17 +36,20 @@ class Products
      * @param Stores $stores
      * @param ProductRepositoryInterface $productRepository
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param State $state
      */
     public function __construct(
         ObjectManagerInterface $objectManager,
         Stores $stores,
         ProductRepositoryInterface $productRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        State $state
     ) {
         $this->objectManager=$objectManager;
         $this->stores = $stores;
         $this->productRepository = $productRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->state = $state;
     }
 
     /**
@@ -70,25 +76,10 @@ class Products
             $productsArray[] = array_combine($header, $row);
         }
 
-        /// create array to restrict existing products from the store view
+        /// create array to restrict existing products from other store views
         if($restrictProductsFromViews=='Y'){
-            $restrictProducts = $this->restrictExistingProducts($settings['store_view_code']);
-            if (!empty($restrictProducts)) {
-                print_r("Restricting existing products from store\n");
-                $importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
-                $importerModel->setImportImagesFileDir($imgDir);
-                $importerModel->setValidationStrategy('validation-skip-errors');
-                try {
-                    $importerModel->processImport($restrictProducts);
-                } catch (\Exception $e) {
-                    print_r($e->getMessage());
-                }
-
-                print_r($importerModel->getLogTrace());
-                print_r($importerModel->getErrorMessages());
-
-                unset($importerModel);
-            }
+            $restrictExistingProducts = $this->restrictExistingProducts($settings['store_view_code']);
+            $restrictNewProducts = $this->restrictNewProductsFromOtherStoreViews($productsArray,$settings['store_view_code']);
         }
 
 
@@ -106,35 +97,40 @@ class Products
         print_r($importerModel->getErrorMessages());
 
         unset($importerModel);
-
-        /// create array to restrict new products from other views. Only run if there are products under another store
-        if($restrictProductsFromViews=='Y' && !empty($restrictProducts)) {
-            $restrictNewProducts = $this->restrictProductsFromOtherStoreViews($productsArray,$settings['store_view_code']);
-            if (!empty($restrictNewProducts)) {
-                print_r("Restrict new products from existing stores\n");
-                $importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
-                $importerModel->setImportImagesFileDir($imgDir);
-                $importerModel->setValidationStrategy('validation-skip-errors');
-                try {
-                    $importerModel->processImport($restrictNewProducts);
-                } catch (\Exception $e) {
-                    print_r($e->getMessage());
-                }
-
-                print_r($importerModel->getLogTrace());
-                print_r($importerModel->getErrorMessages());
+        
+        /// Restrict products from other stores
+        if($restrictProductsFromViews=='Y') {
+            print_r("Restricting products from other store views\n");
+            //Need to set area code when updating products
+            try{
+                $this->state->setAreaCode('adminhtml');
             }
-
-            unset($productsArray);
-            unset($importerModel);
+            catch(\Magento\Framework\Exception\LocalizedException $e){
+                // left empty
+            }
+            print_r("Restricting ".count($restrictExistingProducts)." products from new store view\n");
+            $this->updateProductVisitbility($restrictExistingProducts);
+            print_r("Restricting ".count($restrictNewProducts)." new products from existing store views\n");
+            $this->updateProductVisitbility($restrictNewProducts);
         }
+        //$t=$r;
+    }
+    
+    private function updateProductVisitbility($restrictProducts){
+        foreach($restrictProducts as $restrictProduct){
+            $product = $this->productRepository->get($restrictProduct['sku']);
+            $product->setStoreId($restrictProduct['store_view_code']);
+            $product->setVisibility($restrictProduct['visibility']);
+            $this->productRepository->save($product);
+        }
+
     }
 
     /**
      * @param array $products
      * @return array
      */
-    private function restrictProductsFromOtherStoreViews(array $products,$storeViewCode)
+    private function restrictNewProductsFromOtherStoreViews(array $products,$storeViewCode)
     {
         $newProductArray = [];
         $allStoreCodes = $this->stores->getAllViewCodes();
@@ -161,7 +157,8 @@ class Products
     {
         $newProductArray = [];
         $search = $this->searchCriteriaBuilder
-            ->addFilter(ProductInterface::SKU, '', 'neq')->create();
+            //->addFilter(ProductInterface::SKU, '', 'neq')->create();
+            ->addFilter(ProductInterface::VISIBILITY, '4', 'eq')->create();
         $productCollection = $this->productRepository->getList($search)->getItems();
         foreach ($productCollection as $product) {
             $newProductArray[] = ['sku'=>$product->getSku(),'store_view_code'=>$storeViewCodeToRestrict,'visibility'=>'Not Visible Individually'];

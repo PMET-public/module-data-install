@@ -10,6 +10,7 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\App\State;
+use FireGento\FastSimpleImport\Model\ImporterFactory as Importer;
 
 class Products
 {
@@ -27,6 +28,10 @@ class Products
 
     /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
+
+    /** @var Importer */
+    protected $importer;
+
     /** @var State */
     protected $state;
 
@@ -43,12 +48,14 @@ class Products
         Stores $stores,
         ProductRepositoryInterface $productRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
+        Importer $importer,
         State $state
     ) {
         $this->objectManager=$objectManager;
         $this->stores = $stores;
         $this->productRepository = $productRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->importer = $importer;
         $this->state = $state;
     }
 
@@ -84,19 +91,7 @@ class Products
 
 
         print_r("Import new products\n");
-        $importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
-        $importerModel->setImportImagesFileDir($imgDir);
-        $importerModel->setValidationStrategy('validation-skip-errors');
-        try {
-            $importerModel->processImport($productsArray);
-        } catch (\Exception $e) {
-            print_r($e->getMessage());
-        }
-
-        print_r($importerModel->getLogTrace());
-        print_r($importerModel->getErrorMessages());
-
-        unset($importerModel);
+        $this->import($productsArray,$imgDir);
         
         /// Restrict products from other stores
         if($restrictProductsFromViews=='Y') {
@@ -109,9 +104,11 @@ class Products
                 // left empty
             }
             print_r("Restricting ".count($restrictExistingProducts)." products from new store view\n");
-            $this->updateProductVisitbility($restrictExistingProducts);
+            //$this->updateProductVisitbility($restrictExistingProducts);
+            $this->import($restrictExistingProducts,$imgDir);
             print_r("Restricting ".count($restrictNewProducts)." new products from existing store views\n");
-            $this->updateProductVisitbility($restrictNewProducts);
+            //$this->updateProductVisitbility($restrictNewProducts);
+            $this->import($restrictNewProducts,$imgDir);
         }
         //$t=$r;
     }
@@ -119,11 +116,27 @@ class Products
     private function updateProductVisitbility($restrictProducts){
         foreach($restrictProducts as $restrictProduct){
             $product = $this->productRepository->get($restrictProduct['sku']);
-            $product->setStoreId($restrictProduct['store_view_code']);
+            $product->setStoreId($this->stores->getViewId($restrictProduct['store_view_code']));
             $product->setVisibility($restrictProduct['visibility']);
             $this->productRepository->save($product);
         }
 
+    }
+
+    private function import($productsArray,$imgDir){
+        $importerModel = $this->importer->create();
+        $importerModel->setImportImagesFileDir($imgDir);
+        $importerModel->setValidationStrategy('validation-skip-errors');
+        try {
+            $importerModel->processImport($productsArray);
+        } catch (\Exception $e) {
+            print_r($e->getMessage());
+        }
+
+        print_r($importerModel->getLogTrace());
+        print_r($importerModel->getErrorMessages());
+
+        unset($importerModel);
     }
 
     /**

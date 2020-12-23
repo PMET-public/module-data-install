@@ -104,8 +104,8 @@ class Products
                 // left empty
             }
             print_r("Restricting ".count($restrictExistingProducts)." products from new store view\n");
-            //$this->updateProductVisitbility($restrictExistingProducts);
-            $this->import($restrictExistingProducts,$imgDir);
+            $this->updateProductVisitbility($restrictExistingProducts);
+            //$this->import($restrictExistingProducts,$imgDir);
             print_r("Restricting ".count($restrictNewProducts)." new products from existing store views\n");
             //$this->updateProductVisitbility($restrictNewProducts);
             $this->import($restrictNewProducts,$imgDir);

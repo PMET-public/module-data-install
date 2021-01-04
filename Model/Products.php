@@ -110,7 +110,6 @@ class Products
             //$this->updateProductVisitbility($restrictNewProducts);
             $this->import($restrictNewProducts,$imgDir);
         }
-        //$t=$r;
     }
     
     private function updateProductVisitbility($restrictProducts){

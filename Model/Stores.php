@@ -463,7 +463,7 @@ class Stores
         $cmsPagesCollection = $this->pageRepository->getList($searchCriteria)->getItems();
         foreach ($cmsPagesCollection as $page) {
             //generate urls for pages shared across stores
-            if($page->getStoreId()[0]==0){
+            if ($page->getStoreId()[0]==0) {
                 $page->setStoreId($storeId);
                 $rewrites[] = $this->cmsPageUrlRewriteGenerator->generate($page);
             }

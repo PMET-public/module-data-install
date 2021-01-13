@@ -1,27 +1,20 @@
 <?php
+/**
+ * Copyright © Magento. All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Company\Api\Data\TeamInterfaceFactory;
-use Magento\Company\Api\Data\TeamInterface;
 use Magento\Company\Api\CompanyRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Company\Api\Data\CompanyInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Customer\Api\Data\CustomerInterface;
-use Magento\Company\Api\TeamRepositoryInterface;
-use Magento\Company\Api\CompanyManagementInterface;
 use Magento\Company\Api\Data\StructureInterfaceFactory;
-use Magento\Customer\Api\Data\CustomerInterfaceFactory;
-use Magento\Company\Api\CompanyHierarchyInterface;
-use Magento\Company\Api\Data\StructureInterface;
 use Magento\Company\Model\StructureRepository;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Api\SearchCriteriaInterface;
-use Magento\Framework\Api\FilterBuilder;
-use Magento\Framework\Api\Search\FilterGroupBuilder;
 
-
-class Teams {
+class Teams
+{
     
     /** @var TeamInterfaceFactory */
     protected $teamFactory;
@@ -35,17 +28,8 @@ class Teams {
     /** @var CustomerRepositoryInterface */
     protected $customerRepository;
 
-    /** @var TeamRepositoryInterface */
-    protected $teamRepository;
-
-    /** @var CompanyManagmentInterface */
-    protected $companyManagement;
-
-     /** @var StructureInterfaceFactory */
-     protected $structureFactory;
-
-       /** @var CompanyHierarchyInterface  */
-    protected $companyHierarchy;
+    /** @var StructureInterfaceFactory */
+    protected $structureFactory;
 
     /** @var StructureRepository  */
     protected $structureRepository;
@@ -53,194 +37,122 @@ class Teams {
      /** @var SearchCriteriaInterface  */
      protected $searchCriteriaInterface;
 
-
-     /** @var FilterBuilder  */
-     protected $filterBuilder;
-
-
-     /** @var FilterGroupBuilder  */
-     protected $filterGroupBuilder;
-
     /** @var int */
     protected $companyId;
 
-    public function __construct(TeamInterfaceFactory $teamFactory, CompanyRepositoryInterface $companyRepository,
-    SearchCriteriaBuilder $searchCriteriaBuilder, CustomerRepositoryInterface $customerRepository,TeamRepositoryInterface $teamRepository,
-    CompanyManagementInterface $companyManagement, StructureInterfaceFactory $structureFactory,
-    CompanyHierarchyInterface $companyHierarchy, SearchCriteriaInterface $searchCriteriaInterface, FilterBuilder $filterBuilder, FilterGroupBuilder $filterGroupBuilder,
-    StructureRepository $structureRepository){
+    public function __construct(
+        TeamInterfaceFactory $teamFactory,
+        CompanyRepositoryInterface $companyRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        CustomerRepositoryInterface $customerRepository,
+        StructureInterfaceFactory $structureFactory,
+        SearchCriteriaInterface $searchCriteriaInterface,
+        StructureRepository $structureRepository
+    ) {
         $this->teamFactory = $teamFactory;
         $this->companyRepository = $companyRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->customerRepository = $customerRepository;
-        $this->teamRepository = $teamRepository;
-        $this->companyManagement = $companyManagement;
         $this->structureFactory = $structureFactory;
-        $this->companyHierarchy = $companyHierarchy;
         $this->structureRepository = $structureRepository;
         $this->searchCriteriaInterface = $searchCriteriaInterface;
-        $this->filterBuilder = $filterBuilder;
-        $this->filterGroupBuilder = $filterGroupBuilder;
     }
-    public function __destruct () {
-        echo "Destructiong\n";
-        unset($this->companyHierarchy);
-    }
-    public function install($row,$header){
-        //company_name,team,parent
-        //get company
-        echo $row['team']."\n";
-        $companySearch = $this->searchCriteriaBuilder
-            ->addFilter('company_name', $row['company_name'], 'eq')->create()->setPageSize(1)->setCurrentPage(1);
-        $companyList = $this->companyRepository->getList($companySearch);
-        /** @var CompanyInterface $company */
-        $company = current($companyList->getItems());
-        
-        if(!$company){
-            print_r("The company ". $row['company_name'] ." requested in b2b_teams.csv does not exist\n");
-        }else{
-            $this->companyId = $company->getId();
-            $companyAdminId = $this->companyManagement->getAdminByCompanyId($company->getId())->getId();
-            //add team
-            $this->addTeamtoTree($this->getEntityType($row['team'])['id'],$companyAdminId);
-            //$entityToAdd = $this->getEntityType($row['team']);
-            //get parent
-            //print_r($entityToAdd);
-            //$newPath = $this->getPath($row['parent'],$companyAdminId);
-            //$currentTeams = $this->companyHierarchy->getCompanyHierarchy($this->companyId);
-            return true;
-            if(!empty($newPath['parent'])){
-                $newStruct = $this->structureFactory->create();
-                $newStruct->setEntityId($entityToAdd['id']);
-                $newStruct->setEntityType($entityToAdd['type']);
-                //TODO: parent id needs to be determined
-                $newStruct->setParentId($companyAdminId);
-                $newStruct->setLevel($newPath['level']);
-                //$this->structureRepository->save($newStruct);
-                //$this->setPath($newStruct,'');
-                $newStruct->setPath($newPath['parent'].'/'.$newStruct->getId());
-                print_r("original ". $row['parent'] ."---".$newPath['parent'].'/'.$newStruct->getId()."\n");
-                //$this->structureRepository->save($newStruct);
-                
-            } else{
-                print_r("The parent ". $row['parent'] ." requested in b2b_teams.csv is invalid and has been skipped\n");
+    
+    public function install($row, $header)
+    {
+        $data['members'] = explode(",", $row['members']);
+        //create array from members addresses
+        // Create Team
+        $newTeam = $this->teamFactory->create();
+        $newTeam->setName($row['name']);
+        $newTeam->save();
+
+        //get admin user id
+        $adminUserId = $this->getCompanyAdminIdByName($row['company_name']);
+        //get admins structure
+        $parentId = $this->getStructureByEntity($adminUserId, 0)->getDataByKey('structure_id');
+        $teamId =($newTeam->getId());
+        //put team under admin users
+        $teamStruct = $this->addTeamToTree($teamId, $parentId);
+        //loop over team members
+        foreach ($data['members'] as $companyCustomerEmail) {
+            //get user id from email
+            $userId = $this->customerRepository->get(trim($companyCustomerEmail))->getId();
+            //delete structure that the user belongs to
+            $userStruct = $this->getStructureByEntity($userId, 0);
+            if ($userStruct) {
+                $structureId = $userStruct->getDataByKey('structure_id');
+                $this ->structureRepository->deleteById($structureId);
             }
-            
+
+            //add them to the new team
+            $this->addUserToTeamTree($userId, $teamStruct->getId(), $teamStruct->getPath());
+
         }
+
         return true;
     }
 
-    private function getPath($path,$companyAdminId){
-        $newPath = ['parent'=>$companyAdminId,'level'=>1];
-        if(!empty($path)){
-            //turn path into array
-            $pathArray = explode('/',$path);
-            foreach($pathArray as $pathElement){
-                //$element = $this->getEntityType($pathElement);
-                $newPath['parent'] = $newPath['parent'].'/'.$this->getEntityType($pathElement)['id'];
-                $currentTeams = $this->companyHierarchy->getCompanyHierarchy($this->companyId);
-            }
-            $newPath['level'] = count($pathArray);
-        }
-        unset($currentTeams);
-       return $newPath;
+     /**
+      * @param int $userId
+      * @param int $parentId
+      * @param string $path
+      * @return \Magento\Company\Model\Structure
+      */
+    private function addUserToTeamTree($userId, $parentId, $path)
+    {
+        $newStruct = $this->structureFactory->create();
+        $newStruct->setEntityId($userId);
+        $newStruct->setEntityType(0);
+        $newStruct->setParentId($parentId);
+        $newStruct->setLevel(2);
+        $newStruct->save();
+        $newStruct->setPath($path.'/'.$newStruct->getId());
+        $newStruct->save();
+        return $newStruct;
     }
 
-    private function getEntityType($entity){
-        $type=[];
-        //determine if it's a customer or team, return type and Id
-        try{
-            $customer = $this->customerRepository->get($entity);
-            $entityId = $customer->getId();
-            $entityType = StructureInterface::TYPE_CUSTOMER;
-            //TODO:need to get the entity id from the structure
-        }catch(NoSuchEntityException $e){
-            //check does team exist
-            //get teams under that name
-            $team = $this->getTeam($entity);
-            //if there are none, then create
-            if(!$team){
-                return ['type'=>StructureInterface::TYPE_TEAM,'id'=>$this->createTeam($entity)];
-            }
-            //if there is one, then get from company structure with that entity type and entity id
-            else{
-                //$teamStructureId = $this->getEntityIdOfTeamInStructure($team);
-                $teamStructureId = $team->getId();
-                if($teamStructureId){
-                    return ['type'=>StructureInterface::TYPE_TEAM,'id'=>$teamStructureId];
-                }else{
-                    return ['type'=>StructureInterface::TYPE_TEAM,'id'=>$this->createTeam($entity)];
-                }
-            }        
-        }
+      /**
+       * @param $entityId
+       * @param $entityType
+       * @return \Magento\Company\Api\Data\StructureInterface|mixed
+       */
+    private function getStructureByEntity($entityId, $entityType)
+    {
+        $builder = $this->searchCriteriaBuilder;
+        $builder->addFilter('entity_id', $entityId);
+        $builder->addFilter('entity_type', $entityType);
+        $structures = $this->structureRepository->getList($builder->create())->getItems();
+        return reset($structures);
+    }
         
-        
-        echo $entityType.'--'.$entityId."\n";
-        return ['type'=>$entityType,'id'=>$entityId];
-    }
-
-    private function getTeam($entity){
-        $teamFilter = $this->filterBuilder
-            ->setField("name")->setConditionType("eq")->setValue($entity)->create();
-            $teamFilterGroup = $this->filterGroupBuilder
-            ->addFilter($teamFilter)->create();
-            $teamSearch = $this->searchCriteriaBuilder->setFilterGroups([$teamFilterGroup])->create()->setPageSize(1)->setCurrentPage(1);
-            $team = $this->teamRepository->getList($teamSearch)->getItems();
-            return $team;
-    }
-
-    private function getEntityIdOfTeamInStructure($teams){
-
-        foreach($teams as $team){
-            $entityIdFilter = $this->filterBuilder
-            ->setField("entity_id")->setConditionType("eq")->setValue($team->getId())->create();
-            $entityIdFilterGroup = $this->filterGroupBuilder
-            ->addFilter($entityIdFilter)->create();
-            
-            $entityTypeFilter = $this->filterBuilder
-            ->setField("entity_type")->setConditionType("eq")->setValue(StructureInterface::TYPE_TEAM)->create();
-            $entityTypeFilterGroup = $this->filterGroupBuilder
-            ->addFilter($entityTypeFilter)->create();
-
-            $structSearch = $this->searchCriteriaBuilder->setFilterGroups([$entityIdFilterGroup,$entityTypeFilterGroup])->create()->setPageSize(1)->setCurrentPage(1);
-            $companyStructures = $this->structureRepository->getList($structSearch)->getItems();
-            if(count($companyStructures)==1){
-                return $team->getId();
-            } else {
-                    return false;
-            }
+    private function getCompanyAdminIdByName($name)
+    {
+        $companySearch = $this->searchCriteriaBuilder
+        ->addFilter('company_name', $name, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        $companyList = $this->companyRepository->getList($companySearch);
+        /** @var CompanyInterface $company */
+        $company = current($companyList->getItems());
+    
+        if (!$company) {
+            print_r("The company ". $name ." requested in b2b_teams.csv does not exist\n");
+        } else {
+            /**@var CompanyInterface $company */
+            return $company->getSuperUserId();
         }
-       
-       
     }
 
-    private function createTeam($name){
-        //does the team exist, if not create it
-        /** @var TeamInterface $team */
-        $team = $this->teamFactory->create();
-        $team->setName($name);
-        $this->teamRepository->create($team, $this->companyId);
-        echo "team=".$name."[".$team->getId()."}\n";
-        // if($team->getId()==3){
-        //     echo "moving\n"; 
-        //     $this->companyHierarchy->moveNode(15,14);
-        // }
-        return $team->getId();
-        //return $this->getEntityIdOfTeamInStructure($team);
-    }
-
-    private function addTeamToTree($teamId,$parentId){
+    private function addTeamToTree($teamId, $parentId)
+    {
         //path is structure_id of admin user / structure_id of team)
         $newStruct = $this->structureFactory->create();
         $newStruct->setEntityId($teamId);
         $newStruct->setEntityType(1);
         $newStruct->setParentId($parentId);
-        //$newStruct->setPath('1/2');
         $newStruct->setLevel(1);
         $newStruct->save();
         $newStruct->setPath($parentId.'/'.$newStruct->getId());
         $newStruct->save();
         return $newStruct;
     }
-
- }
+}

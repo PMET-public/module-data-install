@@ -16,7 +16,8 @@ class Validate
      * @param  Stores $stores
      * @return void
      */
-    public function __construct(Stores $stores){
+    public function __construct(Stores $stores)
+    {
         $this->stores = $stores;
     }
         
@@ -26,7 +27,8 @@ class Validate
      * @param  array $data
      * @return void
      */
-    public function validateB2bData($data){
+    public function validateB2bData($data)
+    {
         //Company
             //are required fields included
             //is there a company admin flagged in the customer data
@@ -44,36 +46,39 @@ class Validate
             //do the customers exist and are the with the correct company
         return true;
     }
-    
-    
-    public function validateCsvFile($header,$rows){
+       
+    public function validateCsvFile($header, $rows)
+    {
         //size of header array vs. size of each row $rows[0]
-        foreach($rows as $row){
-            if(count($row)!=count($header)){
+        foreach ($rows as $row) {
+            if (count($row)!=count($header)) {
                 return false;
             }
         }
         return true;
     }
 
-    public function validateWebsiteCode($websiteCode){
-        if($this->stores->getWebsiteId($websiteCode)){
+    public function validateWebsiteCode($websiteCode)
+    {
+        if ($this->stores->getWebsiteId($websiteCode)) {
             return true;
         } else {
             return false;
         }
     }
 
-    public function validateStoreCode($storeCode){
-        if($this->stores->getStoreId($storeCode)){
+    public function validateStoreCode($storeCode)
+    {
+        if ($this->stores->getStoreId($storeCode)) {
             return true;
         } else {
             return false;
         }
     }
 
-    public function validateStoreViewCode($storeViewCode){
-        if($this->stores->getViewId($storeViewCode)){
+    public function validateStoreViewCode($storeViewCode)
+    {
+        if ($this->stores->getViewId($storeViewCode)) {
             return true;
         } else {
             return false;

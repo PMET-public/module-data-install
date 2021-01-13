@@ -14,10 +14,10 @@ use Magento\Framework\ObjectManagerInterface;
 
 class Process
 {
-    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv','admin_roles.csv',
-        'admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','blocks.csv','categories.csv',
-        'products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv',
-        'b2b_companies.csv'];
+    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv',
+    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
+    'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
+    'pages.csv','templates.csv','reviews.csv','b2b_companies.csv'];
 
     const B2B_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv','b2b_salesreps.csv','b2b_teams.csv'];
 
@@ -96,30 +96,30 @@ class Process
      protected $adminRolesInstall;
 
      /**
-     * Process constructor.
-     * @param SampleDataContext $sampleDataContext
-     * @param Stores $stores
-     * @param ProductAttributes $productAttributes
-     * @param Categories $categories
-     * @param Products $products
-     * @param DirectoryList $directoryList
-     * @param Pages $pages
-     * @param Blocks $blocks
-     * @param DynamicBlocks $dynamicBlocks
-     * @param Configuration $configuration
-     * @param CustomerGroups $customerGroups
-     * @param CustomerAttributes $customerAttributes
-     * @param Customers $customers
-     * @param Reviews $reviews
-     * @param Templates $templates
-     * @param Validate $validate
-     * @param Upsells $upsells
-     * @param CopyMedia $copyMedia
-     * @param MsiInventory $msiInventory
-     * @param ObjectManagerInterface $objectManager
-     * @param AdminUsers $adminUsers
-     * @param AdminRoles $adminRoles
-     */
+      * Process constructor.
+      * @param SampleDataContext $sampleDataContext
+      * @param Stores $stores
+      * @param ProductAttributes $productAttributes
+      * @param Categories $categories
+      * @param Products $products
+      * @param DirectoryList $directoryList
+      * @param Pages $pages
+      * @param Blocks $blocks
+      * @param DynamicBlocks $dynamicBlocks
+      * @param Configuration $configuration
+      * @param CustomerGroups $customerGroups
+      * @param CustomerAttributes $customerAttributes
+      * @param Customers $customers
+      * @param Reviews $reviews
+      * @param Templates $templates
+      * @param Validate $validate
+      * @param Upsells $upsells
+      * @param CopyMedia $copyMedia
+      * @param MsiInventory $msiInventory
+      * @param ObjectManagerInterface $objectManager
+      * @param AdminUsers $adminUsers
+      * @param AdminRoles $adminRoles
+      */
     public function __construct(
         SampleDataContext $sampleDataContext,
         Stores $stores,
@@ -178,7 +178,6 @@ class Process
     public function loadFiles($moduleName, $fixtureDirectory = "fixtures", array $fileOrder = self::FILE_ORDER)
     {
 
-
         //set module configuration
         $this->settings = $this->getConfiguration($moduleName, $fixtureDirectory);
         print_r("Copying media files\n");
@@ -196,7 +195,7 @@ class Process
                     //Remove hidden character Excel adds to the first cell of a document
                     $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
                     //validate that number of elements in header and rows is equal
-                    if(!$this->validate->validateCsvFile($header,$rows)){
+                    if (!$this->validate->validateCsvFile($header, $rows)) {
                         print_r("Skipping File ".$nextFile.". The number of columns in the header does not match the number of column of data in one or more rows\n");
                         continue;
                     }
@@ -311,15 +310,12 @@ class Process
 
                     case "admin_roles.csv":
                         print_r("Loading Admin Roles\n");
-                        $this->processFile($rows, $header, $this->adminRolesInstall,$modulePath);
+                        $this->processFile($rows, $header, $this->adminRolesInstall, $modulePath);
                         break;
 
                     case "b2b_companies.csv":
                         print_r("Loading B2B\n");
-                        $this->processB2B($moduleName,$fixtureDirectory);
-                        //print_r("loading Companies\n");
-                        //$companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\Companies');
-                        //$this->processRows($rows, $header, $companiesInstall);
+                        $this->processB2B($moduleName, $fixtureDirectory);
                         break;
                 }
             }
@@ -329,10 +325,10 @@ class Process
     }
 
      /**
-     * @param array $rows
-     * @param array $header
-     * @param object $process
-     */
+      * @param array $rows
+      * @param array $header
+      * @param object $process
+      */
     private function processRows(array $rows, array $header, object $process): void
     {
         foreach ($rows as $row) {
@@ -431,7 +427,7 @@ class Process
             //Remove hidden character Excel adds to the first cell of a document
             $setupHeader = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $setupHeader);
             foreach ($setupRows as $setupRow) {
-                if(!empty($setupRow[1])){
+                if (!empty($setupRow[1])) {
                     $setupArray[$setupRow[0]] = $setupRow[1];
                 }
             }
@@ -439,7 +435,8 @@ class Process
         return $setupArray;
     }
 
-    private function processB2B($moduleName, $fixtureDirectory){
+    private function processB2B($moduleName, $fixtureDirectory)
+    {
         $b2bData = [];
         //do we have all the files we need
         foreach (self::B2B_FILES as $nextFile) {
@@ -450,18 +447,18 @@ class Process
                 //Remove hidden character Excel adds to the first cell of a document
                  $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
                 //validate that number of elements in header and rows is equal
-                if(!$this->validate->validateCsvFile($header,$rows)){
-                   print_r($nextFile." is invalid. The number of columns in the header does not match the number of column of data in one or more rows\n");
-                   break;
+                if (!$this->validate->validateCsvFile($header, $rows)) {
+                    print_r($nextFile." is invalid. The number of columns in the header does not match the number of column of data in one or more rows\n");
+                    break;
                 }
                 $b2bData[$nextFile] = ['header'=>$header,'rows'=>$rows];
-            }else{
+            } else {
                 print_r("You are missing the required B2B file - ".$nextFile."\n");
                 break;
             }
         }
         //validate referential integrity of the data
-        if(!$this->validate->validateB2bData($b2bData)){
+        if (!$this->validate->validateB2bData($b2bData)) {
             print_r("Bad Data");
                 ///probaby need to throw an error to roll back everything
         }
@@ -469,8 +466,6 @@ class Process
         $companies = $this->buildB2bDataArrays($b2bData['b2b_companies.csv']);
         $customers = $this->buildB2bDataArrays($b2bData['b2b_customers.csv']);
 
-         
-      
         //load customers (normal process)
         print_r("Loading B2B Customers\n");
         $this->processFile($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $this->customerInstall, '');
@@ -479,13 +474,11 @@ class Process
         $this->processRows($b2bData['b2b_salesreps.csv']['rows'], $b2bData['b2b_salesreps.csv']['header'], $this->adminUsersInstall);
         //create company (add on company admin from customers, and sales rep);
 
-        
-        
-        $companiesData = $this->mergeCompanyData($companies,$customers,$salesReps);
+        $companiesData = $this->mergeCompanyData($companies, $customers, $salesReps);
         print_r("Loading B2B Companies\n");
         $companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\Companies');
-        foreach($companiesData as $companyData){
-            $companiesInstall->install($companyData,$this->settings);
+        foreach ($companiesData as $companyData) {
+            $companiesInstall->install($companyData, $this->settings);
         }
         
         //add company roles
@@ -498,28 +491,28 @@ class Process
 
         print_r("Loading B2B Teams and Company Structure\n");
         //create company structure
-        //$companyTeamsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\Teams');
-        //$this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $companyTeamsInstall);
+        $companyTeamsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\Teams');
+        $this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $companyTeamsInstall);
 
         //$t=$r;
     }
     //copy data that may be needed from one array into another
-    private function mergeCompanyData($companies,$customers,$salesReps){
-
+    private function mergeCompanyData($companies, $customers, $salesReps)
+    {
         $revisedCompany = [];
-        foreach($companies as $company){
+        foreach ($companies as $company) {
              //copy email from customers to company admin_email
-             foreach($customers as $customer){
-                 if($customer['company']==$company['company_name'] && $customer['company_admin'] == 'Y'){
-                     $company['admin_email'] = $customer['email'];
-                 } elseif($customer['company']==$company['company_name']){
+            foreach ($customers as $customer) {
+                if ($customer['company']==$company['company_name'] && $customer['company_admin'] == 'Y') {
+                    $company['admin_email'] = $customer['email'];
+                } elseif ($customer['company']==$company['company_name']) {
                     $company['company_customers'][] = $customer['email'];
-                 }
-             }
+                }
+            }
 
              //copy email from salesreps to company salesrep_email
-             foreach($salesReps as $rep){
-                if($rep['company']==$company['company_name']){
+            foreach ($salesReps as $rep) {
+                if ($rep['company']==$company['company_name']) {
                     $company['sales_rep'] = $rep['username'];
                 }
             }
@@ -529,8 +522,8 @@ class Process
         return($revisedCompany);
     }
 
-
-    private function buildB2bDataArrays($rowData){
+    private function buildB2bDataArrays($rowData)
+    {
         $result = [];
         foreach ($rowData['rows'] as $row) {
             $data = [];
@@ -542,10 +535,11 @@ class Process
         return $result;
     }
 
-    private function matchKeyValue($array,$keyToFind,$valueToFind,$keyToReturn){
-        foreach($array as $key=>$value){
-            if($key==$keyToFind && $value==$valueToFind){
-               return [$key=>$value];
+    private function matchKeyValue($array, $keyToFind, $valueToFind, $keyToReturn)
+    {
+        foreach ($array as $key => $value) {
+            if ($key==$keyToFind && $value==$valueToFind) {
+                return [$key=>$value];
             }
         }
     }

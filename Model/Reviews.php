@@ -117,7 +117,7 @@ class Reviews
     {
         $storeId = $this->stores->getViewId($settings['store_view_code']);
         //$storeId = [$this->storeManager->getDefaultStoreView()->getStoreId()];
-        $review = $this->prepareReview($row,$storeId);
+        $review = $this->prepareReview($row, $storeId);
         $this->createRating($row['rating_code'], $storeId);
         $productId = $this->getProductIdBySku($row['sku']);
 
@@ -168,7 +168,7 @@ class Reviews
      * @param array $row
      * @return Review
      */
-    protected function prepareReview($row,$storeId)
+    protected function prepareReview($row, $storeId)
     {
         /** @var $review Review */
         $review = $this->reviewFactory->create();

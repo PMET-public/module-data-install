@@ -133,9 +133,9 @@ class Customers
             $customer->setAddresses([$addresses]);
             
             //set website for customer
-            if(!empty($row['site_code'])){
+            if (!empty($row['site_code'])) {
                 $customer->setWebsiteId($this->stores->getWebsiteId($row['site_code']));
-            }else{
+            } else {
                 $customer->setWebsiteId($this->stores->getWebsiteId($this->settings['site_code']));
             }
 

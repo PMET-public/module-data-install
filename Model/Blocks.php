@@ -61,17 +61,16 @@ class Blocks
         $cmsBlock->getResource()->load($cmsBlock, $data['identifier']);
 
         //get view id from view code, use admin if not defined
-        if(!empty($data['store_view_code'])){
+        if (!empty($data['store_view_code'])) {
             $viewId = $this->storeView->load($data['store_view_code'])->getStoreId();
-        } else{
+        } else {
             $viewId = $this->storeView->load('admin')->getStoreId();
         }
 
         //set status as active if not defined
-        if(empty($data['is_active']) || $data['is_active']=='Y'){
+        if (empty($data['is_active']) || $data['is_active']=='Y') {
             $data['is_active'] = 1;
         }
-
 
         if (!$cmsBlock->getData()) {
             $cmsBlock->setData($data);

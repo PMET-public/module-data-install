@@ -78,7 +78,7 @@ class ProductAttributes
         $attribute = $this->eavConfig->getAttribute('catalog_product', $this->validateCode($data['attribute_code']));
         if (!$attribute) {
             $attribute = $this->attributeFactory->create();
-        } elseif(!empty($data['only_update_sets']) && $data['only_update_sets']=='Y'){
+        } elseif (!empty($data['only_update_sets']) && $data['only_update_sets']=='Y') {
             //facilitate adding existing attributes to set without changes.  Most likely used for system attributes
             $this->setAttributeSets($data, $attribute);
             $this->eavConfig->clear();

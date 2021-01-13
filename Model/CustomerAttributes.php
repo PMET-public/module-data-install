@@ -87,7 +87,6 @@ class CustomerAttributes
             $this->addOptions(0, $data["attribute_code"], explode(PHP_EOL, $data["options"]));
         }
 
-
         $useInForms=['adminhtml_customer','adminhtml_checkout','customer_account_edit','customer_account_create'];
         $attributeOptions = ['Running','Crossfit','Pilates','Yoga'];
         $attributeCode = 'preferred_activities';
@@ -124,15 +123,5 @@ class CustomerAttributes
         $eavSetup = $this->eavSetupFactory->create();
 
         $eavSetup->addAttributeOption($option);
-    }
-
-    public static function getDependencies()
-    {
-        return [];
-    }
-
-    public function getAliases()
-    {
-        return [];
     }
 }

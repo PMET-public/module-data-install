@@ -8,7 +8,6 @@ namespace MagentoEse\DataInstall\Model;
 use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
-use Magento\Tests\NamingConvention\true\mixed;
 use Magento\Theme\Model\ResourceModel\Theme\Collection as ThemeCollection;
 use Magento\Theme\Model\Theme\Registration as ThemeRegistration;
 

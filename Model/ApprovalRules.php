@@ -28,7 +28,6 @@ class ApprovalRules
     /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
 
-
     /** @var RoleManagementInterface */
     protected $roleManagement;
 
@@ -44,11 +43,26 @@ class ApprovalRules
     /** @var RuleRepositoryInterface */
     protected $ruleRepository;
 
+    /**
+     * ApprovalRules constructor.
+     * @param RuleInterfaceFactory $ruleFactory
+     * @param CompanyRepositoryInterface $companyRepositoryInterface
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param RoleManagementInterface $roleManagement
+     * @param RoleRepositoryInterface $roleRepositoryInterface
+     * @param ConditionBuilderFactory $conditionBuilderFactory
+     * @param RuleConditionPool $ruleConditionPool
+     * @param RuleRepositoryInterface $ruleRepository
+     */
     public function __construct(
-        RuleInterfaceFactory $ruleFactory, CompanyRepositoryInterface $companyRepositoryInterface, 
-        SearchCriteriaBuilder $searchCriteriaBuilder, RoleManagementInterface  $roleManagement,
-        RoleRepositoryInterface $roleRepositoryInterface, ConditionBuilderFactory $conditionBuilderFactory,
-        RuleConditionPool $ruleConditionPool, RuleRepositoryInterface $ruleRepository
+        RuleInterfaceFactory $ruleFactory,
+        CompanyRepositoryInterface $companyRepositoryInterface,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        RoleManagementInterface  $roleManagement,
+        RoleRepositoryInterface $roleRepositoryInterface,
+        ConditionBuilderFactory $conditionBuilderFactory,
+        RuleConditionPool $ruleConditionPool,
+        RuleRepositoryInterface $ruleRepository
     ) {
         $this->ruleFactory = $ruleFactory;
         $this->companyRepository = $companyRepositoryInterface;
@@ -71,7 +85,7 @@ class ApprovalRules
         //convert data row to usable values
         $ruleData = $this->convertRow($row);
         //validate data
-        if($this->validate($ruleData)!=''){
+        if ($this->validate($ruleData)!='') {
             print_r($this->validate($ruleData));
             return true;
         }
@@ -91,7 +105,6 @@ class ApprovalRules
         $rule->setCompanyId($ruleData['company_id']);
         $rule->setCreatedBy((int) $this->getCompanyAdminIdByName($ruleData['company']));
         $this->ruleRepository->save($rule);
-        //$cmsBlock->unsetData();
         return true;
     }
 
@@ -121,10 +134,10 @@ class ApprovalRules
     }
 
     /**
-     * Validate the incoming request is valid for a Purchase Order rule
-     *
-     * @param RequestInterface $request
+     * @param $ruleData
+     * @return string
      * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     private function validate($ruleData)
     {
@@ -162,83 +175,105 @@ class ApprovalRules
         }
 
         // Validate roles for both the applies to & approvers
-        $returnMessage.= $this->validateRoles($ruleData['apply_to_roles'],"Applies To");
-        $returnMessage.= $this->validateRoles($ruleData['approval_roles'],"Approver");
+        $returnMessage.= $this->validateRoles($ruleData['apply_to_roles'], "Applies To");
+        $returnMessage.= $this->validateRoles($ruleData['approval_roles'], "Approver");
         //TODO validate rule types
         //TODO validate rule
         //TODO validate amount value is numeric
         return $returnMessage;
-    }    
+    }
     //company,name,description,is_active,apply_to_roles,rule_type,rule,amount_value,currency_code,approval_roles
 
-    private function convertRow(array $row){
+    /**
+     * @param array $row
+     * @return array
+     */
+    private function convertRow(array $row)
+    {
         //convert company to company_id
         $row['company_id'] = $this->getCompanyIdbyName($row['company']);
         //convert is_active to 1/0
         $row['is_active'] = $row['is_active']== 'Y' ? 1:0;
         //convert app_to_roles to list of roles
-        if($row['apply_to_roles']=='all'){
+        if ($row['apply_to_roles']=='all') {
             $row['apply_to_roles']=='';
             $row['applies_to_all'] = 1;
-        }else{
+        } else {
             $row['applies_to_all'] = 0;
-            $row['apply_to_roles'] = $this->convertRoleNamesToIds($row['company_id'],$row['apply_to_roles']);
+            $row['apply_to_roles'] = $this->convertRoleNamesToIds($row['company_id'], $row['apply_to_roles']);
         }
-        
+
         //convert rule information to conditions array
             //default currency code to USD
-        if(empty($row['currency_code'])){
+        if (empty($row['currency_code'])) {
             $row['currency_code']='USD';
         }
         $row['conditions'] = ['attribute'=>$row['rule_type'],'operator'=>$row['rule'],'value'=>$row['amount_value'],'currency_code'=>$row['currency_code']];
         //convert approval_roles to list of roles
-        $row['approval_roles'] = $this->convertRoleNamesToIds($row['company_id'],$row['approval_roles']);
+        $row['approval_roles'] = $this->convertRoleNamesToIds($row['company_id'], $row['approval_roles']);
 
         return $row;
     }
-    
-    private function convertRoleNamesToIds($companyId, $roles){
+
+    /**
+     * @param $companyId
+     * @param $roles
+     * @return array
+     */
+    private function convertRoleNamesToIds($companyId, $roles)
+    {
         $roleIds = [];
         //change list to array
-        $roleNames = explode(',',$roles);
+        $roleNames = explode(',', $roles);
         //get roles for company
         $companyRoles = $this->roleManagement->getRolesByCompanyId($companyId);
-        foreach($roleNames as $roleName){
-            foreach($companyRoles as $companyRole){
-                if($companyRole->getRoleName()==$roleName){
-                  $roleIds[]=$companyRole->getId();
-                break;      
+        foreach ($roleNames as $roleName) {
+            foreach ($companyRoles as $companyRole) {
+                if ($companyRole->getRoleName()==$roleName) {
+                    $roleIds[]=$companyRole->getId();
+                    break;
                 }
             }
         }
         return $roleIds;
     }
 
-
-    private function getCompanyIdbyName($name){
+    /**
+     * @param $name
+     * @return int|null
+     * @throws LocalizedException
+     */
+    private function getCompanyIdbyName($name)
+    {
         $companySearch = $this->searchCriteriaBuilder
         ->addFilter('company_name', $name, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
         $companyList = $this->companyRepository->getList($companySearch);
         /** @var CompanyInterface $company */
         $company = current($companyList->getItems());
-    
-        if(!$company){
+
+        if (!$company) {
             print_r("The company ". $name ." requested in b2b_approval_rules.csv does not exist\n");
-        }else{
+        } else {
             return $company->getId();
         }
     }
 
-    private function getCompanyAdminIdByName($name){
+    /**
+     * @param $name
+     * @return int
+     * @throws LocalizedException
+     */
+    private function getCompanyAdminIdByName($name)
+    {
         $companySearch = $this->searchCriteriaBuilder
         ->addFilter('company_name', $name, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
         $companyList = $this->companyRepository->getList($companySearch);
         /** @var CompanyInterface $company */
         $company = current($companyList->getItems());
-    
-        if(!$company){
+
+        if (!$company) {
             print_r("The company ". $name ." requested in b2b_approval_rules.csv does not exist\n");
-        }else{
+        } else {
             /**@var CompanyInterface $company */
             return $company->getSuperUserId();
         }
@@ -266,14 +301,14 @@ class ApprovalRules
     }
 
      /**
-     * Validate that all role selections are valid
-     *
-     * @param array $approvers
-     * @param Phrase $errorMessage
-     *
-     * @throws LocalizedException
-     * @throws NoSuchEntityException
-     */
+      * Validate that all role selections are valid
+      *
+      * @param array $approvers
+      * @param Phrase $errorMessage
+      *
+      * @throws LocalizedException
+      * @throws NoSuchEntityException
+      */
     private function validateRoles(array $approvers, $message)
     {
         // Verify all approvers exist and are assigned to the users company
@@ -332,6 +367,4 @@ class ApprovalRules
 
         return $combineCondition->create()->toString();
     }
-
-
 }

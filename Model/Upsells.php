@@ -6,6 +6,7 @@ namespace MagentoEse\DataInstall\Model;
 use Magento\TargetRule\Model\RuleFactory as RuleFactory;
 use Magento\TargetRule\Model\Rule;
 use Magento\TargetRule\Model\ResourceModel\Rule as ResourceModel;
+use Magento\Framework\Serialize\SerializerInterface;
 
 class Upsells
 {
@@ -15,26 +16,27 @@ class Upsells
     /** @var Converter */
     protected $converter;
 
+    /** @var SerializerInterface */
+    protected $serializerInterface;
+
     /** @var ResourceModel */
     protected $resourceModel;
 
-    /**
-     * Upsells constructor.
-     * @param RuleFactory $ruleFactory
-     * @param Converter $converter
-     */
-    public function __construct(RuleFactory $ruleFactory,
-                                Converter $converter,
-                                ResourceModel $resourceModel)
-    {
+    public function __construct(
+        RuleFactory $ruleFactory,
+        Converter $converter,
+        ResourceModel $resourceModel,
+        SerializerInterface $serializerInterface
+    ) {
         $this->ruleFactory = $ruleFactory;
         $this->converter = $converter;
         $this->resourceModel = $resourceModel;
+        $this->serializerInterfac = $serializerInterface;
     }
 
     public function install(array $row, array $settings)
     {
-        switch(strtolower($row['apply_to'])){
+        switch (strtolower($row['apply_to'])) {
             case "upsell":
                 $applyTo = Rule::UP_SELLS;
                 break;
@@ -50,7 +52,7 @@ class Upsells
         /** @var Rule $upsellModel */
         $upsellModel = $this->ruleFactory->create();
         $upsellModel->setName($row['name']);
-        $upsellModel->setIsActive($row['is_active'] =='Y' ? 1 : 0 );
+        $upsellModel->setIsActive($row['is_active'] =='Y' ? 1 : 0);
         $upsellModel->setConditionsSerialized($this->converter->convertContent($row['conditions_serialized']));
         $upsellModel->setActionsSerialized($this->converter->convertContent($row['actions_serialized']));
         $upsellModel->setPositionsLimit($row['positions_limit']);
@@ -82,10 +84,9 @@ class Upsells
                 }
             }
             if (!empty($replacement)) {
-                $data = preg_replace('/' . $matches[0][$matchedId] . '/', serialize($replacement), $data);
+                $data = preg_replace('/' . $matches[0][$matchedId] . '/', $this->serializerInterface->serialize($replacement), $data);
             }
         }
         return $data;
     }
-
 }

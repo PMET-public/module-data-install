@@ -8,7 +8,6 @@ use Magento\PageBuilder\Model\Template;
 use Magento\PageBuilder\Model\TemplateFactory;
 use Magento\PageBuilder\Model\TemplateRepository;
 
-
 class Templates
 {
 
@@ -24,7 +23,6 @@ class Templates
     protected $converter;
 
     public function __construct(
-
         TemplateFactory $templateFactory,
         TemplateRepository $templateRepository,
         Converter $converter
@@ -34,7 +32,6 @@ class Templates
         $this->templateRepository = $templateRepository;
         $this->converter = $converter;
     }
-
 
     public function install(array $row, array $settings)
     {
@@ -48,6 +45,4 @@ class Templates
 
         return true;
     }
-
-
 }

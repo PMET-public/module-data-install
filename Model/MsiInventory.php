@@ -9,12 +9,9 @@ use Magento\Framework\ObjectManagerInterface;
 
 class MsiInventory
 {
-    /** @var ObjectManagerInterface  */    
-
+    /** @var ObjectManagerInterface  */
     protected $objectManager;
 
-    
-       
     /**
      * @param ObjectManagerInterface $objectManager
      */

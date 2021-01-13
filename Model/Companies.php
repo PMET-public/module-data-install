@@ -16,79 +16,78 @@
  use Magento\User\Model\UserFactory;
  use Magento\Directory\Model\RegionFactory;
 
- class Companies
- {
+class Companies
+{
 
-     /** @var CompanyCustomer  */
-     protected $companyCustomer;
+    /** @var CompanyCustomer  */
+    protected $companyCustomer;
 
-     /** @var CustomerRepositoryInterface  */
-     protected $customer;
+    /** @var CustomerRepositoryInterface  */
+    protected $customer;
 
-     /** @var Customer  */
-     protected $customerResource;
+    /** @var Customer  */
+    protected $customerResource;
 
-     /** @var StructureInterfaceFactory  */
-     protected $structure;
+    /** @var StructureInterfaceFactory  */
+    protected $structure;
 
-     /** @var float */
-     protected $creditLimit;
+    /** @var float */
+    protected $creditLimit;
 
-     /** @var CreditLimitManagementInterface  */
-     protected $creditLimitManagement;
+    /** @var CreditLimitManagementInterface  */
+    protected $creditLimitManagement;
 
-     /** @var UserInterfaceFactory  */
-     protected $userFactory;
+    /** @var UserInterfaceFactory  */
+    protected $userFactory;
 
-     /** @var RegionFactory  */
-     protected $region;
+    /** @var RegionFactory  */
+    protected $region;
      
-     /** @var StructureRepository  */
-     protected $structureRepository;
+    /** @var StructureRepository  */
+    protected $structureRepository;
 
-     /**
-      * Companies constructor.
-      * @param CompanyCustomer $companyCustomer
-      * @param CustomerRepositoryInterface $customer
-      * @param Customer $customerResource
-      * @param StructureInterfaceFactory $structure
-      * @param CreditLimitManagementInterface $creditLimitManagement
-      * @param UserFactory $userFactory
-      * @param RegionFactory $region
-      * @param StructureRepository $structureRepository
-      */
-     public function __construct(
-         CompanyCustomer $companyCustomer,
-         CustomerRepositoryInterface $customer,
-         Customer $customerResource,
-         StructureInterfaceFactory $structure,
-         CreditLimitManagementInterface $creditLimitManagement,
-         UserFactory $userFactory,
-         RegionFactory $region,
-         StructureRepository $structureRepository
-     )
-     {
-         $this->companyCustomer = $companyCustomer;
-         $this->customer = $customer;
-         $this->customerResource = $customerResource;
-         $this->structure = $structure;
-         $this->creditLimitManagement = $creditLimitManagement;
-         $this->userFactory = $userFactory;
-         $this->region = $region;
-         $this->structureRepository = $structureRepository;
-     }
+    /**
+     * Companies constructor.
+     * @param CompanyCustomer $companyCustomer
+     * @param CustomerRepositoryInterface $customer
+     * @param Customer $customerResource
+     * @param StructureInterfaceFactory $structure
+     * @param CreditLimitManagementInterface $creditLimitManagement
+     * @param UserFactory $userFactory
+     * @param RegionFactory $region
+     * @param StructureRepository $structureRepository
+     */
+    public function __construct(
+        CompanyCustomer $companyCustomer,
+        CustomerRepositoryInterface $customer,
+        Customer $customerResource,
+        StructureInterfaceFactory $structure,
+        CreditLimitManagementInterface $creditLimitManagement,
+        UserFactory $userFactory,
+        RegionFactory $region,
+        StructureRepository $structureRepository
+    ) {
+        $this->companyCustomer = $companyCustomer;
+        $this->customer = $customer;
+        $this->customerResource = $customerResource;
+        $this->structure = $structure;
+        $this->creditLimitManagement = $creditLimitManagement;
+        $this->userFactory = $userFactory;
+        $this->region = $region;
+        $this->structureRepository = $structureRepository;
+    }
 
-     /**
-      * @param array $row
-      * @param array $settings
-      * @return bool
-      * @throws \Magento\Framework\Exception\CouldNotSaveException
-      * @throws \Magento\Framework\Exception\InputException
-      * @throws \Magento\Framework\Exception\LocalizedException
-      * @throws \Magento\Framework\Exception\NoSuchEntityException
-      */
-     public function install(array $row, array $settings)
-     {
+    /**
+     * @param array $row
+     * @param array $settings
+     * @return bool
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function install(array $row, array $settings)
+    {
         //TODO: Enable Purchase Orders
 
         $region = $this->region->create();
@@ -115,53 +114,53 @@
         $creditLimit->setCreditLimit($row['credit_limit']);
         $creditLimit->save();
 
-        if(count($row['company_customers']) > 0) {
+        if (count($row['company_customers']) > 0) {
             foreach ($row['company_customers'] as $companyCustomerEmail) {
                 //tie other customers to company
+                
                 $companyCustomer = $this->customer->get(trim($companyCustomerEmail));
                 $this->addCustomerToCompany($newCompany, $companyCustomer);
                 /* add the customer in the tree under the admin user
                 //They may be moved later on if they are part of a team */
-                if($row['admin_email']!='Y'){
+                if ($row['admin_email']!='Y') {
                     $this->addToTree($companyCustomer->getId(), $adminCustomer->getId());
                 }
-
-
             }
-
         }
         return true;
-     }
+    }
 
+    /**
+     * @param CompanyCustomer $newCompany
+     * @param CompanyCustomer $companyCustomer
+     */
+    private function addCustomerToCompany($newCompany, $companyCustomer)
+    {
 
-     /**
-      * @param CompanyCustomer $newCompany
-      * @param CompanyCustomer $companyCustomer
-      */
-     private function addCustomerToCompany($newCompany,$companyCustomer){
+        //assign to company
+        if ($companyCustomer->getExtensionAttributes() !== null
+            && $companyCustomer->getExtensionAttributes()->getCompanyAttributes() !== null) {
+            $companyAttributes = $companyCustomer->getExtensionAttributes()->getCompanyAttributes();
+            $companyAttributes->setCustomerId($companyCustomer->getId());
+            $companyAttributes->setCompanyId($newCompany->getId());
+            $this->customerResource->saveAdvancedCustomAttributes($companyAttributes);
+            $this->customer->save($companyCustomer);
+        }
+    }
 
-         //assign to company
-         if ($companyCustomer->getExtensionAttributes() !== null
-             && $companyCustomer->getExtensionAttributes()->getCompanyAttributes() !== null) {
-             $companyAttributes = $companyCustomer->getExtensionAttributes()->getCompanyAttributes();
-             $companyAttributes->setCustomerId($companyCustomer->getId());
-             $companyAttributes->setCompanyId($newCompany->getId());
-             $this->customerResource->saveAdvancedCustomAttributes($companyAttributes);
-         }
-     }
-
-     /**
-      * @param int $customerId
-      * @param int $parentId
-      */
-     private function addToTree($customerId,$parentId){
-         $newStruct = $this->structure->create();
-         $newStruct->setEntityId($customerId);
-         $newStruct->setEntityType(0);
-         $newStruct->setParentId($parentId);
-         $newStruct->setLevel(1);
-         $this->structureRepository->save($newStruct);
-         $newStruct->setPath($parentId.'/'.$newStruct->getId());
-         $this->structureRepository->save($newStruct);
-     }
- }
+    /**
+     * @param int $customerId
+     * @param int $parentId
+     */
+    private function addToTree($customerId, $parentId)
+    {
+        $newStruct = $this->structure->create();
+        $newStruct->setEntityId($customerId);
+        $newStruct->setEntityType(0);
+        $newStruct->setParentId($parentId);
+        $newStruct->setLevel(1);
+        $this->structureRepository->save($newStruct);
+        $newStruct->setPath($parentId.'/'.$newStruct->getId());
+        $this->structureRepository->save($newStruct);
+    }
+}

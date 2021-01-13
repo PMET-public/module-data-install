@@ -19,6 +19,7 @@ use Magento\UrlRewrite\Model\ResourceModel\UrlRewrite;
 use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollection;
 use Magento\UrlRewrite\Model\UrlPersistInterface;
 use Magento\UrlRewrite\Service\V1\Data\UrlRewrite as UrlRewriteService;
+
 class Pages
 {
     /** @var Csv  */
@@ -158,7 +159,7 @@ class Pages
                 //if its an existing page, but needs to be created for a store
                 if (count($pages) > 1 && $foundPage==0) {
                     $this->urlPersist->deleteByData(
-                    [
+                        [
                         UrlRewriteService::ENTITY_TYPE =>CmsPageUrlRewriteGenerator::ENTITY_TYPE,
                         UrlRewriteService::STORE_ID=>$this->getStoreIds($row['store_view_code']),
                         UrlRewriteService::REQUEST_PATH=>$row['identifier']

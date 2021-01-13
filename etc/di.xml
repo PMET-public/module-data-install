@@ -1,4 +1,0 @@
-<?xml version="1.0" ?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-	<!-- <preference for="Magento\Company\Model\Company\Structure" type="MagentoEse\DataInstall\Rewrite\Magento\Company\Model\Company\Structure"/> -->
-</config>

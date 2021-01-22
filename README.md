@@ -71,7 +71,10 @@ Optional file. This file contains settings used by the install process. This fil
 
 **product\_image\_import\_directory** - Path from server root to directory where images should be read during product import.  Defaults to `<module with data files>\media\products`
 
+
 **restrict\_products\_from\_views** - (Y/N, Default: Y) Used to set the visibility of products, so products from one store view don't show in the search from another. When installing new products, the visibility for existing products is set to **Not Visible Individually** for the view defined by **store\_view\_code**. Visibility for products added from the products.csv file will be set to **Not Visible Individually** for all views (including *default*) except for the **store\_view\_code** defined in that row of the products.csv data file.
+
+**product\_validation\_strategy** - (validation-stop-on-errors,validation-skip-errors) Default : validation-skip-errors. Setting to either stop a product import on an data error or allow it to continue. This is the Validation Strategy setting in the Import admin UI.
 
 ### Stores
 *File Name* - stores.csv

@@ -79,6 +79,12 @@ class Products
             $restrictProductsFromViews =  'N';
         }
 
+        if (!empty($settings['product_validation_strategy'])) {
+            $productValidationStrategy = $settings['product_validation_strategy'];
+        } else {
+            $productValidationStrategy =  'validation-skip-errors';
+        }
+
         foreach ($rows as $row) {
             $productsArray[] = array_combine($header, $row);
         }
@@ -91,7 +97,7 @@ class Products
 
 
         print_r("Import new products\n");
-        $this->import($productsArray,$imgDir);
+        $this->import($productsArray,$imgDir,$productValidationStrategy);
         
         /// Restrict products from other stores
         if($restrictProductsFromViews=='Y') {
@@ -122,10 +128,15 @@ class Products
 
     }
 
-    private function import($productsArray,$imgDir){
+    private function import($productsArray,$imgDir,$productValidationStrategy){
         $importerModel = $this->importer->create();
         $importerModel->setImportImagesFileDir($imgDir);
-        $importerModel->setValidationStrategy('validation-skip-errors');
+        $importerModel->setValidationStrategy($productValidationStrategy);
+        if($productValidationStrategy == 'validation-stop-on-errors'){
+            $importerModel->setAllowedErrorCount(1);
+        }else{
+            $importerModel->setAllowedErrorCount(100);
+        }
         try {
             $importerModel->processImport($productsArray);
         } catch (\Exception $e) {

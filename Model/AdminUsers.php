@@ -9,6 +9,8 @@ use Magento\Authorization\Model\RoleFactory;
 use Magento\Authorization\Model\ResourceModel\Role\CollectionFactory as RoleCollection;
 use Magento\Authorization\Model\Acl\Role\Group as RoleGroup;
 use Magento\Authorization\Model\UserContextInterface;
+use Magento\User\Model\ResourceModel\User\CollectionFactory as UserCollection;
+
 
 class AdminUsers
 {
@@ -21,20 +23,26 @@ class AdminUsers
     /** @var RoleCollection */
     protected $roleCollection;
 
+    /** @var UserCollection */
+    protected $userCollection;
+
     /**
      * AdminUsers constructor.
      * @param UserInterfaceFactory $userFactory
      * @param RoleFactory $roleFactory
      * @param RoleCollection $roleCollection
+     * @param UserCollection $userCollection
      */
     public function __construct(
         UserInterfaceFactory $userFactory,
         RoleFactory $roleFactory,
-        RoleCollection $roleCollection
+        RoleCollection $roleCollection,
+        UserCollection $userCollection
     ) {
         $this->userFactory = $userFactory;
         $this->roleFactory = $roleFactory;
         $this->roleCollection = $roleCollection;
+        $this->userCollection = $userCollection;
     }
 
     /**
@@ -44,13 +52,17 @@ class AdminUsers
      */
     public function install(array $row, array $settings)
     {
-        $user = $this->userFactory->create();
-        $user->setEmail($row['email']);
-        $user->setFirstName($row['firstname']);
-        $user->setLastName($row['lastname']);
-        $user->setUserName($row['username']);
-        $user->setPassword($row['password']);
-        $user->save();
+        $user = $this->userCollection->create()->addFieldToFilter('username', ['eq' => $row['username']])->getFirstItem();
+            //create role if it doesnt exist
+        if (!$user->getData('username')) {
+            $user = $this->userFactory->create();       
+            $user->setEmail($row['email']);
+            $user->setFirstName($row['firstname']);
+            $user->setLastName($row['lastname']);
+            $user->setUserName($row['username']);
+            $user->setPassword($row['password']);
+            $user->save();
+        }
         $this->addUserToRole($user, $row);
 
         return true;

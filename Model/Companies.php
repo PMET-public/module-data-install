@@ -15,6 +15,9 @@
  use Magento\User\Api\Data\UserInterfaceFactory;
  use Magento\User\Model\UserFactory;
  use Magento\Directory\Model\RegionFactory;
+ use Magento\Company\Api\CompanyRepositoryInterface;
+ use Magento\Framework\Api\SearchCriteriaBuilder;
+ use Magento\Company\Api\Data\CompanyInterface;
 
 class Companies
 {
@@ -46,6 +49,12 @@ class Companies
     /** @var StructureRepository  */
     protected $structureRepository;
 
+    /** @var CompanyRepositoryInterface  */
+    protected $companyRepositoryInterface;
+
+    /** @var SearchCriteriaBuilder */
+    protected $searchCriteriaBuilder;
+
     /**
      * Companies constructor.
      * @param CompanyCustomer $companyCustomer
@@ -56,6 +65,8 @@ class Companies
      * @param UserFactory $userFactory
      * @param RegionFactory $region
      * @param StructureRepository $structureRepository
+     * @param CompanyRepositoryInterface $companyRepositoryInterface
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
         CompanyCustomer $companyCustomer,
@@ -65,7 +76,9 @@ class Companies
         CreditLimitManagementInterface $creditLimitManagement,
         UserFactory $userFactory,
         RegionFactory $region,
-        StructureRepository $structureRepository
+        StructureRepository $structureRepository,
+        CompanyRepositoryInterface $companyRepositoryInterface,
+        SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
         $this->companyCustomer = $companyCustomer;
         $this->customer = $customer;
@@ -75,6 +88,8 @@ class Companies
         $this->userFactory = $userFactory;
         $this->region = $region;
         $this->structureRepository = $structureRepository;
+        $this->companyRepositoryInterface = $companyRepositoryInterface;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
     /**
@@ -101,8 +116,16 @@ class Companies
         $salesRep->loadByUsername($row['sales_rep']);
 
         $row['company_email']=$row['admin_email'];
+        $companySearch = $this->searchCriteriaBuilder
+        ->addFilter(CompanyInterface::NAME, $row['company_name'], 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        $companyList = $this->companyRepositoryInterface->getList($companySearch);
+        /** @var CompanyInterface $company */
+        $newCompany = current($companyList->getItems());
         //create company
-        $newCompany = $this->companyCustomer->createCompany($adminCustomer, $row);
+        if(!$newCompany){
+            $newCompany = $this->companyCustomer->createCompany($adminCustomer, $row);
+        }
+        
         $newCompany->setSalesRepresentativeId($salesRep->getId());
         $newCompany->setLegalName($row['company_name']);
         $newCompany->setStatus(1);

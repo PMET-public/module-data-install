@@ -104,10 +104,17 @@ class CompanyRoles
 
     private function setCompanyRole($companyId, $roleName, $rolePermissions)
     {
+        $roleSearch = $this->searchCriteriaBuilder
+            ->addFilter(RoleInterface::COMPANY_ID, $companyId, 'eq')
+            ->addFilter(RoleInterface::ROLE_NAME, $roleName, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        $roleSearch = $this->roleRepository->getList($roleSearch);
         /** @var RoleInterface $salesRole */
-        $salesRole = $this->roleFactory->create();
+        $salesRole = current($roleSearch->getItems());
+        if(!$salesRole){
+            $salesRole = $this->roleFactory->create();
         $salesRole->setCompanyId($companyId);
         $salesRole->setRoleName($roleName);
+        }
         /** @var PermissionInterface $permission */
         $permissionsToSet = [];
         foreach ($rolePermissions as $rolePermission) {

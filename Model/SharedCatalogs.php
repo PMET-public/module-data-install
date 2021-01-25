@@ -5,6 +5,7 @@ use Magento\SharedCatalog\Api\CompanyManagementInterface;
 use Magento\SharedCatalog\Api\Data\SharedCatalogInterfaceFactory;
 use Magento\SharedCatalog\Api\Data\SharedCatalogInterface;
 use Magento\SharedCatalog\Api\SharedCatalogRepositoryInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 
 class SharedCatalogs{
 
@@ -23,25 +24,33 @@ class SharedCatalogs{
     /** @var Companies */
     protected $companies;
 
+     /** @var SearchCriteriaBuilder */
+     protected $searchCriteriaBuilder;
+
     public function __construct(SharedCatalogInterfaceFactory $sharedCatalogInterface, 
     SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface,
-    CustomerGroups $customerGroups,CompanyManagementInterface $companyManagementInterface,Companies $companies)
+    CustomerGroups $customerGroups,CompanyManagementInterface $companyManagementInterface,Companies $companies,
+    SearchCriteriaBuilder $searchCriteriaBuilder)
     {
         $this->sharedCatalogInterfaceFactory = $sharedCatalogInterface;
         $this->sharedCatalogRepository = $sharedCatalogRepositoryInterface;
         $this->customerGroups = $customerGroups;
         $this->companyManagementInterface = $companyManagementInterface;
         $this->companies = $companies;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
     public function install(array $row, array $settings){
-        //TODO:validate row data
-        //TODO:what happens when wanting to add a second public catalog
-        //create customer group
-        $this->customerGroups->install(['name'=>$row['name']]);
-        //TODO:check for existing shared catalog to update
-        /** @var SharedCatalogInterface $sharedCatalog */
-        $sharedCatalog = $this->sharedCatalogInterfaceFactory->create();
+        //check for existing shared catalog to update
+         /** @var SharedCatalogInterface $sharedCatalog */
+        $sharedCatalog = $this->getSharedCatalogByName($row['name']);
+
+        if(!$sharedCatalog){
+            //create customer group
+            $this->customerGroups->install(['name'=>$row['name']]);
+            $sharedCatalog = $this->sharedCatalogInterfaceFactory->create();
+        }
+
         $sharedCatalog->setName($row['name']);
         $sharedCatalog->setCustomerGroupId($this->customerGroups->getCustomerGroupId($row['name']));
         $sharedCatalog->setCreatedBy(1);
@@ -58,9 +67,27 @@ class SharedCatalogs{
         
         //assign catalog to company
         $r = $sharedCatalog->getId();
-        //TODO:get all compainies and return to array
-        $this->companyManagementInterface->assignCompanies($sharedCatalog->getId(),[$this->companies->getCompanyByName('Vandelay Industries')]);
+        //get all compainies and return to array
+        $companiesData = explode(',',$row['companies']);
+        $companiesToAssign = [];
+        foreach($companiesData as $companyData){
+            $company = $this->companies->getCompanyByName($companyData);
+            if($company){
+                $companiesToAssign[]=$company;
+            }
+        }
+        if(count($companiesToAssign)>0){
+            $this->companyManagementInterface->assignCompanies($sharedCatalog->getId(),$companiesToAssign);
+        }
+
         //$r = $u;
         return true;
+    }
+
+    private function getSharedCatalogByName($sharedCatalogName){
+        $catalogSearch = $this->searchCriteriaBuilder
+        ->addFilter(SharedCatalogInterface::NAME, $sharedCatalogName, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        $catalogList = $this->sharedCatalogRepository->getList($catalogSearch);
+        return current($catalogList->getItems());
     }
 }

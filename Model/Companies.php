@@ -186,7 +186,6 @@ class Companies
     }
 
     /**
-     * Assign companies to a shared catalog.
      *
      * @param string $name
      * @return \Magento\Company\Api\Data\CompanyInterface[] $companies
@@ -195,7 +194,6 @@ class Companies
         $companySearch = $this->searchCriteriaBuilder
         ->addFilter(CompanyInterface::NAME, $companyName, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
         $companyList = $this->companyRepositoryInterface->getList($companySearch);
-        $r = current($companyList->getItems());
         return current($companyList->getItems());
     }
 }

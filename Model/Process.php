@@ -11,13 +11,14 @@ use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\Filesystem\DriverInterface;
 
 class Process
 {
     const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv',
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
     'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
-    'pages.csv','templates.csv','reviews.csv','b2b_companies.csv'];
+    'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv'];
 
     const B2B_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv','b2b_salesreps.csv','b2b_teams.csv'];
 
@@ -95,6 +96,12 @@ class Process
      /** @var AdminRoles  */
      protected $adminRolesInstall;
 
+     /** @var DriverInterface */
+     protected $driverInterface;
+
+     /** @var SharedCatalogs */
+     protected $sharedCatalogs;
+
      /**
       * Process constructor.
       * @param SampleDataContext $sampleDataContext
@@ -119,6 +126,8 @@ class Process
       * @param ObjectManagerInterface $objectManager
       * @param AdminUsers $adminUsers
       * @param AdminRoles $adminRoles
+      * @param DriverInterface $driverInterface
+      * @param SharedCatalogs $sharedCatalogs
       */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -142,7 +151,9 @@ class Process
         MsiInventory $msiInventory,
         ObjectManagerInterface $objectManager,
         AdminUsers $adminUsers,
-        AdminRoles $adminRoles
+        AdminRoles $adminRoles,
+        DriverInterface $driverInterface,
+        SharedCatalogs $sharedCatalogs
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -167,6 +178,8 @@ class Process
         $this->objectManager = $objectManager;
         $this->adminUsersInstall = $adminUsers;
         $this->adminRolesInstall = $adminRoles;
+        $this->driverInterface = $driverInterface;
+        $this->sharedCatalogs = $sharedCatalogs;
     }
 
     /**
@@ -188,7 +201,7 @@ class Process
             $fileName = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/" . $nextFile);
             if (basename($fileName)==$nextFile && file_exists($fileName)) {
                 if (pathinfo($fileName, PATHINFO_EXTENSION) == 'json') {
-                    $fileContent = file_get_contents($fileName);
+                    $fileContent = $this->driverInterface->fileGetContents($fileName);
                 } else {
                     $rows = $this->csvReader->getData($fileName);
                     $header = array_shift($rows);
@@ -316,6 +329,11 @@ class Process
                     case "b2b_companies.csv":
                         print_r("Loading B2B\n");
                         $this->processB2B($moduleName, $fixtureDirectory);
+                        break;
+
+                    case "b2b_shared_catalogs.csv":
+                        print_r("Loading B2B Shared Catalogs\n");
+                        $this->processRows($rows, $header, $this->sharedCatalogs);
                         break;
                 }
             }

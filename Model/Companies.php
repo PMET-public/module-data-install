@@ -116,11 +116,9 @@ class Companies
         $salesRep->loadByUsername($row['sales_rep']);
 
         $row['company_email']=$row['admin_email'];
-        $companySearch = $this->searchCriteriaBuilder
-        ->addFilter(CompanyInterface::NAME, $row['company_name'], 'eq')->create()->setPageSize(1)->setCurrentPage(1);
-        $companyList = $this->companyRepositoryInterface->getList($companySearch);
-        /** @var CompanyInterface $company */
-        $newCompany = current($companyList->getItems());
+       
+        /** @var CompanyInterface $newCompany */
+        $newCompany = $this->getCompanyByName($row['company_name']);
         //create company
         if(!$newCompany){
             $newCompany = $this->companyCustomer->createCompany($adminCustomer, $row);
@@ -185,5 +183,19 @@ class Companies
         $this->structureRepository->save($newStruct);
         $newStruct->setPath($parentId.'/'.$newStruct->getId());
         $this->structureRepository->save($newStruct);
+    }
+
+    /**
+     * Assign companies to a shared catalog.
+     *
+     * @param string $name
+     * @return \Magento\Company\Api\Data\CompanyInterface[] $companies
+     */
+    public function getCompanyByName($companyName){
+        $companySearch = $this->searchCriteriaBuilder
+        ->addFilter(CompanyInterface::NAME, $companyName, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        $companyList = $this->companyRepositoryInterface->getList($companySearch);
+        $r = current($companyList->getItems());
+        return current($companyList->getItems());
     }
 }

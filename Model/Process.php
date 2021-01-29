@@ -18,9 +18,9 @@ class Process
     const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv',
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
     'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
-    'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv','b2b_shared_catalog_categories.csv','advanced_pricing.csv'];
+    'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv','b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv'];
 
-    const B2B_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv','b2b_salesreps.csv','b2b_teams.csv'];
+    const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv','b2b_salesreps.csv','b2b_teams.csv'];
 
     protected $redo=[];
 
@@ -347,6 +347,11 @@ class Process
                         $sharedCatalogCategoriesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\SharedCatalogCategories');
                         $this->processFile($rows, $header, $sharedCatalogCategoriesInstall, $modulePath);
                         break;
+                    case "b2b_requisition_lists.csv":
+                        print_r("Loading Requisition Lists\n");
+                        $requisitionListInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\RequisitionLists');
+                        $this->processRows($rows, $header, $requisitionListInstall);
+                        break;
                 }
             }
         }
@@ -469,7 +474,7 @@ class Process
     {
         $b2bData = [];
         //do we have all the files we need
-        foreach (self::B2B_FILES as $nextFile) {
+        foreach (self::B2B_REQUIRED_FILES as $nextFile) {
             $fileName = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/" . $nextFile);
             if (basename($fileName)==$nextFile && file_exists($fileName)) {
                 $rows = $this->csvReader->getData($fileName);

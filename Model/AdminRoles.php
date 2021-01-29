@@ -3,9 +3,7 @@
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Authorization\Model\RoleFactory;
-use Magento\Authorization\Model\Role;
 use Magento\Authorization\Model\ResourceModel\Role\CollectionFactory as RoleCollection;
-use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Authorization\Model\RulesFactory;
 
 class AdminRoles
@@ -17,28 +15,22 @@ class AdminRoles
     /** @var RoleCollection */
     protected $roleCollection;
 
-    /** @var SearchCriteriaBuilder */
-    protected $searchCriteriaBuilder;
-
     /** @var RulesFactory */
     protected $rulesFactory;
 
     /**
      * AdminRoles constructor.
      * @param RoleFactory $roleFactory
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param RoleCollection $roleCollection
      * @param RulesFactory $rulesFactory
      */
     public function __construct(
         RoleFactory $roleFactory,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
         RoleCollection $roleCollection,
         RulesFactory $rulesFactory
     ) {
         $this->roleFactory = $roleFactory;
         $this->roleCollection = $roleCollection;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->rulesFactory = $rulesFactory;
     }
 

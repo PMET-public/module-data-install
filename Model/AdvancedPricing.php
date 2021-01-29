@@ -5,51 +5,25 @@
  */
 namespace MagentoEse\DataInstall\Model;
 
-use Magento\Catalog\Api\Data\ProductInterface;
-use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Framework\App\State;
 use FireGento\FastSimpleImport\Model\ImporterFactory as Importer;
 
-class Products
+class AdvancedPricing
 {
     const DEFAULT_IMAGE_PATH = '/media/catalog/product';
-    //TODO: flexibility for other than default category
-
-    /** @var Stores */
-    protected $stores;
-
-    /** @var ProductRepositoryInterface */
-    protected $productRepository;
-
-    /** @var SearchCriteriaBuilder */
-    protected $searchCriteriaBuilder;
+    const DEFAULT_WEBSITE = 'All Websites [USD]';
+    const DEFAULT_CUSTOMER_GROUP = 'ALL GROUPS';
 
     /** @var Importer */
     protected $importer;
 
-    /** @var State */
-    protected $state;
-
     /**
      * Products constructor.
-     * @param Stores $stores
-     * @param ProductRepositoryInterface $productRepository
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
-     * @param State $state
+     * @param Importer $importer
      */
     public function __construct(
-        Stores $stores,
-        ProductRepositoryInterface $productRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
-        Importer $importer,
-        State $state
+        Importer $importer
     ) {
-        $this->stores = $stores;
-        $this->productRepository = $productRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->importer = $importer;
-        $this->state = $state;
     }
 
     /**
@@ -60,16 +34,12 @@ class Products
      */
     public function install(array $rows, array $header, string $modulePath, array $settings)
     {
+        //need to set default for tier_price_website = settings[site_code],tier_price_customer_group
+        //advanced_pricing
         if (!empty($settings['product_image_import_directory'])) {
             $imgDir = $settings['product_image_import_directory'];
         } else {
             $imgDir = $modulePath . self::DEFAULT_IMAGE_PATH;
-        }
-
-        if (!empty($settings['restrict_products_from_views'])) {
-            $restrictProductsFromViews = $settings['restrict_products_from_views'];
-        } else {
-            $restrictProductsFromViews =  'N';
         }
 
         if (!empty($settings['product_validation_strategy'])) {
@@ -81,48 +51,24 @@ class Products
         foreach ($rows as $row) {
             $productsArray[] = array_combine($header, $row);
         }
-
-        /// create array to restrict existing products from other store views
-        if($restrictProductsFromViews=='Y'){
-            $restrictExistingProducts = $this->restrictExistingProducts($settings['store_view_code']);
-            $restrictNewProducts = $this->restrictNewProductsFromOtherStoreViews($productsArray,$settings['store_view_code']);
-        }
-
-
-        print_r("Import new products\n");
-        $this->import($productsArray,$imgDir,$productValidationStrategy);
-        
-        /// Restrict products from other stores
-        if($restrictProductsFromViews=='Y') {
-            print_r("Restricting products from other store views\n");
-            //Need to set area code when updating products
-            try{
-                $this->state->setAreaCode('adminhtml');
+        //set default group and website if they arent included
+        foreach($productsArray as $productRow){
+            if(empty($productRow['tier_price_website'])){
+                $productRow['tier_price_website'] = self::DEFAULT_WEBSITE;
             }
-            catch(\Magento\Framework\Exception\LocalizedException $e){
-                // left empty
+            if(empty($productRow['tier_price_customer_group'])){
+                $productRow['tier_price_customer_group'] = self::DEFAULT_CUSTOMER_GROUP;
             }
-            print_r("Restricting ".count($restrictExistingProducts)." products from new store view\n");
-            $this->updateProductVisitbility($restrictExistingProducts);
-            //$this->import($restrictExistingProducts,$imgDir);
-            print_r("Restricting ".count($restrictNewProducts)." new products from existing store views\n");
-            //$this->updateProductVisitbility($restrictNewProducts);
-            $this->import($restrictNewProducts,$imgDir,$productValidationStrategy);
-        }
-    }
-    
-    private function updateProductVisitbility($restrictProducts){
-        foreach($restrictProducts as $restrictProduct){
-            $product = $this->productRepository->get($restrictProduct['sku']);
-            $product->setStoreId($this->stores->getViewId($restrictProduct['store_view_code']));
-            $product->setVisibility($restrictProduct['visibility']);
-            $this->productRepository->save($product);
+            $updatedProductsArray[]=$productRow;
         }
 
-    }
+        $this->import($updatedProductsArray,$imgDir,$productValidationStrategy);
 
-    private function import($productsArray,$imgDir,$productValidationStrategy){
+        return true;
+    }
+     private function import($productsArray,$imgDir,$productValidationStrategy){
         $importerModel = $this->importer->create();
+        $importerModel->setEntityCode('advanced_pricing');
         $importerModel->setImportImagesFileDir($imgDir);
         $importerModel->setValidationStrategy($productValidationStrategy);
         if($productValidationStrategy == 'validation-stop-on-errors'){

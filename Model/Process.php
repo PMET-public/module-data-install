@@ -18,7 +18,7 @@ class Process
     const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv',
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
     'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
-    'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv'];
+    'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv','b2b_shared_catalog_categories.csv','advanced_pricing.csv'];
 
     const B2B_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv','b2b_salesreps.csv','b2b_teams.csv'];
 
@@ -99,8 +99,8 @@ class Process
      /** @var DriverInterface */
      protected $driverInterface;
 
-     /** @var SharedCatalogs */
-     protected $sharedCatalogs;
+     /** @var AdvancedPricing */
+     protected $advancedPricingInstall;
 
      /**
       * Process constructor.
@@ -127,7 +127,7 @@ class Process
       * @param AdminUsers $adminUsers
       * @param AdminRoles $adminRoles
       * @param DriverInterface $driverInterface
-      * @param SharedCatalogs $sharedCatalogs
+      * @param AdvancedPricing $advancedPricing
       */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -153,7 +153,7 @@ class Process
         AdminUsers $adminUsers,
         AdminRoles $adminRoles,
         DriverInterface $driverInterface,
-        SharedCatalogs $sharedCatalogs
+        AdvancedPricing $advancedPricing
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -179,7 +179,7 @@ class Process
         $this->adminUsersInstall = $adminUsers;
         $this->adminRolesInstall = $adminRoles;
         $this->driverInterface = $driverInterface;
-        $this->sharedCatalogs = $sharedCatalogs;
+        $this->advancedPricingInstall = $advancedPricing;
     }
 
     /**
@@ -242,6 +242,12 @@ class Process
                         print_r("loading Products\n");
                         $this->processFile($rows, $header, $this->productInstall, $modulePath);
                         break;
+                        
+                    case "advanced_pricing.csv":
+                        print_r("loading Advanced Pricing\n");
+                        $this->processFile($rows, $header, $this->advancedPricingInstall, $modulePath);
+                        break;
+                        
 
                     case "pages.csv":
                         print_r("loading Pages\n");
@@ -333,7 +339,13 @@ class Process
 
                     case "b2b_shared_catalogs.csv":
                         print_r("Loading B2B Shared Catalogs\n");
-                        $this->processRows($rows, $header, $this->sharedCatalogs);
+                        $sharedCatalogsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\SharedCatalogs');
+                        $this->processRows($rows, $header, $sharedCatalogsInstall);
+                        break;
+                    case "b2b_shared_catalog_categories.csv":
+                        print_r("Loading Shared Catalog Categories\n");
+                        $sharedCatalogCategoriesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\SharedCatalogCategories');
+                        $this->processFile($rows, $header, $sharedCatalogCategoriesInstall, $modulePath);
                         break;
                 }
             }

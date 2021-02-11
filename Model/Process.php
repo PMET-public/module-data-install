@@ -20,7 +20,7 @@ class Process
     'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv','b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv'];
 
-    const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv','b2b_salesreps.csv','b2b_teams.csv'];
+    const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv','b2b_sales_reps.csv','b2b_teams.csv'];
 
     protected $redo=[];
 
@@ -497,7 +497,7 @@ class Process
             print_r("Bad Data");
                 ///probaby need to throw an error to roll back everything
         }
-        $salesReps = $this->buildB2bDataArrays($b2bData['b2b_salesreps.csv']);
+        $salesReps = $this->buildB2bDataArrays($b2bData['b2b_sales_reps.csv']);
         $companies = $this->buildB2bDataArrays($b2bData['b2b_companies.csv']);
         $customers = $this->buildB2bDataArrays($b2bData['b2b_customers.csv']);
 
@@ -506,7 +506,7 @@ class Process
         $this->processFile($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $this->customerInstall, '');
         //load sales reps (admin user process)
         print_r("Loading B2B Sales Reps\n");
-        $this->processRows($b2bData['b2b_salesreps.csv']['rows'], $b2bData['b2b_salesreps.csv']['header'], $this->adminUsersInstall);
+        $this->processRows($b2bData['b2b_sales_reps.csv']['rows'], $b2bData['b2b_sales_reps.csv']['header'], $this->adminUsersInstall);
         //create company (add on company admin from customers, and sales rep);
 
         $companiesData = $this->mergeCompanyData($companies, $customers, $salesReps);

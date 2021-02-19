@@ -11,6 +11,7 @@ use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Directory\WriteInterface;
 use Magento\Framework\Filesystem\Directory\ReadInterface;
 use Magento\Framework\File\Mime;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class CopyMedia
 {
@@ -39,6 +40,9 @@ class CopyMedia
         'woff'=>'application/octet-stream','woff2'=>'application/octet-stream','ttf'=>'application/font-sfnt',
         'txt'=>'text/plain'];
 
+    /** @var Helper */
+    protected $helper;
+    
     /** @var SampleDataContext */
     protected $sampleDataContext;
 
@@ -70,11 +74,13 @@ class CopyMedia
      */
 
     public function __construct(
+        Helper $helper,
         SampleDataContext $sampleDataContext,
         Filesystem $fileSystem,
         DirectoryList $directoryList,
         Mime $fileMime
     ) {
+        $this->helper = $helper;
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->fileSystem = $fileSystem;
         $this->directoryWrite = $fileSystem->getDirectoryWrite(DirectoryList::ROOT);
@@ -101,16 +107,15 @@ class CopyMedia
                 //validate file against type and extension
                 if ($this->validateFile($file, $fileType)) {
                     $newFileName = str_replace($fromPath, $toPath, $file);
-                    //print_r($newFileName."\n");
                     if ($this->directoryRead->isFile($file)) {
                         try {
                             $this->directoryWrite->copyFile($file, $newFileName);
                         } catch (FileSystemException $exception) {
-                            print_r("Unable to copy file ".$file. " --- ".$exception->getMessage()."\n");
+                            $this->helper->printMessage("Unable to copy file ".$file. " --- ".$exception->getMessage(),"warning");
                         }
                     }
                 } else {
-                    print_r($file." is an invalid type and was not copied\n");
+                    $this->helper->printMessage($file." is an invalid type and was not copied","warning");
                 }
             }
         }

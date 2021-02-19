@@ -114,9 +114,11 @@ class Companies
         //get sales rep
         $salesRep = $this->userFactory->create();
         $salesRep->loadByUsername($row['sales_rep']);
-
-        $row['company_email']=$row['admin_email'];
-       
+        //if company email isn't defined, use the admin email
+        if(empty($row['company_email'])){
+            $row['company_email']=$row['admin_email'];
+        }
+        
         /** @var CompanyInterface $newCompany */
         $newCompany = $this->getCompanyByName($row['company_name']);
         //create company
@@ -134,6 +136,7 @@ class Companies
         $creditLimit = $this->creditLimitManagement->getCreditByCompanyId($newCompany->getId());
         $creditLimit->setCreditLimit($row['credit_limit']);
         $creditLimit->save();
+
 
         if (count($row['company_customers']) > 0) {
             foreach ($row['company_customers'] as $companyCustomerEmail) {

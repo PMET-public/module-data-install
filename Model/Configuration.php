@@ -10,10 +10,14 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Theme\Model\ResourceModel\Theme\Collection as ThemeCollection;
 use Magento\Theme\Model\Theme\Registration as ThemeRegistration;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class Configuration
 {
 
+    /** @var Helper */
+    protected $helper;
+    
    /** @var ResourceConfig  */
     protected $resourceConfig;
 
@@ -42,6 +46,7 @@ class Configuration
      * @param EncryptorInterface $encryptor
      */
     public function __construct(
+        Helper $helper,
         ResourceConfig $resourceConfig,
         Stores $stores,
         ScopeConfigInterface $scopeConfig,
@@ -49,6 +54,7 @@ class Configuration
         ThemeRegistration $themeRegistration,
         EncryptorInterface $encryptor
     ) {
+        $this->helper = $helper;
         $this->resourceConfig = $resourceConfig;
         $this->stores = $stores;
         $this->scopeConfig = $scopeConfig;
@@ -99,13 +105,12 @@ class Configuration
         try {
             $config = json_decode($json)->configuration;
         } catch (\Exception $e) {
-            print_r("The JSON in your configuration file is invalid.\n");
+            $this->helper->printMessage("The JSON in your configuration file is invalid","error");
             return true;
         }
 
         foreach ($config as $key => $item) {
             array_walk_recursive($item, [$this,'getValuePath'], $key);
-            // print_r($setting);
         }
 
         //TODO:set theme - this will be incorporated into the config structure
@@ -158,9 +163,9 @@ class Configuration
         if ($scopeId!==null) {
             $this->resourceConfig->saveConfig($path, $this->setEncryption($value), $scope, $scopeId);
         } else {
-            print_r(
+            $this->helper->printMessage(
                 "Error setting configuration " . $path . ". Check your scope codes as the " .
-                $scope . " code you used does not exist\n"
+                $scope . " code you used does not exist","error"
             );
         }
     }

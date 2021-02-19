@@ -6,18 +6,24 @@
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Framework\ObjectManagerInterface;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class MsiInventory
 {
     /** @var ObjectManagerInterface  */
     protected $objectManager;
 
+    /** @var Helper */
+    protected $helper;
+    
     /**
      * @param ObjectManagerInterface $objectManager
      */
     public function __construct(
+        Helper $helper,
         ObjectManagerInterface $objectManager
     ) {
+        $this->helper = $helper;
         $this->objectManager=$objectManager;
     }
 
@@ -41,11 +47,11 @@ class MsiInventory
         try {
             $importerModel->processImport($productsArray);
         } catch (\Exception $e) {
-            print_r($e->getMessage());
+            $this->helper->printMessage($e->getMessage());
         }
 
-        print_r($importerModel->getLogTrace());
-        print_r($importerModel->getErrorMessages());
+        $this->helper->printMessage($importerModel->getLogTrace());
+        $this->helper->printMessage($importerModel->getErrorMessages());
 
         unset($importerModel);
     }

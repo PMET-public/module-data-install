@@ -10,6 +10,7 @@ use Magento\Authorization\Model\ResourceModel\Role\CollectionFactory as RoleColl
 use Magento\Authorization\Model\Acl\Role\Group as RoleGroup;
 use Magento\Authorization\Model\UserContextInterface;
 use Magento\User\Model\ResourceModel\User\CollectionFactory as UserCollection;
+use MagentoEse\DataInstall\Helper\Helper;
 
 
 class AdminUsers
@@ -26,6 +27,9 @@ class AdminUsers
     /** @var UserCollection */
     protected $userCollection;
 
+    /** @var Helper */
+    protected $helper;
+    
     /**
      * AdminUsers constructor.
      * @param UserInterfaceFactory $userFactory
@@ -34,6 +38,7 @@ class AdminUsers
      * @param UserCollection $userCollection
      */
     public function __construct(
+        Helper $helper,
         UserInterfaceFactory $userFactory,
         RoleFactory $roleFactory,
         RoleCollection $roleCollection,
@@ -43,6 +48,7 @@ class AdminUsers
         $this->roleFactory = $roleFactory;
         $this->roleCollection = $roleCollection;
         $this->userCollection = $userCollection;
+        $this->helper = $helper;
     }
 
     /**
@@ -88,7 +94,7 @@ class AdminUsers
                 $userRole->setRoleName($user->getUserName());
                 $userRole->save();
             } else {
-                print_r("Role ".$row['role']." for user ".$row['username']." does not exist\n");
+                $this->helper->printMessage("Role ".$row['role']." for user ".$row['username']." does not exist","warning");
             }
         }
     }

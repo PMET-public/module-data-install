@@ -6,6 +6,7 @@
 namespace MagentoEse\DataInstall\Model;
 
 use FireGento\FastSimpleImport\Model\ImporterFactory as Importer;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class AdvancedPricing
 {
@@ -13,6 +14,9 @@ class AdvancedPricing
     const DEFAULT_WEBSITE = 'All Websites [USD]';
     const DEFAULT_CUSTOMER_GROUP = 'ALL GROUPS';
 
+    /** @var Helper */
+    protected $helper;
+    
     /** @var Importer */
     protected $importer;
 
@@ -21,9 +25,12 @@ class AdvancedPricing
      * @param Importer $importer
      */
     public function __construct(
+        Helper $helper,
         Importer $importer
     ) {
         $this->importer = $importer;
+
+        $this->helper = $helper;
     }
 
     /**
@@ -79,11 +86,11 @@ class AdvancedPricing
         try {
             $importerModel->processImport($productsArray);
         } catch (\Exception $e) {
-            print_r($e->getMessage());
+            $this->helper->printMessage($e->getMessage());
         }
 
-        print_r($importerModel->getLogTrace());
-        print_r($importerModel->getErrorMessages());
+        $this->helper->printMessage($importerModel->getLogTrace());
+        $this->helper->printMessage($importerModel->getErrorMessages());
 
         unset($importerModel);
     }

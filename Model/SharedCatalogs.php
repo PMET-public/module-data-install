@@ -6,6 +6,7 @@ use Magento\SharedCatalog\Api\Data\SharedCatalogInterfaceFactory;
 use Magento\SharedCatalog\Api\Data\SharedCatalogInterface;
 use Magento\SharedCatalog\Api\SharedCatalogRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class SharedCatalogs{
 
@@ -24,14 +25,18 @@ class SharedCatalogs{
     /** @var Companies */
     protected $companies;
 
-     /** @var SearchCriteriaBuilder */
-     protected $searchCriteriaBuilder;
+    /** @var SearchCriteriaBuilder */
+    protected $searchCriteriaBuilder;
 
-    public function __construct(SharedCatalogInterfaceFactory $sharedCatalogInterface, 
+    /** @var Helper */
+    protected $helper;
+
+    public function __construct(Helper $helper, SharedCatalogInterfaceFactory $sharedCatalogInterface, 
     SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface,
     CustomerGroups $customerGroups,CompanyManagementInterface $companyManagementInterface,Companies $companies,
     SearchCriteriaBuilder $searchCriteriaBuilder)
     {
+        $this->helper = $helper;
         $this->sharedCatalogInterfaceFactory = $sharedCatalogInterface;
         $this->sharedCatalogRepository = $sharedCatalogRepositoryInterface;
         $this->customerGroups = $customerGroups;

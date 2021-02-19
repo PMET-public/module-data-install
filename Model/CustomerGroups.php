@@ -8,6 +8,7 @@ namespace MagentoEse\DataInstall\Model;
 use Magento\Customer\Api\Data\GroupInterfaceFactory;
 use Magento\Customer\Api\GroupRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class CustomerGroups
 {
@@ -22,6 +23,9 @@ class CustomerGroups
     /** @var SearchCriteriaBuilder  */
     protected $searchCriteriaBuilder;
 
+    /** @var Helper */
+    protected $helper;
+    
     /**
      * CustomerGroups constructor.
      * @param GroupInterfaceFactory $groupInterfaceFactory
@@ -29,10 +33,12 @@ class CustomerGroups
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      */
     public function __construct(
+        Helper $helper,
         GroupInterfaceFactory $groupInterfaceFactory,
         GroupRepositoryInterface $groupRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder
     ) {
+        $this->helper = $helper;
         $this->groupInterfaceFactory = $groupInterfaceFactory;
         $this->groupRepository = $groupRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
@@ -50,7 +56,7 @@ class CustomerGroups
             $this->groupRepository->save($group);
         } catch (\Exception $e) {
             //error will likely be trying to add duplicate group
-            print_r("Customer Group ".$data['name']." not installed, another group with the same name likely exists");
+            $this->helper->printMessage("Customer Group ".$data['name']." not installed, another group with the same name likely exists","warning");
         }
 
         return true;

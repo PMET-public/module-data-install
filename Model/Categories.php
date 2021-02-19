@@ -95,7 +95,7 @@ class Categories
 
                 $category->save();
             } else {
-                print_r("-Cannot find the parent category for " . $row['name'] . " in the path " . $row['path'] . ". That category has been skipped\n");
+                $this->helper->printMessage("-Cannot find the parent category for " . $row['name'] . " in the path " . $row['path'] . ". That category has been skipped","warning");
             }
         }
 

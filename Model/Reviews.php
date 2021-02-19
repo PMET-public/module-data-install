@@ -14,10 +14,14 @@ use Magento\Review\Model\ResourceModel\Review\CollectionFactory as ReviewCollect
 use Magento\Review\Model\RatingFactory;
 use Magento\Review\Model\Rating\OptionFactory;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class Reviews
 {
 
+    /** @var Helper */
+    protected $helper;
+    
     /**
      * @var ReviewFactory
      */
@@ -88,6 +92,7 @@ class Reviews
      * @param Stores $stores
      */
     public function __construct(
+        Helper $helper,
         ReviewFactory $reviewFactory,
         ReviewCollectionFactory $reviewCollectionFactory,
         RatingFactory $ratingFactory,
@@ -97,6 +102,7 @@ class Reviews
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         Stores $stores
     ) {
+        $this->helper = $helper;
         $this->reviewFactory = $reviewFactory;
         $this->reviewCollectionFactory = $reviewCollectionFactory;
         $this->ratingFactory = $ratingFactory;
@@ -122,7 +128,7 @@ class Reviews
         $productId = $this->getProductIdBySku($row['sku']);
 
         if (empty($productId)) {
-            print_r("Review skipped -- Product ".$row['sku']." not found\n");
+            $this->helper->printMessage("Review skipped -- Product ".$row['sku']." not found","warning");
             return true;
         }
         /** @var \Magento\Review\Model\ResourceModel\Review\Collection $reviewCollection */
@@ -132,7 +138,7 @@ class Reviews
             ->addFilter('entity_id', $this->getReviewEntityId())
             ->addFieldToFilter('detail.title', ['eq' => $row['summary']]);
         if ($reviewCollection->getSize() > 0) {
-            print_r("Review skipped -- Duplicate\n");
+            $this->helper->printMessage("Review skipped -- Duplicate","warning");
             return true;
         }
 

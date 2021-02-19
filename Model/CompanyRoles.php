@@ -95,7 +95,7 @@ class CompanyRoles
         /** @var CompanyInterface $company */
         $company = current($companyList->getItems());
         if (!$company) {
-            print_r("The company ". $companyName ." requested in b2b_customers.csv does not exist\n");
+            $this->helper->printMessage("The company ". $companyName ." requested in b2b_customers.csv does not exist","warning");
             return false;
         } else {
             return $company->getId();

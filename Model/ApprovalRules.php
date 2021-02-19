@@ -86,10 +86,9 @@ class ApprovalRules
         $ruleData = $this->convertRow($row);
         //validate data
         if ($this->validate($ruleData)!='') {
-            print_r($this->validate($ruleData));
             return true;
         }
-        print_r("Creating approval rule ".$ruleData['name']." \n");
+        $this->helper->printMessage("Creating approval rule ".$ruleData['name'],"info");
         $rule = $this->ruleFactory->create();
         $rule->setName($ruleData['name']);
         $rule->setDescription($ruleData['description']);
@@ -252,7 +251,7 @@ class ApprovalRules
         $company = current($companyList->getItems());
 
         if (!$company) {
-            print_r("The company ". $name ." requested in b2b_approval_rules.csv does not exist\n");
+            $this->helper->printMessage("The company ". $name ." requested in b2b_approval_rules.csv does not exist","warning");
         } else {
             return $company->getId();
         }
@@ -272,7 +271,7 @@ class ApprovalRules
         $company = current($companyList->getItems());
 
         if (!$company) {
-            print_r("The company ". $name ." requested in b2b_approval_rules.csv does not exist\n");
+            $this->helper->printMessage("The company ". $name ." requested in b2b_approval_rules.csv does not exist","warning");
         } else {
             /**@var CompanyInterface $company */
             return $company->getSuperUserId();

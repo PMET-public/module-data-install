@@ -10,9 +10,13 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\State;
 use FireGento\FastSimpleImport\Model\ImporterFactory as Importer;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class Products
 {
+    /** @var Helper */
+    protected $helper;
+    
     const DEFAULT_IMAGE_PATH = '/media/catalog/product';
     //TODO: flexibility for other than default category
 
@@ -39,6 +43,7 @@ class Products
      * @param State $state
      */
     public function __construct(
+        Helper $helper,
         Stores $stores,
         ProductRepositoryInterface $productRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
@@ -50,6 +55,7 @@ class Products
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->importer = $importer;
         $this->state = $state;
+        $this->helper = $helper;
     }
 
     /**
@@ -89,12 +95,12 @@ class Products
         }
 
 
-        print_r("Import new products\n");
+        $this->helper->printMessage("Importing new products","info");
         $this->import($productsArray,$imgDir,$productValidationStrategy);
         
         /// Restrict products from other stores
         if($restrictProductsFromViews=='Y') {
-            print_r("Restricting products from other store views\n");
+            $this->helper->printMessage("Restricting products from other store views","info");
             //Need to set area code when updating products
             try{
                 $this->state->setAreaCode('adminhtml');
@@ -102,10 +108,10 @@ class Products
             catch(\Magento\Framework\Exception\LocalizedException $e){
                 // left empty
             }
-            print_r("Restricting ".count($restrictExistingProducts)." products from new store view\n");
+            $this->helper->printMessage("Restricting ".count($restrictExistingProducts)." products from new store view","info");
             $this->updateProductVisitbility($restrictExistingProducts);
             //$this->import($restrictExistingProducts,$imgDir);
-            print_r("Restricting ".count($restrictNewProducts)." new products from existing store views\n");
+            $this->helper->printMessage("Restricting ".count($restrictNewProducts)." new products from existing store views","info");
             //$this->updateProductVisitbility($restrictNewProducts);
             $this->import($restrictNewProducts,$imgDir,$productValidationStrategy);
         }
@@ -133,11 +139,11 @@ class Products
         try {
             $importerModel->processImport($productsArray);
         } catch (\Exception $e) {
-            print_r($e->getMessage());
+            $this->helper->printMessage($e->getMessage());
         }
 
-        print_r($importerModel->getLogTrace());
-        print_r($importerModel->getErrorMessages());
+        $this->helper->printMessage($importerModel->getLogTrace());
+        $this->helper->printMessage($importerModel->getErrorMessages());
 
         unset($importerModel);
     }

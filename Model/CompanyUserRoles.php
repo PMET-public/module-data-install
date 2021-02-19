@@ -16,9 +16,13 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Company\Api\Data\CompanyInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Company\Api\AclInterface;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class CompanyUserRoles
 {
+
+    /** @var Helper */
+    protected $helper;
 
     /** @var RoleFactory */
     protected $roleFactory;
@@ -52,6 +56,7 @@ class CompanyUserRoles
      * @param AclInterface $aclInterface
      */
     public function __construct(
+        Helper $helper,
         RoleFactory $roleFactory,
         RoleRepositoryInterface $roleRepositoryInterface,
         PermissionFactory $permissionFactory,
@@ -60,6 +65,7 @@ class CompanyUserRoles
         CustomerRepositoryInterface $customerRepository,
         AclInterface $aclInterface
     ) {
+        $this->helper = $helper;
         $this->roleRepository = $roleRepositoryInterface;
         $this->roleFactory = $roleFactory;
         $this->permissionFactory = $permissionFactory;
@@ -82,7 +88,7 @@ class CompanyUserRoles
                      $this->acl->assignUserDefaultRole($userId, $this->getCompanyId($row['company']));
                      $this->acl->assignRoles($userId, [$role]);
             } else {
-                print_r("The role ". $row['role'] ." for company ".$row['company']." does not exist\n");
+                $this->helper->printMessage("The role ". $row['role'] ." for company ".$row['company']." does not exist","warning");
             }
 
         }
@@ -113,7 +119,7 @@ class CompanyUserRoles
         /** @var CompanyInterface $company */
         $company = current($companyList->getItems());
         if (!$company) {
-            print_r("The company ". $companyName ." requested in b2b_company_user_roles.csv does not exist\n");
+            $this->helper->printMessage("The company ". $companyName ." requested in b2b_company_user_roles.csv does not exist","warning");
             return false;
         } else {
             return $company->getId();

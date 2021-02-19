@@ -12,10 +12,14 @@ use Magento\RequisitionList\Api\Data\RequisitionListItemInterface;
 use Magento\RequisitionList\Api\RequisitionListRepositoryInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use MagentoEse\DataInstall\Helper\Helper;
 
 
 class RequisitionLists
 {
+    /** @var Helper */
+    protected $helper;
+    
     /** @var RequisitionListInterfaceFactory */
     protected $requisitionListFactory;
 
@@ -31,10 +35,12 @@ class RequisitionLists
     /** @var RequisitionListItemInterfaceFactory */
     protected $requisitionListItemFactory;
 
-    public function __construct(RequisitionListInterfaceFactory $requisitionListFactory,
+    public function __construct(
+    Helper $helper,RequisitionListInterfaceFactory $requisitionListFactory,
     RequisitionListRepositoryInterface $requisitionListRepository, CustomerRepositoryInterface $customerRepository,
     SearchCriteriaBuilder $searchCriteriaBuilder, RequisitionListItemInterfaceFactory $requisitionListItemFactory)
     {
+        $this->helper = $helper;
         $this->requisitionListFactory = $requisitionListFactory;
         $this->requisitionListRepository = $requisitionListRepository;
         $this->customerRepository = $customerRepository;
@@ -47,7 +53,7 @@ class RequisitionLists
         try{
             $customer = $this->customerRepository->get($row['customer']);
         }catch (\Exception $e){
-            print_r("Requistion list ".$row['name']." cannot be created. Customer ".$row['customer']." does not exist\n");
+            $this->helper->printMessage("Requistion list ".$row['name']." cannot be created. Customer ".$row['customer']." does not exist","warning");
             return true;
         }
         

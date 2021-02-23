@@ -7,6 +7,8 @@ use Magento\TargetRule\Model\RuleFactory as RuleFactory;
 use Magento\TargetRule\Model\Rule;
 use Magento\TargetRule\Model\ResourceModel\Rule as ResourceModel;
 use Magento\Framework\Serialize\SerializerInterface;
+use Magento\Framework\App\State;
+use Magento\Framework\App\Area;
 
 class Upsells
 {
@@ -22,16 +24,21 @@ class Upsells
     /** @var ResourceModel */
     protected $resourceModel;
 
+    /** @var State */
+    protected $appState;
+
     public function __construct(
         RuleFactory $ruleFactory,
         Converter $converter,
         ResourceModel $resourceModel,
-        SerializerInterface $serializerInterface
+        SerializerInterface $serializerInterface,
+        State $state
     ) {
         $this->ruleFactory = $ruleFactory;
         $this->converter = $converter;
         $this->resourceModel = $resourceModel;
         $this->serializerInterfac = $serializerInterface;
+        $this->appState = $state;
     }
 
     public function install(array $row, array $settings)
@@ -58,7 +65,13 @@ class Upsells
         $upsellModel->setPositionsLimit($row['positions_limit']);
         $upsellModel->setApplyTo($applyTo);
         $upsellModel->setSortOrder($row['sort_order']);
-        $this->resourceModel->save($upsellModel);
+        $this->appState->emulateAreaCode(
+            Area::AREA_ADMINHTML,
+            [$this->resourceModel, 'save'],
+            [$upsellModel]
+        );
+
+        //$this->resourceModel->save($upsellModel);
         return true;
     }
 

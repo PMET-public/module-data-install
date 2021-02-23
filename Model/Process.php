@@ -164,8 +164,8 @@ class Process
         AdminUsers $adminUsers,
         AdminRoles $adminRoles,
         DriverInterface $driverInterface,
-        AdvancedPricing $advancedPricing,
-        Orders $orders
+        AdvancedPricing $advancedPricing//,
+        //Orders $orders
     ) {
         $this->helper = $helper;
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
@@ -193,7 +193,7 @@ class Process
         $this->adminRolesInstall = $adminRoles;
         $this->driverInterface = $driverInterface;
         $this->advancedPricingInstall = $advancedPricing;
-        $this->ordersInstall = $orders;
+       // $this->ordersInstall = $orders;
     }
 
     /**

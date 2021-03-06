@@ -16,7 +16,7 @@ class Validate
      * @param  Stores $stores
      * @return void
      */
-    public function __construct(Stores $stores)
+    public function __construct(Datatypes\Stores $stores)
     {
         $this->stores = $stores;
     }

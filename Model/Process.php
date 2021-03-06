@@ -5,6 +5,7 @@
  */
 namespace MagentoEse\DataInstall\Model;
 
+use ArgumentSequence\ParentClass;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Csv;
 use Magento\Framework\Filesystem\DirectoryList;
@@ -16,18 +17,32 @@ use MagentoEse\DataInstall\Helper\Helper;
 
 class Process
 {
-    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv',
+    const ALL_FILES = ['stores.csv','config_vertical.json','config_secret.json','config.csv',
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
-    'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
+    'blocks.csv','categories.csv','products.csv','products2.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv'];
+
+    const STORE_FILES = ['stores.csv'];
+
+    const STAGE1 = ['config_default.json','config_vertical.json','config_secret.json','config.csv',
+    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
+    'blocks.csv','categories.csv'];
+
+    const STAGE2 = ['products.csv','products2.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
+    'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
+    'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv'];
+
 
     const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv','b2b_sales_reps.csv','b2b_teams.csv'];
 
     protected $redo=[];
 
-    protected $settings = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
+    const SETTINGS = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
         'root_category' => 'Default Category', 'root_category_id' => '2'];
+
+    /** @var array */
+    private $settings;    
 
     /** @var FixtureManager  */
     protected $fixtureManager;
@@ -35,76 +50,76 @@ class Process
     /** @var Csv  */
     protected $csvReader;
 
-    /** @var Stores  */
+    /** @var DataTypes\Stores  */
     protected $storeInstall;
 
-    /** @var ProductAttributes  */
+    /** @var DataTypes\ProductAttributes  */
     protected $productAttributesInstall;
 
-    /** @var Categories  */
+    /** @var DataTypes\Categories  */
     protected $categoryInstall;
 
-    /** @var Products  */
+    /** @var DataTypes\Products  */
     protected $productInstall;
 
-    /** @var DirectoryList  */
+    /** @var DataTypes\DirectoryList  */
     protected $directoryList;
 
-    /** @var Pages  */
+    /** @var DataTypes\Pages  */
     protected $pageInstall;
 
-    /** @var Blocks  */
+    /** @var DataTypes\Blocks  */
     protected $blockInstall;
 
-    /** @var DynamicBlocks  */
+    /** @var DataTypes\DynamicBlocks  */
     protected $dynamicBlockInstall;
 
-    /** @var Configuration  */
+    /** @var DataTypes\Configuration  */
     protected $configurationInstall;
 
-    /** @var CustomerGroups  */
+    /** @var DataTypes\CustomerGroups  */
     protected $customerGroupInstall;
 
-    /** @var CustomerAttributes  */
+    /** @var DataTypes\CustomerAttributes  */
     protected $customerAttributeInstall;
 
-    /** @var Customers  */
+    /** @var DataTypes\Customers  */
     protected $customerInstall;
 
-    /** @var Reviews  */
+    /** @var DataTypes\Reviews  */
     protected $reviewsInstall;
 
     /** @var Validate */
     protected $validate;
 
-    /** @var Templates  */
+    /** @var DataTypes\Templates  */
     protected $templatesInstall;
 
-    /** @var Upsells */
+    /** @var DataTypes\Upsells */
     protected $upsellsInstall;
 
     /** @var CopyMedia */
     protected $copyMedia;
 
-    /** @var MsiInventory */
+    /** @var DataTypes\MsiInventory */
     protected $msiInventoryInstall;
 
     /** @var ObjectManagerInterface  */
     protected $objectManager;
 
-    /** @var AdminUsers  */
+    /** @var DataTypes\AdminUsers  */
     protected $adminUsersInstall;
 
-    /** @var AdminRoles  */
+    /** @var DataTypes\AdminRoles  */
     protected $adminRolesInstall;
 
     /** @var DriverInterface */
     protected $driverInterface;
 
-    /** @var AdvancedPricing */
+    /** @var DataTypes\AdvancedPricing */
     protected $advancedPricingInstall;
 
-    /** @var Orders */
+    /** @var DataTypes\Orders */
     protected $orderInstall;
 
     /** @var Helper */
@@ -142,29 +157,29 @@ class Process
     public function __construct(
         Helper $helper,
         SampleDataContext $sampleDataContext,
-        Stores $stores,
-        ProductAttributes $productAttributes,
-        Categories $categories,
-        Products $products,
+        DataTypes\Stores $stores,
+        DataTypes\ProductAttributes $productAttributes,
+        DataTypes\Categories $categories,
+        DataTypes\Products $products,
         DirectoryList $directoryList,
-        Pages $pages,
-        Blocks $blocks,
-        DynamicBlocks $dynamicBlocks,
-        Configuration $configuration,
-        CustomerGroups $customerGroups,
-        CustomerAttributes $customerAttributes,
-        Customers $customers,
-        Reviews $reviews,
-        Templates $templates,
+        DataTypes\Pages $pages,
+        DataTypes\Blocks $blocks,
+        DataTypes\DynamicBlocks $dynamicBlocks,
+        DataTypes\Configuration $configuration,
+        DataTypes\CustomerGroups $customerGroups,
+        DataTypes\CustomerAttributes $customerAttributes,
+        DataTypes\Customers $customers,
+        DataTypes\Reviews $reviews,
+        DataTypes\Templates $templates,
         Validate $validate,
-        Upsells $upsells,
+        DataTypes\Upsells $upsells,
         CopyMedia $copyMedia,
-        MsiInventory $msiInventory,
+        DataTypes\MsiInventory $msiInventory,
         ObjectManagerInterface $objectManager,
-        AdminUsers $adminUsers,
-        AdminRoles $adminRoles,
+        DataTypes\AdminUsers $adminUsers,
+        DataTypes\AdminRoles $adminRoles,
         DriverInterface $driverInterface,
-        AdvancedPricing $advancedPricing//,
+        DataTypes\AdvancedPricing $advancedPricing//,
         //Orders $orders
     ) {
         $this->helper = $helper;
@@ -202,10 +217,36 @@ class Process
      * @param array|string[] $fileOrder
      * @throws LocalizedException
      */
-    public function loadFiles($moduleName, $fixtureDirectory = "fixtures", array $fileOrder = self::FILE_ORDER)
-    {
 
+    
+    public function loadFiles($loadType, $fixtureDirectory = "fixtures", array $fileOrder=[])
+    {
+        
+        //if fileOrder is defined then skip the determining load type
+        if(count($fileOrder)==0){
+            //for backwards compatibility, load type default case is full in case module name is still being passed in
+            switch (strtolower($loadType)) {
+                case "stores":
+                    $fileOrder = self::STORE_FILES;
+                    break;
+                case "start":
+                    $fileOrder = self::STAGE1;
+                    break;
+                case "end":
+                    $fileOrder = self::STAGE2;
+                    break;
+                default:
+                    $fileOrder = self::ALL_FILES;
+                }
+        }
+        
+        print_r($fileOrder);
+      
+        //flush cache
+        //$this->helper->flushCache();
+        
         //set module configuration
+        $moduleName = $this->getModuleName();
         $this->settings = $this->getConfiguration($moduleName, $fixtureDirectory);
         $this->helper->printMessage("Copying media files","info");
 
@@ -256,6 +297,10 @@ class Process
                         //$this->helper->printMessage("Loading Products","info");
                         $this->processFile($rows, $header, $this->productInstall, $modulePath);
                         break;
+                        case "products2.csv":
+                            //$this->helper->printMessage("Loading Products","info");
+                            $this->processFile($rows, $header, $this->productInstall, $modulePath);
+                            break;
                         
                     case "advanced_pricing.csv":
                         $this->helper->printMessage("Loading Advanced Pricing","info");
@@ -293,7 +338,7 @@ class Process
                         break;
 
                     case "config_secret.json":
-                        $this->helper->printMessage("Loading Config Secretd Json","info");
+                        $this->helper->printMessage("Loading Config Secret Json","info");
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
 
@@ -374,7 +419,7 @@ class Process
                 }
             }
         }
-
+        $this->settings = 
         $this->processRedos();
     }
 
@@ -471,6 +516,7 @@ class Process
     private function getConfiguration(string $moduleName, string $fixtureDirectory): array
     {
         $valid = false;
+        $this->settings = self::SETTINGS;
         $setupArray=$this->settings;
         $setupFile = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/settings.csv");
         if (file_exists($setupFile)) {
@@ -600,4 +646,25 @@ class Process
             }
         }
     }
+
+    private function getModuleName(){
+        return $this->helper->getModuleName($this->getCallingClass());
+    }
+
+    private function getCallingClass() {
+
+        //get the trace
+        $trace = debug_backtrace();
+    
+        // Get the class that is asking for who awoke it
+        $class = $trace[1]['class'];
+    
+        // +1 to i cos we have to account for calling this function
+        for ( $i=1; $i<count( $trace ); $i++ ) {
+            if ( isset( $trace[$i] ) ) // is it set?
+                 if ( $class != $trace[$i]['class'] ) // is it a different class
+                     return $trace[$i]['class'];
+        }
+    }
+    
 }

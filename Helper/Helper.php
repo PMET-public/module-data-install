@@ -8,17 +8,36 @@ declare(strict_types=1);
 namespace MagentoEse\DataInstall\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Framework\App\Cache\Frontend\Pool;
+use Magento\Indexer\Model\IndexerFactory;
+use Magento\Indexer\Model\Indexer\Collection;
+
 
 class Helper extends AbstractHelper
 {
-    private $foreground_colors = array();
-	private $background_colors = array();
+    protected $foreground_colors = array();
+	protected $background_colors = array();
 
-    /**
-     * @param \Magento\Framework\App\Helper\Context $context
-     */
+    /** @var TypeListInterface */
+    protected $cacheTypeList;
+    
+    /** @var Pool */
+    protected $cacheFrontendPool;
+
+    /** @var IndexerFactory */
+    private $indexFactory;
+
+    /** @var Collection */
+    private $indexCollection;
+
     public function __construct(
-        \Magento\Framework\App\Helper\Context $context
+        Context $context,
+        Pool $cacheFrontendPool,
+        TypeListInterface $cacheTypeList,
+        IndexerFactory $indexFactory,
+        Collection $indexCollection
     ) {
         parent::__construct($context);
         // Set up shell colors
@@ -47,8 +66,55 @@ class Helper extends AbstractHelper
 			$this->background_colors['magenta'] = '45';
 			$this->background_colors['cyan'] = '46';
 			$this->background_colors['light_gray'] = '47';
+
+            $this->cacheFrontendPool = $cacheFrontendPool;
+            $this->cacheTypeList = $cacheTypeList;
+            $this->indexCollection = $indexCollection;
+            $this->indexFactory = $indexFactory;
     }
 
+    public function reindex()
+    {
+        $indexes = $this->indexCollection->getAllIds();
+        foreach ($indexes as $index){
+            $indexFactory = $this->indexFactory->create()->load($index);
+            //$indexFactory->reindexAll($index);
+            print_r($index."\n");
+            if($index!='catalogrule_rule'){
+                $indexFactory->reindexRow($index);
+            }
+            
+ 
+        }
+    }
+
+    public function flushCache()
+    {
+    $_types = [
+                'config',
+                'layout',
+                'block_html',
+                'collections',
+                'reflection',
+                'db_ddl',
+                'eav',
+                'config_integration',
+                'config_integration_api',
+                'full_page',
+                'translate',
+                'config_webservice'
+                ];
+    
+        foreach ($_types as $type) {
+            $this->cacheTypeList->cleanType($type);
+        }
+        foreach ($this->cacheFrontendPool as $cacheFrontend) {
+            $cacheFrontend->getBackend()->clean();
+        }
+    }
+
+    
+    
     public function printMessage($string, $foreground_color = null, $background_color = null){
         print_r($this->getColoredString($string, $foreground_color, $background_color)."\n");
     }
@@ -94,5 +160,13 @@ class Helper extends AbstractHelper
     public function getBackgroundColors() {
         return array_keys($this->background_colors);
     }
+
+    public function getModuleName($module){
+        //$class = get_class($module);
+        $temp = explode("\\",$module);
+        return $temp[0]."_".$temp[1];
+    }
+
+
 
 }

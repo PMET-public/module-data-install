@@ -91,7 +91,8 @@ class Products
 
         /// create array to restrict existing products from other store views
         if($restrictProductsFromViews=='Y'){
-            ///get all products that are in views that are not in my store
+            ///get all products that are not in my view not in my data file
+            //restricts from incoming store
             $restrictExistingProducts = $this->restrictExistingProducts($productsArray,$settings['store_view_code']);
 
             //Restrict new (not updated) products to views that arent in my store

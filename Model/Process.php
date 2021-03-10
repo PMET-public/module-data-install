@@ -13,7 +13,10 @@ use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Filesystem\DriverInterface;
+use MagentoEse\DataInstall\Api\Data\InstallerInterface;
 use MagentoEse\DataInstall\Helper\Helper;
+use MagentoEse\DataInstall\Api\Data\InstallerInterfaceFactory;
+use MagentoEse\DataInstall\Api\InstallerRepositoryInterface;
 
 class Process
 {
@@ -125,6 +128,13 @@ class Process
     /** @var Helper */
     protected $helper;
 
+    /** @var InstallerInterfaceFactory */
+    protected $dataInstallerInterface;
+
+    /** @var InstallerRepositoryInterface */
+    protected $dataInstallerRepository;
+
+
      /**
       * Process constructor.
       * @param Helper $helper
@@ -153,6 +163,8 @@ class Process
       * @param DriverInterface $driverInterface
       * @param AdvancedPricing $advancedPricing
       * @param Orders $orders
+      * @param InstallerInterfaceFactory $$dataInstallerInterface;
+      * @param InstallerRepositoryInterface $dataInstallerRepository
       */
     public function __construct(
         Helper $helper,
@@ -179,8 +191,10 @@ class Process
         DataTypes\AdminUsers $adminUsers,
         DataTypes\AdminRoles $adminRoles,
         DriverInterface $driverInterface,
-        DataTypes\AdvancedPricing $advancedPricing//,
-        //Orders $orders
+        DataTypes\AdvancedPricing $advancedPricing,
+        //Orders $orders,
+        InstallerInterfaceFactory $dataInstallerInterface,
+        InstallerRepositoryInterface $dataInstallerRepository
     ) {
         $this->helper = $helper;
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
@@ -208,6 +222,8 @@ class Process
         $this->adminRolesInstall = $adminRoles;
         $this->driverInterface = $driverInterface;
         $this->advancedPricingInstall = $advancedPricing;
+        $this->dataInstallerInterface = $dataInstallerInterface;
+        $this->dataInstallerRepository = $dataInstallerRepository;
        // $this->ordersInstall = $orders;
     }
 
@@ -221,7 +237,10 @@ class Process
     
     public function loadFiles($loadType, $fixtureDirectory = "fixtures", array $fileOrder=[])
     {
-        
+        //set module configuration
+        $moduleName = $this->getModuleName();
+        $this->settings = $this->getConfiguration($moduleName, $fixtureDirectory);
+
         //if fileOrder is defined then skip the determining load type
         if(count($fileOrder)==0){
             //for backwards compatibility, load type default case is full in case module name is still being passed in
@@ -231,27 +250,27 @@ class Process
                     break;
                 case "start":
                     $fileOrder = self::STAGE1;
+                    $this->helper->printMessage("Copying media files","info");
+                    $this->copyMedia->moveFiles($moduleName);
                     break;
                 case "end":
                     $fileOrder = self::STAGE2;
                     break;
                 default:
                     $fileOrder = self::ALL_FILES;
+                    $this->helper->printMessage("Copying media files","info");
+                    $this->copyMedia->moveFiles($moduleName);
                 }
         }
         
-        print_r($fileOrder);
+        //see if we need to do any work for recurring, if not clear out the file list to bypass
+        if($this->isRecurring()){
+            if($this->isModuleInstalled($moduleName)){
+                $fileOrder=[];
+            }
+        } 
       
-        //flush cache
-        //$this->helper->flushCache();
-        
-        //set module configuration
-        $moduleName = $this->getModuleName();
-        $this->settings = $this->getConfiguration($moduleName, $fixtureDirectory);
-        $this->helper->printMessage("Copying media files","info");
-
-        $this->copyMedia->moveFiles($moduleName);
-
+   
         foreach ($fileOrder as $nextFile) {
             $fileName = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/" . $nextFile);
             if (basename($fileName)==$nextFile && file_exists($fileName)) {
@@ -398,17 +417,17 @@ class Process
 
                     case "b2b_shared_catalogs.csv":
                         $this->helper->printMessage("Loading B2B Shared Catalogs","info");
-                        $sharedCatalogsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\SharedCatalogs');
+                        $sharedCatalogsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\SharedCatalogs');
                         $this->processRows($rows, $header, $sharedCatalogsInstall);
                         break;
                     case "b2b_shared_catalog_categories.csv":
                         $this->helper->printMessage("Loading Shared Catalog Categories","info");
-                        $sharedCatalogCategoriesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\SharedCatalogCategories');
+                        $sharedCatalogCategoriesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\SharedCatalogCategories');
                         $this->processFile($rows, $header, $sharedCatalogCategoriesInstall, $modulePath);
                         break;
                     case "b2b_requisition_lists.csv":
                         $this->helper->printMessage("Loading Requisition Lists","info");
-                        $requisitionListInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\RequisitionLists');
+                        $requisitionListInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\RequisitionLists');
                         $this->processRows($rows, $header, $requisitionListInstall);
                         break;
 
@@ -419,8 +438,15 @@ class Process
                 }
             }
         }
-        $this->settings = 
+        
         $this->processRedos();
+        //register module status
+        if(!$this->isRecurring()){
+            $this->registerModule($moduleName);
+        }else{
+            $this->setModuleInstalled($moduleName);
+        } 
+
     }
 
      /**
@@ -498,13 +524,24 @@ class Process
      * @param string $classname
      * @return false|int|string
      */
-    private function getClassName(string $classname)
+    private function getClassName(string $className)
     {
-        if ($pos = strrpos($classname, '\\')) {
-            return substr($classname, $pos + 1);
+        if ($pos = strrpos($className, '\\')) {
+            return substr($className, $pos + 1);
         }
 
         return $pos;
+    }
+
+    private function isRecurring(){
+        $callingClass = $this->getCallingClass();
+        $arr = explode("\\",$callingClass);
+        $className = end($arr);
+        if($className=="RecurringData"){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     /**
@@ -578,22 +615,22 @@ class Process
 
             $companiesData = $this->mergeCompanyData($companies, $customers, $salesReps);
             $this->helper->printMessage("Loading B2B Companies","info");
-            $companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\Companies');
+            $companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\Companies');
             foreach ($companiesData as $companyData) {
                 $companiesInstall->install($companyData, $this->settings);
             }
             
             //add company roles
             $this->helper->printMessage("Loading B2B Company Roles","info");
-            $companyRolesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\CompanyRoles');
+            $companyRolesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\CompanyRoles');
             $this->processFile($b2bData['b2b_company_roles.csv']['rows'], $b2bData['b2b_company_roles.csv']['header'], $companyRolesInstall, '');
             //assign roles to customers
-            $companyUserRolesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\CompanyUserRoles');
+            $companyUserRolesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\CompanyUserRoles');
             $this->processRows($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $companyUserRolesInstall);
 
             $this->helper->printMessage("Loading B2B Teams and Company Structure","info");
             //create company structure
-            $companyTeamsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\Teams');
+            $companyTeamsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\Teams');
             $this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $companyTeamsInstall);
         }
         
@@ -665,6 +702,32 @@ class Process
                  if ( $class != $trace[$i]['class'] ) // is it a different class
                      return $trace[$i]['class'];
         }
+    }
+
+    private function registerModule($moduleName){
+        $tracker = $this->dataInstallerRepository->getByModuleName($moduleName);
+        if($tracker->getId()){
+            $this->dataInstallerRepository->delete($tracker);
+            $tracker = $this->dataInstallerInterface->create();
+        }
+        $tracker->setModuleName($moduleName);
+        //$this->dataInstallerRepository->delete($tracker);
+        $tracker->setIsInstalled(0);
+        $this->dataInstallerRepository->save($tracker);
+        return $tracker->getId();
+    }
+
+    private function isModuleInstalled($moduleName){
+        $tracker = $this->dataInstallerInterface->create();
+        $tracker = $this->dataInstallerRepository->getByModuleName($moduleName);
+        $f=$tracker->isInstalled();
+        return $tracker->isInstalled();
+    }
+    private function setModuleInstalled($moduleName){
+        $tracker = $this->dataInstallerInterface->create();
+        $tracker = $this->dataInstallerRepository->getByModuleName($moduleName);
+        $tracker->setIsInstalled(1);
+        $this->dataInstallerRepository->save($tracker);
     }
     
 }

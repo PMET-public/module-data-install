@@ -161,9 +161,9 @@ class Helper extends AbstractHelper
         return array_keys($this->background_colors);
     }
 
-    public function getModuleName($module){
+    public function getModuleName($class){
         //$class = get_class($module);
-        $temp = explode("\\",$module);
+        $temp = explode("\\",$class);
         return $temp[0]."_".$temp[1];
     }
 

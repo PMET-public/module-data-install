@@ -313,13 +313,8 @@ class Process
                         break;
 
                     case "products.csv":
-                        //$this->helper->printMessage("Loading Products","info");
                         $this->processFile($rows, $header, $this->productInstall, $modulePath);
                         break;
-                        case "products2.csv":
-                            //$this->helper->printMessage("Loading Products","info");
-                            $this->processFile($rows, $header, $this->productInstall, $modulePath);
-                            break;
                         
                     case "advanced_pricing.csv":
                         $this->helper->printMessage("Loading Advanced Pricing","info");

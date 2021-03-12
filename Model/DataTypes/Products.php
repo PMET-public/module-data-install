@@ -88,7 +88,6 @@ class Products
             $productsArray[] = array_combine($header, $row);
         }
 
-
         /// create array to restrict existing products from other store views
         if($restrictProductsFromViews=='Y'){
             ///get all products that are not in my view not in my data file
@@ -99,26 +98,23 @@ class Products
             $restrictNewProducts = $this->restrictNewProductsFromOtherStoreViews($productsArray,$settings['store_view_code']);
         }
 
-
         $this->helper->printMessage("Importing new products","info");
         $this->import($productsArray,$imgDir,$productValidationStrategy);
 
         /// Restrict products from other stores
         if($restrictProductsFromViews=='Y') {
             $this->helper->printMessage("Restricting products from other store views","info");
-            //Need to set area code when updating products
-            // try{
-            //     $this->state->setAreaCode('adminhtml');
-            // }
-            // catch(\Magento\Framework\Exception\LocalizedException $e){
-            //     // left empty
-            // }
-            $this->helper->printMessage("Restricting ".count($restrictExistingProducts)." products from new store view","info");
-            //$this->updateProductVisibility($restrictExistingProducts);
-            $this->import($restrictExistingProducts,$imgDir,$productValidationStrategy);
-            $this->helper->printMessage("Restricting ".count($restrictNewProducts)." new products from existing store views","info");
-            //$this->updateProductVisibility($restrictNewProducts);
+
+            if(count($restrictExistingProducts) > 0){
+                 $this->helper->printMessage("Restricting ".count($restrictExistingProducts)." products from new store view","info");
+                $this->import($restrictExistingProducts,$imgDir,$productValidationStrategy);
+            }
+            
+            if(count($restrictNewProducts) > 0){
+                $this->helper->printMessage("Restricting ".count($restrictNewProducts)." new products from existing store views","info");
             $this->import($restrictNewProducts,$imgDir,$productValidationStrategy);
+            }
+            
         }
 
     }
@@ -160,29 +156,14 @@ class Products
      */
     private function restrictExistingProducts(array $products,$storeViewCode)
     {
-        //get all product skus
-        $allProductSkus = $this->getVisibleProductSkus();
+        $allProductSkus = $this->productDataToSkus($this->getAllProducts());
+        $productsToAdd = $this->productDataToSkus($products);
+        //$productsToAdd = $this->getUniqueNewProductSkus($products,$allProductSkus);
+        $products = array_diff($allProductSkus,$productsToAdd);
         $newProductArray = [];
-        //$allStoreCodes = $this->stores->getViewCodesFromOtherStores($storeViewCode);
-        //$allStoreCodes = $this->stores->getAllViews();
         foreach ($products as $product) {
-            $r= array_search($product['sku'],$allProductSkus);
-            $sku = $product['sku'];
-            //only restrict if product doesnt exist
-            if(array_search($product['sku'],$allProductSkus)!==false){
-                // if (!empty($product['store_view_code'])) {
-                // $storeViewCode = $product['store_view_code'];
-                // }
-                //add restrictive line for each
-                //foreach ($allStoreCodes as $storeCode) {
-                //    if ($storeCode != $storeViewCode) {
-                        $newProductArray[] = ['sku'=>$product['sku'],'store_view_code'=>$storeViewCode,'visibility'=>'Not Visible Individually'];
-                //    }
-               // }
-            }
-            
+            $newProductArray[] = ['sku'=>$product,'store_view_code'=>$storeViewCode,'visibility'=>'Not Visible Individually'];
         }
-
         return $newProductArray;
     }
 
@@ -191,28 +172,20 @@ class Products
         
         /////loop over all products, if that sku isn in the products array then flag it
         //get all product skus
-        $allProductSkus = $this->getVisibleProductSkus();
+        $allProductSkus = $this->productDataToSkus($this->getAllProducts());
         $restrictedProducts = [];
         $allStoreCodes = $this->stores->getViewCodesFromOtherStores($storeViewCode);
         $uniqueNewProductSkus = $this->getUniqueNewProductSkus($newProducts,$allProductSkus);
 
         //$allStoreCodes = $this->stores->getAllViews();
-        foreach ($newProducts as $product) {
-            $r= array_search($product['sku'],$allProductSkus);
-            $sku= $product['sku'];
-            //only restrict if product doesnt exist
-            if(array_search($product['sku'],$allProductSkus)===false){
-                if (!empty($product['store_view_code'])) {
-                $storeViewCode = $product['store_view_code'];
-                }
+        foreach ($uniqueNewProductSkus as $product) {
+
                 //add restrictive line for each
                 foreach ($allStoreCodes as $storeCode) {
                     if ($storeCode != $storeViewCode) {
-                        $restrictedProducts[] = ['sku'=>$product['sku'],'store_view_code'=>$storeCode,'visibility'=>'Not Visible Individually'];
+                        $restrictedProducts[] = ['sku'=>$product,'store_view_code'=>$storeCode,'visibility'=>'Not Visible Individually'];
                     }
                 }
-            }
-            
         }
 
         return $restrictedProducts;
@@ -220,34 +193,28 @@ class Products
 
     private function getUniqueNewProductSkus(array $newProducts, array $allProductSkus){
         $newSkus = $this->productDataToSkus($newProducts);
-        return array_diff($newProducts,$allProductSkus);
+        return array_diff($newSkus,$allProductSkus);
     }
 
     private function productDataToSkus($products){
-        $productData = [];
+        $skus = [];
         foreach ($products as $product) {
-            $productData[]=$product['sku'];
+            $skus[]=$product['sku'];
         }
+        return $skus;
     }
 
-    /**
-     * @param $storeViewCodeToRestrict
-     * @return array
-     */
-    // private function restrictExistingProducts($storeViewCodeToRestrict)
-    // {
-    //     $newProductArray = [];
-    //     $productCollection = $this->getVisibleProducts();
-    //     foreach ($productCollection as $product) {
-    //         $newProductArray[] = ['sku'=>$product->getSku(),'store_view_code'=>$storeViewCodeToRestrict,'visibility'=>'Not Visible Individually'];
-    //     }
+    private function getAllProducts(){
+        $search = $this->searchCriteriaBuilder
+        ->addFilter(ProductInterface::SKU, '', 'neq')
+        ->create();
+        $productCollection = $this->productRepository->getList($search)->getItems();
 
-    //     return $newProductArray;
-    // }
+        return $productCollection;
+    }
 
     private function getVisibleProducts(){
         $search = $this->searchCriteriaBuilder
-        //->addFilter(ProductInterface::SKU, '', 'neq')->create();
         ->addFilter(ProductInterface::VISIBILITY, '4', 'eq')
         ->create();
         $productCollection = $this->productRepository->getList($search)->getItems();
@@ -265,4 +232,21 @@ class Products
 
         return $productSkus;
     }
+
+    private function addSettingsToImportFile($products,$settings){
+        $i=0;
+        foreach ($products as $product) {
+            //store_view_code, product_websites
+            if(empty($product['store_view_code']) || $product['store_view_code']==''){
+                $product['store_view_code'] = $settings['store_view_code'];
+            }
+            if(empty($product['product_websites']) || $product['product_websites']==''){
+                $product['product_websites'] = $settings['site_code'];
+            }
+            $products[$i] = $product;
+            $i++;
+        }
+        return $products;
+    }
 }
+

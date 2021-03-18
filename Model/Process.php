@@ -242,8 +242,8 @@ class Process
         
         $this->settings = $this->getConfiguration($moduleName, $fixtureDirectory);
 
-        $fromName = $this->fixtureManager->getFixture($moduleName . "::" . "media/" . $nextDirectory['from']);
-        $toName = $this->directoryList->getRoot()."/".$nextDirectory['to'];
+        //$fromName = $this->fixtureManager->getFixture($moduleName . "::" . "media/" . $nextDirectory['from']);
+        //$toName = $this->directoryList->getRoot()."/".$nextDirectory['to'];
 
         //if fileOrder is defined then skip the determining load type
         if(count($fileOrder)==0){

@@ -236,9 +236,10 @@ class Process
 
     
     public function loadFiles($loadType, $fixtureDirectory = "fixtures", array $fileOrder=[])
-    {
+    {   
+        $moduleName  = $loadType;
         //set module configuration
-        $moduleName = $this->getModuleName();
+        //$moduleName = $this->getModuleName();
         $this->settings = $this->getConfiguration($moduleName, $fixtureDirectory);
 
         //if fileOrder is defined then skip the determining load type
@@ -263,6 +264,7 @@ class Process
                 }
         }
         
+        $fileOrder = self::ALL_FILES;
         //see if we need to do any work for recurring, if not clear out the file list to bypass
         if($this->isRecurring()){
             if($this->isModuleInstalled($moduleName)){

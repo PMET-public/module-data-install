@@ -2,4 +2,13 @@
     <preference for="MagentoEse\DataInstall\Api\Data\InstallerInterface" type="MagentoEse\DataInstall\Model\Installer" />
     <!-- <preference for="MagentoEse\DataInstall\Api\Data\InstallTrackertSearchResultInterface" type="MagentoEse\DataInstallModel\StudentSearchResult" /> -->
     <preference for="MagentoEse\DataInstall\Api\InstallerRepositoryInterface" type="MagentoEse\DataInstall\Model\InstallerRepository" />
+
+
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="magentoEseDataInstall" xsi:type="object">MagentoEse\DataInstall\Console\Command\Install</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

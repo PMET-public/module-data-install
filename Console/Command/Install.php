@@ -25,10 +25,13 @@ class Install extends Command
     }
     //bin/magento gxd:datainstall MagentoEse_Base
     //bin/magento gxd:datainstall vendor/story-store/grocery
-    //bin/magento gxd:datainstall does/it/matter/what/directory
+    //bin/magento gxd:datainstall relative/to/magento
+    //bin/magento gxd:datainstall /Absolute/Path
 
     //dir=fixtures - can be any other sub directory
     //-f force reload if already loaded
+
+    ///test if module loaded by composer will still work without setup:upgrade
 
 	protected function configure()
 	{

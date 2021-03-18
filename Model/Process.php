@@ -235,17 +235,20 @@ class Process
      */
 
     
-    public function loadFiles($loadType, $fixtureDirectory = "fixtures", array $fileOrder=[])
+    public function loadFiles($fileSource, $fixtureDirectory = "fixtures", array $fileOrder=[])
     {   
-        $moduleName  = $loadType;
-        //set module configuration
-        //$moduleName = $this->getModuleName();
+        $moduleName  = $fileSource;
+        $this->copyMedia->moveFiles($moduleName);
+        
         $this->settings = $this->getConfiguration($moduleName, $fixtureDirectory);
+
+        $fromName = $this->fixtureManager->getFixture($moduleName . "::" . "media/" . $nextDirectory['from']);
+        $toName = $this->directoryList->getRoot()."/".$nextDirectory['to'];
 
         //if fileOrder is defined then skip the determining load type
         if(count($fileOrder)==0){
             //for backwards compatibility, load type default case is full in case module name is still being passed in
-            switch (strtolower($loadType)) {
+            switch (strtolower($fileSource)) {
                 case "stores":
                     $fileOrder = self::STORE_FILES;
                     break;

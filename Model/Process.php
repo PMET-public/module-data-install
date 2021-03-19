@@ -228,57 +228,51 @@ class Process
     }
 
     /**
-     * @param $moduleName
+     * @param $fileSource
      * @param string $fixtureDirectory
      * @param array|string[] $fileOrder
+     * @param bool|int $reload
      * @throws LocalizedException
      */
 
     
-    public function loadFiles($fileSource, $fixtureDirectory = "fixtures", array $fileOrder=[])
+    public function loadFiles($fileSource, $fixtureDirectory = "fixtures", array $fileOrder=self::ALL_FILES,$reload=null)
     {   
-        $moduleName  = $fileSource;
-        $this->copyMedia->moveFiles($moduleName);
+        //TODO: Handle b2b files if b2b modules arent installed
+        //TODO: Absolute path - need to copy files
+        if($this->isModuleInstalled($fileSource)==1 && $reload===0){
+            $this->helper->printMessage($fileSource." has already been installed.  Add the -r option if you want to reinstall","warning");
+            return true;
+        }else{
+            $this->registerModule($fileSource);
+        }
+        $fileCount = 0;
+        if(count($fileOrder)==0){
+            $fileOrder=self::ALL_FILES;
+        }
+        $filePath = $this->getDataPath($fileSource,$fixtureDirectory);
+
+        $this->copyMedia->moveFiles($filePath);
         
-        $this->settings = $this->getConfiguration($moduleName, $fixtureDirectory);
+        $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
 
         //$fromName = $this->fixtureManager->getFixture($moduleName . "::" . "media/" . $nextDirectory['from']);
         //$toName = $this->directoryList->getRoot()."/".$nextDirectory['to'];
 
-        //if fileOrder is defined then skip the determining load type
-        if(count($fileOrder)==0){
-            //for backwards compatibility, load type default case is full in case module name is still being passed in
-            switch (strtolower($fileSource)) {
-                case "stores":
-                    $fileOrder = self::STORE_FILES;
-                    break;
-                case "start":
-                    $fileOrder = self::STAGE1;
-                    $this->helper->printMessage("Copying media files","info");
-                    $this->copyMedia->moveFiles($moduleName);
-                    break;
-                case "end":
-                    $fileOrder = self::STAGE2;
-                    break;
-                default:
-                    $fileOrder = self::ALL_FILES;
-                    $this->helper->printMessage("Copying media files","info");
-                    $this->copyMedia->moveFiles($moduleName);
-                }
-        }
         
-        $fileOrder = self::ALL_FILES;
         //see if we need to do any work for recurring, if not clear out the file list to bypass
-        if($this->isRecurring()){
-            if($this->isModuleInstalled($moduleName)){
-                $fileOrder=[];
-            }
-        } 
+        // if($this->isRecurring()){
+        //     if($this->isModuleInstalled($moduleName)){
+        //         $fileOrder=[];
+        //     }
+        // } 
       
    
         foreach ($fileOrder as $nextFile) {
-            $fileName = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/" . $nextFile);
+            $fileName = $filePath . $fixtureDirectory . "/" . $nextFile;
+
             if (basename($fileName)==$nextFile && file_exists($fileName)) {
+                $fileCount++;
                 if (pathinfo($fileName, PATHINFO_EXTENSION) == 'json') {
                     $fileContent = $this->driverInterface->fileGetContents($fileName);
                 } else {
@@ -412,7 +406,7 @@ class Process
 
                     case "b2b_companies.csv":
                         $this->helper->printMessage("Loading B2B Data","header");
-                        $this->processB2B($moduleName, $fixtureDirectory);
+                        $this->processB2B($filePath, $fixtureDirectory);
                         break;
 
                     case "b2b_shared_catalogs.csv":
@@ -438,15 +432,13 @@ class Process
                 }
             }
         }
-        
-        $this->processRedos();
-        //register module status
-        if(!$this->isRecurring()){
-            $this->registerModule($moduleName);
+        if($fileCount==0){
+            return false;
         }else{
-            $this->setModuleInstalled($moduleName);
-        } 
-
+            
+            $this->setModuleInstalled($fileSource);
+            return true;
+        }
     }
 
      /**
@@ -545,17 +537,17 @@ class Process
     }
 
     /**
-     * @param string $moduleName
+     * @param string $filePath
      * @param string $fixtureDirectory
      * @return array
      * @throws LocalizedException
      */
-    private function getConfiguration(string $moduleName, string $fixtureDirectory): array
+    private function getConfiguration(string $filePath, string $fixtureDirectory): array
     {
         $valid = false;
         $this->settings = self::SETTINGS;
         $setupArray=$this->settings;
-        $setupFile = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/settings.csv");
+        $setupFile = $filePath . $fixtureDirectory . "/settings.csv";
         if (file_exists($setupFile)) {
             $setupRows = $this->csvReader->getData($setupFile);
             $setupHeader = array_shift($setupRows);
@@ -570,13 +562,13 @@ class Process
         return $setupArray;
     }
 
-    private function processB2B($moduleName, $fixtureDirectory)
+    private function processB2B($filePath, $fixtureDirectory)
     {
         $b2bData = [];
         $stopFlag = 0;
         //do we have all the files we need
         foreach (self::B2B_REQUIRED_FILES as $nextFile) {
-            $fileName = $this->fixtureManager->getFixture($moduleName . "::" . $fixtureDirectory . "/" . $nextFile);
+            $fileName = $filePath . $fixtureDirectory . "/" . $nextFile;
             if (basename($fileName)==$nextFile && file_exists($fileName)) {
                 $rows = $this->csvReader->getData($fileName);
                 $header = array_shift($rows);
@@ -728,6 +720,26 @@ class Process
         $tracker = $this->dataInstallerRepository->getByModuleName($moduleName);
         $tracker->setIsInstalled(1);
         $this->dataInstallerRepository->save($tracker);
+    }
+
+    private function getDataPath($fileLocation,$fixtureDirectory){
+        
+        //remove trailing /
+        //Is it a module? do we need to check to see if the module exists
+        if (preg_match ('/[A-Z,a-z,,0-9]+_[A-Z,a-z,0-9]+/' ,$fileLocation)==1){
+            $filePath = $this->fixtureManager->getFixture($fileLocation . "::");
+            //if its not a valid module, the file path will just be the fixtures directory, so then assume it may a relative path that looks like a module name;
+            if($filePath=='/'){
+                return $fileLocation.'/';
+            } else{
+                return $filePath;
+            }
+        }else{
+            //otherwise assume relative or absolute path
+            return $fileLocation.'/';
+        }
+        
+        
     }
     
 }

@@ -11,7 +11,9 @@ use MagentoEse\DataInstall\Model\Process;
 class Install extends Command
 {
     const MODULE = 'module';
-
+    const FIXTURES = 'fixtures';
+    const FILES = 'files';
+    const RELOAD_FLAG = 'reload';
     /** @var Process  */
     protected $process;
     
@@ -32,6 +34,7 @@ class Install extends Command
     //-f force reload if already loaded
 
     ///test if module loaded by composer will still work without setup:upgrade
+    //https://magento.stackexchange.com/questions/155654/console-command-waiting-for-input-from-user
 
 	protected function configure()
 	{
@@ -41,7 +44,10 @@ class Install extends Command
                 self::MODULE,
                 InputArgument::REQUIRED,
                 'Module'
-            )
+            ),
+            new InputOption(self::FIXTURES,null,InputOption::VALUE_OPTIONAL,'Fixtures Directory','fixtures'),
+            new InputOption(self::FILES,null,InputOption::VALUE_OPTIONAL,'Comma delimited list of individual files to load'),
+            new InputOption(self::RELOAD_FLAG,'-r',InputOption::VALUE_OPTIONAL,'Force Reload',0)
 		];
 
 		$this->setName('gxd:datainstall')
@@ -54,23 +60,24 @@ class Install extends Command
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
 		$module = $input->getArgument(self::MODULE);
-        $output->writeln("Installing data from " . $module);
+        $fixtures = $input->getOption(self::FIXTURES);
+        $reload = $input->getOption(self::RELOAD_FLAG);
+        $files = $input->getOption(self::FILES);
+        if($files==''){
+            $fileArray=[];
+        }else{
+            $fileArray = explode(",",$files);
+        }
+        //$files = explode(",",$input->getOption(self::FILES));
+        // $output->writeln("Installing data from " . $module);
+        // $output->writeln("fixtures " . $fixtures);
+        // $output->writeln("reload " . $reload);
+        // $output->writeln("files " . $files);
+        ///convert files to array
         //exit;
-        // $this->process->loadFiles('MagentoEse_Base','data',['stores.csv','config_vertical.json','config_secret.json','config.csv',
-        // 'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
-        // 'blocks.csv','categories.csv','products.csv','products2.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
-        // 'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
-        // 'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv']);
-		// $this->process->loadFiles('MagentoEse_Custom','data',['stores.csv','config_vertical.json','config_secret.json','config.csv',
-        // 'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
-        // 'blocks.csv','categories.csv','products.csv','products2.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
-        // 'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
-        // 'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv']);
-		$this->process->loadFiles($module,'data',['stores.csv','config_vertical.json','config_secret.json','config.csv',
-        'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
-        'blocks.csv','categories.csv','products.csv','products2.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
-        'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
-        'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv']);
+		if($this->process->loadFiles($module,$fixtures,$fileArray,$reload)==0){
+            $output->writeln("No files found to load in " . $module);
+        }
         
 
 		return $this;

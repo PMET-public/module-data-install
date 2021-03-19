@@ -135,6 +135,8 @@ class Helper extends AbstractHelper
             case "header":
                 $foreground_color = "light_cyan";
             break;
+            
+
         }
         // Check if given foreground color found
         if (isset($this->foreground_colors[$foreground_color])) {

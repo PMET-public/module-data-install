@@ -238,8 +238,8 @@ class Process
     
     public function loadFiles($fileSource, $fixtureDirectory = "fixtures", array $fileOrder=self::ALL_FILES,$reload=null)
     {   
-        //TODO: Handle b2b files if b2b modules arent installed
         //TODO: Absolute path - need to copy files
+        $this->helper->printMessage("Loading files from ".$fileSource,"white","cyan");
         if($this->isModuleInstalled($fileSource)==1 && $reload===0){
             $this->helper->printMessage($fileSource." has already been installed.  Add the -r option if you want to reinstall","warning");
             return true;
@@ -405,24 +405,43 @@ class Process
                         break;
 
                     case "b2b_companies.csv":
-                        $this->helper->printMessage("Loading B2B Data","header");
-                        $this->processB2B($filePath, $fixtureDirectory);
+                        try{
+                            ///catch if b2b module is installed by trying to instantiate company
+                            $companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\Companies');
+                            $this->helper->printMessage("Loading B2B Data","header");
+                            $this->processB2B($filePath, $fixtureDirectory);
+                        }catch(\ReflectionException $e){
+                            $this->helper->printMessage("Companies cannot be loaded. Check that B2B module is included","error");
+                        }
                         break;
 
                     case "b2b_shared_catalogs.csv":
                         $this->helper->printMessage("Loading B2B Shared Catalogs","info");
-                        $sharedCatalogsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\SharedCatalogs');
-                        $this->processRows($rows, $header, $sharedCatalogsInstall);
+                        try{
+                            $sharedCatalogsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\SharedCatalogs');
+                            $this->processRows($rows, $header, $sharedCatalogsInstall);
+                        }catch(\ReflectionException $e){
+                            $this->helper->printMessage("Shared Catalogs cannot be loaded. Check that B2B module is included","error");
+                        }
                         break;
                     case "b2b_shared_catalog_categories.csv":
                         $this->helper->printMessage("Loading Shared Catalog Categories","info");
-                        $sharedCatalogCategoriesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\SharedCatalogCategories');
-                        $this->processFile($rows, $header, $sharedCatalogCategoriesInstall, $modulePath);
+                        try{
+                            $sharedCatalogCategoriesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\SharedCatalogCategories');
+                            $this->processFile($rows, $header, $sharedCatalogCategoriesInstall, $modulePath);    
+                        }catch(\ReflectionException $e){
+                        $this->helper->printMessage("Shared Catalog Categories cannot be loaded. Check that B2B module is included","error");
+                        }
                         break;
                     case "b2b_requisition_lists.csv":
                         $this->helper->printMessage("Loading Requisition Lists","info");
-                        $requisitionListInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\RequisitionLists');
-                        $this->processRows($rows, $header, $requisitionListInstall);
+                        try{
+                            $requisitionListInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\RequisitionLists');
+                            $this->processRows($rows, $header, $requisitionListInstall);
+                      
+                        }catch(\ReflectionException $e){
+                            $this->helper->printMessage("Requsition Lists cannot be loaded. Check that B2B module is included","error");
+                        }
                         break;
 
                     case "orders.csv":
@@ -607,6 +626,7 @@ class Process
 
             $companiesData = $this->mergeCompanyData($companies, $customers, $salesReps);
             $this->helper->printMessage("Loading B2B Companies","info");
+            
             $companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\Companies');
             foreach ($companiesData as $companyData) {
                 $companiesInstall->install($companyData, $this->settings);

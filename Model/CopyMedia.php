@@ -21,7 +21,7 @@ class CopyMedia
         ['from'=>'favicon','to'=>'pub/media/favicon/stores','type'=>'image'],
         ['from'=>'theme','to'=>'app/design/frontend','type'=>'theme'],
         ['from'=>'template_manager','to'=>'pub/media/.template-manager','type'=>'image'],
-        ['from'=>'downloadable_products','to'=>'/pub/media/import','type'=>'download'],
+        ['from'=>'downloadable_products','to'=>'pub/media/import','type'=>'download'],
         ['from'=>'.template-manager','to'=>'pub/media/.template-manager','type'=>'image']];
 
     protected $allowedImageFiles = [ 'jpg' => 'image/jpeg','png' => 'image/png', 'jpeg' => 'image/jpeg',
@@ -92,7 +92,7 @@ class CopyMedia
     public function moveFiles($filePath)
     {
         foreach ($this->directoryMappings as $nextDirectory) {
-            $fromName = $this->directoryList->getRoot()."/".    $filePath . "media/" . $nextDirectory['from'];
+            $fromName = $filePath . "media/" . $nextDirectory['from'];
             $toName = $this->directoryList->getRoot()."/".$nextDirectory['to'];
             $this->copyFilesFromTo($fromName, $toName, $nextDirectory['type']);
         }

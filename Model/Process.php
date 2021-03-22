@@ -251,7 +251,7 @@ class Process
             $fileOrder=self::ALL_FILES;
         }
         $filePath = $this->getDataPath($fileSource);
-        $filePath = str_replace("//","/",$filePath);
+  
         $this->helper->printMessage("Copying Media","info");
         $this->copyMedia->moveFiles($filePath);
         
@@ -757,7 +757,7 @@ class Process
             }
         }else{
             //otherwise assume relative or absolute path
-            return $fileLocation.'/';
+            return $this->driverInterface->getRealPath($fileLocation).'/';
         }
         
         

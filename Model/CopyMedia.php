@@ -92,8 +92,8 @@ class CopyMedia
     public function moveFiles($filePath)
     {
         foreach ($this->directoryMappings as $nextDirectory) {
-            $fromName = $this->fixtureManager->getFixture($filePath . "media/" . $nextDirectory['from']);
-            $toName = $this->directoryList->getRoot().$nextDirectory['to'];
+            $fromName = $this->directoryList->getRoot()."/".    $filePath . "media/" . $nextDirectory['from'];
+            $toName = $this->directoryList->getRoot()."/".$nextDirectory['to'];
             $this->copyFilesFromTo($fromName, $toName, $nextDirectory['type']);
         }
     }

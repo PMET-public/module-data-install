@@ -250,8 +250,9 @@ class Process
         if(count($fileOrder)==0){
             $fileOrder=self::ALL_FILES;
         }
-        $filePath = $this->getDataPath($fileSource,$fixtureDirectory);
-
+        $filePath = $this->getDataPath($fileSource);
+        $filePath = str_replace("//","/",$filePath);
+        $this->helper->printMessage("Copying Media","info");
         $this->copyMedia->moveFiles($filePath);
         
         $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
@@ -742,7 +743,7 @@ class Process
         $this->dataInstallerRepository->save($tracker);
     }
 
-    private function getDataPath($fileLocation,$fixtureDirectory){
+    private function getDataPath($fileLocation){
         
         //remove trailing /
         //Is it a module? do we need to check to see if the module exists

@@ -236,7 +236,7 @@ class Process
      */
 
     
-    public function loadFiles($fileSource, $fixtureDirectory = "fixtures", array $fileOrder=self::ALL_FILES,$reload=null)
+    public function loadFiles($fileSource, $fixtureDirectory = "fixtures", array $fileOrder=self::ALL_FILES,$reload=0)
     {   
         //TODO: Absolute path - need to copy files
         $this->helper->printMessage("Loading files from ".$fileSource,"white","cyan");
@@ -250,6 +250,20 @@ class Process
         if(count($fileOrder)==0){
             $fileOrder=self::ALL_FILES;
         }
+        if(count($fileOrder)==1){
+            //for setting files when start, stores and end is used in place of file list
+            switch (strtolower($fileOrder[0])) {
+                case "stores":
+                    $fileOrder = self::STORE_FILES;
+                    break;
+                case "start":
+                    $fileOrder = self::STAGE1;
+                    break;
+                case "end":
+                    $fileOrder = self::STAGE2;
+                    break;
+            }
+        }
         $filePath = $this->getDataPath($fileSource);
   
         $this->helper->printMessage("Copying Media","info");
@@ -257,8 +271,6 @@ class Process
         
         $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
 
-        //$fromName = $this->fixtureManager->getFixture($moduleName . "::" . "media/" . $nextDirectory['from']);
-        //$toName = $this->directoryList->getRoot()."/".$nextDirectory['to'];
 
         
         //see if we need to do any work for recurring, if not clear out the file list to bypass

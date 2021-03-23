@@ -163,12 +163,29 @@ class Helper extends AbstractHelper
         return array_keys($this->background_colors);
     }
 
-    public function getModuleName($class){
-        //$class = get_class($module);
-        $temp = explode("\\",$class);
+    
+
+    public function getModuleName(){
+        $temp = explode("\\",$this->getCallingClass());
         return $temp[0]."_".$temp[1];
+
     }
 
+    private function getCallingClass() {
+
+        //get the trace
+        $trace = debug_backtrace();
+    
+        // Get the class that is asking for who awoke it
+        $class = $trace[1]['class'];
+    
+        // +1 to i cos we have to account for calling this function
+        for ( $i=1; $i<count( $trace ); $i++ ) {
+            if ( isset( $trace[$i] ) ) // is it set?
+                 if ( $class != $trace[$i]['class'] ) // is it a different class
+                     return $trace[$i]['class'];
+        }
+    }
 
 
 }

@@ -1,4 +1,8 @@
 <?php
+/**
+ * Copyright © Adobe  All rights reserved.
+ */
+
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\SharedCatalog\Api\SharedCatalogRepositoryInterface;
@@ -10,7 +14,8 @@ use Magento\SharedCatalog\Model\SharedCatalogAssignment;
 use Magento\SharedCatalog\Model\CatalogPermissionManagement;
 use Magento\SharedCatalog\Model\ResourceModel\Permission\CategoryPermissions\ScheduleBulk;
 
-class SharedCatalogCategories{
+class SharedCatalogCategories
+{
 
     //TODO: Set Default Catalog
     /** @var SharedCatalogRepositoryInterface */
@@ -37,11 +42,27 @@ class SharedCatalogCategories{
      /** @var ScheduleBulk */
      protected $scheduleBulk;
 
-    public function __construct(SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface,
-    SearchCriteriaBuilder $searchCriteriaBuilder, CategoryManagementInterface $categoryManagementInterface,
-    CategoryCollection $categoryCollection, Stores $stores,SharedCatalogAssignment $sharedCatalogAssignment,
-    CatalogPermissionManagement $catalogPermissionManagement, ScheduleBulk $scheduleBulk)
-    {
+    /**
+     * SharedCatalogCategories constructor.
+     * @param SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param CategoryManagementInterface $categoryManagementInterface
+     * @param CategoryCollection $categoryCollection
+     * @param Stores $stores
+     * @param SharedCatalogAssignment $sharedCatalogAssignment
+     * @param CatalogPermissionManagement $catalogPermissionManagement
+     * @param ScheduleBulk $scheduleBulk
+     */
+     public function __construct(
+        SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        CategoryManagementInterface $categoryManagementInterface,
+        CategoryCollection $categoryCollection,
+        Stores $stores,
+        SharedCatalogAssignment $sharedCatalogAssignment,
+        CatalogPermissionManagement $catalogPermissionManagement,
+        ScheduleBulk $scheduleBulk
+    ) {
         $this->sharedCatalogRepository = $sharedCatalogRepositoryInterface;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->categoryManagementInterface = $categoryManagementInterface;
@@ -52,83 +73,110 @@ class SharedCatalogCategories{
         $this->scheduleBulk = $scheduleBulk;
     }
 
-    public function install(array $rows, array $header, string $modulePath, array $settings){
+    /**
+     * @param array $rows
+     * @param array $header
+     * @param string $modulePath
+     * @param array $settings
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function install(array $rows, array $header, string $modulePath, array $settings)
+    {
         foreach ($rows as $row) {
             $categoryRowArray[] = array_combine($header, $row);
         }
         //create separate array for each shared catalog
-        foreach($categoryRowArray as $categoryRow){
+        foreach ($categoryRowArray as $categoryRow) {
             $categoryArray[$categoryRow['shared_catalog']][]=$categoryRow['category'];
         }
         //if the default catalog is not defined, then add all categories and products to it
         $allCategoryIds = $this->getCategoryIds($this->getAllCategories($settings));
-        if(!array_key_exists('Default (General)',$categoryArray)){
+        if (!array_key_exists('Default (General)', $categoryArray)) {
             $categoryArray['Default (General)'] = $allCategoryIds;
         }
-        foreach($categoryArray as $catalogName=>$categoryArray){
+        foreach ($categoryArray as $catalogName => $categoryArray) {
             $groupIds = [];
             //get id for shared catalog
             /** @var SharedCatalogInterface $catalog */
             $catalog = $this->getSharedCatalogByName($catalogName);
 
-            if($catalog){
+            if ($catalog) {
                 $catalogId = $catalog->getId();
                 //remove current categories
-                $this->categoryManagementInterface->unassignCategories($catalogId,$this->categoryManagementInterface->getCategories($catalogId));
+                $this->categoryManagementInterface->unassignCategories($catalogId, $this->categoryManagementInterface->getCategories($catalogId));
 
                 //get ids of added categories by path
-                $newCategories = $this->getCategoriesByPath($categoryArray,$settings);
+                $newCategories = $this->getCategoriesByPath($categoryArray, $settings);
                 //add new categories
-                $this->categoryManagementInterface->assignCategories($catalogId,$newCategories);
+                $this->categoryManagementInterface->assignCategories($catalogId, $newCategories);
                 //add products in categories
                 $catgoryIds = $this->getCategoryIds($newCategories);
-                $this->sharedCatalogAssignment->assignProductsForCategories($catalogId,$catgoryIds);
-                
+                $this->sharedCatalogAssignment->assignProductsForCategories($catalogId, $catgoryIds);
+
                 //set catalog permissions
                 $groupIds[] = $catalog->getCustomerGroupId();
                 $catalogType = $catalog->getType();
-                if($catalogType == SharedCatalogInterface::TYPE_PUBLIC){
+                if ($catalogType == SharedCatalogInterface::TYPE_PUBLIC) {
                     $groupIds[]=0;
                 }
-                $this->catalogPermissionManagement->setDenyPermissions(array_diff($allCategoryIds,$catgoryIds),$groupIds);
-                $this->scheduleBulk->execute($allCategoryIds,$groupIds);
-
+                $this->catalogPermissionManagement->setDenyPermissions(array_diff($allCategoryIds, $catgoryIds), $groupIds);
+                $this->scheduleBulk->execute($allCategoryIds, $groupIds);
             }
-        
         }
-        
-        
-        //$r=$l;
     }
 
-    private function getCategoryIds($categoryArray){
+    /**
+     * @param $categoryArray
+     * @return array
+     */
+    private function getCategoryIds($categoryArray)
+    {
         $categoryIds = [];
-        foreach($categoryArray as $category){
+        foreach ($categoryArray as $category) {
             $categoryIds[]=$category->getId();
         }
         return $categoryIds;
     }
 
-    private function getSharedCatalogByName($sharedCatalogName){
+    /**
+     * @param $sharedCatalogName
+     * @return SharedCatalogInterface
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    private function getSharedCatalogByName($sharedCatalogName)
+    {
         $catalogSearch = $this->searchCriteriaBuilder
         ->addFilter(SharedCatalogInterface::NAME, $sharedCatalogName, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
         $catalogList = $this->sharedCatalogRepository->getList($catalogSearch);
         return current($catalogList->getItems());
     }
 
-    private function getCategoriesByPath($categories,$settings){
+    /**
+     * @param $categories
+     * @param $settings
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    private function getCategoriesByPath($categories, $settings)
+    {
         $categoryIds = [];
         $allCategories = $this->getAllCategories($settings);
-        foreach($categories as $category){
+        foreach ($categories as $category) {
             $index = mb_strtolower($category);
             if (isset($allCategories[$index])) {
-               $categoryId = $allCategories[$index]; // here is your category id
-               $categoryIds[]=$categoryId;
+                $categoryId = $allCategories[$index]; // here is your category id
+                $categoryIds[]=$categoryId;
             }
         }
         return $categoryIds;
     }
 
+    /**
+     * @param $settings
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     private function getAllCategories($settings)
     {
 
@@ -148,7 +196,8 @@ class SharedCatalogCategories{
                 $path = [];
                 for ($i = 1; $i < $pathSize; $i++) {
                     $name = $collection->getItemById((int)$structure[$i])->getName();
-                    $path[] = str_replace('/', '\\' . '/', $name);;
+                    $path[] = str_replace('/', '\\' . '/', $name);
+                    ;
                 }
                 $index = mb_strtolower(implode('/', $path));
                 $allCategories[$index] = $category;

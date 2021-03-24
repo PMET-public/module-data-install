@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Copyright © Adobe, Inc. All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\Authorization\Model\RoleFactory;
@@ -35,9 +37,10 @@ class AdminRoles
     }
 
     /**
-     * @param array $rows
+     * @param $rows
      * @param $header
      * @return bool
+     * @throws \Exception
      */
     public function install($rows, $header)
     {

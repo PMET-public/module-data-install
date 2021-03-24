@@ -1,4 +1,7 @@
 <?php
+/**
+ * Copyright © Adobe, Inc. All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\SharedCatalog\Api\CompanyManagementInterface;
@@ -8,10 +11,11 @@ use Magento\SharedCatalog\Api\SharedCatalogRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use MagentoEse\DataInstall\Helper\Helper;
 
-class SharedCatalogs{
+class SharedCatalogs
+{
 
     /** @var SharedCatalogInterface */
-    protected $sharedCatalogInterface;
+    protected $sharedCatalogInterfaceFactory;
 
     /** @var SharedCatalogRepositoryInterface */
     protected $sharedCatalogRepository;
@@ -31,11 +35,25 @@ class SharedCatalogs{
     /** @var Helper */
     protected $helper;
 
-    public function __construct(Helper $helper, SharedCatalogInterfaceFactory $sharedCatalogInterface, 
-    SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface,
-    CustomerGroups $customerGroups,CompanyManagementInterface $companyManagementInterface,Companies $companies,
-    SearchCriteriaBuilder $searchCriteriaBuilder)
-    {
+    /**
+     * SharedCatalogs constructor.
+     * @param Helper $helper
+     * @param SharedCatalogInterfaceFactory $sharedCatalogInterface
+     * @param SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface
+     * @param CustomerGroups $customerGroups
+     * @param CompanyManagementInterface $companyManagementInterface
+     * @param Companies $companies
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     */
+    public function __construct(
+        Helper $helper,
+        SharedCatalogInterfaceFactory $sharedCatalogInterface,
+        SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface,
+        CustomerGroups $customerGroups,
+        CompanyManagementInterface $companyManagementInterface,
+        Companies $companies,
+        SearchCriteriaBuilder $searchCriteriaBuilder
+    ) {
         $this->helper = $helper;
         $this->sharedCatalogInterfaceFactory = $sharedCatalogInterface;
         $this->sharedCatalogRepository = $sharedCatalogRepositoryInterface;
@@ -45,12 +63,20 @@ class SharedCatalogs{
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
-    public function install(array $row, array $settings){
+    /**
+     * @param array $row
+     * @param array $settings
+     * @return bool
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function install(array $row, array $settings)
+    {
         //check for existing shared catalog to update
          /** @var SharedCatalogInterface $sharedCatalog */
         $sharedCatalog = $this->getSharedCatalogByName($row['name']);
 
-        if(!$sharedCatalog){
+        if (!$sharedCatalog) {
             //create customer group
             $this->customerGroups->install(['name'=>$row['name']]);
             $sharedCatalog = $this->sharedCatalogInterfaceFactory->create();
@@ -60,36 +86,42 @@ class SharedCatalogs{
         $sharedCatalog->setCustomerGroupId($this->customerGroups->getCustomerGroupId($row['name']));
         $sharedCatalog->setCreatedBy(1);
         $sharedCatalog->setTaxClassId(3);
-        if(!empty($row['description'])){
+        if (!empty($row['description'])) {
             $sharedCatalog->setDescription($row['description']);
         }
-        if(empty($row['type']) || $row['type']=='Custom'){
+        if (empty($row['type']) || $row['type']=='Custom') {
             $sharedCatalog->setType(SharedCatalogInterface::TYPE_CUSTOM);
-        }else{
+        } else {
             $sharedCatalog->setType(SharedCatalogInterface::TYPE_PUBLIC);
         }
         $this->sharedCatalogRepository->save($sharedCatalog);
-        
+
         //assign catalog to company
         $r = $sharedCatalog->getId();
         //get all compainies and return to array
-        $companiesData = explode(',',$row['companies']);
+        $companiesData = explode(',', $row['companies']);
         $companiesToAssign = [];
-        foreach($companiesData as $companyData){
+        foreach ($companiesData as $companyData) {
             $company = $this->companies->getCompanyByName($companyData);
-            if($company){
+            if ($company) {
                 $companiesToAssign[]=$company;
             }
         }
-        if(count($companiesToAssign)>0){
-            $this->companyManagementInterface->assignCompanies($sharedCatalog->getId(),$companiesToAssign);
+        if (count($companiesToAssign)>0) {
+            $this->companyManagementInterface->assignCompanies($sharedCatalog->getId(), $companiesToAssign);
         }
 
         //$r = $u;
         return true;
     }
 
-    private function getSharedCatalogByName($sharedCatalogName){
+    /**
+     * @param $sharedCatalogName
+     * @return SharedCatalogInterface
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    private function getSharedCatalogByName($sharedCatalogName)
+    {
         $catalogSearch = $this->searchCriteriaBuilder
         ->addFilter(SharedCatalogInterface::NAME, $sharedCatalogName, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
         $catalogList = $this->sharedCatalogRepository->getList($catalogSearch);

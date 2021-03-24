@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -131,7 +131,7 @@ class Pages
                             $page = $this->pageInterfaceFactory->create();
                             $page->addData($row)->setStores($this->getStoreIds($row['store_view_code']))->save();
                         }
-                        //else is the exsiting store different than requested
+                        //else is the exisiting store different than requested
                         elseif ($updatePage->getStores() != $this->getStoreIds($row['store_view_code'])) {
                             //create a new page for the new stores
                             $page = $this->pageInterfaceFactory->create();

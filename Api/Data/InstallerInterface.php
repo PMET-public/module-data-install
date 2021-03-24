@@ -1,13 +1,20 @@
 <?php
-
+/**
+ * Copyright © Adobe  All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Api\Data;
 
 use Magento\Framework\Api\ExtensibleDataInterface;
 
 interface InstallerInterface extends ExtensibleDataInterface
 {
+    /** @var string  */
     const ID = 'id';
+
+    /** @var string  */
     const MODULE_NAME = 'module_name';
+
+    /** @var string  */
     const IS_INSTALLED = 'is_installed';
 
     /**
@@ -42,5 +49,4 @@ interface InstallerInterface extends ExtensibleDataInterface
      * @return string
      */
     public function setIsInstalled($rollNumber);
-
 }

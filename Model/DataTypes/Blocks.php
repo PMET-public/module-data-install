@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 

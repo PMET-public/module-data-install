@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -10,18 +10,26 @@ use MagentoEse\DataInstall\Helper\Helper;
 
 class AdvancedPricing
 {
+    /** @var string  */
     const DEFAULT_IMAGE_PATH = '/media/catalog/product';
+
+    /** @var string  */
     const DEFAULT_WEBSITE = 'All Websites [USD]';
+
+    /**
+     *
+     */
     const DEFAULT_CUSTOMER_GROUP = 'ALL GROUPS';
 
     /** @var Helper */
     protected $helper;
-    
+
     /** @var Importer */
     protected $importer;
 
     /**
-     * Products constructor.
+     * AdvancedPricing constructor.
+     * @param Helper $helper
      * @param Importer $importer
      */
     public function __construct(
@@ -38,6 +46,7 @@ class AdvancedPricing
      * @param array $header
      * @param string $modulePath
      * @param array $settings
+     * @return bool
      */
     public function install(array $rows, array $header, string $modulePath, array $settings)
     {
@@ -59,28 +68,35 @@ class AdvancedPricing
             $productsArray[] = array_combine($header, $row);
         }
         //set default group and website if they arent included
-        foreach($productsArray as $productRow){
-            if(empty($productRow['tier_price_website'])){
+        foreach ($productsArray as $productRow) {
+            if (empty($productRow['tier_price_website'])) {
                 $productRow['tier_price_website'] = self::DEFAULT_WEBSITE;
             }
-            if(empty($productRow['tier_price_customer_group'])){
+            if (empty($productRow['tier_price_customer_group'])) {
                 $productRow['tier_price_customer_group'] = self::DEFAULT_CUSTOMER_GROUP;
             }
             $updatedProductsArray[]=$productRow;
         }
 
-        $this->import($updatedProductsArray,$imgDir,$productValidationStrategy);
+        $this->import($updatedProductsArray, $imgDir, $productValidationStrategy);
 
         return true;
     }
-     private function import($productsArray,$imgDir,$productValidationStrategy){
+
+    /**
+     * @param $productsArray
+     * @param $imgDir
+     * @param $productValidationStrategy
+     */
+    private function import($productsArray, $imgDir, $productValidationStrategy)
+    {
         $importerModel = $this->importer->create();
         $importerModel->setEntityCode('advanced_pricing');
         $importerModel->setImportImagesFileDir($imgDir);
         $importerModel->setValidationStrategy($productValidationStrategy);
-        if($productValidationStrategy == 'validation-stop-on-errors'){
+        if ($productValidationStrategy == 'validation-stop-on-errors') {
             $importerModel->setAllowedErrorCount(1);
-        }else{
+        } else {
             $importerModel->setAllowedErrorCount(100);
         }
         try {
@@ -99,7 +115,7 @@ class AdvancedPricing
      * @param array $products
      * @return array
      */
-    private function restrictNewProductsFromOtherStoreViews(array $products,$storeViewCode)
+    private function restrictNewProductsFromOtherStoreViews(array $products, $storeViewCode)
     {
         $newProductArray = [];
         $allStoreCodes = $this->stores->getAllViewCodes();

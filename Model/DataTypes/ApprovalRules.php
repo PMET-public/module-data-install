@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -88,7 +88,7 @@ class ApprovalRules
         if ($this->validate($ruleData)!='') {
             return true;
         }
-        $this->helper->printMessage("Creating approval rule ".$ruleData['name'],"info");
+        $this->helper->printMessage("Creating approval rule ".$ruleData['name'], "info");
         $rule = $this->ruleFactory->create();
         $rule->setName($ruleData['name']);
         $rule->setDescription($ruleData['description']);
@@ -186,6 +186,7 @@ class ApprovalRules
     /**
      * @param array $row
      * @return array
+     * @throws LocalizedException
      */
     private function convertRow(array $row)
     {
@@ -251,7 +252,7 @@ class ApprovalRules
         $company = current($companyList->getItems());
 
         if (!$company) {
-            $this->helper->printMessage("The company ". $name ." requested in b2b_approval_rules.csv does not exist","warning");
+            $this->helper->printMessage("The company ". $name ." requested in b2b_approval_rules.csv does not exist", "warning");
         } else {
             return $company->getId();
         }
@@ -271,7 +272,7 @@ class ApprovalRules
         $company = current($companyList->getItems());
 
         if (!$company) {
-            $this->helper->printMessage("The company ". $name ." requested in b2b_approval_rules.csv does not exist","warning");
+            $this->helper->printMessage("The company ". $name ." requested in b2b_approval_rules.csv does not exist", "warning");
         } else {
             /**@var CompanyInterface $company */
             return $company->getSuperUserId();
@@ -289,6 +290,10 @@ class ApprovalRules
         return is_array($array) && count($array) > 0;
     }
 
+    /**
+     * @param array $conditions
+     * @return string
+     */
     private function validateConditions(array $conditions)
     {
         // Iterate through conditions and ensure all required data is present
@@ -299,15 +304,11 @@ class ApprovalRules
         }
     }
 
-     /**
-      * Validate that all role selections are valid
-      *
-      * @param array $approvers
-      * @param Phrase $errorMessage
-      *
-      * @throws LocalizedException
-      * @throws NoSuchEntityException
-      */
+    /**
+     * @param array $approvers
+     * @param $message
+     * @return string
+     */
     private function validateRoles(array $approvers, $message)
     {
         // Verify all approvers exist and are assigned to the users company

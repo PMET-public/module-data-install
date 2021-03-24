@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -229,7 +229,7 @@ class ProductAttributes
      */
     private function setAttributeSets(array $data, Attribute $attribute): void
     {
-//if attribute_set is empty, or not included, set to default
+     //if attribute_set is empty, or not included, set to default
         if (empty($data['attribute_set'])) {
             $data['attribute_set'] = [self::DEFAULT_ATTRIBUTE_SET];
         } else {

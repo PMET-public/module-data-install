@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -11,7 +11,6 @@ use Magento\Authorization\Model\Acl\Role\Group as RoleGroup;
 use Magento\Authorization\Model\UserContextInterface;
 use Magento\User\Model\ResourceModel\User\CollectionFactory as UserCollection;
 use MagentoEse\DataInstall\Helper\Helper;
-
 
 class AdminUsers
 {
@@ -29,9 +28,10 @@ class AdminUsers
 
     /** @var Helper */
     protected $helper;
-    
+
     /**
      * AdminUsers constructor.
+     * @param Helper $helper
      * @param UserInterfaceFactory $userFactory
      * @param RoleFactory $roleFactory
      * @param RoleCollection $roleCollection
@@ -55,13 +55,14 @@ class AdminUsers
      * @param array $row
      * @param array $settings
      * @return bool
+     * @throws \Exception
      */
     public function install(array $row, array $settings)
     {
         $user = $this->userCollection->create()->addFieldToFilter('username', ['eq' => $row['username']])->getFirstItem();
             //create role if it doesnt exist
         if (!$user->getData('username')) {
-            $user = $this->userFactory->create();       
+            $user = $this->userFactory->create();
             $user->setEmail($row['email']);
             $user->setFirstName($row['firstname']);
             $user->setLastName($row['lastname']);
@@ -76,7 +77,8 @@ class AdminUsers
 
     /**
      * @param $user
-     * @param array $row
+     * @param $row
+     * @throws \Exception
      */
     private function addUserToRole($user, $row)
     {
@@ -94,12 +96,15 @@ class AdminUsers
                 $userRole->setRoleName($user->getUserName());
                 $userRole->save();
             } else {
-                $this->helper->printMessage("Role ".$row['role']." for user ".$row['username']." does not exist","warning");
+                $this->helper->printMessage("Role ".$row['role']." for user ".$row['username']." does not exist", "warning");
             }
         }
     }
 
-    private function createSalesrepRole()
+    /**
+     * @return \Magento\Authorization\Model\Role
+     */
+    private function createSalesRepRole()
     {
         try {
             $role=$this->roleFactory->create();

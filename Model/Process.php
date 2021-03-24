@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model;
 
-use ArgumentSequence\ParentClass;
+use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Csv;
 use Magento\Framework\Filesystem\DirectoryList;
@@ -13,7 +13,6 @@ use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Filesystem\DriverInterface;
-use MagentoEse\DataInstall\Api\Data\InstallerInterface;
 use MagentoEse\DataInstall\Helper\Helper;
 use MagentoEse\DataInstall\Api\Data\InstallerInterfaceFactory;
 use MagentoEse\DataInstall\Api\InstallerRepositoryInterface;
@@ -36,7 +35,6 @@ class Process
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv'];
 
-
     const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv','b2b_sales_reps.csv','b2b_teams.csv'];
 
     protected $redo=[];
@@ -45,7 +43,7 @@ class Process
         'root_category' => 'Default Category', 'root_category_id' => '2'];
 
     /** @var array */
-    private $settings;    
+    private $settings;
 
     /** @var FixtureManager  */
     protected $fixtureManager;
@@ -134,38 +132,36 @@ class Process
     /** @var InstallerRepositoryInterface */
     protected $dataInstallerRepository;
 
-
-     /**
-      * Process constructor.
-      * @param Helper $helper
-      * @param SampleDataContext $sampleDataContext
-      * @param Stores $stores
-      * @param ProductAttributes $productAttributes
-      * @param Categories $categories
-      * @param Products $products
-      * @param DirectoryList $directoryList
-      * @param Pages $pages
-      * @param Blocks $blocks
-      * @param DynamicBlocks $dynamicBlocks
-      * @param Configuration $configuration
-      * @param CustomerGroups $customerGroups
-      * @param CustomerAttributes $customerAttributes
-      * @param Customers $customers
-      * @param Reviews $reviews
-      * @param Templates $templates
-      * @param Validate $validate
-      * @param Upsells $upsells
-      * @param CopyMedia $copyMedia
-      * @param MsiInventory $msiInventory
-      * @param ObjectManagerInterface $objectManager
-      * @param AdminUsers $adminUsers
-      * @param AdminRoles $adminRoles
-      * @param DriverInterface $driverInterface
-      * @param AdvancedPricing $advancedPricing
-      * @param Orders $orders
-      * @param InstallerInterfaceFactory $$dataInstallerInterface;
-      * @param InstallerRepositoryInterface $dataInstallerRepository
-      */
+    /**
+     * Process constructor.
+     * @param Helper $helper
+     * @param SampleDataContext $sampleDataContext
+     * @param DataTypes\Stores $stores
+     * @param DataTypes\ProductAttributes $productAttributes
+     * @param DataTypes\Categories $categories
+     * @param DataTypes\Products $products
+     * @param DirectoryList $directoryList
+     * @param DataTypes\Pages $pages
+     * @param DataTypes\Blocks $blocks
+     * @param DataTypes\DynamicBlocks $dynamicBlocks
+     * @param DataTypes\Configuration $configuration
+     * @param DataTypes\CustomerGroups $customerGroups
+     * @param DataTypes\CustomerAttributes $customerAttributes
+     * @param DataTypes\Customers $customers
+     * @param DataTypes\Reviews $reviews
+     * @param DataTypes\Templates $templates
+     * @param Validate $validate
+     * @param DataTypes\Upsells $upsells
+     * @param CopyMedia $copyMedia
+     * @param DataTypes\MsiInventory $msiInventory
+     * @param ObjectManagerInterface $objectManager
+     * @param DataTypes\AdminUsers $adminUsers
+     * @param DataTypes\AdminRoles $adminRoles
+     * @param DriverInterface $driverInterface
+     * @param DataTypes\AdvancedPricing $advancedPricing
+     * @param InstallerInterfaceFactory $dataInstallerInterface
+     * @param InstallerRepositoryInterface $dataInstallerRepository
+     */
     public function __construct(
         Helper $helper,
         SampleDataContext $sampleDataContext,
@@ -231,26 +227,32 @@ class Process
      * @param $fileSource
      * @param string $fixtureDirectory
      * @param array|string[] $fileOrder
-     * @param bool|int $reload
+     * @param int $reload
+     * @return bool
      * @throws LocalizedException
+     * @throws FileSystemException
      */
 
-    
-    public function loadFiles($fileSource, $fixtureDirectory = "fixtures", array $fileOrder=self::ALL_FILES,$reload=0)
-    {   
+    public function loadFiles($fileSource, $fixtureDirectory = "fixtures", array $fileOrder = self::ALL_FILES, $reload = 0)
+    {
         //TODO: Absolute path - need to copy files
-        $this->helper->printMessage("Loading files from ".$fileSource,"white","cyan");
-        if($this->isModuleInstalled($fileSource)==1 && $reload===0){
-            $this->helper->printMessage($fileSource." has already been installed.  Add the -r option if you want to reinstall","warning");
+
+        //bypass if data is already installed
+        if ($this->isModuleInstalled($fileSource)==1 && $reload===0) {
+            //output reload option if cli is used
+            if ($this->isCli()) {
+                $this->helper->printMessage($fileSource." has already been installed.  Add the -r option if you want to reinstall", "warning");
+            }
             return true;
-        }else{
+        } else {
             $this->registerModule($fileSource);
         }
+
         $fileCount = 0;
-        if(count($fileOrder)==0){
+        if (count($fileOrder)==0) {
             $fileOrder=self::ALL_FILES;
         }
-        if(count($fileOrder)==1){
+        if (count($fileOrder)==1) {
             //for setting files when start, stores and end is used in place of file list
             switch (strtolower($fileOrder[0])) {
                 case "stores":
@@ -265,22 +267,10 @@ class Process
             }
         }
         $filePath = $this->getDataPath($fileSource);
-  
-        $this->helper->printMessage("Copying Media","info");
+        $this->helper->printMessage("Copying Media", "info");
         $this->copyMedia->moveFiles($filePath);
-        
         $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
 
-
-        
-        //see if we need to do any work for recurring, if not clear out the file list to bypass
-        // if($this->isRecurring()){
-        //     if($this->isModuleInstalled($moduleName)){
-        //         $fileOrder=[];
-        //     }
-        // } 
-      
-   
         foreach ($fileOrder as $nextFile) {
             $fileName = $filePath . $fixtureDirectory . "/" . $nextFile;
 
@@ -295,7 +285,7 @@ class Process
                     $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
                     //validate that number of elements in header and rows is equal
                     if (!$this->validate->validateCsvFile($header, $rows)) {
-                        $this->helper->printMessage("Skipping File ".$nextFile.". The number of columns in the header does not match the number of column of data in one or more rows","warning");
+                        $this->helper->printMessage("Skipping File ".$nextFile.". The number of columns in the header does not match the number of column of data in one or more rows", "warning");
                         continue;
                     }
                 }
@@ -305,179 +295,180 @@ class Process
 
                 switch (basename($fileName)) {
                     case "stores.csv":
-                        $this->helper->printMessage("Loading Stores","info");
+                        $this->helper->printMessage("Loading Stores", "info");
                         $this->processRows($rows, $header, $this->storeInstall);
                         break;
 
                     case "customers.csv":
-                        $this->helper->printMessage("Loading Customers","info");
+                        $this->helper->printMessage("Loading Customers", "info");
                         $this->processFile($rows, $header, $this->customerInstall, '');
                         break;
 
                     case "product_attributes.csv":
-                        $this->helper->printMessage("Loading Product Attributes","info");
+                        $this->helper->printMessage("Loading Product Attributes", "info");
                         $this->processRows($rows, $header, $this->productAttributesInstall);
                         break;
 
                     case "categories.csv":
-                        $this->helper->printMessage("Loading Categories","info");
+                        $this->helper->printMessage("Loading Categories", "info");
                         $this->processRows($rows, $header, $this->categoryInstall);
                         break;
 
                     case "products.csv":
                         $this->processFile($rows, $header, $this->productInstall, $modulePath);
                         break;
-                        
+
                     case "advanced_pricing.csv":
-                        $this->helper->printMessage("Loading Advanced Pricing","info");
+                        $this->helper->printMessage("Loading Advanced Pricing", "info");
                         $this->processFile($rows, $header, $this->advancedPricingInstall, $modulePath);
                         break;
-                        
 
                     case "pages.csv":
-                        $this->helper->printMessage("Loading Pages","info");
+                        $this->helper->printMessage("Loading Pages", "info");
                         $this->processRows($rows, $header, $this->pageInstall);
                         break;
 
                     case "blocks.csv":
-                        $this->helper->printMessage("Loading Blocks","info");
+                        $this->helper->printMessage("Loading Blocks", "info");
                         $this->processRows($rows, $header, $this->blockInstall);
                         break;
 
                     case "dynamic_blocks.csv":
-                        $this->helper->printMessage("Loading Dynamic Blocks","info");
+                        $this->helper->printMessage("Loading Dynamic Blocks", "info");
                         $this->processRows($rows, $header, $this->dynamicBlockInstall);
                         break;
 
                     case "default_config.json":
-                        $this->helper->printMessage("Loading Default Config Json","info");;
+                        $this->helper->printMessage("Loading Default Config Json", "info");
+                        ;
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
                     case "config_default.json":
-                        $this->helper->printMessage("Loading Config Default Json","info");
+                        $this->helper->printMessage("Loading Config Default Json", "info");
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
 
                     case "config_vertical.json":
-                        $this->helper->printMessage("Loading Config Vertical Json","info");
+                        $this->helper->printMessage("Loading Config Vertical Json", "info");
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
 
                     case "config_secret.json":
-                        $this->helper->printMessage("Loading Config Secret Json","info");
+                        $this->helper->printMessage("Loading Config Secret Json", "info");
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
 
                     case "config.json":
-                        $this->helper->printMessage("Loading Config Json","info");
+                        $this->helper->printMessage("Loading Config Json", "info");
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
 
                     case "config.csv":
-                        $this->helper->printMessage("Loading Config.csv","info");
+                        $this->helper->printMessage("Loading Config.csv", "info");
                         $this->processRows($rows, $header, $this->configurationInstall);
                         break;
 
                     case "customer_groups.csv":
-                        $this->helper->printMessage("Loading Customer Groups","info");
+                        $this->helper->printMessage("Loading Customer Groups", "info");
                         $this->processRows($rows, $header, $this->customerGroupInstall);
                         break;
 
                     case "customer_attributes.csv":
-                        $this->helper->printMessage("Loading Customer Attributes","info");
+                        $this->helper->printMessage("Loading Customer Attributes", "info");
                         $this->processRows($rows, $header, $this->customerAttributeInstall);
                         break;
 
                     case "reviews.csv":
-                        $this->helper->printMessage("Loading Reviews & Ratings","info");
+                        $this->helper->printMessage("Loading Reviews & Ratings", "info");
                         $this->processRows($rows, $header, $this->reviewsInstall);
                         break;
 
                     case "templates.csv":
-                        $this->helper->printMessage("Loading Page Builder Templates","info");
+                        $this->helper->printMessage("Loading Page Builder Templates", "info");
                         $this->processRows($rows, $header, $this->templatesInstall);
                         break;
                     case "upsells.csv":
-                        $this->helper->printMessage("Loading Related Proudcts, Cross Sells and Upsells","info");
+                        $this->helper->printMessage("Loading Related Products, Cross Sells and Upsells", "info");
                         $this->processRows($rows, $header, $this->upsellsInstall);
                         break;
 
                     case "msi_inventory.csv":
-                        $this->helper->printMessage("Loading Msi Inventory","info");
+                        $this->helper->printMessage("Loading Msi Inventory", "info");
                         $this->processFile($rows, $header, $this->msiInventoryInstall, $modulePath);
                         break;
 
                     case "admin_users.csv":
-                        $this->helper->printMessage("Loading Admin Users","info");
+                        $this->helper->printMessage("Loading Admin Users", "info");
                         $this->processRows($rows, $header, $this->adminUsersInstall);
                         break;
 
                     case "admin_roles.csv":
-                        $this->helper->printMessage("Loading Admin Roles","info");
+                        $this->helper->printMessage("Loading Admin Roles", "info");
                         $this->processFile($rows, $header, $this->adminRolesInstall, $modulePath);
                         break;
 
                     case "b2b_companies.csv":
-                        try{
+                        try {
                             ///catch if b2b module is installed by trying to instantiate company
                             $companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\Companies');
-                            $this->helper->printMessage("Loading B2B Data","header");
+                            $this->helper->printMessage("Loading B2B Data", "header");
                             $this->processB2B($filePath, $fixtureDirectory);
-                        }catch(\ReflectionException $e){
-                            $this->helper->printMessage("Companies cannot be loaded. Check that B2B module is included","error");
+                        } catch (\ReflectionException $e) {
+                            $this->helper->printMessage("Companies cannot be loaded. Check that B2B module is included", "error");
                         }
                         break;
 
                     case "b2b_shared_catalogs.csv":
-                        $this->helper->printMessage("Loading B2B Shared Catalogs","info");
-                        try{
+                        $this->helper->printMessage("Loading B2B Shared Catalogs", "info");
+                        try {
                             $sharedCatalogsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\SharedCatalogs');
                             $this->processRows($rows, $header, $sharedCatalogsInstall);
-                        }catch(\ReflectionException $e){
-                            $this->helper->printMessage("Shared Catalogs cannot be loaded. Check that B2B module is included","error");
+                        } catch (\ReflectionException $e) {
+                            $this->helper->printMessage("Shared Catalogs cannot be loaded. Check that B2B module is included", "error");
                         }
                         break;
                     case "b2b_shared_catalog_categories.csv":
-                        $this->helper->printMessage("Loading Shared Catalog Categories","info");
-                        try{
+                        $this->helper->printMessage("Loading Shared Catalog Categories", "info");
+                        try {
                             $sharedCatalogCategoriesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\SharedCatalogCategories');
-                            $this->processFile($rows, $header, $sharedCatalogCategoriesInstall, $modulePath);    
-                        }catch(\ReflectionException $e){
-                        $this->helper->printMessage("Shared Catalog Categories cannot be loaded. Check that B2B module is included","error");
+                            $this->processFile($rows, $header, $sharedCatalogCategoriesInstall, $modulePath);
+                        } catch (\ReflectionException $e) {
+                            $this->helper->printMessage("Shared Catalog Categories cannot be loaded. Check that B2B module is included", "error");
                         }
                         break;
                     case "b2b_requisition_lists.csv":
-                        $this->helper->printMessage("Loading Requisition Lists","info");
-                        try{
+                        $this->helper->printMessage("Loading Requisition Lists", "info");
+                        try {
                             $requisitionListInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\RequisitionLists');
                             $this->processRows($rows, $header, $requisitionListInstall);
-                      
-                        }catch(\ReflectionException $e){
-                            $this->helper->printMessage("Requsition Lists cannot be loaded. Check that B2B module is included","error");
+
+                        } catch (\ReflectionException $e) {
+                            $this->helper->printMessage("Requsition Lists cannot be loaded. Check that B2B module is included", "error");
                         }
                         break;
 
                     case "orders.csv":
-                        $this->helper->printMessage("Loading Orders","info");
+                        $this->helper->printMessage("Loading Orders", "info");
                         $this->processRows($rows, $header, $this->ordersInstall);
                         break;
                 }
             }
         }
-        if($fileCount==0){
+        if ($fileCount==0) {
             return false;
-        }else{
-            
-            $this->setModuleInstalled($fileSource);
+        } else {
+            if ($this->isCli() || $this->isRecurring()) {
+                $this->setModuleInstalled($fileSource);
+            }
             return true;
         }
     }
 
-     /**
-      * @param array $rows
-      * @param array $header
-      * @param object $process
-      */
+    /**
+     * @param array $rows
+     * @param array $header
+     * @param object $process
+     */
     private function processRows(array $rows, array $header, object $process): void
     {
         foreach ($rows as $row) {
@@ -538,17 +529,18 @@ class Process
             foreach ($this->redo as $redo) {
                 $this->helper->printMessage(
                     "Installing " . $this->getClassName(get_class($redo['process'])) .
-                    " was not fully successful, likely due to a dependency on other sample data that doesnt exist"
-                ,"error");
+                    " was not fully successful, likely due to a dependency on other sample data that doesnt exist",
+                    "error"
+                );
             }
         }
     }
 
     /**
-     * @param string $classname
+     * @param $className
      * @return false|int|string
      */
-    private function getClassName(string $className)
+    private function getClassName($className)
     {
         if ($pos = strrpos($className, '\\')) {
             return substr($className, $pos + 1);
@@ -557,13 +549,17 @@ class Process
         return $pos;
     }
 
-    private function isRecurring(){
+    /**
+     * @return bool
+     */
+    private function isRecurring()
+    {
         $callingClass = $this->getCallingClass();
-        $arr = explode("\\",$callingClass);
+        $arr = explode("\\", $callingClass);
         $className = end($arr);
-        if($className=="RecurringData"){
+        if ($className=="RecurringData") {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -594,6 +590,11 @@ class Process
         return $setupArray;
     }
 
+    /**
+     * @param $filePath
+     * @param $fixtureDirectory
+     * @throws \Exception
+     */
     private function processB2B($filePath, $fixtureDirectory)
     {
         $b2bData = [];
@@ -608,58 +609,63 @@ class Process
                  $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
                 //validate that number of elements in header and rows is equal
                 if (!$this->validate->validateCsvFile($header, $rows)) {
-                    $this->helper->printMessage($nextFile." is invalid. The number of columns in the header does not match the number of column of data in one or more rows","error");
+                    $this->helper->printMessage($nextFile." is invalid. The number of columns in the header does not match the number of column of data in one or more rows", "error");
                     break;
                     $stopFlag = 1;
                 }
                 $b2bData[$nextFile] = ['header'=>$header,'rows'=>$rows];
             } else {
-                $this->helper->printMessage("You are missing the required B2B file - ".$nextFile.". B2B setup did not complete","error");
+                $this->helper->printMessage("You are missing the required B2B file - ".$nextFile.". B2B setup did not complete", "error");
                 $stopFlag = 1;
                 break;
             }
         }
-        if($stopFlag == 0){
+        if ($stopFlag == 0) {
             //validate referential integrity of the data
             if (!$this->validate->validateB2bData($b2bData)) {
-                $this->helper->printMessage("Bad Data","error");
-                    ///probaby need to throw an error to roll back everything
+                $this->helper->printMessage("Bad Data", "error");
+                    ///probably need to throw an error to roll back everything
             }
             $salesReps = $this->buildB2bDataArrays($b2bData['b2b_sales_reps.csv']);
             $companies = $this->buildB2bDataArrays($b2bData['b2b_companies.csv']);
             $customers = $this->buildB2bDataArrays($b2bData['b2b_customers.csv']);
 
             //load customers (normal process)
-            $this->helper->printMessage("Loading B2B Customers","info");
+            $this->helper->printMessage("Loading B2B Customers", "info");
             $this->processFile($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $this->customerInstall, '');
             //load sales reps (admin user process)
-            $this->helper->printMessage("Loading B2B Sales Reps","info");
+            $this->helper->printMessage("Loading B2B Sales Reps", "info");
             $this->processRows($b2bData['b2b_sales_reps.csv']['rows'], $b2bData['b2b_sales_reps.csv']['header'], $this->adminUsersInstall);
             //create company (add on company admin from customers, and sales rep);
 
             $companiesData = $this->mergeCompanyData($companies, $customers, $salesReps);
-            $this->helper->printMessage("Loading B2B Companies","info");
-            
+            $this->helper->printMessage("Loading B2B Companies", "info");
+
             $companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\Companies');
             foreach ($companiesData as $companyData) {
                 $companiesInstall->install($companyData, $this->settings);
             }
-            
+
             //add company roles
-            $this->helper->printMessage("Loading B2B Company Roles","info");
+            $this->helper->printMessage("Loading B2B Company Roles", "info");
             $companyRolesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\CompanyRoles');
             $this->processFile($b2bData['b2b_company_roles.csv']['rows'], $b2bData['b2b_company_roles.csv']['header'], $companyRolesInstall, '');
             //assign roles to customers
             $companyUserRolesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\CompanyUserRoles');
             $this->processRows($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $companyUserRolesInstall);
 
-            $this->helper->printMessage("Loading B2B Teams and Company Structure","info");
+            $this->helper->printMessage("Loading B2B Teams and Company Structure", "info");
             //create company structure
             $companyTeamsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\Teams');
             $this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $companyTeamsInstall);
         }
-        
     }
+    /**
+     * @param $companies
+     * @param $customers
+     * @param $salesReps
+     * @return array
+     */
     //copy data that may be needed from one array into another
     private function mergeCompanyData($companies, $customers, $salesReps)
     {
@@ -681,12 +687,16 @@ class Process
                     $company['sales_rep'] = $rep['username'];
                 }
             }
-           
+
             $revisedCompany[]=$company;
         }
         return($revisedCompany);
     }
 
+    /**
+     * @param $rowData
+     * @return array
+     */
     private function buildB2bDataArrays($rowData)
     {
         $result = [];
@@ -700,6 +710,13 @@ class Process
         return $result;
     }
 
+    /**
+     * @param $array
+     * @param $keyToFind
+     * @param $valueToFind
+     * @param $keyToReturn
+     * @return array
+     */
     private function matchKeyValue($array, $keyToFind, $valueToFind, $keyToReturn)
     {
         foreach ($array as $key => $value) {
@@ -709,29 +726,47 @@ class Process
         }
     }
 
-    private function getModuleName(){
+    /**
+     * @return string
+     */
+    private function getModuleName()
+    {
         return $this->helper->getModuleName($this->getCallingClass());
     }
 
-    private function getCallingClass() {
+    /**
+     * @return mixed
+     */
+    private function getCallingClass()
+    {
 
         //get the trace
         $trace = debug_backtrace();
-    
+
         // Get the class that is asking for who awoke it
         $class = $trace[1]['class'];
-    
+
         // +1 to i cos we have to account for calling this function
-        for ( $i=1; $i<count( $trace ); $i++ ) {
-            if ( isset( $trace[$i] ) ) // is it set?
-                 if ( $class != $trace[$i]['class'] ) // is it a different class
-                     return $trace[$i]['class'];
+        for ($i=1; $i<count($trace); $i++) {
+            if (isset($trace[$i])) { // is it set?
+                if ($class != $trace[$i]['class']) { // is it a different class
+                    return $trace[$i]['class'];
+                }
+            }
         }
     }
 
-    private function registerModule($moduleName){
+    /**
+     * @param $moduleName
+     * @return int
+     * @throws \Magento\Framework\Exception\CouldNotDeleteException
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    private function registerModule($moduleName)
+    {
         $tracker = $this->dataInstallerRepository->getByModuleName($moduleName);
-        if($tracker->getId()){
+        if ($tracker->getId()) {
             $this->dataInstallerRepository->delete($tracker);
             $tracker = $this->dataInstallerInterface->create();
         }
@@ -742,37 +777,63 @@ class Process
         return $tracker->getId();
     }
 
-    private function isModuleInstalled($moduleName){
+    /**
+     * @param $moduleName
+     * @return string
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    private function isModuleInstalled($moduleName)
+    {
         $tracker = $this->dataInstallerInterface->create();
         $tracker = $this->dataInstallerRepository->getByModuleName($moduleName);
         $f=$tracker->isInstalled();
         return $tracker->isInstalled();
     }
-    private function setModuleInstalled($moduleName){
+
+    /**
+     * @param $moduleName
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    private function setModuleInstalled($moduleName)
+    {
         $tracker = $this->dataInstallerInterface->create();
         $tracker = $this->dataInstallerRepository->getByModuleName($moduleName);
         $tracker->setIsInstalled(1);
         $this->dataInstallerRepository->save($tracker);
     }
 
-    private function getDataPath($fileLocation){
-        
-        //remove trailing /
-        //Is it a module? do we need to check to see if the module exists
-        if (preg_match ('/[A-Z,a-z,,0-9]+_[A-Z,a-z,0-9]+/' ,$fileLocation)==1){
+    /**
+     * @param $fileLocation
+     * @return string
+     * @throws LocalizedException
+     */
+    private function getDataPath($fileLocation)
+    {
+        if (preg_match('/[A-Z,a-z,,0-9]+_[A-Z,a-z,0-9]+/', $fileLocation)==1) {
             $filePath = $this->fixtureManager->getFixture($fileLocation . "::");
-            //if its not a valid module, the file path will just be the fixtures directory, so then assume it may a relative path that looks like a module name;
-            if($filePath=='/'){
+            //if its not a valid module, the file path will just be the fixtures directory,
+            //so then assume it may a relative path that looks like a module name;
+            if ($filePath=='/') {
                 return $fileLocation.'/';
-            } else{
+            } else {
                 return $filePath;
             }
-        }else{
+        } else {
             //otherwise assume relative or absolute path
             return $this->driverInterface->getRealPath($fileLocation).'/';
         }
-        
-        
     }
-    
+
+    /**
+     * @return bool
+     */
+    public function isCli()
+    {
+        if ($this->getCallingClass() === 'MagentoEse\DataInstall\Console\Command\Install') {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

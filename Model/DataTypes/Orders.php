@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -23,7 +23,7 @@ class Orders
 
     /** @var Helper */
     protected $helper;
-    
+
     /** @var CustomerRepository */
     protected $customerRepository;
 
@@ -53,11 +53,17 @@ class Orders
 
 
     public function __construct(
-    Helper $helper,CustomerRepositoryInterface $customerRepository, SessionQuoteFactory $sessionQuoteFactory,
-    CreateOrderFactory $createOrderFactory, ProductRepositoryInterface $productRepositoryInterface, 
-    OrderFactory $orderFactory,InvoiceService $invoiceService, ShipmentLoaderFactory $shipmentLoaderFactory,
-    CreditmemoLoaderFactory $creditmemoLoaderFactory, TransactionFactory $transactionFactory, Registry $coreRegistry
-        
+        Helper $helper,
+        CustomerRepositoryInterface $customerRepository,
+        SessionQuoteFactory $sessionQuoteFactory,
+        CreateOrderFactory $createOrderFactory,
+        ProductRepositoryInterface $productRepositoryInterface,
+        OrderFactory $orderFactory,
+        InvoiceService $invoiceService,
+        ShipmentLoaderFactory $shipmentLoaderFactory,
+        CreditmemoLoaderFactory $creditmemoLoaderFactory,
+        TransactionFactory $transactionFactory,
+        Registry $coreRegistry
     ) {
         $this->helper = $helper;
         $this->customerRepository = $customerRepository;
@@ -70,7 +76,6 @@ class Orders
         $this->creditmemoLoaderFactory = $creditmemoLoaderFactory;
         $this->transactionFactory = $transactionFactory;
         $this->coreRegistry = $coreRegistry;
-       
     }
 
     /**
@@ -81,27 +86,27 @@ class Orders
     public function install(array $row, array $settings)
     {
         //check if user exists
-        if(empty($row['customer_email'])){
-            $this->helper->printMessage("customer_email value is required in orders.csv","warning");
+        if (empty($row['customer_email'])) {
+            $this->helper->printMessage("customer_email value is required in orders.csv", "warning");
             return true;
         }
         /** @var CustomerInterface $customer */
         $customer = $this->customerRepository->get($row['customer_email'], 1);
         if (!$customer->getId()) {
-            $this->helper->printMessage("customer_email ".$row['customer_email']." was not found in orders.csv. Row is skipped","warning");
-        return true;
+            $this->helper->printMessage("customer_email ".$row['customer_email']." was not found in orders.csv. Row is skipped", "warning");
+            return true;
         }
-        $this->createOrder($row,$customer);
+        $this->createOrder($row, $customer);
         //check if products exist in the quantity requested.
         //check if payment method exists
         //check if shipping method exists
         return true;
     }
-    public function createOrder($row,$customer)
+    public function createOrder($row, $customer)
     {
         $this->currentSession = $this->sessionQuoteFactory->create();
         $this->currentSession->setCustomerId($customer->getId());
-        $orderCreateModel = $this->processQuote($row,$customer);
+        $orderCreateModel = $this->processQuote($row, $customer);
         $orderCreateModel->getQuote()->setCustomer($customer);
         //$orderCreateModel->setShippingMethod();
         $order = $orderCreateModel->createOrder();
@@ -128,7 +133,7 @@ class Orders
      * @param array $data
      * @return \Magento\Sales\Model\AdminOrder\Create
      */
-    protected function processQuote($row,$customer)
+    protected function processQuote($row, $customer)
     {
         /** @var \Magento\Sales\Model\AdminOrder\Create $orderCreateModel */
 
@@ -157,35 +162,38 @@ class Orders
         return $orderCreateModel;
     }
 
-    protected function getShippingAddress($customer){
+    protected function getShippingAddress($customer)
+    {
         /** @var CustomerInterface $customer */
         $addressId = $customer->getDefaultShipping();
         $addresses = $customer->getAddresses();
-        foreach($addresses as $address){
+        foreach ($addresses as $address) {
             /** @var AddressInterface $address */
-            if($address->getId() == $customer->getDefaultShipping()){
+            if ($address->getId() == $customer->getDefaultShipping()) {
                 return $address;
             }
         }
     }
 
-    protected function getBillingAddress($customer){
+    protected function getBillingAddress($customer)
+    {
          /** @var CustomerInterface $customer */
         $addressId = $customer->getDefaultBilling();
         $addresses = $customer->getAddresses();
-        foreach($addresses as $address){
+        foreach ($addresses as $address) {
             /** @var AddressInterface $address */
-            if($address->getId() == $customer->getDefaultBilling()){
+            if ($address->getId() == $customer->getDefaultBilling()) {
                 return $address;
             }
         }
     }
-    protected function convertProductArray($products){
+    protected function convertProductArray($products)
+    {
         $productArray = [];
-        $products = explode(';',$products); //"sku=ORT4030054913,qty=5"
-        foreach($products as $product){
-            $productInfo = explode(',',$product);
-            foreach($productInfo as $productItem){
+        $products = explode(';', $products); //"sku=ORT4030054913,qty=5"
+        foreach ($products as $product) {
+            $productInfo = explode(',', $product);
+            foreach ($productInfo as $productItem) {
                 $b = explode('=', $productItem);
                 $item[$b[0]] = $b[1];
             }
@@ -194,8 +202,8 @@ class Orders
         }
         return $productArray;
     }
-        
-        protected function getOrderItemForTransaction(\Magento\Sales\Model\Order $order)
+
+    protected function getOrderItemForTransaction(\Magento\Sales\Model\Order $order)
     {
         $order->getItemByQuoteItemId($order->getQuoteId());
         foreach ($order->getItemsCollection() as $item) {

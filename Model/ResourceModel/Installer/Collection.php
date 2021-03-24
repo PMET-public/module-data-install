@@ -1,10 +1,11 @@
 <?php
-
+/**
+ * Copyright © Adobe, Inc. All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Model\ResourceModel\Installer;
 
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use MagentoEse\DataInstall\Model\ResourceModel\Installer;
-
 
 class Collection extends AbstractCollection
 {
@@ -15,7 +16,9 @@ class Collection extends AbstractCollection
      */
     protected function _construct()
     {
-        $this->_init(\MagentoEse\DataInstall\Model\Installer::class,
-            Installer::class);
+        $this->_init(
+            \MagentoEse\DataInstall\Model\Installer::class,
+            Installer::class
+        );
     }
 }

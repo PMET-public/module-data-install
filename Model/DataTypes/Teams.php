@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -17,10 +17,10 @@ use Magento\Framework\Exception\NoSuchEntityException;
 
 class Teams
 {
-    
+
     /** @var Helper */
     protected $helper;
-    
+
     /** @var TeamInterfaceFactory */
     protected $teamFactory;
 
@@ -45,6 +45,17 @@ class Teams
     /** @var int */
     protected $companyId;
 
+    /**
+     * Teams constructor.
+     * @param Helper $helper
+     * @param TeamInterfaceFactory $teamFactory
+     * @param CompanyRepositoryInterface $companyRepository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param CustomerRepositoryInterface $customerRepository
+     * @param StructureInterfaceFactory $structureFactory
+     * @param SearchCriteriaInterface $searchCriteriaInterface
+     * @param StructureRepository $structureRepository
+     */
     public function __construct(
         Helper $helper,
         TeamInterfaceFactory $teamFactory,
@@ -64,7 +75,15 @@ class Teams
         $this->structureRepository = $structureRepository;
         $this->searchCriteriaInterface = $searchCriteriaInterface;
     }
-    
+
+    /**
+     * @param $row
+     * @param $header
+     * @return bool
+     * @throws NoSuchEntityException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\StateException
+     */
     public function install($row, $header)
     {
         $data['members'] = explode(",", $row['members']);
@@ -84,13 +103,12 @@ class Teams
         //loop over team members
         foreach ($data['members'] as $companyCustomerEmail) {
             //get user id from email
-            try{
+            try {
                  $userId = $this->customerRepository->get(trim($companyCustomerEmail))->getId();
-            }catch(NoSuchEntityException $e){
-                $this->helper->printMessage("User ".$companyCustomerEmail." was not found and will not be added to team ".$row['name']." for company ".$row['company_name'],"warning");
+            } catch (NoSuchEntityException $e) {
+                $this->helper->printMessage("User ".$companyCustomerEmail." was not found and will not be added to team ".$row['name']." for company ".$row['company_name'], "warning");
                 break;
             }
-           
             //delete structure that the user belongs to
             $userStruct = $this->getStructureByEntity($userId, 0);
             if ($userStruct) {
@@ -100,10 +118,7 @@ class Teams
 
             //add them to the new team
             $this->addUserToTeamTree($userId, $teamStruct->getId(), $teamStruct->getPath());
-            
-            
         }
-
         return true;
     }
 
@@ -139,7 +154,12 @@ class Teams
         $structures = $this->structureRepository->getList($builder->create())->getItems();
         return reset($structures);
     }
-        
+
+    /**
+     * @param $name
+     * @return int
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     private function getCompanyAdminIdByName($name)
     {
         $companySearch = $this->searchCriteriaBuilder
@@ -147,15 +167,20 @@ class Teams
         $companyList = $this->companyRepository->getList($companySearch);
         /** @var CompanyInterface $company */
         $company = current($companyList->getItems());
-    
+
         if (!$company) {
-            $this->helper->printMessage("The company ". $name ." requested in b2b_teams.csv does not exist","warning");
+            $this->helper->printMessage("The company ". $name ." requested in b2b_teams.csv does not exist", "warning");
         } else {
             /**@var CompanyInterface $company */
             return $company->getSuperUserId();
         }
     }
 
+    /**
+     * @param $teamId
+     * @param $parentId
+     * @return \Magento\Company\Api\Data\StructureInterface
+     */
     private function addTeamToTree($teamId, $parentId)
     {
         //path is structure_id of admin user / structure_id of team)

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -22,6 +22,12 @@ class Templates
     /** @var Converter */
     protected $converter;
 
+    /**
+     * Templates constructor.
+     * @param TemplateFactory $templateFactory
+     * @param TemplateRepository $templateRepository
+     * @param Converter $converter
+     */
     public function __construct(
         TemplateFactory $templateFactory,
         TemplateRepository $templateRepository,
@@ -33,9 +39,14 @@ class Templates
         $this->converter = $converter;
     }
 
+    /**
+     * @param array $row
+     * @param array $settings
+     * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function install(array $row, array $settings)
     {
-        /** @var Template $template */
         $template = $this->templateFactory->create();
         $template->setTemplate($this->converter->convertContent($row['content']));
         $template->setName($row['name']);

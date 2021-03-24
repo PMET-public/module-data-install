@@ -1,7 +1,6 @@
 <?php
 /**
- * Copyright © 2015 Magento. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright © Adobe. All rights reserved.
  */
 
  namespace MagentoEse\DataInstall\Model\DataTypes;
@@ -45,7 +44,7 @@ class Companies
 
     /** @var RegionFactory  */
     protected $region;
-     
+
     /** @var StructureRepository  */
     protected $structureRepository;
 
@@ -115,17 +114,17 @@ class Companies
         $salesRep = $this->userFactory->create();
         $salesRep->loadByUsername($row['sales_rep']);
         //if company email isn't defined, use the admin email
-        if(empty($row['company_email'])){
+        if (empty($row['company_email'])) {
             $row['company_email']=$row['admin_email'];
         }
-        
+
         /** @var CompanyInterface $newCompany */
         $newCompany = $this->getCompanyByName($row['company_name']);
         //create company
-        if(!$newCompany){
+        if (!$newCompany) {
             $newCompany = $this->companyCustomer->createCompany($adminCustomer, $row);
         }
-        
+
         $newCompany->setSalesRepresentativeId($salesRep->getId());
         $newCompany->setLegalName($row['company_name']);
         $newCompany->setStatus(1);
@@ -137,11 +136,10 @@ class Companies
         $creditLimit->setCreditLimit($row['credit_limit']);
         $creditLimit->save();
 
-
         if (count($row['company_customers']) > 0) {
             foreach ($row['company_customers'] as $companyCustomerEmail) {
                 //tie other customers to company
-                
+
                 $companyCustomer = $this->customer->get(trim($companyCustomerEmail));
                 $this->addCustomerToCompany($newCompany, $companyCustomer);
                 /* add the customer in the tree under the admin user
@@ -155,8 +153,12 @@ class Companies
     }
 
     /**
-     * @param CompanyCustomer $newCompany
-     * @param CompanyCustomer $companyCustomer
+     * @param $newCompany
+     * @param $companyCustomer
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\State\InputMismatchException
      */
     private function addCustomerToCompany($newCompany, $companyCustomer)
     {
@@ -173,8 +175,9 @@ class Companies
     }
 
     /**
-     * @param int $customerId
-     * @param int $parentId
+     * @param $customerId
+     * @param $parentId
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
      */
     private function addToTree($customerId, $parentId)
     {
@@ -189,11 +192,12 @@ class Companies
     }
 
     /**
-     *
-     * @param string $name
-     * @return \Magento\Company\Api\Data\CompanyInterface[] $companies
+     * @param $companyName
+     * @return CompanyInterface
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function getCompanyByName($companyName){
+    public function getCompanyByName($companyName)
+    {
         $companySearch = $this->searchCriteriaBuilder
         ->addFilter(CompanyInterface::NAME, $companyName, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
         $companyList = $this->companyRepositoryInterface->getList($companySearch);

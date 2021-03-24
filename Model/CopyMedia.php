@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Copyright © Adobe, Inc. All rights reserved.
+ */
 
 namespace MagentoEse\DataInstall\Model;
 
@@ -15,6 +18,7 @@ use MagentoEse\DataInstall\Helper\Helper;
 
 class CopyMedia
 {
+    /** @var string[][]  */
     protected $directoryMappings=[['from'=>'wysiwyg','to'=>'pub/media/wysiwyg','type'=>'image'],
         ['from'=>'logo','to'=>'pub/media/logo/stores','type'=>'image'],
         ['from'=>'email','to'=>'pub/media/email/logo/stores','type'=>'image'],
@@ -24,16 +28,19 @@ class CopyMedia
         ['from'=>'downloadable_products','to'=>'pub/media/import','type'=>'download'],
         ['from'=>'.template-manager','to'=>'pub/media/.template-manager','type'=>'image']];
 
+    /** @var string[]  */
     protected $allowedImageFiles = [ 'jpg' => 'image/jpeg','png' => 'image/png', 'jpeg' => 'image/jpeg',
         'gif'  => 'image/gif','jpe' => 'image/jpeg', 'bmp'  => 'image/bmp', 'svg' => 'image/svg+xml',
         'svgz' => 'image/svg+xml','md'=>'application/octet-stream|text/plain',
         'ico'=>'image/vnd.microsoft.icon|image/x-icon|image/png'];
 
+    /** @var string[]  */
     protected $allowedDownloadableFiles = ['pdf'  => 'application/pdf', 'mp3'  => 'audio/mpeg',
         'qt'   => 'video/quicktime', 'mov'  => 'video/quicktime','txt'  => 'text/plain',
         'csv'  => 'text/plain',  'psd'  => 'image/vnd.adobe.photoshop', 'ai'   => 'application/postscript',
         'eps'  => 'application/postscript'];
 
+    /** @var string[]  */
     protected $allowedThemeFiles = ['xml'=>'application/xml','less'=>'text/plain','phtml'=>'text/html|text/x-php',
         'css'=>'text/html','md'=>'application/octet-stream|text/plain','json'=>'application/json','csv'=>'text/plain',
         'php'=>'text/html|text/x-php','eot'=>'application/vnd.ms-fontobject','svg'=>'image/svg+xml',
@@ -42,7 +49,7 @@ class CopyMedia
 
     /** @var Helper */
     protected $helper;
-    
+
     /** @var SampleDataContext */
     protected $sampleDataContext;
 
@@ -66,13 +73,13 @@ class CopyMedia
 
     /**
      * CopyMedia constructor.
+     * @param Helper $helper
      * @param SampleDataContext $sampleDataContext
      * @param Filesystem $fileSystem
      * @param DirectoryList $directoryList
      * @param Mime $fileMime
      * @throws FileSystemException
      */
-
     public function __construct(
         Helper $helper,
         SampleDataContext $sampleDataContext,
@@ -89,6 +96,9 @@ class CopyMedia
         $this->fileMime = $fileMime;
     }
 
+    /**
+     * @param $filePath
+     */
     public function moveFiles($filePath)
     {
         foreach ($this->directoryMappings as $nextDirectory) {
@@ -98,6 +108,11 @@ class CopyMedia
         }
     }
 
+    /**
+     * @param $fromPath
+     * @param $toPath
+     * @param $fileType
+     */
     protected function copyFilesFromTo($fromPath, $toPath, $fileType)
     {
         if ($this->directoryRead->isDirectory($fromPath)) {
@@ -111,16 +126,22 @@ class CopyMedia
                         try {
                             $this->directoryWrite->copyFile($file, $newFileName);
                         } catch (FileSystemException $exception) {
-                            $this->helper->printMessage("Unable to copy file ".$file. " --- ".$exception->getMessage(),"warning");
+                            $this->helper->printMessage("Unable to copy file ".$file. " --- ".$exception->getMessage(), "warning");
                         }
                     }
                 } else {
-                    $this->helper->printMessage($file." is an invalid type and was not copied","warning");
+                    $this->helper->printMessage($file." is an invalid type and was not copied", "warning");
                 }
             }
         }
     }
 
+    /**
+     * @param $file
+     * @param $fileType
+     * @return bool
+     * @throws FileSystemException
+     */
     private function validateFile($file, $fileType)
     {
         $validFiles = [];
@@ -144,7 +165,7 @@ class CopyMedia
             $fileExtension=$this->getFileExtension($file);
             $fileType=$this->fileMime->getMimeType($file);
             $pos = strpos($type, $this->fileMime->getMimeType($file));
-            if ($extension = $this->getFileExtension($file)) {
+            if ($extension == $this->getFileExtension($file)) {
                 if (is_integer(strpos($type, $this->fileMime->getMimeType($file)))) {
                     return true;
                 }
@@ -153,6 +174,10 @@ class CopyMedia
         return false;
     }
 
+    /**
+     * @param string $file
+     * @return string
+     */
     private function getFileExtension(string $file): string
     {
         return strtolower(pathinfo($file, 4));

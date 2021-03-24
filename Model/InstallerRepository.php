@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Copyright © Adobe  All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
@@ -11,7 +13,6 @@ use MagentoEse\DataInstall\Api\Data\InstallerSearchResultInterfaceFactory;
 use MagentoEse\DataInstall\Api\InstallerRepositoryInterface;
 use MagentoEse\DataInstall\Model\ResourceModel\Installer;
 use MagentoEse\DataInstall\Model\ResourceModel\Installer\CollectionFactory;
-
 
 class InstallerRepository implements InstallerRepositoryInterface
 {
@@ -40,6 +41,14 @@ class InstallerRepository implements InstallerRepositoryInterface
      */
     private $collectionProcessor;
 
+    /**
+     * InstallerRepository constructor.
+     * @param InstallerFactory $installerFactory
+     * @param Installer $installerResource
+     * @param CollectionFactory $installerCollectionFactory
+     * @param InstallerSearchResultInterfaceFactory $installerSearchResultInterfaceFactory
+     * @param CollectionProcessorInterface $collectionProcessor
+     */
     public function __construct(
         InstallerFactory $installerFactory,
         Installer $installerResource,
@@ -74,12 +83,13 @@ class InstallerRepository implements InstallerRepositoryInterface
      * @return \MagentoEse\DataInstall\Api\Data\InstallerInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getByModuleName($moduleName){
+    public function getByModuleName($moduleName)
+    {
         $connection = $this->installerResource->getConnection();
         $tableName = $connection->getTableName('magentoese_data_installer_recurring');
         $select = $connection->select()
         ->from($tableName)
-        ->where('module_name = ?',$moduleName);
+        ->where('module_name = ?', $moduleName);
 
         $moduleId = $connection->fetchOne($select);
         return $this->getById($moduleId);
@@ -106,13 +116,12 @@ class InstallerRepository implements InstallerRepositoryInterface
         try {
             $this->installerResource->delete($installer);
         } catch (\Exception $exception) {
-            // throw new CouldNotDeleteException(
-            //     __('Could not delete the entry: %1', $exception->getMessage())
-            // );
+             throw new CouldNotDeleteException(
+                // __('Could not delete the entry: %1', $exception->getMessage())
+            );
         }
 
         return true;
-
     }
 
     /**
@@ -129,9 +138,9 @@ class InstallerRepository implements InstallerRepositoryInterface
         $searchResults->setSearchCriteria($searchCriteria);
         $searchResults->setItems($collection->getItems());
 
-        echo "</br>";
-        echo $collection->getSelect()->__toString();
-        echo "</br>";
+        //echo "</br>";
+        //echo $collection->getSelect()->__toString();
+        //echo "</br>";
 
         return $searchResults;
     }

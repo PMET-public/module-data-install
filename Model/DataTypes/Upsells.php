@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Copyright © Adobe, Inc. All rights reserved.
+ */
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -27,6 +29,14 @@ class Upsells
     /** @var State */
     protected $appState;
 
+    /**
+     * Upsells constructor.
+     * @param RuleFactory $ruleFactory
+     * @param Converter $converter
+     * @param ResourceModel $resourceModel
+     * @param SerializerInterface $serializerInterface
+     * @param State $state
+     */
     public function __construct(
         RuleFactory $ruleFactory,
         Converter $converter,
@@ -37,10 +47,16 @@ class Upsells
         $this->ruleFactory = $ruleFactory;
         $this->converter = $converter;
         $this->resourceModel = $resourceModel;
-        $this->serializerInterfac = $serializerInterface;
+        $this->serializerInterface = $serializerInterface;
         $this->appState = $state;
     }
 
+    /**
+     * @param array $row
+     * @param array $settings
+     * @return bool
+     * @throws \Exception
+     */
     public function install(array $row, array $settings)
     {
         switch (strtolower($row['apply_to'])) {

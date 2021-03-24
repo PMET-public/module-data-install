@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
+ * Copyright © Adobe, Inc. All rights reserved.
  */
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
@@ -58,6 +58,11 @@ class CompanyRoles
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
+    /**
+     * @param $rows
+     * @param $header
+     * @return bool
+     */
     public function install($rows, $header)
     {
         $rolesData = [];
@@ -76,6 +81,10 @@ class CompanyRoles
         return true;
     }
 
+    /**
+     * @param $companyName
+     * @param $companyRoles
+     */
     private function createCompanyRole($companyName, $companyRoles)
     {
         $companyId = $this->getCompanyId($companyName);
@@ -86,6 +95,11 @@ class CompanyRoles
         }
     }
 
+    /**
+     * @param $companyName
+     * @return false|int|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     private function getCompanyId($companyName)
     {
 
@@ -95,13 +109,22 @@ class CompanyRoles
         /** @var CompanyInterface $company */
         $company = current($companyList->getItems());
         if (!$company) {
-            $this->helper->printMessage("The company ". $companyName ." requested in b2b_customers.csv does not exist","warning");
+            $this->helper->printMessage("The company ". $companyName ." requested in b2b_customers.csv does not exist", "warning");
             return false;
         } else {
             return $company->getId();
         }
     }
 
+    /**
+     * @param $companyId
+     * @param $roleName
+     * @param $rolePermissions
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     private function setCompanyRole($companyId, $roleName, $rolePermissions)
     {
         $roleSearch = $this->searchCriteriaBuilder
@@ -110,10 +133,10 @@ class CompanyRoles
         $roleSearch = $this->roleRepository->getList($roleSearch);
         /** @var RoleInterface $salesRole */
         $salesRole = current($roleSearch->getItems());
-        if(!$salesRole){
+        if (!$salesRole) {
             $salesRole = $this->roleFactory->create();
-        $salesRole->setCompanyId($companyId);
-        $salesRole->setRoleName($roleName);
+            $salesRole->setCompanyId($companyId);
+            $salesRole->setRoleName($roleName);
         }
         /** @var PermissionInterface $permission */
         $permissionsToSet = [];

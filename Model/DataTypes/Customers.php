@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 
 //TODO:Support for multiple addresses
@@ -131,7 +131,7 @@ class Customers
             //add address
             $addresses = $this->convertAddresses($row);
             $customer->setAddresses([$addresses]);
-            
+
             //set website for customer
             if (!empty($row['site_code'])) {
                 $customer->setWebsiteId($this->stores->getWebsiteId($row['site_code']));

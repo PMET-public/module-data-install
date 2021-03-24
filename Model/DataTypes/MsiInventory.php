@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -15,8 +15,10 @@ class MsiInventory
 
     /** @var Helper */
     protected $helper;
-    
+
     /**
+     * MsiInventory constructor.
+     * @param Helper $helper
      * @param ObjectManagerInterface $objectManager
      */
     public function __construct(

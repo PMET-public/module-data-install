@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -14,12 +14,11 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use MagentoEse\DataInstall\Helper\Helper;
 
-
 class RequisitionLists
 {
     /** @var Helper */
     protected $helper;
-    
+
     /** @var RequisitionListInterfaceFactory */
     protected $requisitionListFactory;
 
@@ -36,10 +35,13 @@ class RequisitionLists
     protected $requisitionListItemFactory;
 
     public function __construct(
-    Helper $helper,RequisitionListInterfaceFactory $requisitionListFactory,
-    RequisitionListRepositoryInterface $requisitionListRepository, CustomerRepositoryInterface $customerRepository,
-    SearchCriteriaBuilder $searchCriteriaBuilder, RequisitionListItemInterfaceFactory $requisitionListItemFactory)
-    {
+        Helper $helper,
+        RequisitionListInterfaceFactory $requisitionListFactory,
+        RequisitionListRepositoryInterface $requisitionListRepository,
+        CustomerRepositoryInterface $customerRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        RequisitionListItemInterfaceFactory $requisitionListItemFactory
+    ) {
         $this->helper = $helper;
         $this->requisitionListFactory = $requisitionListFactory;
         $this->requisitionListRepository = $requisitionListRepository;
@@ -47,21 +49,28 @@ class RequisitionLists
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->requisitionListItemFactory = $requisitionListItemFactory;
     }
+
+    /**
+     * @param array $row
+     * @param array $settings
+     * @return bool
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     */
     public function install(array $row, array $settings)
     {
         //validate user
-        try{
+        try {
             $customer = $this->customerRepository->get($row['customer']);
-        }catch (\Exception $e){
-            $this->helper->printMessage("Requistion list ".$row['name']." cannot be created. Customer ".$row['customer']." does not exist","warning");
+        } catch (\Exception $e) {
+            $this->helper->printMessage("Requistion list ".$row['name']." cannot be created. Customer ".$row['customer']." does not exist", "warning");
             return true;
         }
-        
-        $skus = explode(",",$row["skus"]);
+
+        $skus = explode(",", $row["skus"]);
         //get list if exists, otherwise create
         /** @var RequisitionListInterface $requisitionList */
-        $requisitionList = $this->getRequisitionListByName($row['name'],$customer->getId());
-        if(!$requisitionList){
+        $requisitionList = $this->getRequisitionListByName($row['name'], $customer->getId());
+        if (!$requisitionList) {
             $requisitionList = $this->requisitionListFactory->create();
         }
         $requisitionList->setName($row['name']);
@@ -70,10 +79,10 @@ class RequisitionLists
 
         //remove existing items
         $requisitionList->setItems([]);
-        
+
         //add items to list
         $listItems=[];
-        foreach($skus as $sku){
+        foreach ($skus as $sku) {
             /** @var RequisitionListItemInterface $listItem */
             $listItem = $this->requisitionListItemFactory->create();
             $listItem->setSku($sku);
@@ -86,13 +95,18 @@ class RequisitionLists
         return true;
     }
 
-    private function getRequisitionListByName($listName,$customerId){
+    /**
+     * @param $listName
+     * @param $customerId
+     * @return \Magento\Framework\Api\ExtensibleDataInterface
+     */
+    private function getRequisitionListByName($listName, $customerId)
+    {
         $listSearch = $this->searchCriteriaBuilder
         ->addFilter(RequisitionListInterface::NAME, $listName, 'eq')
-        ->addFilter(RequisitionListInterface::CUSTOMER_ID,$customerId,'eq')
+        ->addFilter(RequisitionListInterface::CUSTOMER_ID, $customerId, 'eq')
         ->create()->setPageSize(1)->setCurrentPage(1);
         $lists = $this->requisitionListRepository->getList($listSearch);
         return current($lists->getItems());
     }
-     
 }

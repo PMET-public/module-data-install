@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
+ * Copyright © Adobe, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -47,6 +47,7 @@ class CompanyUserRoles
 
     /**
      * CompanyUserRoles constructor.
+     * @param Helper $helper
      * @param RoleFactory $roleFactory
      * @param RoleRepositoryInterface $roleRepositoryInterface
      * @param PermissionFactory $permissionFactory
@@ -75,6 +76,13 @@ class CompanyUserRoles
         $this->acl = $aclInterface;
     }
 
+    /**
+     * @param $row
+     * @param $settings
+     * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     public function install($row, $settings)
     {
         //skip company admin roles
@@ -88,7 +96,7 @@ class CompanyUserRoles
                      $this->acl->assignUserDefaultRole($userId, $this->getCompanyId($row['company']));
                      $this->acl->assignRoles($userId, [$role]);
             } else {
-                $this->helper->printMessage("The role ". $row['role'] ." for company ".$row['company']." does not exist","warning");
+                $this->helper->printMessage("The role ". $row['role'] ." for company ".$row['company']." does not exist", "warning");
             }
 
         }
@@ -96,6 +104,12 @@ class CompanyUserRoles
         return true;
     }
 
+    /**
+     * @param $companyName
+     * @param $role
+     * @return RoleInterface
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     private function getCompanyRole($companyName, $role)
     {
         $companyId = $this->getCompanyId($companyName);
@@ -110,6 +124,11 @@ class CompanyUserRoles
         return $role;
     }
 
+    /**
+     * @param $companyName
+     * @return false|int|null
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     private function getCompanyId($companyName)
     {
 
@@ -119,13 +138,21 @@ class CompanyUserRoles
         /** @var CompanyInterface $company */
         $company = current($companyList->getItems());
         if (!$company) {
-            $this->helper->printMessage("The company ". $companyName ." requested in b2b_company_user_roles.csv does not exist","warning");
+            $this->helper->printMessage("The company ". $companyName ." requested in b2b_company_user_roles.csv does not exist", "warning");
             return false;
         } else {
             return $company->getId();
         }
     }
 
+    /**
+     * @param $companyId
+     * @param $roleName
+     * @param $rolePermissions
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     private function setCompanyRole($companyId, $roleName, $rolePermissions)
     {
         /** @var RoleInterface $salesRole */

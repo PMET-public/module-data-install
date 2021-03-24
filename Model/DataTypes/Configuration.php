@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
@@ -17,7 +17,7 @@ class Configuration
 
     /** @var Helper */
     protected $helper;
-    
+
    /** @var ResourceConfig  */
     protected $resourceConfig;
 
@@ -38,6 +38,7 @@ class Configuration
 
     /**
      * Configuration constructor.
+     * @param Helper $helper
      * @param ResourceConfig $resourceConfig
      * @param Stores $stores
      * @param ScopeConfigInterface $scopeConfig
@@ -105,7 +106,7 @@ class Configuration
         try {
             $config = json_decode($json)->configuration;
         } catch (\Exception $e) {
-            $this->helper->printMessage("The JSON in your configuration file is invalid","error");
+            $this->helper->printMessage("The JSON in your configuration file is invalid", "error");
             return true;
         }
 
@@ -165,7 +166,8 @@ class Configuration
         } else {
             $this->helper->printMessage(
                 "Error setting configuration " . $path . ". Check your scope codes as the " .
-                $scope . " code you used does not exist","error"
+                $scope . " code you used does not exist",
+                "error"
             );
         }
     }

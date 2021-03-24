@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -259,6 +259,11 @@ class Converter
     /**  CUSTOMER GROUP   */
     /**  *************   */
 
+    /**
+     * @param $matchValue
+     * @return mixed
+     * @throws LocalizedException
+     */
     public function matcherCustomergroup($matchValue)
     {
         //* use _customerGroup_name as token */

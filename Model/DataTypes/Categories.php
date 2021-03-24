@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -95,7 +95,7 @@ class Categories
 
                 $category->save();
             } else {
-                $this->helper->printMessage("-Cannot find the parent category for " . $row['name'] . " in the path " . $row['path'] . ". That category has been skipped","warning");
+                $this->helper->printMessage("-Cannot find the parent category for " . $row['name'] . " in the path " . $row['path'] . ". That category has been skipped", "warning");
             }
         }
 

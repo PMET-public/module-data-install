@@ -1,9 +1,10 @@
 <?php
-
+/**
+ * Copyright © Adobe, Inc. All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Model\ResourceModel;
 
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
-
 
 class Installer extends AbstractDb
 {

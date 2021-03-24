@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
@@ -25,9 +25,10 @@ class CustomerGroups
 
     /** @var Helper */
     protected $helper;
-    
+
     /**
      * CustomerGroups constructor.
+     * @param Helper $helper
      * @param GroupInterfaceFactory $groupInterfaceFactory
      * @param GroupRepositoryInterface $groupRepository
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
@@ -56,7 +57,7 @@ class CustomerGroups
             $this->groupRepository->save($group);
         } catch (\Exception $e) {
             //error will likely be trying to add duplicate group
-            $this->helper->printMessage("Customer Group ".$data['name']." not installed, another group with the same name likely exists","warning");
+            $this->helper->printMessage("Customer Group ".$data['name']." not installed, another group with the same name likely exists", "warning");
         }
 
         return true;

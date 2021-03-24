@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -38,6 +38,12 @@ class CustomerAttributes
         $this->attributeRepository = $attributeRepository;
     }
 
+    /**
+     * @param array $data
+     * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Zend_Validate_Exception
+     */
     public function install(array $data)
     {
         //TODO; Check for minimum requirements - frontend_label,frontend_input, attribute_code
@@ -108,6 +114,13 @@ class CustomerAttributes
         return true;
     }
 
+    /**
+     * @param $store
+     * @param $attributeCode
+     * @param array $options
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     private function addOptions($store, $attributeCode, array $options)
     {
         $attribute = $this->attributeRepository->get(Customer::ENTITY, $attributeCode);

@@ -1,9 +1,10 @@
 <?php
-
+/**
+ * Copyright © Adobe  All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Api\Data;
 
 use Magento\Framework\Api\SearchResultsInterface;
-
 
 interface InstallerSearchResultInterface extends SearchResultsInterface
 {

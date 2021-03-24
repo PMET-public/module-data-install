@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -16,7 +16,7 @@ class Products
 {
     /** @var Helper */
     protected $helper;
-    
+
     const DEFAULT_IMAGE_PATH = '/media/catalog/product';
     //TODO: flexibility for other than default category
 
@@ -37,9 +37,11 @@ class Products
 
     /**
      * Products constructor.
+     * @param Helper $helper
      * @param Stores $stores
      * @param ProductRepositoryInterface $productRepository
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param Importer $importer
      * @param State $state
      */
     public function __construct(
@@ -89,53 +91,65 @@ class Products
         }
 
         /// create array to restrict existing products from other store views
-        if($restrictProductsFromViews=='Y'){
+        if ($restrictProductsFromViews=='Y') {
             ///get all products that are not in my view not in my data file
             //restricts from incoming store
-            $restrictExistingProducts = $this->restrictExistingProducts($productsArray,$settings['store_view_code']);
+            $restrictExistingProducts = $this->restrictExistingProducts($productsArray, $settings['store_view_code']);
 
             //Restrict new (not updated) products to views that arent in my store
-            $restrictNewProducts = $this->restrictNewProductsFromOtherStoreViews($productsArray,$settings['store_view_code']);
+            $restrictNewProducts = $this->restrictNewProductsFromOtherStoreViews($productsArray, $settings['store_view_code']);
         }
 
-        $this->helper->printMessage("Importing new products","info");
-        $this->import($productsArray,$imgDir,$productValidationStrategy);
+        $this->helper->printMessage("Importing new products", "info");
+        $this->import($productsArray, $imgDir, $productValidationStrategy);
 
         /// Restrict products from other stores
-        if($restrictProductsFromViews=='Y') {
-            $this->helper->printMessage("Restricting products from other store views","info");
+        if ($restrictProductsFromViews=='Y') {
+            $this->helper->printMessage("Restricting products from other store views", "info");
 
-            if(count($restrictExistingProducts) > 0){
-                 $this->helper->printMessage("Restricting ".count($restrictExistingProducts)." products from new store view","info");
-                $this->import($restrictExistingProducts,$imgDir,$productValidationStrategy);
+            if (count($restrictExistingProducts) > 0) {
+                 $this->helper->printMessage("Restricting ".count($restrictExistingProducts)." products from new store view", "info");
+                $this->import($restrictExistingProducts, $imgDir, $productValidationStrategy);
             }
-            
-            if(count($restrictNewProducts) > 0){
-                $this->helper->printMessage("Restricting ".count($restrictNewProducts)." new products from existing store views","info");
-            $this->import($restrictNewProducts,$imgDir,$productValidationStrategy);
+
+            if (count($restrictNewProducts) > 0) {
+                $this->helper->printMessage("Restricting ".count($restrictNewProducts)." new products from existing store views", "info");
+                $this->import($restrictNewProducts, $imgDir, $productValidationStrategy);
             }
-            
+
         }
-
     }
-    
-    private function updateProductVisibility($restrictProducts){
-        foreach($restrictProducts as $restrictProduct){
+
+    /**
+     * @param $restrictProducts
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \Magento\Framework\Exception\StateException
+     */
+    private function updateProductVisibility($restrictProducts)
+    {
+        foreach ($restrictProducts as $restrictProduct) {
             $product = $this->productRepository->get($restrictProduct['sku']);
             $product->setStoreId($this->stores->getViewId($restrictProduct['store_view_code']));
             $product->setVisibility($restrictProduct['visibility']);
             $this->productRepository->save($product);
         }
-
     }
 
-    private function import($productsArray,$imgDir,$productValidationStrategy){
+    /**
+     * @param $productsArray
+     * @param $imgDir
+     * @param $productValidationStrategy
+     */
+    private function import($productsArray, $imgDir, $productValidationStrategy)
+    {
         $importerModel = $this->importer->create();
         $importerModel->setImportImagesFileDir($imgDir);
         $importerModel->setValidationStrategy($productValidationStrategy);
-        if($productValidationStrategy == 'validation-stop-on-errors'){
+        if ($productValidationStrategy == 'validation-stop-on-errors') {
             $importerModel->setAllowedErrorCount(1);
-        }else{
+        } else {
             $importerModel->setAllowedErrorCount(100);
         }
         try {
@@ -154,12 +168,12 @@ class Products
      * @param array $products
      * @return array
      */
-    private function restrictExistingProducts(array $products,$storeViewCode)
+    private function restrictExistingProducts(array $products, $storeViewCode)
     {
         $allProductSkus = $this->productDataToSkus($this->getAllProducts());
         $productsToAdd = $this->productDataToSkus($products);
         //$productsToAdd = $this->getUniqueNewProductSkus($products,$allProductSkus);
-        $products = array_diff($allProductSkus,$productsToAdd);
+        $products = array_diff($allProductSkus, $productsToAdd);
         $newProductArray = [];
         foreach ($products as $product) {
             $newProductArray[] = ['sku'=>$product,'store_view_code'=>$storeViewCode,'visibility'=>'Not Visible Individually'];
@@ -167,36 +181,52 @@ class Products
         return $newProductArray;
     }
 
-    private function restrictNewProductsFromOtherStoreViews(array $newProducts,$storeViewCode)
+    /**
+     * @param array $newProducts
+     * @param $storeViewCode
+     * @return array
+     */
+    private function restrictNewProductsFromOtherStoreViews(array $newProducts, $storeViewCode)
     {
-        
+
         /////loop over all products, if that sku isn in the products array then flag it
         //get all product skus
         $allProductSkus = $this->productDataToSkus($this->getAllProducts());
         $restrictedProducts = [];
         $allStoreCodes = $this->stores->getViewCodesFromOtherStores($storeViewCode);
-        $uniqueNewProductSkus = $this->getUniqueNewProductSkus($newProducts,$allProductSkus);
+        $uniqueNewProductSkus = $this->getUniqueNewProductSkus($newProducts, $allProductSkus);
 
         //$allStoreCodes = $this->stores->getAllViews();
         foreach ($uniqueNewProductSkus as $product) {
 
                 //add restrictive line for each
-                foreach ($allStoreCodes as $storeCode) {
-                    if ($storeCode != $storeViewCode) {
-                        $restrictedProducts[] = ['sku'=>$product,'store_view_code'=>$storeCode,'visibility'=>'Not Visible Individually'];
-                    }
+            foreach ($allStoreCodes as $storeCode) {
+                if ($storeCode != $storeViewCode) {
+                    $restrictedProducts[] = ['sku'=>$product,'store_view_code'=>$storeCode,'visibility'=>'Not Visible Individually'];
                 }
+            }
         }
 
         return $restrictedProducts;
     }
 
-    private function getUniqueNewProductSkus(array $newProducts, array $allProductSkus){
+    /**
+     * @param array $newProducts
+     * @param array $allProductSkus
+     * @return array
+     */
+    private function getUniqueNewProductSkus(array $newProducts, array $allProductSkus)
+    {
         $newSkus = $this->productDataToSkus($newProducts);
-        return array_diff($newSkus,$allProductSkus);
+        return array_diff($newSkus, $allProductSkus);
     }
 
-    private function productDataToSkus($products){
+    /**
+     * @param $products
+     * @return array
+     */
+    private function productDataToSkus($products)
+    {
         $skus = [];
         foreach ($products as $product) {
             $skus[]=$product['sku'];
@@ -204,7 +234,11 @@ class Products
         return $skus;
     }
 
-    private function getAllProducts(){
+    /**
+     * @return ProductInterface[]
+     */
+    private function getAllProducts()
+    {
         $search = $this->searchCriteriaBuilder
         ->addFilter(ProductInterface::SKU, '', 'neq')
         ->create();
@@ -213,7 +247,11 @@ class Products
         return $productCollection;
     }
 
-    private function getVisibleProducts(){
+    /**
+     * @return ProductInterface[]
+     */
+    private function getVisibleProducts()
+    {
         $search = $this->searchCriteriaBuilder
         ->addFilter(ProductInterface::VISIBILITY, '4', 'eq')
         ->create();
@@ -222,6 +260,9 @@ class Products
         return $productCollection;
     }
 
+    /**
+     * @return array
+     */
     private function getVisibleProductSkus()
     {
         $productSkus = [];
@@ -233,14 +274,20 @@ class Products
         return $productSkus;
     }
 
-    private function addSettingsToImportFile($products,$settings){
+    /**
+     * @param $products
+     * @param $settings
+     * @return mixed
+     */
+    private function addSettingsToImportFile($products, $settings)
+    {
         $i=0;
         foreach ($products as $product) {
             //store_view_code, product_websites
-            if(empty($product['store_view_code']) || $product['store_view_code']==''){
+            if (empty($product['store_view_code']) || $product['store_view_code']=='') {
                 $product['store_view_code'] = $settings['store_view_code'];
             }
-            if(empty($product['product_websites']) || $product['product_websites']==''){
+            if (empty($product['product_websites']) || $product['product_websites']=='') {
                 $product['product_websites'] = $settings['site_code'];
             }
             $products[$i] = $product;
@@ -249,4 +296,3 @@ class Products
         return $products;
     }
 }
-

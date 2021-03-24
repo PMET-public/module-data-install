@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 namespace MagentoEse\DataInstall\Model;
 
@@ -9,7 +9,7 @@ class Validate
 
     /** @var Stores */
     protected $stores;
-    
+
     /**
      * __construct
      *
@@ -20,7 +20,7 @@ class Validate
     {
         $this->stores = $stores;
     }
-        
+
     /**
      * validateB2bData
      *
@@ -46,7 +46,7 @@ class Validate
             //do the customers exist and are the with the correct company
         return true;
     }
-       
+
     public function validateCsvFile($header, $rows)
     {
         //size of header array vs. size of each row $rows[0]

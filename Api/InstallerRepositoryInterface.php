@@ -1,7 +1,9 @@
 <?php
+/**
+ * Copyright © Adobe  All rights reserved.
+ */
 
 namespace MagentoEse\DataInstall\Api;
-
 
 interface InstallerRepositoryInterface
 {
@@ -13,10 +15,10 @@ interface InstallerRepositoryInterface
     public function getById($id);
 
      /**
-     * @param string $moduleName
-     * @return \MagentoEse\DataInstall\Api\Data\InstallerInterface
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
+      * @param string $moduleName
+      * @return \MagentoEse\DataInstall\Api\Data\InstallerInterface
+      * @throws \Magento\Framework\Exception\NoSuchEntityException
+      */
     public function getByModuleName($moduleName);
 
     /**

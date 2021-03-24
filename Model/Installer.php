@@ -1,14 +1,15 @@
 <?php
-
+/**
+ * Copyright © Adobe, Inc. All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Framework\Model\AbstractExtensibleModel;
 use MagentoEse\DataInstall\Api\Data\InstallerInterface;
 
-
 class Installer extends AbstractExtensibleModel implements InstallerInterface
 {
-    
+
     protected function _construct()
     {
         $this->_init(ResourceModel\Installer::class);
@@ -61,6 +62,4 @@ class Installer extends AbstractExtensibleModel implements InstallerInterface
     {
         return $this->setData(self::IS_INSTALLED, $isInstalled);
     }
-  
-
 }

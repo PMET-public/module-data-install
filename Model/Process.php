@@ -188,7 +188,7 @@ class Process
         DataTypes\AdminRoles $adminRoles,
         DriverInterface $driverInterface,
         DataTypes\AdvancedPricing $advancedPricing,
-        //Orders $orders,
+        DataTypes\Orders $orders,
         InstallerInterfaceFactory $dataInstallerInterface,
         InstallerRepositoryInterface $dataInstallerRepository
     ) {
@@ -220,7 +220,7 @@ class Process
         $this->advancedPricingInstall = $advancedPricing;
         $this->dataInstallerInterface = $dataInstallerInterface;
         $this->dataInstallerRepository = $dataInstallerRepository;
-       // $this->ordersInstall = $orders;
+        $this->ordersInstall = $orders;
     }
 
     /**

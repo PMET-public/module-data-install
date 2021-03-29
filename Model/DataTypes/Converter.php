@@ -121,7 +121,6 @@ class Converter
         $this->customerAttributeCollectionFactory = $customerAttributeCollectionFactory;
         $this->storeRepository = $storeRepository;
     }
-    //TODO: What to return if something is missing, like a block that requires a banner that doesnt exist yet
 
     /**
      * @param string $content
@@ -129,7 +128,9 @@ class Converter
      */
     public function convertContent(string $content)
     {
-        return $this->replaceMatches($content);
+        //Remove .renditions/ in image references Page Builder introduced in 2.4.2
+        $newContent = str_replace(".renditions/","",$content);
+        return $this->replaceMatches($newContent);
     }
 
     /**

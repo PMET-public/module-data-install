@@ -94,8 +94,6 @@ class CustomerAttributes
         }
 
         $useInForms=['adminhtml_customer','adminhtml_checkout','customer_account_edit','customer_account_create'];
-        $attributeOptions = ['Running','Crossfit','Pilates','Yoga'];
-        $attributeCode = 'preferred_activities';
         $mainSettings = [
             'type'         => 'varchar',
             'label'        => 'Preferred Activities',

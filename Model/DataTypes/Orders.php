@@ -17,6 +17,7 @@ use Magento\Sales\Controller\Adminhtml\Order\CreditmemoLoaderFactory;
 use Magento\Framework\DB\TransactionFactory;
 use Magento\Framework\Registry;
 use MagentoEse\DataInstall\Helper\Helper;
+use Magento\Framework\ObjectManagerInterface;
 
 class Orders
 {
@@ -37,7 +38,7 @@ class Orders
     protected $productRepository;
 
     /** @var InvoiceService */
-    protected $invoiceManagement;
+    //protected $invoiceManagement;
 
     /** @var ShipmentLoaderFactory */
     protected $shipmentLoaderFactory;
@@ -52,6 +53,10 @@ class Orders
     protected $coreRegistry;
 
 
+    /** @var ObjectManagerInterface  */
+    protected $objectManager;
+
+
     public function __construct(
         Helper $helper,
         CustomerRepositoryInterface $customerRepository,
@@ -59,11 +64,12 @@ class Orders
         CreateOrderFactory $createOrderFactory,
         ProductRepositoryInterface $productRepositoryInterface,
         OrderFactory $orderFactory,
-        InvoiceService $invoiceService,
+        //InvoiceService $invoiceService,
         ShipmentLoaderFactory $shipmentLoaderFactory,
         CreditmemoLoaderFactory $creditmemoLoaderFactory,
         TransactionFactory $transactionFactory,
-        Registry $coreRegistry
+        Registry $coreRegistry,
+        ObjectManagerInterface $objectManager
     ) {
         $this->helper = $helper;
         $this->customerRepository = $customerRepository;
@@ -71,11 +77,12 @@ class Orders
         $this->createOrderFactory = $createOrderFactory;
         $this->productRepository = $productRepositoryInterface;
         $this->orderFactory = $orderFactory;
-        $this->invoiceManagement = $invoiceService;
+        //$this->invoiceManagement = $invoiceService;
         $this->shipmentLoaderFactory = $shipmentLoaderFactory;
         $this->creditmemoLoaderFactory = $creditmemoLoaderFactory;
         $this->transactionFactory = $transactionFactory;
         $this->coreRegistry = $coreRegistry;
+        $this->objectManager = $objectManager;
     }
 
     /**
@@ -243,6 +250,7 @@ class Orders
         if (!$order) {
             return false;
         }
+        $invoiceManagement = $this->objectManager->create('Magento\Sales\Model\Service\InvoiceService');
         $invoice = $this->invoiceManagement->prepareInvoice($order, $invoiceData);
         return $invoice;
     }

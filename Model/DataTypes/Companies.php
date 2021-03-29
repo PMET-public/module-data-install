@@ -17,6 +17,7 @@
  use Magento\Company\Api\CompanyRepositoryInterface;
  use Magento\Framework\Api\SearchCriteriaBuilder;
  use Magento\Company\Api\Data\CompanyInterface;
+ use Magento\Framework\App\State;
 
 class Companies
 {
@@ -54,6 +55,9 @@ class Companies
     /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
 
+    /** @var State */
+    protected $appState;
+
     /**
      * Companies constructor.
      * @param CompanyCustomer $companyCustomer
@@ -77,7 +81,8 @@ class Companies
         RegionFactory $region,
         StructureRepository $structureRepository,
         CompanyRepositoryInterface $companyRepositoryInterface,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        State $appState
     ) {
         $this->companyCustomer = $companyCustomer;
         $this->customer = $customer;
@@ -89,6 +94,7 @@ class Companies
         $this->structureRepository = $structureRepository;
         $this->companyRepositoryInterface = $companyRepositoryInterface;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->appState = $appState;
     }
 
     /**
@@ -122,7 +128,15 @@ class Companies
         $newCompany = $this->getCompanyByName($row['company_name']);
         //create company
         if (!$newCompany) {
-            $newCompany = $this->companyCustomer->createCompany($adminCustomer, $row);
+
+            $newCompany = $this->appState->emulateAreaCode(
+                'frontend',
+                [$this->companyCustomer, 'createCompany'],
+                [$adminCustomer, $row]
+            );
+
+
+            //$newCompany = $this->companyCustomer->createCompany($adminCustomer, $row);
         }
 
         $newCompany->setSalesRepresentativeId($salesRep->getId());

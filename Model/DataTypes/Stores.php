@@ -605,6 +605,17 @@ class Stores
         return  $view->getId();
     }
 
+     /**
+     * @param string $viewCode
+     * @return int
+     */
+    public function getViewName(string $viewCode)
+    {
+        $data = ['store_view_code'=>$viewCode];
+        $view = $this->getView($data);
+        return  $view->getName();
+    }
+
     /**
      * @param string $code
      * @return string

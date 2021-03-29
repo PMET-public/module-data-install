@@ -38,6 +38,9 @@ class Categories
     /** @var Configuration  */
     protected $configuration;
 
+     /** @var Converter  */
+     protected $converter;
+
     /**
      * Categories constructor.
      * @param CategoryInterfaceFactory $categoryFactory
@@ -53,7 +56,8 @@ class Categories
         StoreManagerInterface $storeManager,
         StoreInterfaceFactory $storeFactory,
         BlockInterfaceFactory $blockFactory,
-        Configuration $configuration
+        Configuration $configuration,
+        Converter $converter
     ) {
         $this->categoryFactory = $categoryFactory;
         $this->resourceCategoryTreeFactory = $resourceCategoryTreeFactory;
@@ -61,6 +65,7 @@ class Categories
         $this->storeFactory = $storeFactory;
         $this->blockFactory = $blockFactory;
         $this->configuration = $configuration;
+        $this->converter = $converter;
     }
 
     /**
@@ -123,7 +128,7 @@ class Categories
                 if ($categoryAttribute == 'landing_page') {
                     $attributeData = [$categoryAttribute => $this->getCmsBlockId($row[$categoryAttribute])];
                 } else {
-                    $attributeData = [$categoryAttribute => $row[$categoryAttribute]];
+                    $attributeData = [$categoryAttribute => $this->converter->convertContent($row[$categoryAttribute])];
                 }
 
                 $category->addData($attributeData);

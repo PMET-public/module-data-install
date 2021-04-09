@@ -27,6 +27,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use MagentoEse\DataInstall\Model\Process;
+use Magento\Framework\ObjectManagerInterface;
 
 class Install extends Command
 {
@@ -34,8 +35,9 @@ class Install extends Command
     const FIXTURES = 'fixtures';
     const FILES = 'files';
     const RELOAD_FLAG = 'reload';
-    /** @var Process  */
-    protected $process;
+    
+    /** @var ObjectManagerInterface  */
+    protected $objectManagerInterface;
 
     /** @var ModuleStatus */
     protected $moduleStatus;
@@ -44,9 +46,9 @@ class Install extends Command
      * Install constructor.
      * @param Process $process
      */
-    public function __construct(Process $process)
+    public function __construct(ObjectManagerInterface $objectManagerInterface)
     {
-        $this->process = $process;
+        $this->objectManagerInterface = $objectManagerInterface;
         parent::__construct();
     }
 
@@ -87,8 +89,8 @@ class Install extends Command
         } else {
             $fileArray = explode(",", $files);
         }
-
-        if ($this->process->loadFiles($module, $fixtures, $fileArray, $reload)==0) {
+        $process = $this->objectManagerInterface->create(Process::class);
+        if ($process->loadFiles($module, $fixtures, $fileArray, $reload)==0) {
             $output->writeln("No files found to load in " . $module);
         }
         return $this;

@@ -34,6 +34,7 @@ class RequisitionLists
     /** @var RequisitionListItemInterfaceFactory */
     protected $requisitionListItemFactory;
 
+    
     public function __construct(
         Helper $helper,
         RequisitionListInterfaceFactory $requisitionListFactory,

@@ -11,6 +11,7 @@ use Magento\TargetRule\Model\ResourceModel\Rule as ResourceModel;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\App\State;
 use Magento\Framework\App\Area;
+use MagentoEse\DataInstall\Model\Converter;
 
 class Upsells
 {

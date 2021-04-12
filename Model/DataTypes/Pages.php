@@ -19,6 +19,7 @@ use Magento\UrlRewrite\Model\ResourceModel\UrlRewrite;
 use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollection;
 use Magento\UrlRewrite\Model\UrlPersistInterface;
 use Magento\UrlRewrite\Service\V1\Data\UrlRewrite as UrlRewriteService;
+use MagentoEse\DataInstall\Model\Converter;
 
 class Pages
 {

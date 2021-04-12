@@ -7,6 +7,7 @@ namespace MagentoEse\DataInstall\Model\DataTypes;
 use Magento\PageBuilder\Model\Template;
 use Magento\PageBuilder\Model\TemplateFactory;
 use Magento\PageBuilder\Model\TemplateRepository;
+use MagentoEse\DataInstall\Model\Converter;
 
 class Templates
 {

@@ -11,6 +11,7 @@ use Magento\Cms\Api\Data\BlockInterfaceFactory;
 use Magento\Framework\Data\Tree\Node;
 use Magento\Store\Api\Data\StoreInterfaceFactory;
 use Magento\Store\Model\StoreManagerInterface;
+use MagentoEse\DataInstall\Model\Converter;
 
 class Categories
 {

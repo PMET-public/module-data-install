@@ -20,7 +20,7 @@ use MagentoEse\DataInstall\Api\InstallerRepositoryInterface;
 class Process
 {
     const ALL_FILES = ['stores.csv','config_vertical.json','config_secret.json','config.csv',
-    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
+    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','customer_segments.csv',
     'blocks.csv','categories.csv','products.csv','products2.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv'];
@@ -29,7 +29,7 @@ class Process
 
     const STAGE1 = ['config_default.json','config_vertical.json','config_secret.json','config.csv',
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
-    'blocks.csv','categories.csv'];
+    'customer_segments.csv','blocks.csv','categories.csv'];
 
     const STAGE2 = ['products.csv','products2.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
@@ -132,6 +132,9 @@ class Process
     /** @var InstallerRepositoryInterface */
     protected $dataInstallerRepository;
 
+    /** @var CustomerSegments */
+    protected $customerSegmentsInstall;
+
     /**
      * Process constructor.
      * @param Helper $helper
@@ -161,6 +164,7 @@ class Process
      * @param DataTypes\AdvancedPricing $advancedPricing
      * @param InstallerInterfaceFactory $dataInstallerInterface
      * @param InstallerRepositoryInterface $dataInstallerRepository
+     * @param CustomerSegments $customerSegments
      */
     public function __construct(
         Helper $helper,
@@ -190,7 +194,8 @@ class Process
         DataTypes\AdvancedPricing $advancedPricing,
         DataTypes\Orders $orders,
         InstallerInterfaceFactory $dataInstallerInterface,
-        InstallerRepositoryInterface $dataInstallerRepository
+        InstallerRepositoryInterface $dataInstallerRepository,
+        DataTypes\CustomerSegments $customerSegments
     ) {
         $this->helper = $helper;
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
@@ -221,6 +226,7 @@ class Process
         $this->dataInstallerInterface = $dataInstallerInterface;
         $this->dataInstallerRepository = $dataInstallerRepository;
         $this->ordersInstall = $orders;
+        $this->customerSegmentsInstall = $customerSegments;
     }
 
     /**
@@ -286,6 +292,11 @@ class Process
                     //validate that number of elements in header and rows is equal
                     if (!$this->validate->validateCsvFile($header, $rows)) {
                         $this->helper->printMessage("Skipping File ".$nextFile.". The number of columns in the header does not match the number of column of data in one or more rows", "warning");
+                        continue;
+                    }
+                    //validate that the file is not empty
+                    if (empty($rows)) {
+                        $this->helper->printMessage("Skipping File ".$nextFile.". The file is empty or not properly formatted", "warning");
                         continue;
                     }
                 }
@@ -376,6 +387,11 @@ class Process
                     case "customer_attributes.csv":
                         $this->helper->printMessage("Loading Customer Attributes", "info");
                         $this->processRows($rows, $header, $this->customerAttributeInstall);
+                        break;
+
+                    case "customer_segments.csv":
+                        $this->helper->printMessage("Loading Customer Segments", "info");
+                        $this->processRows($rows, $header, $this->customerSegmentsInstall);
                         break;
 
                     case "reviews.csv":

@@ -7,6 +7,7 @@ namespace MagentoEse\DataInstall\Model\DataTypes;
 use Magento\Cms\Model\BlockFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Store\Model\Store;
+use MagentoEse\DataInstall\Model\Converter;
 
 class Blocks
 {

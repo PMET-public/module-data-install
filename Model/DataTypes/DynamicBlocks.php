@@ -13,6 +13,7 @@ use Magento\CustomerSegment\Model\ResourceModel\Segment\CollectionFactory as Seg
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Setup\SchemaSetupInterface;
+use MagentoEse\DataInstall\Model\Converter;
 
 class DynamicBlocks
 {

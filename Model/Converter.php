@@ -194,23 +194,24 @@ class Converter
         preg_match_all($regexp, $content, $matchesAttributeSet);
         $regexp = '/{{(customergroup) name="([^"]*)"}}/';
         preg_match_all($regexp, $content, $matchesCustomerGroup);
+        $type=[array_merge($matchesCategoryUrl[1]  ,$matchesCategoryId[1] ,  $matchesProductAttribute[1]
+        , $matchesCustomerAttribute[1]
+        , $matchesSegment[1]
+        , $matchesBlock[1]
+        , $matchesDynamicBlock[1]
+        , $matchesAttributeSet[1]
+        , $matchesCustomerGroup[1]
+        , $matchesProductUrl[1])];
+        $value=[];
+        
         return [
-            'type' => $matchesCategoryUrl[1]  +$matchesCategoryId[1] +  $matchesProductAttribute[1]
-                + $matchesCustomerAttribute[1]
-                + $matchesSegment[1]
-                + $matchesBlock[1]
-                + $matchesDynamicBlock[1]
-                + $matchesAttributeSet[1]
-                + $matchesCustomerGroup[1]
-                + $matchesProductUrl[1],
-            'value' => $matchesCategoryUrl[2] + $matchesCategoryId[2] +$matchesProductAttribute[2]
-                + $matchesCustomerAttribute[2]
-                + $matchesSegment[2]
-                + $matchesBlock[2]
-                + $matchesDynamicBlock[2]
-                + $matchesAttributeSet[2]
-                + $matchesCustomerGroup[2]
-                + $matchesProductUrl[2]
+            'type' => array_merge($matchesCategoryUrl[1],$matchesCategoryId[1],$matchesProductAttribute[1],
+            $matchesCustomerAttribute[1],$matchesSegment[1],$matchesBlock[1],$matchesDynamicBlock[1],
+            $matchesAttributeSet[1],$matchesCustomerGroup[1],$matchesProductUrl[1]),
+            
+            'value' => array_merge($matchesCategoryUrl[2],$matchesCategoryId[2],$matchesProductAttribute[2],
+            $matchesCustomerAttribute[2],$matchesSegment[2],$matchesBlock[2],$matchesDynamicBlock[2],
+            $matchesAttributeSet[2],$matchesCustomerGroup[2],$matchesProductUrl[2])
         ];
     }
 
@@ -445,7 +446,7 @@ class Converter
             $productUrl = '{{store url=""}}' .  $productItem->getRequestPath();
         }
 
-        $replaceData['regexp'][] = '/{{product sku="' . preg_quote($matchValue) . '"}}/';
+        $replaceData['regexp'][] = '/{{producturl sku="' . preg_quote($matchValue) . '"}}/';
         $replaceData['value'][] = $productUrl;
         return $replaceData;
     }
@@ -469,7 +470,7 @@ class Converter
 
         if (!empty($code) && !empty($value)) {
             $replaceData['regexp'][] = '/{{customerattribute code="' . preg_quote($matchValue) . '"}}/';
-            $replaceData['value'][] = sprintf('%03d', $this->getCustomerAttributeOptionValueId($code, $value));
+            $replaceData['value'][] = $this->getCustomerAttributeOptionValueId($code, $value);
         }
 
         return $replaceData;
@@ -536,7 +537,7 @@ class Converter
         }
 
         $this->customerAttributeCodeOptionValueIdsPair[$attributeCode] = $opt;
-        if (isset($this->customerAttributeCodeOptionValueIdsPair[$attributeCode][$value])) {
+        if (!empty($this->customerAttributeCodeOptionValueIdsPair[$attributeCode][$value])) {
             return $this->customerAttributeCodeOptionValueIdsPair[$attributeCode][$value];
         } else {
             return $value;
@@ -562,7 +563,7 @@ class Converter
 
         if (!empty($code) && !empty($value)) {
             $replaceData['regexp'][] = '/{{productattribute code="' . $matchValue . '"}}/';
-            $replaceData['value'][] = sprintf('%03d', $this->getProductAttributeOptionValueId($code, $value));
+            $replaceData['value'][] = $this->getProductAttributeOptionValueId($code, $value);
         }
 
         return $replaceData;
@@ -629,7 +630,7 @@ class Converter
         }
 
         $this->productAttributeCodeOptionValueIdsPair[$attributeCode] = $opt;
-        if (isset($this->productAttributeCodeOptionValueIdsPair[$attributeCode][$value])) {
+        if (!empty($this->productAttributeCodeOptionValueIdsPair[$attributeCode][$value])) {
             return $this->productAttributeCodeOptionValueIdsPair[$attributeCode][$value];
         } else {
             return $value;

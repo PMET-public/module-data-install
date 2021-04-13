@@ -17,6 +17,8 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**customer\_attributes.csv**](#customer-attributes) - Creates customer attributes
 
+[**customer\_segments.csv**](#customer-segments) - Creates customer segments
+
 **customers.csv** - Creates customers. Also used to add customer data to autofill.
 
 [**product_attributes.csv**](#product-attributes) - Creates product attributes and set
@@ -43,7 +45,6 @@ Each element of potential sample data is encapsulated in its own file:
 **bundled\_products.csv**
 **grouped\_products.csv**
 **virtual\_products.csv**
-**customer\_segments.csv**
 **cart\_rules.csv**
 **catalog\_rules.csv**
 **Staging**
@@ -164,6 +165,31 @@ Customer attribute configurations can be complex. The purpose of this file is to
 **options** - Required when input is Multi or Select. Values to show, carriage return delimited
 
 **position** - Optional, Numeric.  Indicates the position of the attribute within the Attribute Group
+
+### Customer Segments
+*File Name* - customer\_segments.csv
+
+This file is used to add and update customer segments.
+Because segements are complex, the method currently in use is to create a segment in a test enviornment and then export that data out of the database to put in the .csv file
+
+
+*Columns*
+
+**name** - Always required. Name of the segment shown in the UI and also the key used for updates.
+
+**site\_code** - Optional. Single site_code or comma delimited list for multiple sites. Will take the value from settings.csv if not provided.
+
+**description** - Optional. Description of the segment
+
+**is\_active** - Optional: Values = Y/N. Default = Y
+
+**apply\_to** - Optional. Defaults to 0.
+Accepted values 2= Apply to Visitors, 1= Apply to Registered Users
+
+**conditions_serialized** - Optional (but if you dont put anything in, then really whats the point?) - This is taken from the database magento_customersegment_segment.conditions_serialized column. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers like product and customer attributes.  ID values for Region and Country should remain in place as they should be consistant across installations.
+
+
+
 
 ### Categories
 *File Name* - categories.csv

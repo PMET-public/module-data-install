@@ -184,7 +184,7 @@ Because segements are complex, the method currently in use is to create a segmen
 **is\_active** - Optional: Values = Y/N. Default = Y
 
 **apply\_to** - Optional. Defaults to 0.
-Accepted values 2= Apply to Visitors, 1= Apply to Registered Users
+Accepted values 2= Apply to Visitors, 1= Apply to Registered Users, 0= Both Visitors and Registered
 
 **conditions_serialized** - Optional (but if you dont put anything in, then really whats the point?) - This is taken from the database magento_customersegment_segment.conditions_serialized column. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers like product and customer attributes.  ID values for Region and Country should remain in place as they should be consistant across installations.
 

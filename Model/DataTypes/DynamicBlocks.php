@@ -106,7 +106,7 @@ class DynamicBlocks
         $segments = explode(",", $row['segments']);
         $segmentIds=[];
         foreach ($segments as $segment) {
-            $segmentId = $this->getSegmentIdByName($segment);
+            $segmentId = $this->getSegmentIdByName(trim($segment));
             if ($segmentId != null) {
                 $segmentIds[]=$segmentId;
             }

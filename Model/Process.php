@@ -19,19 +19,20 @@ use MagentoEse\DataInstall\Api\InstallerRepositoryInterface;
 
 class Process
 {
-    const ALL_FILES = ['stores.csv','config_vertical.json','config_secret.json','config.csv',
+    const ALL_FILES = ['stores.csv','config_default.json','config_default.csv','config_vertical.json','config_vertical.csv',
+    'config_secret.json','config_secret.csv','config.json','config.csv',
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','customer_segments.csv',
-    'blocks.csv','categories.csv','products.csv','products2.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
+    'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv'];
 
     const STORE_FILES = ['stores.csv'];
 
-    const STAGE1 = ['config_default.json','config_vertical.json','config_secret.json','config.csv',
+    const STAGE1 = ['config_default.json','config_default.csv','config_vertical.json','config_vertical.csv','config_secret.json','config_secret.csv','config.json','config.csv',
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
     'customer_segments.csv','blocks.csv','categories.csv'];
 
-    const STAGE2 = ['products.csv','products2.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
+    const STAGE2 = ['products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv'];
 
@@ -135,6 +136,9 @@ class Process
     /** @var CustomerSegments */
     protected $customerSegmentsInstall;
 
+    /** @var CatalogRules */
+    protected $catalogRulesInstall;
+
     /**
      * Process constructor.
      * @param Helper $helper
@@ -165,6 +169,7 @@ class Process
      * @param InstallerInterfaceFactory $dataInstallerInterface
      * @param InstallerRepositoryInterface $dataInstallerRepository
      * @param CustomerSegments $customerSegments
+     * @param CatalogRules $catalogRules
      */
     public function __construct(
         Helper $helper,
@@ -195,7 +200,8 @@ class Process
         DataTypes\Orders $orders,
         InstallerInterfaceFactory $dataInstallerInterface,
         InstallerRepositoryInterface $dataInstallerRepository,
-        DataTypes\CustomerSegments $customerSegments
+        DataTypes\CustomerSegments $customerSegments,
+        DataTypes\CatalogRules $catalogRules
     ) {
         $this->helper = $helper;
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
@@ -227,6 +233,7 @@ class Process
         $this->dataInstallerRepository = $dataInstallerRepository;
         $this->ordersInstall = $orders;
         $this->customerSegmentsInstall = $customerSegments;
+        $this->catalogRulesInstall = $catalogRules;
     }
 
     /**
@@ -349,11 +356,7 @@ class Process
                         $this->processRows($rows, $header, $this->dynamicBlockInstall);
                         break;
 
-                    case "default_config.json":
-                        $this->helper->printMessage("Loading Default Config Json", "info");
-                        ;
-                        $this->processJson($fileContent, $this->configurationInstall);
-                        break;
+                    
                     case "config_default.json":
                         $this->helper->printMessage("Loading Config Default Json", "info");
                         $this->processJson($fileContent, $this->configurationInstall);
@@ -373,9 +376,20 @@ class Process
                         $this->helper->printMessage("Loading Config Json", "info");
                         $this->processJson($fileContent, $this->configurationInstall);
                         break;
-
+                    case "config_default.csv":
+                        $this->helper->printMessage("Loading Config Default Csv", "info");
+                        $this->processRows($rows, $header, $this->configurationInstall);
+                        break;
+                    case "config_vertical.csv":
+                        $this->helper->printMessage("Loading Config Vertical Csv", "info");
+                        $this->processRows($rows, $header, $this->configurationInstall);
+                        break;
+                    case "config_secret.csv":
+                        $this->helper->printMessage("Loading Config Secret Csv", "info");
+                        $this->processRows($rows, $header, $this->configurationInstall);
+                        break;
                     case "config.csv":
-                        $this->helper->printMessage("Loading Config.csv", "info");
+                        $this->helper->printMessage("Loading Config Csv", "info");
                         $this->processRows($rows, $header, $this->configurationInstall);
                         break;
 
@@ -392,6 +406,11 @@ class Process
                     case "customer_segments.csv":
                         $this->helper->printMessage("Loading Customer Segments", "info");
                         $this->processRows($rows, $header, $this->customerSegmentsInstall);
+                        break;
+                    
+                    case "catalog_rules.csv":
+                        $this->helper->printMessage("Loading Catalog Price Rules", "info");
+                        $this->processRows($rows, $header, $this->catalogRulesInstall);
                         break;
 
                     case "reviews.csv":

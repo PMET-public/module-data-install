@@ -92,9 +92,9 @@ class CustomerSegments
         $siteCodes = explode(",", $row['site_code']);
         $siteIds = [];
         foreach($siteCodes as $siteCode){
-            $siteId = $this->stores->getWebsiteId($siteCode);
+            $siteId = $this->stores->getWebsiteId(trim($siteCode));
             if($siteId){
-                $siteIds[] = $this->stores->getWebsiteId($siteCode);
+                $siteIds[] = $siteId;
             }
             
         }
@@ -140,8 +140,7 @@ class CustomerSegments
             [$this->segmentResourceModel, 'save'],
             [$segment]
         );
-        
-        //$this->segmentResourceModel->save($segment);
+
         //schedule bulk operation
         $this->segmentMatchPublisher->execute($segment);
     }

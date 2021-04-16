@@ -25,6 +25,8 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**upsells.csv**](#upsells) - Used to create the Related Products rules
 
+[**catalog\_rules.csv**](#catalog-rules) - Used to create the Catalog Promotion Rules
+
 **blocks.csv** - Creates Blocks. Includes Page Builder compatibility
 
 **dynamic_blocks.csv** - Creates Dynamic Blocks. Includes Page Builder compatibility
@@ -298,6 +300,48 @@ This file is used to add Related Products rules. At this time, the easiest metho
 **apply to** - Values: related, upsells, crosssells
 
 **sort_order** - Numeric
+
+### Catalog Rules
+*File Name* - catalog\_rules.csv
+
+This file is used to add and update catalog promotion rules.
+Because rule definitions are complex, the method currently in use is to create a segment in a test enviornment and then export that data out of the database to put in the .csv file
+
+
+*Columns*
+
+**name** - Always required. Name of the rule shown in the UI and also the key used for updates.
+
+**site\_code** - Optional. Single site_code or comma delimited list for multiple sites. Will take the value from settings.csv if not provided.
+
+**description** - Optional. Description of the rule
+
+**is\_active** - Optional: Values = Y/N. Default = Y
+
+**conditions_serialized** - Optional (but if you dont put anything in, then really whats the point?) - This is taken from the database catalogrulet.conditions_serialized column. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers like product attributes.
+
+**stop\_rules\_processing** - In the UI: *Discard subsequent rules*
+Optional: Values = Y/N. Default = N
+
+**sort\_order** - In the UI: *Priority*
+Optional: Default = 0
+
+**simple\_action** - In the UI: *Apply* Required
+| Value in UI                           | Value in File |
+|---------------------------------------|---------------|
+| Apply as percentage of original       | by_percent    |
+| Apply as fixed amount                 | by_fixed      |
+| Adjust final price to this percentage | to_percent    |
+| Adjust final price to discount value  | to_fixed      |
+
+
+**discount\_amount** - Required: Numeric value
+
+**customer\_groups** - Optional: Defaults to NOT LOGGED IN and General
+Single customer group name or comma delimited list
+
+**dynamic\_blocks** - In the UI: *Related Dynamic Blocks*
+Optional: Single dynamic block name  or comma delimited list
 
 
 

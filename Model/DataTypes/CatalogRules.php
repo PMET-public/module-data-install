@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Copyright © Adobe. All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\CatalogRule\Api\Data\RuleInterface;
@@ -17,18 +19,18 @@ use Magento\Banner\Model\ResourceModel\BannerFactory;
 use MagentoEse\DataInstall\Helper\Helper;
 
 class CatalogRules {
-    
+
     const SIMPLE_ACTIONS = ['by_percent','by_fixed','to_percent','to_fixed'];
-  
+
     /** @var CatalogRuleRepositoryInterface */
     protected $ruleRepository;
-    
+
     /** @var RuleInterfaceFactory */
     protected $ruleInterfaceFactory;
 
     /** @var GroupRepositoryInterface */
     protected $groupRepositoryInterface;
-    
+
      /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
 
@@ -55,15 +57,23 @@ class CatalogRules {
 
     /** @var Helper */
     protected $helper;
-       
+
     /**
-     * __construct
-     *
-     * @param  RuleInterfaceFactory $ruleInterfaceFactory
-     * @param  CatalogRuleRepositoryInterface $catalogRuleRepositoryInterface
-     * @return void
+     * CatalogRules constructor.
+     * @param RuleInterfaceFactory $ruleInterfaceFactory
+     * @param CatalogRuleRepositoryInterface $catalogRuleRepositoryInterface
+     * @param GroupRepositoryInterface $groupRepositoryInterface
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param State $appState
+     * @param Stores $stores
+     * @param Converter $converter
+     * @param RuleCollection $ruleCollection
+     * @param CustomerGroups $customerGroups
+     * @param BannerCollection $bannerCollection
+     * @param BannerFactory $bannerFactory
+     * @param Helper $helper
      */
-    function __construct(RuleInterfaceFactory $ruleInterfaceFactory, 
+    function __construct(RuleInterfaceFactory $ruleInterfaceFactory,
         CatalogRuleRepositoryInterface $catalogRuleRepositoryInterface, GroupRepositoryInterface $groupRepositoryInterface,
         SearchCriteriaBuilder $searchCriteriaBuilder,State $appState, Stores $stores,Converter $converter,RuleCollection $ruleCollection,
         CustomerGroups $customerGroups, BannerCollection $bannerCollection, BannerFactory $bannerFactory, Helper $helper){
@@ -100,8 +110,6 @@ class CatalogRules {
             return true;
         }
 
-        //TODO: Validate format of from_date and to_date -- check to see what happens if nodate is provided
-
         //if there is no site_code, take the default
         if(empty($row['site_code'])) {
             $row['site_code'] = $settings['site_code'];
@@ -114,7 +122,7 @@ class CatalogRules {
             if($siteId){
                 $siteIds[] = $siteId;
             }
-            
+
         }
 
         //if no is_active, default to active
@@ -150,10 +158,9 @@ class CatalogRules {
             if(is_numeric($groupId)){
                 $groupIds[] = $groupId;
             }
-            
+
         }
 
-                       
         //convert tags in conditions_serialized and actions_serialized
         $row['conditions_serialized'] = $this->converter->convertContent($row['conditions_serialized']);
 
@@ -164,8 +171,6 @@ class CatalogRules {
             return true;
         }
 
-        //validate simple_action
-        
         //get banner ids
         $banners =  $groups = explode(",", $row['dynamic_blocks']);
         $bannerIds = [];
@@ -177,7 +182,6 @@ class CatalogRules {
                 $this->helper->printMessage("Dynamic block ".$banner." for Catalog Rule ".$row['name']." does not exist", "warning");
             }
         }
-        
 
         //load existing rule by name
         /** @var RuleInterface $rule */
@@ -186,7 +190,7 @@ class CatalogRules {
         if(!$rule->getName()){
             $rule = $this->ruleInterfaceFactory->create();
         }
-      
+
         $rule->setName($row['name']);
         $rule->setDescription($row['description']);
         $rule->setIsActive($row['is_active']);
@@ -200,15 +204,18 @@ class CatalogRules {
         $rule->addData(['customer_group_ids'=>$groupIds]);
         $this->ruleRepository->save($rule);
 
-        //loop over banners and add the rule to them
+        //add rule to banners
         $this->bannerFactory->create()->bindBannersToCatalogRule($rule->getId(),$bannerIds);
 
-        // $this->appState->emulateAreaCode(
-        //     AppArea::AREA_ADMINHTML,
-        //     [$this->segmentResourceModel, 'save'],
-        //     [$rule]
-        // );
     }
+
+
+    /**
+     * validateSimpleAction
+     *
+     * @param  string $simpleAction
+     * @return bool
+     */
     private function validateSimpleAction($simpleAction){
         if(in_array($simpleAction,self::SIMPLE_ACTIONS)){
             return true;

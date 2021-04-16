@@ -46,7 +46,18 @@ class CustomerSegments
      /** @var State */
      protected $appState;
 
-
+    /**
+     * CustomerSegments constructor.
+     * @param Helper $helper
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param SegmentFactory $customerSegment
+     * @param SegmentResourceModel $segmentResourceModel
+     * @param Converter $converter
+     * @param Stores $stores
+     * @param Collection $collection
+     * @param SegmentMatchPublisher $segmentMatchPublisher
+     * @param State $appState
+     */
     public function __construct(
         Helper $helper,
         SearchCriteriaBuilder $searchCriteriaBuilder,
@@ -77,7 +88,7 @@ class CustomerSegments
      */
     public function install(array $row, array $settings)
     {
-        
+
          //if there is no name, reject it
          if(empty($row['name'])) {
             $this->helper->printMessage("A row in the Customer Segments file does not have a value for name. Row is skipped", "warning");
@@ -96,7 +107,7 @@ class CustomerSegments
             if($siteId){
                 $siteIds[] = $siteId;
             }
-            
+
         }
 
         //if no is_active, default to active
@@ -110,7 +121,7 @@ class CustomerSegments
         if(empty($row['apply_to'])) {
             $row['apply_to']=0;
         }
-                
+
         //convert tags in conditions_serialized
         $row['conditions_serialized'] = $this->converter->convertContent($row['conditions_serialized']);
 
@@ -127,7 +138,7 @@ class CustomerSegments
         if(!$segment->getName()){
             $segment = $this->customerSegment->create();
         }
-      
+
         $segment->setName($row['name']);
         $segment->setDescription($row['description']);
         $segment->setIsActive($row['is_active']);

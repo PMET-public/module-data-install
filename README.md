@@ -183,7 +183,7 @@ Customer attribute configurations can be complex. The purpose of this file is to
 *File Name* - customer\_segments.csv
 
 This file is used to add and update customer segments.
-Because segements are complex, the method currently in use is to create a segment in a test enviornment and then export that data out of the database to put in the .csv file
+Because segments are complex, the method currently in use is to create a segment in a test enviornment and then export that data out of the database to put in the .csv file
 
 
 *Columns*
@@ -305,7 +305,7 @@ This file is used to add Related Products rules. At this time, the easiest metho
 *File Name* - catalog\_rules.csv
 
 This file is used to add and update catalog promotion rules.
-Because rule definitions are complex, the method currently in use is to create a segment in a test enviornment and then export that data out of the database to put in the .csv file
+Because rule definitions are complex, the method currently in use is to create a catalog rule in a test enviornment and then export that data out of the database to put in the .csv file
 
 
 *Columns*

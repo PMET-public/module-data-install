@@ -13,7 +13,7 @@ use Magento\Framework\Setup\SampleData\FixtureManager;
 
 class Process
 {
-    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv',
+    const FILE_ORDER = ['stores.csv','config_default.json','config_vertical.json','config_secret.json','config.csv','config.json',
         'customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','blocks.csv','categories.csv',
         'products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','pages.csv','templates.csv','reviews.csv'];
 

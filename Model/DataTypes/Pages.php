@@ -16,7 +16,7 @@ use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 use Magento\Store\Api\StoreRepositoryInterface;
 use Magento\UrlRewrite\Model\ResourceModel\UrlRewrite;
-use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollection;
+use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollectionFactory as UrlRewriteCollection;
 use Magento\UrlRewrite\Model\UrlPersistInterface;
 use Magento\UrlRewrite\Service\V1\Data\UrlRewrite as UrlRewriteService;
 use MagentoEse\DataInstall\Model\Converter;
@@ -95,8 +95,6 @@ class Pages
      */
     public function install(array $row, array $settings)
     {
-        //TODO: set stores to use configuration if stores not in file
-        //TODO: check on multiple stores for a page
         //TODO: Set default layout of a page cms-full-width *check if necessary
         //TODO:Validate design layout types
         $row['content'] = $this->converter->convertContent($row['content']);
@@ -120,6 +118,7 @@ class Pages
                         //is the exiting page a store zero && are we requesting a different store/stores
                         if ($updatePage->getStores()[0]==0 && $this->getStoreIds($row['store_view_code'])[0] !=0) {
                             //Save the exiting page under all other stores
+                           
                             $storeIds = $this->getAllStoreIds();
                             if (($key = array_search($this->getStoreIds($row['store_view_code'])[0], $storeIds)) !== false) {
                                 unset($storeIds[$key]);
@@ -146,8 +145,6 @@ class Pages
                         }
                     } else {
                         //multiple pages exist
-                        $e=$updatePage->getStores();
-                        $f=$this->getStoreIds($row['store_view_code'])[0];
                         if ($updatePage->getStores()[0]==$this->getStoreIds($row['store_view_code'])[0]) {
                             //update when store is found
                             $updatePage->load($row['identifier'], 'identifier');
@@ -184,7 +181,7 @@ class Pages
      */
     protected function removeUrlRewrite(string $identifier, array $storeId)
     {
-        $urls = $this->urlRewriteCollection->
+        $urls = $this->urlRewriteCollection->create()->
             addFilter('request_path', $identifier, 'eq')->addFilter('store_id', $storeId, 'eq')->getItems();
         foreach ($urls as $url) {
             $this->urlRewrite->delete($url);

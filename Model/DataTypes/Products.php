@@ -11,6 +11,10 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\State;
 use FireGento\FastSimpleImport\Model\ImporterFactory as Importer;
 use MagentoEse\DataInstall\Helper\Helper;
+use Magento\Framework\App\Area as AppArea;
+use Magento\Framework\Filesystem\Directory\ReadInterface;
+use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Filesystem;
 
 class Products
 {
@@ -18,6 +22,7 @@ class Products
     protected $helper;
 
     const DEFAULT_IMAGE_PATH = '/media/catalog/product';
+    const APP_DEFAULT_IMAGE_PATH = 'var';
     //TODO: flexibility for other than default category
 
     /** @var Stores */
@@ -33,7 +38,13 @@ class Products
     protected $importer;
 
     /** @var State */
-    protected $state;
+    protected $appState;
+
+    /** @var ReadInterface  */
+    protected $directoryRead;
+
+    /** @var Filesystem */
+    protected $fileSystem;
 
     /**
      * Products constructor.
@@ -42,7 +53,7 @@ class Products
      * @param ProductRepositoryInterface $productRepository
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param Importer $importer
-     * @param State $state
+     * @param State $appState
      */
     public function __construct(
         Helper $helper,
@@ -50,14 +61,17 @@ class Products
         ProductRepositoryInterface $productRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         Importer $importer,
-        State $state
+        State $appState,
+        DirectoryList $directoryList,
+        Filesystem $fileSystem
     ) {
         $this->stores = $stores;
         $this->productRepository = $productRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->importer = $importer;
-        $this->state = $state;
+        $this->appState = $appState;
         $this->helper = $helper;
+        $this->directoryRead = $fileSystem->getDirectoryRead(DirectoryList::ROOT);
     }
 
     /**
@@ -68,10 +82,18 @@ class Products
      */
     public function install(array $rows, array $header, string $modulePath, array $settings)
     {
+        
+        
         if (!empty($settings['product_image_import_directory'])) {
             $imgDir = $settings['product_image_import_directory'];
         } else {
             $imgDir = $modulePath . self::DEFAULT_IMAGE_PATH;
+        }
+        //check to see if the image directory exists.  If not, set it to safe default
+        //this will catch the case of updating products, but not needing to include image files
+        if(!$this->directoryRead->isDirectory($imgDir)){
+            $this->helper->printMessage("The directory or product images ".$imgDir." does not exist. This may cause an issue with your product import if you are expecting to include product images", "warning");
+            $imgDir = self::APP_DEFAULT_IMAGE_PATH;
         }
 
         if (!empty($settings['restrict_products_from_views'])) {
@@ -101,6 +123,7 @@ class Products
         }
 
         $this->helper->printMessage("Importing new products", "info");
+        
         $this->import($productsArray, $imgDir, $productValidationStrategy);
 
         /// Restrict products from other stores
@@ -153,7 +176,12 @@ class Products
             $importerModel->setAllowedErrorCount(100);
         }
         try {
-            $importerModel->processImport($productsArray);
+            $this->appState->emulateAreaCode(
+                AppArea::AREA_ADMINHTML,
+                [$importerModel, 'processImport'],
+                [$productsArray]
+            );
+            //$importerModel->processImport($productsArray);
         } catch (\Exception $e) {
             $this->helper->printMessage($e->getMessage());
         }

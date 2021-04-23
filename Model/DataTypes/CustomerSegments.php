@@ -46,18 +46,7 @@ class CustomerSegments
      /** @var State */
      protected $appState;
 
-    /**
-     * CustomerSegments constructor.
-     * @param Helper $helper
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
-     * @param SegmentFactory $customerSegment
-     * @param SegmentResourceModel $segmentResourceModel
-     * @param Converter $converter
-     * @param Stores $stores
-     * @param Collection $collection
-     * @param SegmentMatchPublisher $segmentMatchPublisher
-     * @param State $appState
-     */
+
     public function __construct(
         Helper $helper,
         SearchCriteriaBuilder $searchCriteriaBuilder,
@@ -88,7 +77,7 @@ class CustomerSegments
      */
     public function install(array $row, array $settings)
     {
-
+        
          //if there is no name, reject it
          if(empty($row['name'])) {
             $this->helper->printMessage("A row in the Customer Segments file does not have a value for name. Row is skipped", "warning");
@@ -103,11 +92,11 @@ class CustomerSegments
         $siteCodes = explode(",", $row['site_code']);
         $siteIds = [];
         foreach($siteCodes as $siteCode){
-            $siteId = $this->stores->getWebsiteId(trim($siteCode));
+            $siteId = $this->stores->getWebsiteId($siteCode);
             if($siteId){
-                $siteIds[] = $siteId;
+                $siteIds[] = $this->stores->getWebsiteId($siteCode);
             }
-
+            
         }
 
         //if no is_active, default to active
@@ -121,16 +110,19 @@ class CustomerSegments
         if(empty($row['apply_to'])) {
             $row['apply_to']=0;
         }
+        if(!empty($row['conditions_serialized'])){
+            //convert tags in conditions_serialized
+            $row['conditions_serialized'] = $this->converter->convertContent($row['conditions_serialized']);
 
-        //convert tags in conditions_serialized
-        $row['conditions_serialized'] = $this->converter->convertContent($row['conditions_serialized']);
-
-        //check json format of conditions_serialized
-        $jsonValidate = json_decode($row['conditions_serialized'], true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->helper->printMessage("A row in the Customer Segments file has invalid Json data for conditions_serialized. Row is skipped", "warning");
-            return true;
+            //check json format of conditions_serialized
+        
+            $jsonValidate = json_decode($row['conditions_serialized'], true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->helper->printMessage("A row in the Customer Segments file has invalid Json data for conditions_serialized. Row is skipped", "warning");
+                return true;
+            }
         }
+        
 
         //load existing segment by name
         /** @var Segment $segment */
@@ -138,20 +130,28 @@ class CustomerSegments
         if(!$segment->getName()){
             $segment = $this->customerSegment->create();
         }
-
+        
         $segment->setName($row['name']);
-        $segment->setDescription($row['description']);
+        if(!empty($row['description'])){
+            $segment->setDescription($row['description']);
+        }
+        
         $segment->setIsActive($row['is_active']);
 
-        $segment->setConditionsSerialized($row['conditions_serialized']);
+        if(!empty($row['conditions_serialized'])){
+            $segment->setConditionsSerialized($row['conditions_serialized']);
+        }
+        
         $segment->setApplyTo($row['apply_to']);
-        $segment->addData(['website_ids'=>$siteIds]);
+        //add new websites to exiting websites for segment;
+        $segment->addData(['website_ids'=>array_merge($siteIds,$segment->getWebsiteIds())]);
         $this->appState->emulateAreaCode(
             AppArea::AREA_ADMINHTML,
             [$this->segmentResourceModel, 'save'],
             [$segment]
         );
-
+        
+        //$this->segmentResourceModel->save($segment);
         //schedule bulk operation
         $this->segmentMatchPublisher->execute($segment);
     }

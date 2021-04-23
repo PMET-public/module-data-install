@@ -77,6 +77,9 @@ class DynamicBlocks
     public function install(array $row)
     {
         //get existing banner to see if we need to create or update content for different store view
+        if(empty($row['store'])){
+            $row['store']='admin';
+        }
         $bannerCollection = $this->bannerCollection->create();
         $banners = $bannerCollection->addFilter('name', $row['name'], 'eq');
         //echo $banners->count()."\n";
@@ -106,7 +109,7 @@ class DynamicBlocks
         $segments = explode(",", $row['segments']);
         $segmentIds=[];
         foreach ($segments as $segment) {
-            $segmentId = $this->getSegmentIdByName(trim($segment));
+            $segmentId = $this->getSegmentIdByName($segment);
             if ($segmentId != null) {
                 $segmentIds[]=$segmentId;
             }

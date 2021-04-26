@@ -7,11 +7,7 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**stores.csv**](#Stores) - Used to create sites, stores, store views and root categories
 
-**config_default.json** - Should not be edited.  This contains settings that are common across all demos, and would normaly be set in Stores->Configuration: Payment methods, basics store information, admin settings, etc.
-
-**config_vertical.json** - Adds to or overrides settings from config_default.json. These would normally be things that are applicable to the specific data set like Venia or Luma German. Generally should not be edited unless creating a re-usable data set
-
-[**config.json & config.csv**](#Config) - Adds to or overrides settings from the default and vertical files. These can be used to add more specific customizations. It can be done in the .json format or in .csv
+[**Configuration files**](#Configuration) - **config_default.json, config_default.csv, config_vertical.json, config_vertical.csv, config_secret.json, config_secret.csv, config.json, config.csv**.  These files contain settings that would mostly be set in Stores->Configuration: Payment methods, store information, admin settings, etc.  See the [**Configuration files**](#Configuration) section for details on their usage.
 
 [**customer\_groups.csv**](#customer-groups) - Creates customer groups
 
@@ -28,6 +24,8 @@ Each element of potential sample data is encapsulated in its own file:
 [**products.csv**](#products) - Creates simple and configurable products
 
 [**upsells.csv**](#upsells) - Used to create the Related Products rules
+
+[**catalog\_rules.csv**](#catalog-rules) - Used to create the Catalog Promotion Rules
 
 **blocks.csv** - Creates Blocks. Includes Page Builder compatibility
 
@@ -117,21 +115,36 @@ Optional file: This file is used to add and update Sites, Stores, Store Views an
 **theme** - Optional: Assigns a theme to the store view. This should be the path of the theme directory from the Vendor namespace. For example Magento/luma or MagentoEse/venia
 
 
-### Config
-*File Name* - config.json & config.csv
+### Configuration
+*File Names* - config_default.json, config_default.csv, config_vertical.json, config_vertical.csv, config_secret.json, config_secret.csv, config.json, config.csv
 
-Optional file. These files are used to set values that would normally be set in the store admin under Stores -> Configuration. They will add to or override settings defined in config_default.json and config_vertical.json
+The .json and .csv files are interchangable. Both formats serve the same purpose, so it is up to personal preference which format is used. All files are optional, but it is recommended to have the default file in order to create the settings to have a reasonablly operational store.
 
-*json file format* - This is the same structure in the other json files, with nodes matching the path of the variable to set
+These files are used to set values that would normally be set in the store admin under Stores -> Configuration.
 
-*config.csv* - This file will be the most likely one you will edit
+The purpose of having the multiple files (default, vertical,secret,config) is to allow the flexibility of having some settings that are likely to never change, or may be applicable to a specific vertical, and then override them with subsequent files.
 
-*Columns* 
+#####File Processing Order
+**config_default.json, config_default.csv** - These files would likely be induded in a base data pack, and would likely not be changed.  It would include common admin settings like security settings, basic payment and shippping settings, etc. These files would contain the basic settings to get a site up and running, and would likely not be changed.
+
+
+**config_vertical.json, config_vertical.csv** - Adds to or overrides settings in the default files. These would normally be things that are applicable to the specific data set like Venia or Luma German, or Grocery. Generally should not be edited by the end user if they are loading a prepared data set
+
+**config_secret.json, config_secret.csv** - This file could contain private information like API keys, passwords, etc.  That information is not required to go into this file, and could go in any configuration file. However it should be a best practice in order to easily remove private information if publically distributing the rest of the data pack
+
+**config.json, config.csv** - These files are final files loaded and are used to add to or override any previous settings.  This is likely where an end user would make changes specific to their needs.
+
+
+*json file format* - Needs to be documented. This is the same structure in the other json files, with nodes matching the path of the variable to set
+
+*using the encode function* - needs to be documented
+
+*CSV file Columns*  - the file format matches the values stored in the core\_config\_data table
 
 **path** - Required. Path matching values set in the core\_config\_data table e.g. `general/locale/code`
 **value** Required. Value to set
-**scope** - Optional. Allowed scopes are websites, stores, default. Defaults to default.
-**scope\_code** - Required if scope is websites or stores. Include the scope_code of the site or store you want the value set for
+**scope** - Optional. Allowed scopes are `websites`, `stores`, `default`. Defaults to `default`.
+**scope\_code** - Required if scope is `websites` or `stores`. Include the scope_code of the site or store you want the value set for
 
 ### Customer Groups
 *File Name* - customer\_groups.csv
@@ -170,14 +183,14 @@ Customer attribute configurations can be complex. The purpose of this file is to
 *File Name* - customer\_segments.csv
 
 This file is used to add and update customer segments.
-Because segements are complex, the method currently in use is to create a segment in a test enviornment and then export that data out of the database to put in the .csv file
+Because segments are complex, the method currently in use is to create a segment in a test enviornment and then export that data out of the database to put in the .csv file
 
 
 *Columns*
 
 **name** - Always required. Name of the segment shown in the UI and also the key used for updates.
 
-**site\_code** - Optional. Single site_code or comma delimited list for multiple sites. Will take the value from settings.csv if not provided. If a segment is being updated, site_codes included will be added to the existing sites of a segment.
+**site\_code** - Optional. Single site_code or comma delimited list for multiple sites. Will take the value from settings.csv if not provided.
 
 **description** - Optional. Description of the segment
 
@@ -287,6 +300,48 @@ This file is used to add Related Products rules. At this time, the easiest metho
 **apply to** - Values: related, upsells, crosssells
 
 **sort_order** - Numeric
+
+### Catalog Rules
+*File Name* - catalog\_rules.csv
+
+This file is used to add and update catalog promotion rules.
+Because rule definitions are complex, the method currently in use is to create a catalog rule in a test enviornment and then export that data out of the database to put in the .csv file
+
+
+*Columns*
+
+**name** - Always required. Name of the rule shown in the UI and also the key used for updates.
+
+**site\_code** - Optional. Single site_code or comma delimited list for multiple sites. Will take the value from settings.csv if not provided.
+
+**description** - Optional. Description of the rule
+
+**is\_active** - Optional: Values = Y/N. Default = Y
+
+**conditions_serialized** - Optional (but if you dont put anything in, then really whats the point?) - This is taken from the database catalogrulet.conditions_serialized column. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers like product attributes.
+
+**stop\_rules\_processing** - In the UI: *Discard subsequent rules*
+Optional: Values = Y/N. Default = N
+
+**sort\_order** - In the UI: *Priority*
+Optional: Default = 0
+
+**simple\_action** - In the UI: *Apply* Required
+| Value in UI                           | Value in File |
+|---------------------------------------|---------------|
+| Apply as percentage of original       | by_percent    |
+| Apply as fixed amount                 | by_fixed      |
+| Adjust final price to this percentage | to_percent    |
+| Adjust final price to discount value  | to_fixed      |
+
+
+**discount\_amount** - Required: Numeric value
+
+**customer\_groups** - Optional: Defaults to NOT LOGGED IN and General
+Single customer group name or comma delimited list
+
+**dynamic\_blocks** - In the UI: *Related Dynamic Blocks*
+Optional: Single dynamic block name  or comma delimited list
 
 
 

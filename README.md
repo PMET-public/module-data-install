@@ -1,6 +1,62 @@
 # Magento 2 Data Install Module
 The Data Install module facilitates the loading of sample data by a series of generic .csv files. This allows for the easy creation/editing of data sets for particular scenerios. It also helps facilitate packaging of demos or verticals so they can be added to an existing site with demo data, or an empty site.
 
+**As the Data Install supports B2B, at this time the B2B modules are required in Magento even if B2B features will not be used.**
+
+## Installation Methods
+### CLI (Preferred Method)
+
+`bin/magento gxd:datainstall <module>`
+Optional arguments:
+`--fixtures[=FIXTURES]  Change fixtures directory [default: "fixtures"]`
+ `--files[=FILES]        Comma delimited list of individual files to load`
+ `-r, --reload[=RELOAD]      Force Reload`
+
+Using the CLI has multiple advantages to the `setup:upgade` method
+1. You don't need to use a Magento module unless you want to
+1. The module becomes very simple with no need for the Setup classes
+1. You can have a module included in the code or composer.json, but it will not add its data until you run the appropriate CLI command.  This allows you to have multiple data sets ready to go without having to load each one as they are needed.
+1. The Magento `setup:upgrade` process was not built with the idea of installing large amounts of data across many data types and multiple stores. This can lead to errors especially when trying to install multiple data packs at the same time.
+
+**If you are using the CLI method, your modules should not have the Setup classes.  This could lead to data conflicts and errors.**
+
+###### Usage
+- `bin/magento gxd:datainstall MySpace_MyData`
+Install data from the `MySpace_MyData` module. This module can reside in either *vendor* or *app/code*
+
+- `bin/magento gxd:datainstall var/import/importdata/MyData`
+Install data from any directory under the Magento root.  In this case `var/import/importdata/MyData`. This does not need to be a Magento module, but only needs to contain the .csv files and media
+
+- `bin/magento gxd:datainstall MySpace_MyData --fixtures=store1`
+Use an alternate directory for the .csv files (default is *fixtures*). This would allow you to potentally have multiple data sets in the same module *fixtures*,*data*,*store1*, etc.
+
+- `bin/magento gxd:datainstall MySpace_MyData --files=customers.csv,pages.csv`
+Mostly used for testing.  You can pass a comma delimited list specific files you want loaded rather than loading everything
+
+- `bin/magento gxd:datainstall MySpace_MyData -r` Each data pack is logged and will only install once. The `-r` option allows you to reinstall an existing data pack.  If you are going to reinstall, it is a good idea to clear the cache first.  Some configurations are retained in cache, and you may see errors around stores not being found if you reinstall.
+
+- If you need to install multiple data packs at the same time, you can chain commands together:`bin/magento gxd:datainstall MySpace_MyData;bin/magento gxd:datainstall MySpace_MyData2;bin/magento gxd:datainstall MySpace_MyData3`
+
+Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](https://github.com/PMET-public/module-storystore-sample "https://github.com/PMET-public/module-storystore-sample")
+
+### Setup:Upgrade (or install)
+Although CLI is the preferred method, you can still create modules and install data during Magento installation or setup upgrade.  This method may not work when installing multiple data packs especailly around multiple sites stores and views. We have separated the process out to require 3 different setup classes in order to optomize for success.
+
+Sample setup:upgrade compatible data pack
+
+The installation is split into 3 Setup classes. 
+- `Setup/Patch/Data/InstallStores.php` - installs sites,stores & views
+- `Setup/Patch/Data/Install.php` - config, categories, customers, segments, blocks, attributes
+- `Setup/RecurringData.php` - remaning data points
+Even though `RecurringData.php` is used, its first run is logged so it only runs once.
+
+Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](https://github.com/PMET-public/module-storystore-sample "https://github.com/PMET-public/module-storystore-sample")
+
+
+------------
+
+
+## Data Files
 Each element of potential sample data is encapsulated in its own file:
 
 [**settings.csv**](#Settings) - Optional file containing settings used by the install process.
@@ -39,12 +95,7 @@ Each element of potential sample data is encapsulated in its own file:
 
 *To be added*
 **widgets.csv**
-**downloadable_products.csv**
-**bundled\_products.csv**
-**grouped\_products.csv**
-**virtual\_products.csv**
 **cart\_rules.csv**
-**catalog\_rules.csv**
 **Staging**
 **MSI**
 **orders, refunds, credit memos**
@@ -472,4 +523,3 @@ Here is a list of all substitutions currently supported
 
 # Content export
 
-# Creating your own data import module

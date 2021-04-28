@@ -65,6 +65,10 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**Configuration files**](#Configuration) - **config_default.json, config_default.csv, config_vertical.json, config_vertical.csv, config_secret.json, config_secret.csv, config.json, config.csv**.  These files contain settings that would mostly be set in Stores->Configuration: Payment methods, store information, admin settings, etc.  See the [**Configuration files**](#Configuration) section for details on their usage.
 
+[**admin\_roles.csv**](#admin-roles) - Creates customer groups
+
+[**admin\_users.csv**](#admin-users) - Creates customer groups
+
 [**customer\_groups.csv**](#customer-groups) - Creates customer groups
 
 [**customer\_attributes.csv**](#customer-attributes) - Creates customer attributes
@@ -197,11 +201,35 @@ The purpose of having the multiple files (default, vertical,secret,config) is to
 **scope** - Optional. Allowed scopes are `websites`, `stores`, `default`. Defaults to `default`.
 **scope\_code** - Required if scope is `websites` or `stores`. Include the scope_code of the site or store you want the value set for
 
+### Admin Roles
+*File Name* - admin\_roles.csv
+
+Optional file: Creates roles and their settings for admin users
+
+*Columns*
+**name** - Required. Name of the role
+**resource_id** - Resource to activate for the role (eg: `Magento_Backend::admin`) one per row
+
+Resource Ids can be obtained by createing a role in the UI and retrieving the information from the authroization_rule table.
+
+### Admin Users
+*File Name* - admin\_users.csv
+
+Optional file: Creates users for the Magento Admin
+
+*Columns*
+**email** - Required.
+**username** - Required.
+**firstname** - Required.
+**lastname** - Required.
+**role** - Optional. Needs to be an existing role
+
+
 ### Customer Groups
 *File Name* - customer\_groups.csv
 
 Optional file: Used to create customer groups
-> Out of Scope: Updating existing customer groups
+> Out of Scope: Because the name is the key, and the name is the only element, updating (renaming) existing customer groups is not supported
 
 
 *Column*

@@ -4,37 +4,54 @@
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
-use Magento\Cms\Model\BlockFactory;
+use Exception;
+use Magento\Cms\Api\BlockRepositoryInterface;
+use Magento\Cms\Api\Data\BlockInterfaceFactory;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Store\Model\Store;
+use MagentoEse\DataInstall\Model\DataTypes\Stores;
 use MagentoEse\DataInstall\Model\Converter;
+use Magento\Cms\Api\Data\BlockInterface;
+use  Magento\Cms\Api\GetBlockByIdentifierInterface;
 
 class Blocks
 {
 
-    /** @var BlockFactory  */
+    /** @var BlockInterfaceFactory  */
     protected $blockFactory;
 
     /** @var Converter  */
     protected $converter;
 
-    /** @var Store  */
-    protected $storeView;
+    /** @var Stores  */
+    protected $stores;
+
+    /** @var BlockRepositoryInterface  */
+    protected $blockRepository;
+
+    /** @var GetBlockByIdentifierInterface  */
+    protected $getBlockByIdentifier;
+
 
     /**
      * Blocks constructor.
-     * @param BlockFactory $blockFactory
+     * @param BlockInterfaceFactory $blockFactory
+     * @param BlockRepositoryInterface $blockRepositoryInterface
+     * @param GetBlockByIdentifierInterface $getBlockByIdentifierInterface
      * @param Converter $converter
-     * @param Store $storeView
+     * @param Stores $stores
      */
     public function __construct(
-        BlockFactory $blockFactory,
+        BlockInterfaceFactory $blockFactory,
+        BlockRepositoryInterface $blockRepositoryInterface,
+        GetBlockByIdentifierInterface $getBlockByIdentifierInterface,
         Converter $converter,
-        Store $storeView
+        Stores $stores
     ) {
         $this->blockFactory = $blockFactory;
         $this->converter = $converter;
-        $this->storeView = $storeView;
+        $this->stores = $stores;
+        $this->blockRepository = $blockRepositoryInterface;
+        $this->getBlockByIdentifier = $getBlockByIdentifierInterface;
     }
 
     /**
@@ -45,44 +62,40 @@ class Blocks
     public function install(array $row, array $settings)
     {
         $row['content'] = $this->converter->convertContent($row['content']);
-        $cmsBlock = $this->saveCmsBlock($row);
-        $cmsBlock->unsetData();
-        return true;
-    }
 
-    /**
-     * @param $data
-     * @return mixed
-     * @throws LocalizedException
-     */
-    protected function saveCmsBlock($data)
-    {
-        /** @var \Magento\Cms\Model\Block $cmsBlock */
-        $cmsBlock = $this->blockFactory->create();
-        $cmsBlock->getResource()->load($cmsBlock, $data['identifier']);
-
-        //get view id from view code, use admin if not defined
-        if (!empty($data['store_view_code'])) {
-            $viewId = $this->storeView->load($data['store_view_code'])->getStoreId();
+        
+         //get view id from view code, use admin if not defined
+         if (!empty($row['store_view_code'])) {
+            $viewId = $this->stores->getViewId(trim($row['store_view_code']));
         } else {
-            $viewId = $this->storeView->load('admin')->getStoreId();
+            $viewId = $this->stores->getViewId(trim($settings['store_view_code']));
         }
 
+        //if the requested view doesnt exist, default it to 0
+        if(!$viewId){
+            $viewId=0;
+        }
+
+        try{
+            /** @var BlockInterface $cmsBlock */
+            $cmsBlock = $this->getBlockByIdentifier->execute($row['identifier'],$viewId);
+        }catch(Exception $e){
+            //if block isnt found, create a new one
+            $cmsBlock = $this->blockFactory->create();
+        }
+        
         //set status as active if not defined
-        if (empty($data['is_active']) || $data['is_active']=='Y') {
-            $data['is_active'] = 1;
+        if (empty($row['is_active']) || $row['is_active']=='Y') {
+            $row['is_active'] = 1;
         }
-
-        if (!$cmsBlock->getData()) {
-            $cmsBlock->setData($data);
-        } else {
-            $cmsBlock->addData($data);
-        }
-
-        $cmsBlock->setStoreId($viewId);
-        //$cmsBlock->setIsActive(!empty($data['is_active']) ?? 'Y');
-        $cmsBlock->setIsActive($data['is_active']);
-        $cmsBlock->save();
-        return $cmsBlock;
+        $cmsBlock->setIdentifier($row['identifier']);
+        $cmsBlock->setContent($row['content']);
+        $cmsBlock->setTitle($row['title']);
+        $cmsBlock->setData('stores',$viewId);
+        //$cmsBlock->setIsActive(!empty($row['is_active']) ?? 'Y');
+        $cmsBlock->setIsActive($row['is_active']);
+        $this->blockRepository->save($cmsBlock);
+        unset($cmsBlock);
+        return true;
     }
 }

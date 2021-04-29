@@ -33,7 +33,7 @@ Use an alternate directory for the .csv files (default is *fixtures*). This woul
 - `bin/magento gxd:datainstall MySpace_MyData --files=customers.csv,pages.csv`
 Mostly used for testing.  You can pass a comma delimited list specific files you want loaded rather than loading everything
 
-- `bin/magento gxd:datainstall MySpace_MyData -r` Each data pack is logged and will only install once. The `-r` option allows you to reinstall an existing data pack.  If you are going to reinstall, it is a good idea to clear the cache first.  Some configurations are retained in cache, and you may see errors around stores not being found if you reinstall.
+- `bin/magento gxd:datainstall MySpace_MyData -r` Each data pack is logged and will only install once. The `-r` option allows you to reinstall an existing data pack.  If you are going to reinstall, it is a good idea to clear the cache first.  Some configurations are retained in cache, and you may see errors around stores not being found or gxd namespace errors if you reinstall.
 
 - If you need to install multiple data packs at the same time, you can chain commands together:`bin/magento gxd:datainstall MySpace_MyData;bin/magento gxd:datainstall MySpace_MyData2;bin/magento gxd:datainstall MySpace_MyData3`
 
@@ -83,11 +83,13 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**products.csv**](#products) - Creates simple and configurable products
 
+[**advanced\_pricing.csv**](#advanced-pricing) - Sets tier and group pricing
+
 [**upsells.csv**](#upsells) - Used to create the Related Products rules
 
 [**catalog\_rules.csv**](#catalog-rules) - Used to create the Catalog Promotion Rules
 
-**blocks.csv** - Creates Blocks. Includes Page Builder compatibility
+[**blocks**](#blocks) - Creates Blocks. Includes Page Builder compatibility
 
 **dynamic_blocks.csv** - Creates Dynamic Blocks. Includes Page Builder compatibility
 
@@ -324,6 +326,11 @@ The standard Magento product import file is used. If you export from an existing
 - Change any store codes, website, attribute set or category definitions to match your new configuration
 - Image references will be the path of the final image *example:* `i/m/image.jpg`. Those will need to be updated to the path of your import source.  Most likely the path will be removed and just the file name (`image.jpg`) will be used
 
+### Advanced Pricing
+*File Name* - advanced\_pricing.csv
+
+The standard Magento Advanced Pricing import file is used. If you export from an existing store, you may need to make adjustments in websites or groups
+
 
 
 ### Product Attributes
@@ -422,7 +429,20 @@ Single customer group name or comma delimited list
 **dynamic\_blocks** - In the UI: *Related Dynamic Blocks*
 Optional: Single dynamic block name  or comma delimited list
 
+### Blocks
+*File Name* - blocks.csv
 
+This file is used to add or update blocks.  Updates are made by using the key of store_view_code and identifier
+
+*Columns*
+**store_view_code** - Optional. Store View the page should be assigned to. If none is provided, the code of the view defined in settings.csv, or the global default of *default* is used.
+> If you want a page to be available across all All Store Views, use the value of **admin** as the store_view_code
+
+**identifier** - Required. 
+
+**title** - Required - Same as Block Title in the UI
+
+**content** - Optional. Body of the page. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers for Page Builder compatibility
 
 ### Pages
 *File Name* - pages.csv
@@ -433,8 +453,8 @@ This file is used to add or update pages.  Updates are made by using the key of 
 
 
 *Columns*
-**store_view_code** - Optional. Store View the page should be assigned to. If none is provided, the code of the view defind in settings.csv, or the global default of *default* is used.
-> If you want a page to be available across all All Store Views, use the value of **admin** as the store_view_cide
+**store_view_code** - Optional. Store View the page should be assigned to. If none is provided, the code of the view defined in settings.csv, or the global default of *default* is used.
+> If you want a page to be available across all All Store Views, use the value of **admin** as the store_view_code
 
 **identifier** - Required. Url key of the page. 
 
@@ -450,7 +470,7 @@ This file is used to add or update pages.  Updates are made by using the key of 
 
 **content** - Optional. Body of the page. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers for Page Builder compatibility
 
-*TODO: document page/block export
+
 
 ### Templates
 *File Name* - templates.csv

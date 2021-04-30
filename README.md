@@ -75,7 +75,7 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**customer\_segments.csv**](#customer-segments) - Creates customer segments
 
-**customers.csv** - Creates customers. Also used to add customer data to autofill.
+[**customers.csv**](#customers)  - Creates customers. Also used to add customer data to autofill.
 
 [**product_attributes.csv**](#product-attributes) - Creates product attributes and set
 
@@ -282,7 +282,15 @@ Accepted values 2= Apply to Visitors, 1= Apply to Registered Users, 0= Both Visi
 
 **conditions_serialized** - Optional (but if you dont put anything in, then really whats the point?) - This is taken from the database magento_customersegment_segment.conditions_serialized column. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers like product and customer attributes.  ID values for Region and Country should remain in place as they should be consistant across installations.
 
+### Customers
+*File Name* - customers.csv
 
+Optional file: Used to create customers
+
+Uses the same file format as the native Magento customer import with the exeption of one column:
+**add_to_autofill** - Optional.  This will add the customer as a selectable option to the [Autofil Module](https://github.com/PMET-public/module-autofill "Autofil Module")
+
+At this time, only one address is supported and used for both billing and shipping.  However, new addresses can be added from a second module, esentially updating the customer but adding, not replacing addresses.  Last address in getst set as default.
 
 
 ### Categories

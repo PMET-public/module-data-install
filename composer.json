@@ -9,7 +9,6 @@
         }
     },
     "require": {
-        "firegento/fastsimpleimport": "*",
-        "magento/extension-b2b": "^1.2"
+        "firegento/fastsimpleimport": "*"
     }
 }

@@ -8,10 +8,12 @@ namespace MagentoEse\DataInstall\Model\DataTypes;
 use Magento\TargetRule\Model\RuleFactory as RuleFactory;
 use Magento\TargetRule\Model\Rule;
 use Magento\TargetRule\Model\ResourceModel\Rule as ResourceModel;
+use Magento\TargetRule\Model\ResourceModel\Rule\CollectionFactory as RuleCollection;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\App\State;
 use Magento\Framework\App\Area;
 use MagentoEse\DataInstall\Model\Converter;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class Upsells
 {
@@ -30,6 +32,12 @@ class Upsells
     /** @var State */
     protected $appState;
 
+    /** @var RuleCollection */
+    protected $ruleCollection;
+
+    /** @var Helper */
+    protected $helper;
+
     /**
      * Upsells constructor.
      * @param RuleFactory $ruleFactory
@@ -37,19 +45,25 @@ class Upsells
      * @param ResourceModel $resourceModel
      * @param SerializerInterface $serializerInterface
      * @param State $state
+     * @param RuleCollection $ruleCollection
+     * @param Helper $helper
      */
     public function __construct(
         RuleFactory $ruleFactory,
         Converter $converter,
         ResourceModel $resourceModel,
         SerializerInterface $serializerInterface,
-        State $state
+        State $state,
+        RuleCollection $ruleCollection,
+        Helper $helper
     ) {
         $this->ruleFactory = $ruleFactory;
         $this->converter = $converter;
         $this->resourceModel = $resourceModel;
         $this->serializerInterface = $serializerInterface;
         $this->appState = $state;
+        $this->ruleCollection = $ruleCollection;
+        $this->helper = $helper;
     }
 
     /**
@@ -74,7 +88,30 @@ class Upsells
                 break;
         }
         /** @var Rule $upsellModel */
-        $upsellModel = $this->ruleFactory->create();
+        if(empty($row['name'])){
+            $this->helper->printMessage("Related Product Rule missing a name. Row skipped", "warning");
+        }
+        if(empty($row['is_active'])){
+            $row['is_active'] == 'Y';
+        }
+        if(empty($row['conditions_serialized'])){
+            $row['conditions_serialized'] = '';
+        }
+        if(empty($row['actions_serialized'])){
+            $row['actions_serialized'] = '';
+        }
+        if(empty($row['positions_limit'])){
+            $row['positions_limit'] = 1;
+        }
+        if(empty($row['sort_order'])){
+            $row['sort_order'] = 1;
+        }
+        
+        $upsellModel = $this->ruleCollection->create()
+            ->addFieldToFilter('name', ['eq' => $row['name']])->getFirstItem();
+        if(!$upsellModel){
+            $upsellModel = $this->ruleFactory->create();
+        }
         $upsellModel->setName($row['name']);
         $upsellModel->setIsActive($row['is_active'] =='Y' ? 1 : 0);
         $upsellModel->setConditionsSerialized($this->converter->convertContent($row['conditions_serialized']));
@@ -88,35 +125,6 @@ class Upsells
             [$upsellModel]
         );
 
-        //$this->resourceModel->save($upsellModel);
         return true;
-    }
-
-    /**
-     * @param string $data
-     * @return mixed
-     */
-    private function convertSerializedData($data)
-    {
-        $regexp = '/\%(.*?)\%/';
-        preg_match_all($regexp, $data, $matches);
-        $replacement = null;
-        foreach ($matches[1] as $matchedId => $matchedItem) {
-            $extractedData = array_filter(explode(",", $matchedItem));
-            foreach ($extractedData as $extractedItem) {
-                $separatedData = array_filter(explode('=', $extractedItem));
-                if ($separatedData[0] == 'url_key') {
-                    if (!$replacement) {
-                        $replacement = $this->getCategoryReplacement($separatedData[1]);
-                    } else {
-                        $replacement .= ',' . $this->getCategoryReplacement($separatedData[1]);
-                    }
-                }
-            }
-            if (!empty($replacement)) {
-                $data = preg_replace('/' . $matches[0][$matchedId] . '/', $this->serializerInterface->serialize($replacement), $data);
-            }
-        }
-        return $data;
     }
 }

@@ -8,8 +8,8 @@ use Magento\PageBuilder\Api\Data\TemplateInterface;
 use Magento\PageBuilder\Model\TemplateFactory;
 use Magento\PageBuilder\Model\ResourceModel\Template\CollectionFactory as TemplateCollection;
 use MagentoEse\DataInstall\Model\Converter;
-use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\PageBuilder\Model\TemplateRepository;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class Templates
 {
@@ -28,24 +28,30 @@ class Templates
     /** @var TemplateRepository */
     protected $templateRepository;
 
+    /** @var Helper */
+    protected $helper;
+
     /**
      * Templates constructor.
      * @param TemplateFactory $templateFactory
      * @param TemplateCollection $templateCollection
      * @param Converter $converter
      * @param TemplateRepository $templateRepository
+     * @param Helper $helper
      */
     public function __construct(
         TemplateFactory $templateFactory,
         TemplateCollection $templateCollection,
         Converter $converter,
-        TemplateRepository $templateRepository
+        TemplateRepository $templateRepository,
+        Helper $helper
     ) {
 
         $this->templateFactory = $templateFactory;
         $this->templateCollection = $templateCollection;
         $this->converter = $converter;
         $this->templateRepository = $templateRepository;
+        $this->helper = $helper;
     }
 
     /**
@@ -56,6 +62,19 @@ class Templates
      */
     public function install(array $row, array $settings)
     {
+        if(empty($row['name'])){
+            $this->helper->printMessage("Page Builder Template is missing a name. Row skipped", "warning");
+        }
+        if(empty($row['content'])){
+            $row['content'] = '';
+        }
+        if(empty($row['created_for'])){
+            $row['created_for'] = 'any';
+        }
+        if(empty($row['preview_image'])){
+            $row['preview_image'] = 1;
+        }
+        
         $template = $this->templateCollection->create()
             ->addFieldToFilter(TemplateInterface::KEY_NAME, ['eq' => $row['name']])->getFirstItem();
         if(!$template){

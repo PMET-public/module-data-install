@@ -37,7 +37,7 @@ Use an alternate directory for the .csv files (default is *fixtures*). This woul
 - `bin/magento gxd:datainstall MySpace_MyData --files=customers.csv,pages.csv`
 Mostly used for testing.  You can pass a comma delimited list specific files you want loaded rather than loading everything
 
-- `bin/magento gxd:datainstall MySpace_MyData -r` Each data pack is logged and will only install once. The `-r` option allows you to reinstall an existing data pack.  If you are going to reinstall, it is a good idea to clear the cache first.  Some configurations are retained in cache, and you may see errors around stores not being found or gxd namespace errors if you reinstall.
+- `bin/magento gxd:datainstall MySpace_MyData -r` Each data pack is logged and will only install once. The `-r` option allows you to reinstall an existing data pack.  If you are going to reinstall, it is a good idea to clear the cache first.  Some configurations are retained in cache, and you may see errors around stores not being found or gxd namespace errors if you reinstall without clearing the cache.
 
 - If you need to install multiple data packs at the same time, you can chain commands together:`bin/magento gxd:datainstall MySpace_MyData;bin/magento gxd:datainstall MySpace_MyData2;bin/magento gxd:datainstall MySpace_MyData3`
 
@@ -396,17 +396,13 @@ Product attribute configurations can be complex. The purpose of this file is to 
 
 This file is used to add Related Products rules. At this time, the easiest method is to create the rules in an existing store, then take the serialized values from the database
 
-> Out of Scope: Updating of existing rules
-
 *Columns*
 
-**name** - Required.
+**name** - Required. Used as key to update existing rules
 
-**is\_active** - Required. Y or N
+**is\_active** - Y or N, Default = Y
 
 **conditions\_serialized** - Value taken from the`conditions_serialized` column in the `targetrule` table. Content is run through the [**Content Substitution**](#content-substitution) process that will replace identifiers, most likely category ids. Make sure to double quotes for csv file compatibilit.
-
-**conditions\_serialized** - Value taken from the`conditions_serialized` column in the `targetrule` table. Content is run through the [**Content Substitution**](#content-substitution) process that will replace identifiers, most likely category ids. Make sure to double quotes for csv file compatibility.
 
 **actions\_serialized** - Value taken from the`actions_serialized` column in the `targetrule` table. Content is run through the [**Content Substitution**](#content-substitution) process that will replace identifiers, most likely category ids. Make sure to double quotes for csv file compatibility.
 

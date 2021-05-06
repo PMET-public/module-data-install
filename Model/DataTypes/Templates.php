@@ -4,10 +4,12 @@
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
-use Magento\PageBuilder\Model\Template;
+use Magento\PageBuilder\Api\Data\TemplateInterface;
 use Magento\PageBuilder\Model\TemplateFactory;
-use Magento\PageBuilder\Model\TemplateRepository;
+use Magento\PageBuilder\Model\ResourceModel\Template\CollectionFactory as TemplateCollection;
 use MagentoEse\DataInstall\Model\Converter;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\PageBuilder\Model\TemplateRepository;
 
 class Templates
 {
@@ -17,27 +19,33 @@ class Templates
     /** @var TemplateFactory */
     protected $templateFactory;
 
-    /** @var TemplateRepository */
-    protected $templateRepository;
+    /** @var TemplateCollection */
+    protected $templateCollection;
 
     /** @var Converter */
     protected $converter;
 
+    /** @var TemplateRepository */
+    protected $templateRepository;
+
     /**
      * Templates constructor.
      * @param TemplateFactory $templateFactory
-     * @param TemplateRepository $templateRepository
+     * @param TemplateCollection $templateCollection
      * @param Converter $converter
+     * @param TemplateRepository $templateRepository
      */
     public function __construct(
         TemplateFactory $templateFactory,
-        TemplateRepository $templateRepository,
-        Converter $converter
+        TemplateCollection $templateCollection,
+        Converter $converter,
+        TemplateRepository $templateRepository
     ) {
 
         $this->templateFactory = $templateFactory;
-        $this->templateRepository = $templateRepository;
+        $this->templateCollection = $templateCollection;
         $this->converter = $converter;
+        $this->templateRepository = $templateRepository;
     }
 
     /**
@@ -48,7 +56,11 @@ class Templates
      */
     public function install(array $row, array $settings)
     {
-        $template = $this->templateFactory->create();
+        $template = $this->templateCollection->create()
+            ->addFieldToFilter(TemplateInterface::KEY_NAME, ['eq' => $row['name']])->getFirstItem();
+        if(!$template){
+            $template = $this->templateFactory->create();
+        }
         $template->setTemplate($this->converter->convertContent($row['content']));
         $template->setName($row['name']);
         $template->setCreatedFor($row['created_for']??'any');

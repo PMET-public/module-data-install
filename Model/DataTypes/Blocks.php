@@ -11,7 +11,8 @@ use Magento\Framework\Exception\LocalizedException;
 use MagentoEse\DataInstall\Model\DataTypes\Stores;
 use MagentoEse\DataInstall\Model\Converter;
 use Magento\Cms\Api\Data\BlockInterface;
-use  Magento\Cms\Api\GetBlockByIdentifierInterface;
+use Magento\Cms\Api\GetBlockByIdentifierInterface;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class Blocks
 {
@@ -31,6 +32,9 @@ class Blocks
     /** @var GetBlockByIdentifierInterface  */
     protected $getBlockByIdentifier;
 
+    /** @var Helper  */
+    protected $helper;
+
 
     /**
      * Blocks constructor.
@@ -39,19 +43,22 @@ class Blocks
      * @param GetBlockByIdentifierInterface $getBlockByIdentifierInterface
      * @param Converter $converter
      * @param Stores $stores
+     * @param Helper $helper
      */
     public function __construct(
         BlockInterfaceFactory $blockFactory,
         BlockRepositoryInterface $blockRepositoryInterface,
         GetBlockByIdentifierInterface $getBlockByIdentifierInterface,
         Converter $converter,
-        Stores $stores
+        Stores $stores,
+        Helper $helper
     ) {
         $this->blockFactory = $blockFactory;
         $this->converter = $converter;
         $this->stores = $stores;
         $this->blockRepository = $blockRepositoryInterface;
         $this->getBlockByIdentifier = $getBlockByIdentifierInterface;
+        $this->helper = $helper;
     }
 
     /**
@@ -61,9 +68,17 @@ class Blocks
      */
     public function install(array $row, array $settings)
     {
-        $row['content'] = $this->converter->convertContent($row['content']);
-
         
+        if(empty($row['identifier']) || empty($row['title'])){
+            $this->helper->printMessage("Block missing identifier or title, row skipped", "warning");
+            return true;
+        }
+        //set status as active if not defined properly
+        $row['is_active']??='Y';
+        $row['is_active'] = 'Y' ? 1:0;
+
+        $row['content'] = $this->converter->convertContent($row['content']??'');
+
          //get view id from view code, use admin if not defined
          if (!empty($row['store_view_code'])) {
             $viewId = $this->stores->getViewId(trim($row['store_view_code']));
@@ -75,7 +90,7 @@ class Blocks
         if(!$viewId){
             $viewId=0;
         }
-
+        
         try{
             /** @var BlockInterface $cmsBlock */
             $cmsBlock = $this->getBlockByIdentifier->execute($row['identifier'],$viewId);
@@ -83,16 +98,11 @@ class Blocks
             //if block isnt found, create a new one
             $cmsBlock = $this->blockFactory->create();
         }
-        
-        //set status as active if not defined
-        if (empty($row['is_active']) || $row['is_active']=='Y') {
-            $row['is_active'] = 1;
-        }
+
         $cmsBlock->setIdentifier($row['identifier']);
         $cmsBlock->setContent($row['content']);
         $cmsBlock->setTitle($row['title']);
         $cmsBlock->setData('stores',$viewId);
-        //$cmsBlock->setIsActive(!empty($row['is_active']) ?? 'Y');
         $cmsBlock->setIsActive($row['is_active']);
         $this->blockRepository->save($cmsBlock);
         unset($cmsBlock);

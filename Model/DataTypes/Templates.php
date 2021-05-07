@@ -64,15 +64,10 @@ class Templates
     {
         if(empty($row['name'])){
             $this->helper->printMessage("Page Builder Template is missing a name. Row skipped", "warning");
-        }
-        if(empty($row['content'])){
-            $row['content'] = '';
+            return true;
         }
         if(empty($row['created_for'])){
             $row['created_for'] = 'any';
-        }
-        if(empty($row['preview_image'])){
-            $row['preview_image'] = 1;
         }
         
         $template = $this->templateCollection->create()
@@ -80,10 +75,10 @@ class Templates
         if(!$template){
             $template = $this->templateFactory->create();
         }
-        $template->setTemplate($this->converter->convertContent($row['content']));
+        $template->setTemplate($this->converter->convertContent($row['content']??''));
         $template->setName($row['name']);
-        $template->setCreatedFor($row['created_for']??'any');
-        $template->setPreviewImage(self::TEMPLATE_DIR.$row['preview_image']);
+        $template->setCreatedFor($row['created_for']);
+        $template->setPreviewImage(self::TEMPLATE_DIR.$row['preview_image']??'');
         $this->templateRepository->save($template);
 
         return true;

@@ -239,8 +239,8 @@ Optional file: Creates users for the Magento Admin
 
 *File Name* - customer\_groups.csv
 
-Optional file: Used to create customer groups
-> Out of Scope: Because the name is the key, and the name is the only element, updating (renaming) existing customer groups is not supported
+Used to create customer groups
+> Out of Scope: Renaming cusomter groups. Assigning Tax Class.
 
 *Column*
 **name** - Required. Name of the customer group

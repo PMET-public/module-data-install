@@ -94,19 +94,7 @@ class Upsells
         if(empty($row['is_active'])){
             $row['is_active'] == 'Y';
         }
-        if(empty($row['conditions_serialized'])){
-            $row['conditions_serialized'] = '';
-        }
-        if(empty($row['actions_serialized'])){
-            $row['actions_serialized'] = '';
-        }
-        if(empty($row['positions_limit'])){
-            $row['positions_limit'] = 1;
-        }
-        if(empty($row['sort_order'])){
-            $row['sort_order'] = 1;
-        }
-        
+                
         $upsellModel = $this->ruleCollection->create()
             ->addFieldToFilter('name', ['eq' => $row['name']])->getFirstItem();
         if(!$upsellModel){
@@ -114,11 +102,11 @@ class Upsells
         }
         $upsellModel->setName($row['name']);
         $upsellModel->setIsActive($row['is_active'] =='Y' ? 1 : 0);
-        $upsellModel->setConditionsSerialized($this->converter->convertContent($row['conditions_serialized']));
-        $upsellModel->setActionsSerialized($this->converter->convertContent($row['actions_serialized']));
-        $upsellModel->setPositionsLimit($row['positions_limit']);
+        $upsellModel->setConditionsSerialized($this->converter->convertContent($row['conditions_serialized']??''));
+        $upsellModel->setActionsSerialized($this->converter->convertContent($row['actions_serialized']??''));
+        $upsellModel->setPositionsLimit($row['positions_limit']??1);
         $upsellModel->setApplyTo($applyTo);
-        $upsellModel->setSortOrder($row['sort_order']);
+        $upsellModel->setSortOrder($row['sort_order']??1);
         $this->appState->emulateAreaCode(
             Area::AREA_ADMINHTML,
             [$this->resourceModel, 'save'],

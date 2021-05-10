@@ -5,17 +5,16 @@
  */
 namespace MagentoEse\DataInstall\Model;
 
+use MagentoEse\DataInstall\Helper\Helper;
+use MagentoEse\DataInstall\Api\Data\InstallerInterfaceFactory;
+use MagentoEse\DataInstall\Api\InstallerRepositoryInterface;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Csv;
 use Magento\Framework\Filesystem\DirectoryList;
+use Magento\Framework\Filesystem\DriverInterface;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
-use Magento\Framework\ObjectManagerInterface;
-use Magento\Framework\Filesystem\DriverInterface;
-use MagentoEse\DataInstall\Helper\Helper;
-use MagentoEse\DataInstall\Api\Data\InstallerInterfaceFactory;
-use MagentoEse\DataInstall\Api\InstallerRepositoryInterface;
 
 class Process
 {
@@ -46,11 +45,11 @@ class Process
     /** @var array */
     private $settings;
 
-    /** @var FixtureManager  */
-    protected $fixtureManager;
-
     /** @var Csv  */
     protected $csvReader;
+
+    /** @var FixtureManager  */
+    protected $fixtureManager;
 
     /** @var DataTypes\Stores  */
     protected $storeInstall;
@@ -106,9 +105,6 @@ class Process
     /** @var DataTypes\MsiInventory */
     protected $msiInventoryInstall;
 
-    /** @var ObjectManagerInterface  */
-    protected $objectManager;
-
     /** @var DataTypes\AdminUsers  */
     protected $adminUsersInstall;
 
@@ -133,75 +129,109 @@ class Process
     /** @var InstallerRepositoryInterface */
     protected $dataInstallerRepository;
 
-    /** @var CustomerSegments */
+    /** @var Datatypes\CustomerSegments */
     protected $customerSegmentsInstall;
 
-    /** @var CatalogRules */
+    /** @var Datatypes\CatalogRules */
     protected $catalogRulesInstall;
+
+    /** @var Datatypes\Companies */
+    protected $companiesInstall;
+
+    /** @var Datatypes\CompanyRoles */
+    protected $companyRolesInstall;
+
+    /** @var Datatypes\CompanyUserRoles */
+    protected $companyUserRolesInstall;
+
+    /** @var Datatypes\RequisitionLists */
+    protected $requisitionListsInstall;
+
+    /** @var Datatypes\SharedCatalogs */
+    protected $sharedCatalogsInstall;
+
+    /** @var Datatypes\SharedCatalogCategories */
+    protected $sharedCatalogCategoriesInstall;
+
+    /** @var Datatypes\Teams */
+    protected $companyTeamsInstall;
 
     /**
      * Process constructor.
-     * @param Helper $helper
-     * @param SampleDataContext $sampleDataContext
-     * @param DataTypes\Stores $stores
-     * @param DataTypes\ProductAttributes $productAttributes
-     * @param DataTypes\Categories $categories
-     * @param DataTypes\Products $products
+     * @param CopyMedia $copyMedia
      * @param DirectoryList $directoryList
-     * @param DataTypes\Pages $pages
+     * @param DriverInterface $driverInterface
+     * @param Helper $helper
+     * @param InstallerInterfaceFactory $dataInstallerInterface
+     * @param InstallerRepositoryInterface $dataInstallerRepository
+     * @param SampleDataContext $sampleDataContext
+     * @param Validate $validate
+     * @param DataTypes\AdminUsers $adminUsers
+     * @param DataTypes\AdminRoles $adminRoles
+     * @param DataTypes\AdvancedPricing $advancedPricing
      * @param DataTypes\Blocks $blocks
-     * @param DataTypes\DynamicBlocks $dynamicBlocks
+     * @param DataTypes\CatalogRules $catalogRules
+     * @param DataTypes\Categories $categories
+     * @param Datatypes\Companies $companies
+     * @param DataTypes\CompanyRoles $companyRoles
+     * @param DataTypes\CompanyUserRoles $companyUserRoles
      * @param DataTypes\Configuration $configuration
      * @param DataTypes\CustomerGroups $customerGroups
      * @param DataTypes\CustomerAttributes $customerAttributes
      * @param DataTypes\Customers $customers
-     * @param DataTypes\Reviews $reviews
-     * @param DataTypes\Templates $templates
-     * @param Validate $validate
-     * @param DataTypes\Upsells $upsells
-     * @param CopyMedia $copyMedia
+     * @param DataTypes\CustomerSegments $customerSegments
+     * @param DataTypes\DynamicBlocks $dynamicBlocks
      * @param DataTypes\MsiInventory $msiInventory
-     * @param ObjectManagerInterface $objectManager
-     * @param DataTypes\AdminUsers $adminUsers
-     * @param DataTypes\AdminRoles $adminRoles
-     * @param DriverInterface $driverInterface
-     * @param DataTypes\AdvancedPricing $advancedPricing
-     * @param InstallerInterfaceFactory $dataInstallerInterface
-     * @param InstallerRepositoryInterface $dataInstallerRepository
-     * @param CustomerSegments $customerSegments
-     * @param CatalogRules $catalogRules
+     * @param DataTypes\Orders $orders
+     * @param DataTypes\Pages $pages
+     * @param DataTypes\ProductAttributes $productAttributes
+     * @param DataTypes\Products $products
+     * @param DataTypes\RequisitionLists $requisitionLists
+     * @param DataTypes\SharedCatalogs $sharedCatalogs
+     * @param DataTypes\SharedCatalogCategories $sharedCatalogCategories
+     * @param DataTypes\Stores $stores
+     * @param DataTypes\Reviews $reviews
+     * @param DataTypes\Teams $teams
+     * @param DataTypes\Templates $templates
+     * @param DataTypes\Upsells $upsells
      */
     public function __construct(
-        Helper $helper,
-        SampleDataContext $sampleDataContext,
-        DataTypes\Stores $stores,
-        DataTypes\ProductAttributes $productAttributes,
-        DataTypes\Categories $categories,
-        DataTypes\Products $products,
+        CopyMedia $copyMedia,
         DirectoryList $directoryList,
-        DataTypes\Pages $pages,
+        DriverInterface $driverInterface,
+        Helper $helper,
+        InstallerInterfaceFactory $dataInstallerInterface,
+        InstallerRepositoryInterface $dataInstallerRepository,
+        SampleDataContext $sampleDataContext,
+        Validate $validate,
+        DataTypes\AdminUsers $adminUsers,
+        DataTypes\AdminRoles $adminRoles,
+        DataTypes\AdvancedPricing $advancedPricing,
         DataTypes\Blocks $blocks,
-        DataTypes\DynamicBlocks $dynamicBlocks,
+        DataTypes\CatalogRules $catalogRules,
+        DataTypes\Categories $categories,
+        Datatypes\Companies $companies,
+        DataTypes\CompanyRoles $companyRoles,
+        DataTypes\CompanyUserRoles $companyUserRoles,
         DataTypes\Configuration $configuration,
         DataTypes\CustomerGroups $customerGroups,
         DataTypes\CustomerAttributes $customerAttributes,
         DataTypes\Customers $customers,
-        DataTypes\Reviews $reviews,
-        DataTypes\Templates $templates,
-        Validate $validate,
-        DataTypes\Upsells $upsells,
-        CopyMedia $copyMedia,
-        DataTypes\MsiInventory $msiInventory,
-        ObjectManagerInterface $objectManager,
-        DataTypes\AdminUsers $adminUsers,
-        DataTypes\AdminRoles $adminRoles,
-        DriverInterface $driverInterface,
-        DataTypes\AdvancedPricing $advancedPricing,
-        DataTypes\Orders $orders,
-        InstallerInterfaceFactory $dataInstallerInterface,
-        InstallerRepositoryInterface $dataInstallerRepository,
         DataTypes\CustomerSegments $customerSegments,
-        DataTypes\CatalogRules $catalogRules
+        DataTypes\DynamicBlocks $dynamicBlocks,
+        DataTypes\MsiInventory $msiInventory,
+        DataTypes\Orders $orders,
+        DataTypes\Pages $pages,
+        DataTypes\ProductAttributes $productAttributes,
+        DataTypes\Products $products,
+        DataTypes\RequisitionLists $requisitionLists,
+        DataTypes\SharedCatalogs $sharedCatalogs,
+        DataTypes\SharedCatalogCategories $sharedCatalogCategories,
+        DataTypes\Stores $stores,
+        DataTypes\Reviews $reviews,
+        DataTypes\Teams $teams,
+        DataTypes\Templates $templates,
+        DataTypes\Upsells $upsells
     ) {
         $this->helper = $helper;
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
@@ -224,7 +254,6 @@ class Process
         $this->upsellsInstall = $upsells;
         $this->copyMedia = $copyMedia;
         $this->msiInventoryInstall = $msiInventory;
-        $this->objectManager = $objectManager;
         $this->adminUsersInstall = $adminUsers;
         $this->adminRolesInstall = $adminRoles;
         $this->driverInterface = $driverInterface;
@@ -234,6 +263,13 @@ class Process
         $this->ordersInstall = $orders;
         $this->customerSegmentsInstall = $customerSegments;
         $this->catalogRulesInstall = $catalogRules;
+        $this->companiesInstall = $companies;
+        $this->companyRolesInstall = $companyRoles;
+        $this->companyUserRolesInstall = $companyUserRoles;
+        $this->requisitionListsInstall = $requisitionLists;
+        $this->sharedCatalogsInstall = $sharedCatalogs;
+        $this->sharedCatalogCategoriesInstall = $sharedCatalogCategories;
+        $this->companyTeamsInstall = $teams;
     }
 
     /**
@@ -356,7 +392,6 @@ class Process
                         $this->processRows($rows, $header, $this->dynamicBlockInstall);
                         break;
 
-                    
                     case "config_default.json":
                         $this->helper->printMessage("Loading Config Default Json", "info");
                         $this->processJson($fileContent, $this->configurationInstall);
@@ -407,7 +442,7 @@ class Process
                         $this->helper->printMessage("Loading Customer Segments", "info");
                         $this->processRows($rows, $header, $this->customerSegmentsInstall);
                         break;
-                    
+
                     case "catalog_rules.csv":
                         $this->helper->printMessage("Loading Catalog Price Rules", "info");
                         $this->processRows($rows, $header, $this->catalogRulesInstall);
@@ -443,43 +478,21 @@ class Process
                         break;
 
                     case "b2b_companies.csv":
-                        try {
-                            ///catch if b2b module is installed by trying to instantiate company
-                            $companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\Companies');
-                            $this->helper->printMessage("Loading B2B Data", "header");
-                            $this->processB2B($filePath, $fixtureDirectory);
-                        } catch (\ReflectionException $e) {
-                            $this->helper->printMessage("Companies cannot be loaded. Check that B2B module is included", "error");
-                        }
+                        $this->helper->printMessage("Loading B2B Data", "header");
+                        $this->processB2B($filePath, $fixtureDirectory);
                         break;
 
                     case "b2b_shared_catalogs.csv":
                         $this->helper->printMessage("Loading B2B Shared Catalogs", "info");
-                        try {
-                            $sharedCatalogsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\SharedCatalogs');
-                            $this->processRows($rows, $header, $sharedCatalogsInstall);
-                        } catch (\ReflectionException $e) {
-                            $this->helper->printMessage("Shared Catalogs cannot be loaded. Check that B2B module is included", "error");
-                        }
+                        $this->processRows($rows, $header, $this->sharedCatalogsInstall);
                         break;
                     case "b2b_shared_catalog_categories.csv":
                         $this->helper->printMessage("Loading Shared Catalog Categories", "info");
-                        try {
-                            $sharedCatalogCategoriesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\SharedCatalogCategories');
-                            $this->processFile($rows, $header, $sharedCatalogCategoriesInstall, $modulePath);
-                        } catch (\ReflectionException $e) {
-                            $this->helper->printMessage("Shared Catalog Categories cannot be loaded. Check that B2B module is included", "error");
-                        }
+                        $this->processFile($rows, $header, $this->sharedCatalogCategoriesInstall, $modulePath);
                         break;
                     case "b2b_requisition_lists.csv":
                         $this->helper->printMessage("Loading Requisition Lists", "info");
-                        try {
-                            $requisitionListInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\RequisitionLists');
-                            $this->processRows($rows, $header, $requisitionListInstall);
-
-                        } catch (\ReflectionException $e) {
-                            $this->helper->printMessage("Requsition Lists cannot be loaded. Check that B2B module is included", "error");
-                        }
+                        $this->processRows($rows, $header, $this->requisitionListInstall);
                         break;
 
                     case "orders.csv":
@@ -676,23 +689,18 @@ class Process
             $companiesData = $this->mergeCompanyData($companies, $customers, $salesReps);
             $this->helper->printMessage("Loading B2B Companies", "info");
 
-            $companiesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\Companies');
             foreach ($companiesData as $companyData) {
-                $companiesInstall->install($companyData, $this->settings);
+                $this->companiesInstall->install($companyData, $this->settings);
             }
 
             //add company roles
             $this->helper->printMessage("Loading B2B Company Roles", "info");
-            $companyRolesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\CompanyRoles');
-            $this->processFile($b2bData['b2b_company_roles.csv']['rows'], $b2bData['b2b_company_roles.csv']['header'], $companyRolesInstall, '');
+            $this->processFile($b2bData['b2b_company_roles.csv']['rows'], $b2bData['b2b_company_roles.csv']['header'], $this->companyRolesInstall, '');
             //assign roles to customers
-            $companyUserRolesInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\CompanyUserRoles');
-            $this->processRows($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $companyUserRolesInstall);
-
+            $this->processRows($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $this->companyUserRolesInstall);
             $this->helper->printMessage("Loading B2B Teams and Company Structure", "info");
             //create company structure
-            $companyTeamsInstall = $this->objectManager->create('MagentoEse\DataInstall\Model\DataTypes\Teams');
-            $this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $companyTeamsInstall);
+            $this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $this->companyTeamsInstall);
         }
     }
     /**

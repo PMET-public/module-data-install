@@ -122,8 +122,18 @@ class Reviews
      */
     public function install(array $row, array $settings)
     {
-        $storeId = $this->stores->getViewId($settings['store_view_code']);
-        //$storeId = [$this->storeManager->getDefaultStoreView()->getStoreId()];
+        //check for required columns
+        if(empty($row['sku']) || empty($row['reviewer']) || empty($row['summary']) || empty($row['review']) | empty($row['rating_code'])){
+            $this->helper->printMessage("Review skipped -- one or more of the required values is missing", "warning");
+            return true;
+        }
+        //get view id from view code, use admin if not defined
+        if (!empty($row['store_view_code'])) {
+            $storeId = $this->stores->getViewId(trim($row['store_view_code']));
+        } else {
+            $storeId = $this->stores->getViewId(trim($settings['store_view_code']));
+        }
+        
         $review = $this->prepareReview($row, $storeId);
         $this->createRating($row['rating_code'], $storeId);
         $productId = $this->getProductIdBySku($row['sku']);

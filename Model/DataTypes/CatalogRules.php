@@ -124,14 +124,9 @@ class CatalogRules {
             }
 
         }
-
-        //if no is_active, default to active
-        if(empty($row['is_active'])) {
-            $row['is_active']=1;
-        }
-        if(!is_numeric($row['is_active'])){
-            $row['is_active'] = $row['is_active']=='Y' ? 1:0;
-        }
+         //set status as active if not defined properly
+         $row['is_active']??='Y';
+         $row['is_active'] = 'Y' ? 1:0;
 
         //if no stop_rules_processing, default to N
         if(empty($row['stop_rules_processing'])) {

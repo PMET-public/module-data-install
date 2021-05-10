@@ -49,15 +49,20 @@ class CustomerGroups
      * @param array $data
      * @return bool
      */
-    public function install(array $data)
+    public function install(array $row)
     {
+        if(empty($row['name'])){
+            $this->helper->printMessage("Customer group missing name, row skipped", "warning");
+            return true;
+        }
+        
         $group = $this->groupInterfaceFactory->create();
-        $group->setCode($data['name'])->setTaxClassId(3);
+        $group->setCode($row['name'])->setTaxClassId(3);
         try {
             $this->groupRepository->save($group);
         } catch (\Exception $e) {
             //error will likely be trying to add duplicate group
-            $this->helper->printMessage("Customer Group ".$data['name']." not installed, another group with the same name likely exists", "warning");
+            $this->helper->printMessage("Customer Group ".$row['name']." not installed, another group with the same name likely exists", "warning");
         }
 
         return true;

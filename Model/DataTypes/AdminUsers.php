@@ -4,6 +4,7 @@
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Exception;
 use Magento\User\Api\Data\UserInterfaceFactory;
 use Magento\Authorization\Model\RoleFactory;
 use Magento\Authorization\Model\ResourceModel\Role\CollectionFactory as RoleCollection;
@@ -59,17 +60,31 @@ class AdminUsers
      */
     public function install(array $row, array $settings)
     {
+        if(empty($row['username']) || empty($row['firstname']) || empty($row['lastname']) || empty($row['password'])){
+            $this->helper->printMessage("Required data for admin_users.csv is missing. Row skipped", "warning");
+            return true;
+        }
         $user = $this->userCollection->create()->addFieldToFilter('username', ['eq' => $row['username']])->getFirstItem();
-            //create role if it doesnt exist
+        //create user if it doesnt exist
         if (!$user->getData('username')) {
             $user = $this->userFactory->create();
-            $user->setEmail($row['email']);
-            $user->setFirstName($row['firstname']);
-            $user->setLastName($row['lastname']);
-            $user->setUserName($row['username']);
-            $user->setPassword($row['password']);
+        }    
+        $user->setEmail($row['email']);
+        $user->setFirstName($row['firstname']);
+        $user->setLastName($row['lastname']);
+        $user->setUserName($row['username']);
+        $user->setPassword($row['password']);
+        try{
             $user->save();
+        }catch(Exception $e){
+            $messages = $e->getMessages();
+            foreach($messages as $message){
+                $this->helper->printMessage($message->getText(), "warning");
+            }
+            return true;
         }
+        
+        
         $this->addUserToRole($user, $row);
 
         return true;
@@ -83,11 +98,16 @@ class AdminUsers
     private function addUserToRole($user, $row)
     {
         if (!empty($row['role'])) {
+            //is there the group role, if not skip
             $role = $this->roleCollection->create()
             ->addFieldToFilter('role_name', ['eq' => $row['role']])->getFirstItem();
-            //create role if it doesnt exist
             if ($role->getData('role_name')) {
-                $userRole=$this->roleFactory->create();
+                //is there the role for the user?
+                $userRole = $this->roleCollection->create()
+                ->addFieldToFilter('role_name', ['eq' => $user->getUserName()])->getFirstItem();
+                if(!$userRole->getId()){
+                    $userRole=$this->roleFactory->create();
+                }
                 $userRole->setParentId($role->getId());
                 $userRole->setTreeLevel(2);
                 $userRole->setRoleType('U');
@@ -98,6 +118,9 @@ class AdminUsers
             } else {
                 $this->helper->printMessage("Role ".$row['role']." for user ".$row['username']." does not exist", "warning");
             }
+        }
+        else{
+            $this->helper->printMessage("Role ".$row['role']." for user ".$row['username']." does not exist", "warning");
         }
     }
 

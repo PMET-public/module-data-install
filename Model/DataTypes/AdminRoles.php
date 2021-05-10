@@ -49,8 +49,10 @@ class AdminRoles
             $rolesArray[] = array_combine($header, $row);
         }
         foreach ($rolesArray as $roleRow) {
-            $rolesData[$roleRow['role']][]=$roleRow['resource_id'];
-        }
+            if(!empty($roleRow['role'])&&!empty($roleRow['resource_id'])){
+                $rolesData[$roleRow['role']][]=$roleRow['resource_id'];
+            }
+         }
 
         foreach ($rolesData as $roleDataKey => $roleDataValue) {
             $role = $this->roleCollection->create()

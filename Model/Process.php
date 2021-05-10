@@ -210,9 +210,9 @@ class Process
         DataTypes\Blocks $blocks,
         DataTypes\CatalogRules $catalogRules,
         DataTypes\Categories $categories,
-        Datatypes\Companies $companies,
-        DataTypes\CompanyRoles $companyRoles,
-        DataTypes\CompanyUserRoles $companyUserRoles,
+        //Datatypes\Companies $companies,
+        //DataTypes\CompanyRoles $companyRoles,
+        //DataTypes\CompanyUserRoles $companyUserRoles,
         DataTypes\Configuration $configuration,
         DataTypes\CustomerGroups $customerGroups,
         DataTypes\CustomerAttributes $customerAttributes,
@@ -224,12 +224,12 @@ class Process
         DataTypes\Pages $pages,
         DataTypes\ProductAttributes $productAttributes,
         DataTypes\Products $products,
-        DataTypes\RequisitionLists $requisitionLists,
-        DataTypes\SharedCatalogs $sharedCatalogs,
-        DataTypes\SharedCatalogCategories $sharedCatalogCategories,
+        //DataTypes\RequisitionLists $requisitionLists,
+        //DataTypes\SharedCatalogs $sharedCatalogs,
+        //DataTypes\SharedCatalogCategories $sharedCatalogCategories,
         DataTypes\Stores $stores,
         DataTypes\Reviews $reviews,
-        DataTypes\Teams $teams,
+        //DataTypes\Teams $teams,
         DataTypes\Templates $templates,
         DataTypes\Upsells $upsells
     ) {
@@ -263,13 +263,13 @@ class Process
         $this->ordersInstall = $orders;
         $this->customerSegmentsInstall = $customerSegments;
         $this->catalogRulesInstall = $catalogRules;
-        $this->companiesInstall = $companies;
-        $this->companyRolesInstall = $companyRoles;
-        $this->companyUserRolesInstall = $companyUserRoles;
-        $this->requisitionListsInstall = $requisitionLists;
-        $this->sharedCatalogsInstall = $sharedCatalogs;
-        $this->sharedCatalogCategoriesInstall = $sharedCatalogCategories;
-        $this->companyTeamsInstall = $teams;
+        // $this->companiesInstall = $companies;
+        // $this->companyRolesInstall = $companyRoles;
+        // $this->companyUserRolesInstall = $companyUserRoles;
+        // $this->requisitionListsInstall = $requisitionLists;
+        // $this->sharedCatalogsInstall = $sharedCatalogs;
+        // $this->sharedCatalogCategoriesInstall = $sharedCatalogCategories;
+        // $this->companyTeamsInstall = $teams;
     }
 
     /**

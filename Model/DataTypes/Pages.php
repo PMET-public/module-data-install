@@ -20,6 +20,7 @@ use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollectionFactory as UrlRew
 use Magento\UrlRewrite\Model\UrlPersistInterface;
 use Magento\UrlRewrite\Service\V1\Data\UrlRewrite as UrlRewriteService;
 use MagentoEse\DataInstall\Model\Converter;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class Pages
 {
@@ -53,6 +54,9 @@ class Pages
     /** @var UrlPersistInterface */
     protected $urlPersist;
 
+    /** @var Helper */
+    protected $helper;
+
     /**
      * Pages constructor.
      * @param SampleDataContext $sampleDataContext
@@ -64,6 +68,7 @@ class Pages
      * @param UrlRewrite $urlRewrite
      * @param UrlRewriteCollection $urlRewriteCollection
      * @param UrlPersistInterface $urlPersist
+     * @param Helper $helper
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -74,7 +79,8 @@ class Pages
         SearchCriteriaBuilder $searchCriteria,
         UrlRewrite $urlRewrite,
         UrlRewriteCollection $urlRewriteCollection,
-        UrlPersistInterface $urlPersist
+        UrlPersistInterface $urlPersist,
+        Helper $helper
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -86,6 +92,7 @@ class Pages
         $this->urlRewrite = $urlRewrite;
         $this->urlRewriteCollection = $urlRewriteCollection;
         $this->urlPersist = $urlPersist;
+        $this->helper = $helper;
     }
 
     /**
@@ -154,7 +161,7 @@ class Pages
                         if ($updatePage->getStores()[0]==$this->getStoreIds($row['store_view_code'])[0]) {
                             //update when store is found
                             $updatePage->load($row['identifier'], 'identifier');
-                            $this->pageRepository->save($updatePage->addData($row));
+                             $this->pageRepository->save($updatePage->addData($row));
                             $foundPage =1;
                         }
                     }
@@ -170,9 +177,14 @@ class Pages
                         ]
                     );
                     $page = $this->pageInterfaceFactory->create();
-                    $page->addData($row)
+                    try{
+                        $page->addData($row)
                         ->setStores($this->getStoreIds($row['store_view_code']))
                         ->save();
+                    }catch (Exception $e){
+                        $this->helper->printMessage("The Page ".$row['title']." cannot be updated.  It is likely conflicting with page data set elsewhere.","warning");
+                    }
+                    
                 }
             }
         }

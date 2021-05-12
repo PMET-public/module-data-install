@@ -11,6 +11,7 @@ use Magento\Cms\Api\Data\BlockInterfaceFactory;
 use Magento\Framework\Data\Tree\Node;
 use Magento\Store\Api\Data\StoreInterfaceFactory;
 use Magento\Store\Model\StoreManagerInterface;
+use MagentoEse\DataInstall\Helper\Helper;
 use MagentoEse\DataInstall\Model\Converter;
 
 class Categories
@@ -42,6 +43,9 @@ class Categories
      /** @var Converter  */
      protected $converter;
 
+     /** @var Helper  */
+     protected $helper;
+
     /**
      * Categories constructor.
      * @param CategoryInterfaceFactory $categoryFactory
@@ -58,7 +62,8 @@ class Categories
         StoreInterfaceFactory $storeFactory,
         BlockInterfaceFactory $blockFactory,
         Configuration $configuration,
-        Converter $converter
+        Converter $converter,
+        Helper $helper
     ) {
         $this->categoryFactory = $categoryFactory;
         $this->resourceCategoryTreeFactory = $resourceCategoryTreeFactory;
@@ -67,6 +72,7 @@ class Categories
         $this->blockFactory = $blockFactory;
         $this->configuration = $configuration;
         $this->converter = $converter;
+        $this->helper = $helper;
     }
 
     /**

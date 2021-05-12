@@ -370,7 +370,7 @@ The standard Magento Advanced Pricing import file is used. If you export from an
 
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
 Product attribute configurations can be complex. The purpose of this file is to address the most common settings.
-> Out of Scope: Updating Attribute codes. Any attribute setting not currently listed. Swatches
+> Out of Scope: Any attribute setting not currently listed. Swatches
 
 *Columns*
 

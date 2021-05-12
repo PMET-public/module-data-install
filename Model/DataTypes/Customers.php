@@ -7,6 +7,7 @@
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Exception;
 use Magento\Customer\Api\AccountManagementInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\AddressRepositoryInterface;
@@ -182,7 +183,13 @@ class Customers
                 foreach($addressesToKeep as $checking){
                     if($checking->getStreet()==$address->getStreet()){
                         //remove duplicate
-                        $this->addressRespository->delete($address);
+                        try{
+                            $this->addressRespository->delete($address);
+                        }catch(Exception $e){
+                            // There is an edge case on a data reload that if a reindex doesnt occur after the original
+                            // load, the reload can fail deleting an address.
+                        }
+                        
                         $removed = true;
                         break;
                     }

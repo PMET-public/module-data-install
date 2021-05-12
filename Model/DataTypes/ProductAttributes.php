@@ -14,12 +14,15 @@ use Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\Collection;
 use Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\CollectionFactory as OptionCollectionFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
-use Magento\Store\Model\Store;
-use Magento\Store\Model\StoreManagerInterface;
+use MagentoEse\DataInstall\Model\DataTypes\Stores;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class ProductAttributes
 {
     const DEFAULT_ATTRIBUTE_SET = 'Default';
+    
+    //input types not supported swatch_visual,swatch_text,media_image
+    const VALID_INPUT_TYPES = ['text','textarea','texteditor','pagebuilder','date','datetime','boolean','multiselect','select','price','weee'];
 
     /** @var AttributeFactory  */
     protected $attributeFactory;
@@ -39,8 +42,11 @@ class ProductAttributes
     /** @var  */
     protected $entityTypeId;
 
-    /** @var StoreManagerInterface  */
-    protected $storeManager;
+    /** @var Stores  */
+    protected $stores;
+
+     /** @var Helper  */
+     protected $helper;
 
     /**
      * ProductAttributes constructor.
@@ -49,7 +55,8 @@ class ProductAttributes
      * @param OptionCollectionFactory $attrOptionCollectionFactory
      * @param Product $productHelper
      * @param EavConfig $eavConfig
-     * @param StoreManagerInterface $storeManager
+     * @param Stores $stores
+     * @param Helper $helper
      */
     public function __construct(
         AttributeFactory $attributeFactory,
@@ -57,84 +64,112 @@ class ProductAttributes
         OptionCollectionFactory $attrOptionCollectionFactory,
         Product $productHelper,
         EavConfig $eavConfig,
-        StoreManagerInterface $storeManager
+        Stores $stores,
+        Helper $helper
     ) {
         $this->attributeFactory = $attributeFactory;
         $this->attributeSetFactory = $attributeSetFactory;
         $this->attrOptionCollectionFactory = $attrOptionCollectionFactory;
         $this->productHelper = $productHelper;
         $this->eavConfig = $eavConfig;
-        $this->storeManager = $storeManager;
+        $this->stores = $stores;
+        $this->helper = $helper;
     }
 
     /**
-     * @param array $data
+     * @param array $row
      * @return bool
      * @throws LocalizedException
      */
-    public function install(array $data)
+    public function install(array $row)
     {
+        //Required:attribute_code
+        if(empty($row['attribute_code'])){
+            $this->helper->printMessage("attribute_code value is required in product_recs.csv. Row skipped","warning");
+            return true;
+        }
+
+         //validate frontend_input values
+         if(!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])){
+            $this->helper->printMessage("frontend_input value in product_recs.csv is invalid. Row skipped","warning");
+        }
+        
+        if(!empty($row['store_view_code'])){
+            $storeViewId = $this->stores->getViewId($row['store_view_code']);
+        } else{
+            $storeViewId = 0;
+            $row['store_view_code'] = 'admin';
+        }
+        
         /** @var Attribute $attribute */
-        $attribute = $this->eavConfig->getAttribute('catalog_product', $this->validateCode($data['attribute_code']));
+        $attribute = $this->eavConfig->getAttribute('catalog_product', $this->validateCode($row['attribute_code']));
         if (!$attribute) {
+            //Required if new - frontend_label, frontend_input
+            if(empty($row['frontend_label']) || empty($row['frontend_input'])){
+                $this->helper->printMessage("frontend_label and frontend_input are required when created a product attribute. Row skipped","warning");
+                return true;
+            }
+            //validate frontend_input values
+
+
             $attribute = $this->attributeFactory->create();
-        } elseif (!empty($data['only_update_sets']) && $data['only_update_sets']=='Y') {
+        } elseif (!empty($row['only_update_sets']) && $row['only_update_sets']=='Y') {
             //facilitate adding existing attributes to set without changes.  Most likely used for system attributes
-            $this->setAttributeSets($data, $attribute);
+            $this->setAttributeSets($row, $attribute);
             $this->eavConfig->clear();
             return true;
         }
-        //attribute_code,frontend_label,frontend_input,option,attribute_set
 
-        //TODO:split out between default_label (frontend)and default store view label * may not be necessary
-        //TODO: validate frontend_input values
-        //TODO: swatch colors or images
-        $frontendLabel = explode("\n", $data['frontend_label']);
-        if (count($frontendLabel) > 1) {
-            $data['frontend_label'] = [];
-            $data['frontend_label'][Store::DEFAULT_STORE_ID] = $frontendLabel[0];
-            $data['frontend_label'][$this->storeManager->getDefaultStoreView()->getStoreId()] =
-                $frontendLabel[1];
-        }
+        //add store id key to frontend_label
+        $row['frontend_label'][$storeViewId] = $row['frontend_label'];
 
-        $data['option'] = $this->getOption($attribute, $data);
-        $data['source_model'] = $this->productHelper->getAttributeSourceModelByInputType(
-            $data['frontend_input']
+
+        $row['option'] = $this->getOption($attribute, $row);
+        $row['source_model'] = $this->productHelper->getAttributeSourceModelByInputType(
+            $row['frontend_input']
         );
-        $data['backend_model'] = $this->productHelper->getAttributeBackendModelByInputType(
-            $data['frontend_input']
+        $row['backend_model'] = $this->productHelper->getAttributeBackendModelByInputType(
+            $row['frontend_input']
         );
-        $data += ['is_filterable' => 0, 'is_filterable_in_search' => 0];
-        $data['backend_type'] = $attribute->getBackendTypeByInput($data['frontend_input']);
+        $row += ['is_filterable' => 0, 'is_filterable_in_search' => 0];
+        $row['backend_type'] = $attribute->getBackendTypeByInput($row['frontend_input']);
 
-        $attribute->addData($data);
+        $attribute->addData($row);
         $attribute->setIsUserDefined(1);
 
         $attribute->setEntityTypeId($this->getEntityTypeId());
         $attribute->save();
         //$attributeId = $attribute->getId();
-        $this->setAttributeSets($data, $attribute);
+        $this->setAttributeSets($row, $attribute);
 
         $this->eavConfig->clear();
 
         return true;
     }
 
+    protected function validateFrontendInputs($frontendInput){
+        if(is_numeric(array_search($frontendInput,self::VALID_INPUT_TYPES))){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     /**
      * @param Attribute $attribute
-     * @param array $data
+     * @param array $row
      * @return array
      */
-    protected function getOption(Attribute $attribute, array $data)
+    protected function getOption(Attribute $attribute, array $row)
     {
         $result = [];
-        $data['option'] = explode("\n", $data['option']);
+        $row['option'] = explode("\n", $row['option']);
         /** @var Collection $options */
         $options = $this->attrOptionCollectionFactory->create()
             ->setAttributeFilter($attribute->getId())
             ->setPositionOrder('asc', true)
             ->load();
-        foreach ($data['option'] as $value) {
+        foreach ($row['option'] as $value) {
             if (!$options->getItemByColumnValue('value', $value)) {
                 $result[] = $value;
             }
@@ -223,21 +258,21 @@ class ProductAttributes
     }
 
     /**
-     * @param array $data
+     * @param array $row
      * @param Attribute $attribute
      * @throws LocalizedException
      */
-    private function setAttributeSets(array $data, Attribute $attribute): void
+    private function setAttributeSets(array $row, Attribute $attribute): void
     {
      //if attribute_set is empty, or not included, set to default
-        if (empty($data['attribute_set'])) {
-            $data['attribute_set'] = [self::DEFAULT_ATTRIBUTE_SET];
+        if (empty($row['attribute_set'])) {
+            $row['attribute_set'] = [self::DEFAULT_ATTRIBUTE_SET];
         } else {
-            $data['attribute_set'] = explode("\n", $data['attribute_set']);
+            $row['attribute_set'] = explode("\n", $row['attribute_set']);
         }
 
-        if (is_array($data['attribute_set'])) {
-            foreach ($data['attribute_set'] as $setName) {
+        if (is_array($row['attribute_set'])) {
+            foreach ($row['attribute_set'] as $setName) {
                 $setName = trim($setName);
                 $attributeSet = $this->processAttributeSet($setName);
                 $attributeGroupId = $attributeSet->getDefaultGroupId();
@@ -247,7 +282,7 @@ class ProductAttributes
                     ->setAttributeGroupId($attributeGroupId)
                     ->setAttributeSetId($attributeSet->getId())
                     ->setEntityTypeId($this->getEntityTypeId())
-                    ->setSortOrder(!empty($data['position']) ? $data['position'] : 999)
+                    ->setSortOrder(!empty($row['position']) ? $row['position'] : 999)
                     ->save();
             }
         }

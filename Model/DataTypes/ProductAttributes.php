@@ -88,11 +88,6 @@ class ProductAttributes
             $this->helper->printMessage("attribute_code value is required in product_recs.csv. Row skipped","warning");
             return true;
         }
-
-         //validate frontend_input values
-         if(!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])){
-            $this->helper->printMessage("frontend_input value in product_recs.csv is invalid. Row skipped","warning");
-        }
         
         if(!empty($row['store_view_code'])){
             $storeViewId = $this->stores->getViewId($row['store_view_code']);
@@ -103,14 +98,17 @@ class ProductAttributes
         
         /** @var Attribute $attribute */
         $attribute = $this->eavConfig->getAttribute('catalog_product', $this->validateCode($row['attribute_code']));
-        if (!$attribute) {
+        if (!$attribute->getId()) {
             //Required if new - frontend_label, frontend_input
             if(empty($row['frontend_label']) || empty($row['frontend_input'])){
                 $this->helper->printMessage("frontend_label and frontend_input are required when created a product attribute. Row skipped","warning");
                 return true;
             }
             //validate frontend_input values
-
+            if(!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])){
+                $this->helper->printMessage("frontend_input value in product_recs.csv is invalid. Row skipped","warning");
+                return true;
+            }
 
             $attribute = $this->attributeFactory->create();
         } elseif (!empty($row['only_update_sets']) && $row['only_update_sets']=='Y') {
@@ -119,25 +117,44 @@ class ProductAttributes
             $this->eavConfig->clear();
             return true;
         }
+        
+        if(!empty($row['frontend_label'])){
+            $existingLabels = $attribute->getFrontendLabels();
+            
+            $frontEndLabels = [];
+            /** @var FrontendLabel $label */
+            foreach($existingLabels as $label){
+                $frontEndLabels[$label->getStoreId()] = $label->getLabel();
+            }
 
-        //add store id key to frontend_label
-        $row['frontend_label'][$storeViewId] = $row['frontend_label'];
-
-
-        $row['option'] = $this->getOption($attribute, $row);
-        $row['source_model'] = $this->productHelper->getAttributeSourceModelByInputType(
-            $row['frontend_input']
-        );
-        $row['backend_model'] = $this->productHelper->getAttributeBackendModelByInputType(
-            $row['frontend_input']
-        );
+            if($storeViewId==0){
+                $frontEndLabels[0] = $row['frontend_label'];
+            }else{
+                $existingLabels = $attribute->getFrontendLabels();
+                $frontEndLabels[$storeViewId] = $row['frontend_label'];
+                $frontEndLabels[0] = $attribute->getDefaultFrontendLabel();
+            }
+           
+            $row['frontend_label'] = $frontEndLabels;
+        }
+        if(!empty($row['option'])){
+            $row['option'] = $this->getOption($attribute, $row);
+        }
+        if(!empty($row['frontend_input'])){
+           $row['source_model'] = $this->productHelper->getAttributeSourceModelByInputType($row['frontend_input']);
+           $row['backend_model'] = $this->productHelper->getAttributeBackendModelByInputType($row['frontend_input']);
+           $row['backend_type'] = $attribute->getBackendTypeByInput($row['frontend_input']); 
+        }
+        
         $row += ['is_filterable' => 0, 'is_filterable_in_search' => 0];
-        $row['backend_type'] = $attribute->getBackendTypeByInput($row['frontend_input']);
-
+        
+        //remove empty array keys
+        $row = $this->removeEmptyColumns($row);
         $attribute->addData($row);
         $attribute->setIsUserDefined(1);
 
         $attribute->setEntityTypeId($this->getEntityTypeId());
+        
         $attribute->save();
         //$attributeId = $attribute->getId();
         $this->setAttributeSets($row, $attribute);
@@ -287,4 +304,14 @@ class ProductAttributes
             }
         }
     }
+
+    private function removeEmptyColumns($row){
+        foreach($row as $key=>$value){
+            if ($row[$key]==''){
+                unset($row[$key]);
+            }
+        }
+        return $row;
+    }
+
 }

@@ -13,6 +13,8 @@ use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCo
 use Magento\SharedCatalog\Model\SharedCatalogAssignment;
 use Magento\SharedCatalog\Model\CatalogPermissionManagement;
 use Magento\SharedCatalog\Model\ResourceModel\Permission\CategoryPermissions\ScheduleBulk;
+use Magento\Framework\App\Area as AppArea;
+use Magento\Framework\App\State;
 
 class SharedCatalogCategories
 {
@@ -42,6 +44,9 @@ class SharedCatalogCategories
      /** @var ScheduleBulk */
      protected $scheduleBulk;
 
+     /** @var State */
+    protected $appState;
+
     /**
      * SharedCatalogCategories constructor.
      * @param SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface
@@ -61,7 +66,8 @@ class SharedCatalogCategories
         Stores $stores,
         SharedCatalogAssignment $sharedCatalogAssignment,
         CatalogPermissionManagement $catalogPermissionManagement,
-        ScheduleBulk $scheduleBulk
+        ScheduleBulk $scheduleBulk,
+        State $appState
     ) {
         $this->sharedCatalogRepository = $sharedCatalogRepositoryInterface;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
@@ -71,6 +77,7 @@ class SharedCatalogCategories
         $this->sharedCatalogAssignment = $sharedCatalogAssignment;
         $this->catalogPermissionManagement = $catalogPermissionManagement;
         $this->scheduleBulk = $scheduleBulk;
+        $this->appState = $appState;
     }
 
     /**
@@ -104,7 +111,27 @@ class SharedCatalogCategories
             if ($catalog) {
                 $catalogId = $catalog->getId();
                 //remove current categories
-                $this->categoryManagementInterface->unassignCategories($catalogId, $this->categoryManagementInterface->getCategories($catalogId));
+                ///this returns category ids, it should be categories.
+                // get an instance of CategoryCollection
+                $catIds = $this->categoryManagementInterface->getCategories($catalogId);
+                if(count($catIds) > 0){
+                    $categories = $this->categoryCollection->create();
+                    
+                    // add a filter to get the IDs you need
+                    $categories->addFieldToFilter('entity_id', $this->categoryManagementInterface->getCategories($catalogId));
+                    //$r=$this->categoryManagementInterface->getCategories($catalogId);
+                    $catlist=[];
+                    foreach($categories as $cat){
+                        $catlist[] = $cat;
+                    }
+                    $this->appState->emulateAreaCode(
+                        AppArea::AREA_ADMINHTML,
+                        [$this->categoryManagementInterface, 'unassignCategories'],
+                        [$catalogId, $catlist]
+                    );
+                    //$this->categoryManagementInterface->unassignCategories($catalogId, $catlist);
+                }
+                
 
                 //get ids of added categories by path
                 $newCategories = $this->getCategoriesByPath($categoryArray, $settings);

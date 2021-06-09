@@ -372,7 +372,7 @@ This file is used to add and update Product Attributes and assign them to attrib
 Product attribute configurations can be complex. The purpose of this file is to address the most common settings. All settings are supported using database column names and values.
 
 
-> Out of Scope: Swatches
+> Out of Scope: Swatches, translations of attribute options
 
 *Columns*
 

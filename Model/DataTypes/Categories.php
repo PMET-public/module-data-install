@@ -94,14 +94,15 @@ class Categories
             return true;
         }
 
-        if(!empty($row['store_view_code'])){
-            $storeViewId = $this->stores->getViewId($row['store_view_code']);
-        } else{
-            $storeViewId = 0;
-            $row['store_view_code'] = 'admin';  
-        }
+        //if(!empty($row['store_view_code'])){
+        //    $storeViewId = $this->stores->getViewId($row['store_view_code']);
+        //} else{
+        //    $storeViewId = 0;
+        //    $row['store_view_code'] = 'admin';  
+        //}
         
-        //$row['store_view_code'] = 'admin';
+        
+        $row['store_view_code'] = $settings['store_view_code'];
 
         $category = $this->getCategoryByPath($row['path'] . '/' . $row['name'],$row['store_view_code']);
         if (!$category) {
@@ -114,7 +115,7 @@ class Categories
                     'is_anchor' => $row['is_anchor'] ?? 1,
                     'include_in_menu' => $row['include_in_menu'] ?? 1,
                     'url_key' => $row['url_key'] ?? '',
-                    'store_id' => $storeViewId
+                    'store_id' => 0
                 ];
                 $category = $this->categoryFactory->create();
                 $category->setData($data)

@@ -369,8 +369,10 @@ The standard Magento Advanced Pricing import file is used. If you export from an
 *File Name* - product\_attributes.csv
 
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
-Product attribute configurations can be complex. The purpose of this file is to address the most common settings.
-> Out of Scope: Updating Attribute codes. Any attribute setting not currently listed. Swatches
+Product attribute configurations can be complex. The purpose of this file is to address the most common settings. All settings are supported using database column names and values.
+
+
+> Out of Scope: Swatches, translations of attribute options
 
 *Columns*
 
@@ -389,6 +391,15 @@ Product attribute configurations can be complex. The purpose of this file is to 
 **attribute\_set** - Optional. Carriage return delimited list of Attribute Sets that the Attribute will be added to.  Sets will be created as needed based on the Default set. If no value is given, the Attribute will be added to the Default set.
 
 **only\_update\_sets** - Optional Value=Y. Only requires attribute\_code. This would be flagged in the case where the only action is to add an attribute to a set.  Most likely usage would be for assigning default system attributes to a set.
+
+*Translating Front End Labels*
+After the attributes are created, the translation of front end lables for additional stores can be added with a simpler file. Only one store code per front end lable is allowed per file at this point
+
+**store\_view\_code** - Optional, will set the default label if not defined
+
+**attribute\_code** - Required
+
+**frontend\_label** - Required
 
 ### Upsells
 

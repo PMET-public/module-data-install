@@ -546,7 +546,7 @@ class Stores
      * @param array $data
      * @return StoreInterface
      */
-    private function getView(array $data)
+    public function getView(array $data)
     {
         $viewList = $this->storeRepository->getList();
         foreach ($viewList as $view) {

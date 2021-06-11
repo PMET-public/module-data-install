@@ -46,9 +46,6 @@ class Categories
     /** @var Stores  */
     protected $stores;
 
-     /** @var Helper  */
-     protected $helper;
-
     /**
      * Categories constructor.
      * @param CategoryInterfaceFactory $categoryFactory

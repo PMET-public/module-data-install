@@ -227,7 +227,7 @@ class Customers
                 $customer['_website']=$customer['site_code'];
                 unset($customer['site_code']);
             }
-            if (!empty($customer['website'])||$customer['website']=='') {
+            if (!empty($customer['website']) && $customer['website']!='') {
                 $customer['_website']=$customer['website'];
                 unset($customer['website']);
             }

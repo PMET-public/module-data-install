@@ -10,7 +10,7 @@ The Data Install module facilitates the loading of sample data by a series of ge
 
 `bin/magento gxd:datainstall <module>`
 Optional arguments:
-`--fixtures[=FIXTURES]  Change fixtures directory [default: "fixtures"]`
+`--data[=DATA]  Change data directory [default: "data"]`
  `--files[=FILES]        Comma delimited list of individual files to load`
  `-r, --reload[=RELOAD]      Force Reload`
 
@@ -31,8 +31,8 @@ Install data from the `MySpace_MyData` module. This module can reside in either 
 - `bin/magento gxd:datainstall var/import/importdata/MyData`
 Install data from any directory under the Magento root.  In this case `var/import/importdata/MyData`. This does not need to be a Magento module, but only needs to contain the .csv files and media
 
-- `bin/magento gxd:datainstall MySpace_MyData --fixtures=store1`
-Use an alternate directory for the .csv files (default is *fixtures*). This would allow you to potentally have multiple data sets in the same module *fixtures*,*data*,*store1*, etc.
+- `bin/magento gxd:datainstall MySpace_MyData --data=store1`
+Use an alternate directory for the .csv files (default is *data*). This would allow you to potentally have multiple data sets in the same module *data*,*data2*,*store1*, etc.
 
 - `bin/magento gxd:datainstall MySpace_MyData --files=customers.csv,pages.csv`
 Mostly used for testing.  You can pass a comma delimited list specific files you want loaded rather than loading everything

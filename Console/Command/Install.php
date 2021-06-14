@@ -32,7 +32,7 @@ use Magento\Framework\ObjectManagerInterface;
 class Install extends Command
 {
     const MODULE = 'module';
-    const FIXTURES = 'fixtures';
+    const FIXTURES = 'data';
     const FILES = 'files';
     const RELOAD_FLAG = 'reload';
     
@@ -60,7 +60,7 @@ class Install extends Command
                 InputArgument::REQUIRED,
                 'Module'
             ),
-            new InputOption(self::FIXTURES, null, InputOption::VALUE_OPTIONAL, 'Change default Fixtures directory', 'fixtures'),
+            new InputOption(self::FIXTURES, null, InputOption::VALUE_OPTIONAL, 'Change default data directory', 'data'),
             new InputOption(self::FILES, null, InputOption::VALUE_OPTIONAL, 'Comma delimited list of individual files to load'),
             new InputOption(self::RELOAD_FLAG, '-r', InputOption::VALUE_OPTIONAL, 'Force Reload', 0)
         ];

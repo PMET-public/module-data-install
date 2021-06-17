@@ -299,8 +299,9 @@ Accepted values 2= Apply to Visitors, 1= Apply to Registered Users, 0= Both Visi
 
 Optional file: Used to create customers
 
-Uses the same file format as the native Magento customer import with the exeption of one column:
+Uses the same file format as the native Magento customer import with the exeption of two columns:
 **add_to_autofill** - Optional.  This will add the customer as a selectable option to the [Autofil Module](https://github.com/PMET-public/module-autofill "Autofil Module")
+**group** - Optional.  Name of the customer group.  If not defined, default will be `General` 
 
 At this time, only one address is supported and used for both billing and shipping.  However, new addresses can be added from a second module, esentially updating the customer but adding, not replacing addresses.  Last address in getst set as default.
 

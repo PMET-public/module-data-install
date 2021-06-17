@@ -77,7 +77,7 @@ class Customers
     /** @var CustomerRepositoryInterface */
      protected $customerRepositoryInterface;
 
-     protected $importUnsafeColumns=['company_admin', 'role', 'add_to_autofill'];
+     protected $importUnsafeColumns=['company_admin', 'role', 'add_to_autofill','group'];
 
     /**
      * Customers constructor.
@@ -151,16 +151,9 @@ class Customers
         $this->import($cleanCustomerArray,$productValidationStrategy);
         //return true;
         $startingElement = 1;
-        foreach ($rows as $row) {
-            $data = [];
-            foreach ($row as $key => $value) {
-                $data[$header[$key]] = $value;
-            }
-
-            $row = $data;
-            ///catch if customer doesnt exist
+        foreach ($cleanCustomerArray as $row) {
             try{
-                $customer = $this->customerRepositoryInterface->get($row['email']);
+                $customer = $this->customerRepositoryInterface->get($row['email'],$this->stores->getWebsiteId($row['_website']));
             
             if(!empty($row['store_view_code'])){
                 $customer->setCreatedIn($this->stores->getViewName($row['store_view_code']));
@@ -216,12 +209,10 @@ class Customers
     }
 
     private function cleanDataForImport($customerArray){
-        //remove columns used for other purposes, but throw errors on import
+        
         $newCustomerArray=[];
         foreach($customerArray as $customer){
-            foreach($this->importUnsafeColumns as $column){
-                unset($customer[$column]);
-            }
+            
             //change website column if incorrect
             if (!empty($customer['site_code'])) {
                 $customer['_website']=$customer['site_code'];
@@ -248,12 +239,21 @@ class Customers
             if(empty($customer['group_id'])){
                 $customer['group_id']=1;
             }
+            //if there is a group column, convert to id
+            if(!empty($customer['group'])){
+                $customer['group_id']=$this->customerGroups->getCustomerGroupId($customer['group']);
+            }
+            
             //add _address_firstname, _address_lastname if not present
             if(empty($customer['_address_firstname'])){
                 $customer['_address_firstname']=$customer['firstname'];
             }
             if(empty($customer['_address_lastname'])){
                 $customer['_address_lastname']=$customer['lastname'];
+            }
+            //remove columns used for other purposes, but throw errors on import
+            foreach($this->importUnsafeColumns as $column){
+                unset($customer[$column]);
             }
             $newCustomerArray[]=$customer;
         }

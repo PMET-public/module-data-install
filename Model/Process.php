@@ -282,10 +282,10 @@ class Process
      * @throws FileSystemException
      */
 
-    public function loadFiles($fileSource, $fixtureDirectory = "fixtures", array $fileOrder = self::ALL_FILES, $reload = 0)
+    public function loadFiles($fileSource, $load, array $fileOrder = self::ALL_FILES, $reload = 0)
     {
-        //TODO: Absolute path - need to copy files
-
+        
+        $fixtureDirectory = "data";
         //bypass if data is already installed
         if ($this->isModuleInstalled($fileSource)==1 && $reload===0) {
             //output reload option if cli is used
@@ -296,6 +296,17 @@ class Process
         } else {
             $this->registerModule($fileSource);
         }
+
+        //if there is no load value, check for .default flag
+        $filePath = $this->getDataPath($fileSource);
+        if($load==''){
+            try{
+                $load = $this->driverInterface->fileGetContents($filePath.$fixtureDirectory.'/.default');
+            }catch(FileSystemException $fe){
+                $fixtureDirectory = $filePath;
+            }
+        }
+        $fixtureDirectory = 'data/'.$load;
 
         $fileCount = 0;
         if (count($fileOrder)==0) {
@@ -315,7 +326,7 @@ class Process
                     break;
             }
         }
-        $filePath = $this->getDataPath($fileSource);
+        //$filePath = $this->getDataPath($fileSource);
         $this->helper->printMessage("Copying Media", "info");
         $this->copyMedia->moveFiles($filePath);
         $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);

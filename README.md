@@ -10,9 +10,9 @@ The Data Install module facilitates the loading of sample data by a series of ge
 
 `bin/magento gxd:datainstall <module>`
 Optional arguments:
-`--data[=DATA]  Change data directory [default: "data"]`
- `--files[=FILES]        Comma delimited list of individual files to load`
- `-r, --reload[=RELOAD]      Force Reload`
+`--load[=LOAD]  Data directory to load`
+ `--files[=FILES] Comma delimited list of individual files to load`
+ `-r, --reload[=RELOAD] Force Reload`
 
 Using the CLI has multiple advantages to the `setup:upgade` method
 
@@ -23,6 +23,10 @@ Using the CLI has multiple advantages to the `setup:upgade` method
 
 **If you are using the CLI method, your modules should not have the Setup classes.  This could lead to data conflicts and errors.**
 
+###### Datapack data format
+Each datapack needs to have a `data` subdirectory. This can contain the data to install, or it can contain one or more subdirectories with different installation options.  For example, in our Grocery data pack there are directories for a `standalone` or `store` installation. Those can be specified by using the `--load=` option.
+A `.default` file can be created under the `data` directory containing the name of the directory you want installed if none is specified with the `--load=` option.
+
 ###### Usage
 
 - `bin/magento gxd:datainstall MySpace_MyData`
@@ -31,8 +35,8 @@ Install data from the `MySpace_MyData` module. This module can reside in either 
 - `bin/magento gxd:datainstall var/import/importdata/MyData`
 Install data from any directory under the Magento root.  In this case `var/import/importdata/MyData`. This does not need to be a Magento module, but only needs to contain the .csv files and media
 
-- `bin/magento gxd:datainstall MySpace_MyData --data=store1`
-Use an alternate directory for the .csv files (default is *data*). This would allow you to potentally have multiple data sets in the same module *data*,*data2*,*store1*, etc.
+- `bin/magento gxd:datainstall MySpace_MyData --load=store1`
+Use a specific directory for the .csv files This would allow you to potentally have multiple data sets in the same module *data*,*data2*,*store1*, etc.
 
 - `bin/magento gxd:datainstall MySpace_MyData --files=customers.csv,pages.csv`
 Mostly used for testing.  You can pass a comma delimited list specific files you want loaded rather than loading everything

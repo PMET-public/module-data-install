@@ -12,4 +12,8 @@
         "firegento/fastsimpleimport": "*",
         "magento/extension-b2b": "^1.2"
     }
+    ,
+    "config": {
+        "bin-dir": "../../../../vendor/bin"
+    }
 }

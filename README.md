@@ -10,9 +10,9 @@ The Data Install module facilitates the loading of sample data by a series of ge
 
 `bin/magento gxd:datainstall <module>`
 Optional arguments:
-`--fixtures[=FIXTURES]  Change fixtures directory [default: "fixtures"]`
- `--files[=FILES]        Comma delimited list of individual files to load`
- `-r, --reload[=RELOAD]      Force Reload`
+`--load[=LOAD]  Data directory to load`
+ `--files[=FILES] Comma delimited list of individual files to load`
+ `-r, --reload[=RELOAD] Force Reload`
 
 Using the CLI has multiple advantages to the `setup:upgade` method
 
@@ -23,6 +23,10 @@ Using the CLI has multiple advantages to the `setup:upgade` method
 
 **If you are using the CLI method, your modules should not have the Setup classes.  This could lead to data conflicts and errors.**
 
+###### Datapack data format
+Each datapack needs to have a `data` subdirectory. This can contain the data to install, or it can contain one or more subdirectories with different installation options.  For example, in our Grocery data pack there are directories for a `standalone` or `store` installation. Those can be specified by using the `--load=` option.
+A `.default` file can be created under the `data` directory containing the name of the directory you want installed if none is specified with the `--load=` option.
+
 ###### Usage
 
 - `bin/magento gxd:datainstall MySpace_MyData`
@@ -31,8 +35,8 @@ Install data from the `MySpace_MyData` module. This module can reside in either 
 - `bin/magento gxd:datainstall var/import/importdata/MyData`
 Install data from any directory under the Magento root.  In this case `var/import/importdata/MyData`. This does not need to be a Magento module, but only needs to contain the .csv files and media
 
-- `bin/magento gxd:datainstall MySpace_MyData --fixtures=store1`
-Use an alternate directory for the .csv files (default is *fixtures*). This would allow you to potentally have multiple data sets in the same module *fixtures*,*data*,*store1*, etc.
+- `bin/magento gxd:datainstall MySpace_MyData --load=store1`
+Use a specific directory for the .csv files This would allow you to potentally have multiple data sets in the same module *data*,*data2*,*store1*, etc.
 
 - `bin/magento gxd:datainstall MySpace_MyData --files=customers.csv,pages.csv`
 Mostly used for testing.  You can pass a comma delimited list specific files you want loaded rather than loading everything
@@ -295,8 +299,9 @@ Accepted values 2= Apply to Visitors, 1= Apply to Registered Users, 0= Both Visi
 
 Optional file: Used to create customers
 
-Uses the same file format as the native Magento customer import with the exeption of one column:
+Uses the same file format as the native Magento customer import with the exeption of two columns:
 **add_to_autofill** - Optional.  This will add the customer as a selectable option to the [Autofil Module](https://github.com/PMET-public/module-autofill "Autofil Module")
+**group** - Optional.  Name of the customer group.  If not defined, default will be `General` 
 
 At this time, only one address is supported and used for both billing and shipping.  However, new addresses can be added from a second module, esentially updating the customer but adding, not replacing addresses.  Last address in getst set as default.
 
@@ -369,8 +374,10 @@ The standard Magento Advanced Pricing import file is used. If you export from an
 *File Name* - product\_attributes.csv
 
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
-Product attribute configurations can be complex. The purpose of this file is to address the most common settings.
-> Out of Scope: Updating Attribute codes. Any attribute setting not currently listed. Swatches
+Product attribute configurations can be complex. The purpose of this file is to address the most common settings. All settings are supported using database column names and values.
+
+
+> Out of Scope: Swatches, translations of attribute options
 
 *Columns*
 
@@ -389,6 +396,15 @@ Product attribute configurations can be complex. The purpose of this file is to 
 **attribute\_set** - Optional. Carriage return delimited list of Attribute Sets that the Attribute will be added to.  Sets will be created as needed based on the Default set. If no value is given, the Attribute will be added to the Default set.
 
 **only\_update\_sets** - Optional Value=Y. Only requires attribute\_code. This would be flagged in the case where the only action is to add an attribute to a set.  Most likely usage would be for assigning default system attributes to a set.
+
+*Translating Front End Labels*
+After the attributes are created, the translation of front end lables for additional stores can be added with a simpler file. Only one store code per front end lable is allowed per file at this point
+
+**store\_view\_code** - Optional, will set the default label if not defined
+
+**attribute\_code** - Required
+
+**frontend\_label** - Required
 
 ### Upsells
 

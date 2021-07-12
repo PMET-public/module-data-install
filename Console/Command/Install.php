@@ -12,8 +12,8 @@
  *
  * Options
  *
- * data=fixtures - can be any other sub directory in the data pack
- * files=stores.csv,products.csv - comma delimite list of specific files to load
+ * --data=<directory> - can be any other sub directory in the data pack
+ * --files=stores.csv,products.csv - comma delimite list of specific files to load
  * -r force reload if already loaded
  **/
 
@@ -31,8 +31,8 @@ use Magento\Framework\ObjectManagerInterface;
 
 class Install extends Command
 {
-    const MODULE = 'module';
-    const FIXTURES = 'fixtures';
+    const DATAPACK = 'datapack';
+    const LOAD = 'load';
     const FILES = 'files';
     const RELOAD_FLAG = 'reload';
     
@@ -56,11 +56,11 @@ class Install extends Command
     {
         $options = [
             new InputArgument(
-                self::MODULE,
+                self::DATAPACK,
                 InputArgument::REQUIRED,
-                'Module'
+                'Module name or path to datapack'
             ),
-            new InputOption(self::FIXTURES, null, InputOption::VALUE_OPTIONAL, 'Change default Fixtures directory', 'fixtures'),
+            new InputOption(self::LOAD, null, InputOption::VALUE_OPTIONAL, 'Data directory to load', ''),
             new InputOption(self::FILES, null, InputOption::VALUE_OPTIONAL, 'Comma delimited list of individual files to load'),
             new InputOption(self::RELOAD_FLAG, '-r', InputOption::VALUE_OPTIONAL, 'Force Reload', 0)
         ];
@@ -80,8 +80,8 @@ class Install extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $module = $input->getArgument(self::MODULE);
-        $fixtures = $input->getOption(self::FIXTURES);
+        $module = $input->getArgument(self::DATAPACK);
+        $load = $input->getOption(self::LOAD);
         $reload = $input->getOption(self::RELOAD_FLAG);
         $files = $input->getOption(self::FILES);
         if ($files=='') {
@@ -90,8 +90,8 @@ class Install extends Command
             $fileArray = explode(",", $files);
         }
         $process = $this->objectManagerInterface->create(Process::class);
-        if ($process->loadFiles($module, $fixtures, $fileArray, $reload)==0) {
-            $output->writeln("No files found to load in " . $module);
+        if ($process->loadFiles($module, $load, $fileArray, $reload)==0) {
+            $output->writeln("No files found to load in " . $module." Check the your value of --load if used, or the default set in the datapack");
         }
         return $this;
     }

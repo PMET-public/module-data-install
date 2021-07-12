@@ -59,11 +59,11 @@ class CopyMedia
     /** @var Filesystem */
     protected $fileSystem;
 
-    /** @var ReadInterface  */
-    protected $directoryRead;
-
     /** @var WriteInterface  */
     protected $directoryWrite;
+
+    /** @var ReadInterface  */
+    protected $directoryRead;
 
     /** @var DirectoryList */
     protected $directoryList;

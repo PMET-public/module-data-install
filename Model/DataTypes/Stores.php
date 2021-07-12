@@ -546,7 +546,7 @@ class Stores
      * @param array $data
      * @return StoreInterface
      */
-    private function getView(array $data)
+    public function getView(array $data)
     {
         $viewList = $this->storeRepository->getList();
         foreach ($viewList as $view) {
@@ -695,7 +695,7 @@ class Stores
             //make sure theme is registered
             $this->themeRegistration->register();
             $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $data['theme'])->getThemeId();
-            //set theme for Venia store
+            //set theme
             $this->configuration->saveConfig("design/theme/theme_id", $themeId, "stores", $storeViewId);
         }
     }

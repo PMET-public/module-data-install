@@ -21,6 +21,7 @@ use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Api\Data\StoreInterfaceFactory;
 use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Api\Data\WebsiteInterfaceFactory;
+use Magento\Store\Api\WebsiteRepositoryInterface;
 use Magento\Store\Api\GroupRepositoryInterface;
 use Magento\Store\Api\GroupRepositoryInterfaceFactory;
 use Magento\Store\Api\StoreRepositoryInterface;
@@ -45,6 +46,9 @@ class Stores
 
     /** @var WebsiteResourceModel  */
     protected $websiteResourceModel;
+
+    /** @var WebsiteRepositoryInterface  */
+    protected $websiteRepository;
 
     /** @var GroupResourceModel  */
     protected $groupResourceModel;
@@ -99,6 +103,7 @@ class Stores
      * @param Helper $helper
      * @param WebsiteInterfaceFactory $websiteInterfaceFactory
      * @param WebsiteResourceModel $websiteResourceModel
+     * @param WebsiteRepositoryInterface $websiteRepository
      * @param GroupResourceModel $groupResourceModel
      * @param GroupInterfaceFactory $groupInterfaceFactory
      * @param GroupRepositoryInterface $groupRepository
@@ -121,6 +126,7 @@ class Stores
         Helper $helper,
         WebsiteInterfaceFactory $websiteInterfaceFactory,
         WebsiteResourceModel $websiteResourceModel,
+        WebsiteRepositoryInterface $websiteRepository,
         GroupResourceModel $groupResourceModel,
         GroupInterfaceFactory $groupInterfaceFactory,
         GroupRepositoryInterface $groupRepository,
@@ -141,6 +147,7 @@ class Stores
         $this->helper = $helper;
         $this->websiteInterfaceFactory = $websiteInterfaceFactory;
         $this->websiteResourceModel = $websiteResourceModel;
+        $this->websiteRepository = $websiteRepository;
         $this->groupResourceModel = $groupResourceModel;
         $this->groupInterfaceFactory = $groupInterfaceFactory;
         $this->groupRepository = $groupRepository;
@@ -174,6 +181,7 @@ class Stores
         if (!empty($data['site_code'])) {
             //fix site code if its not correct
             $data['site_code'] = $this->validateCode($data['site_code']);
+            $data['site_code'] = $this->replaceBaseWebsiteCode($data['site_code']);
             $this->helper->printMessage("-updating site", "info");
             $website = $this->setSite($data);
             //if there is a host value, set base urls
@@ -493,6 +501,29 @@ class Stores
     private function getWebsite(array $data)
     {
         return  $this->websiteInterfaceFactory->create()->load($data['site_code']);
+    }
+
+
+    /**
+      * @return string
+     */
+    public function getDefaultWebsiteCode()
+    {
+        $defaultWebsite = $this->websiteRepository->getDefault();
+        return $defaultWebsite->getCode();
+    }
+
+    /**
+      * @return string
+      * In the situations where the default website code may not be 'base'
+      * get the value of the default website code
+     */
+    public function replaceBaseWebsiteCode($websiteCode)
+    {
+        if($websiteCode=='base'){
+            $websiteCode = $this->websiteRepository->getDefault()->getCode();
+        }
+        return $websiteCode;
     }
 
     /**

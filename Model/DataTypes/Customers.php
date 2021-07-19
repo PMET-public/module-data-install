@@ -215,11 +215,11 @@ class Customers
             
             //change website column if incorrect
             if (!empty($customer['site_code'])) {
-                $customer['_website']=$customer['site_code'];
+                $customer['_website']=$this->stores->replaceBaseWebsiteCode($customer['site_code']);
                 unset($customer['site_code']);
             }
             if (!empty($customer['website']) && $customer['website']!='') {
-                $customer['_website']=$customer['website'];
+                $customer['_website']=$this->stores->replaceBaseWebsiteCode($customer['website']);
                 unset($customer['website']);
             }
 

@@ -62,6 +62,14 @@ Even though `RecurringData.php` is used, its first run is logged so it only runs
 
 Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](https://github.com/PMET-public/module-storystore-sample "https://github.com/PMET-public/module-storystore-sample")
 
+###Handling of the default `base` website
+
+When Magento installs, a default web site is created with a site code of `base`. In order to facilitate the ease of re-use of data packs, most are created assuming that the `base` web site exists. The data installer will make adjustments in the case that the `base` site code has been changed.
+
+If the data that is being installed calls for a `base` website, and that site does not exist, the Data Installer will substitute `base` with the site code of the default web site. 
+
+Of course you can always specify any site code where appropriate in the data.
+
 ------------
 
 ## Data Files

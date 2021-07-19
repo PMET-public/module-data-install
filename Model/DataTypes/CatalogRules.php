@@ -118,6 +118,7 @@ class CatalogRules {
         $siteCodes = explode(",", $row['site_code']);
         $siteIds = [];
         foreach($siteCodes as $siteCode){
+            $siteCode = $this->stores->replaceBaseWebsiteCode($siteCode);
             $siteId = $this->stores->getWebsiteId(trim($siteCode));
             if($siteId){
                 $siteIds[] = $siteId;

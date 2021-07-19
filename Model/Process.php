@@ -282,9 +282,8 @@ class Process
      * @throws FileSystemException
      */
 
-    public function loadFiles($fileSource, $load, array $fileOrder = self::ALL_FILES, $reload = 0)
+    public function loadFiles($fileSource, $load ='', array $fileOrder = self::ALL_FILES, $reload = 0)
     {
-        
         $fixtureDirectory = "data";
         //bypass if data is already installed
         if ($this->isModuleInstalled($fileSource)==1 && $reload===0) {
@@ -646,6 +645,9 @@ class Process
                 }
             }
         }
+        //if website requested is "base" get the default website code in case it has changed
+        //the is mostly to get around changed webside codes for livesearch environments
+        $setupArray['site_code'] = $this->storeInstall->replaceBaseWebsiteCode($setupArray['site_code']);
         return $setupArray;
     }
 

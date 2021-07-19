@@ -63,15 +63,40 @@ class AdvancedPricing
             if (empty($productRow['tier_price_website'])) {
                 $productRow['tier_price_website'] = self::DEFAULT_WEBSITE;
             }
+
             if (empty($productRow['tier_price_customer_group'])) {
                 $productRow['tier_price_customer_group'] = self::DEFAULT_CUSTOMER_GROUP;
             }
             $updatedProductsArray[]=$productRow;
         }
-
+        $updatedProductsArray = $this->replaceBaseWebsiteCodes($updatedProductsArray,$settings);
         $this->import($updatedProductsArray, $productValidationStrategy);
 
         return true;
+    }
+
+     /**
+     * @param array $products
+     * @param array $settings
+     * @return array
+     */
+    private function replaceBaseWebsiteCodes($products,$settings){
+        $i=0;
+        foreach ($products as $product) {
+            //product_websites
+            if (!empty($product['tier_price_website'])){
+                ///value may be a comma delimited list e.g. notbase,test
+                $websiteArray = explode(",",$product['tier_price_website']);
+                if(is_int(array_search('base',$websiteArray))){
+                    $websiteArray[array_search('base',$websiteArray)]=$this->stores->replaceBaseWebsiteCode('base');
+                    $product['tier_price_website'] = implode(",",$websiteArray);
+                }
+            } 
+            
+            $products[$i] = $product;
+            $i++;
+        }
+        return $products;
     }
 
     /**

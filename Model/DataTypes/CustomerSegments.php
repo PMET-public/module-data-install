@@ -92,6 +92,7 @@ class CustomerSegments
         $siteCodes = explode(",", $row['site_code']);
         $siteIds = [];
         foreach($siteCodes as $siteCode){
+            $siteCode = $this->stores->replaceBaseWebsiteCode($siteCode);
             $siteId = $this->stores->getWebsiteId($siteCode);
             if($siteId){
                 $siteIds[] = $this->stores->getWebsiteId($siteCode);

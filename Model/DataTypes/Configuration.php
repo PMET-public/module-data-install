@@ -82,6 +82,7 @@ class Configuration
             if (!empty($row['scope_code'])) {
                 if ($scope=='website' || $scope=='websites') {
                     $scope = 'websites';
+                    $row['scope_code'] = $this->stores->replaceBaseWebsiteCode($row['scope_code']);
                     $scopeId = $this->stores->getWebsiteId($row['scope_code']);
                 } elseif ($scope=='store' || $scope=='stores') {
                     $scope = 'stores';

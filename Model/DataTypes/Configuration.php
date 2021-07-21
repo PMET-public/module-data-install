@@ -179,9 +179,9 @@ class Configuration
      * @param string $scopeCode
      * @return mixed
      */
-    public function getConfig(string $path, string $scope, string $scopeCode)
+    public function getConfig(string $path, string $scopeType, string $scopeCode)
     {
-        return $this->scopeConfig->getValue($path, $scope, $scopeCode);
+        return $this->scopeConfig->getValue($path, $scopeType, $scopeCode);
     }
 
     /**

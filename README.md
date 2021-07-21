@@ -187,7 +187,12 @@ Optional file: This file is used to add and update Sites, Stores, Store Views an
 
 **view\_is\_active** - Optional: values = Y/N. Default = N. If a view is set as default for a store, it cannot be deactivated.
 
-**host** - Optional: Used to set the Base Urls for a site.  Should just be the domain name (example: luma.com).  This is set at the website level. If it needs to be set for another scope, that can be done in the config.json or config.csv files.
+**host** - Optional: Used to set the Base Urls for a site.  There are 3 allowed values
+1. The desired domain name. Can use subdomains and subdirectories (example: `luma.com`, `store.luma.com`, `luma.com/canada`).
+1. `subdomain` - If you are using different subdomains for website, a base url will be generated based on the `site_code` and  default base url. (example: if the `site_code` is `us` and the default base url is `http://site.test`, the resulting base urls for this site will be `http://us.site.test` & `https://us.site.test` )
+1. `subdirectory` - If you are using different subdirectories for website, a base url will be generated based on the `site_code` and  default base url. (example: if the `site_code` is `us` and the default base url is `http://site.test`, the resulting base urls for this site will be `http://site.test/us` & `https://site.test/us` )
+
+This is set at the website level. If it needs to be set for another scope, that can be done in the config.json or config.csv files.
 
 **theme** - Optional: Assigns a theme to the store view. This should be the path of the theme directory from the Vendor namespace. For example Magento/luma or MagentoEse/venia
 

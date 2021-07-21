@@ -11,6 +11,7 @@ use Magento\CmsUrlRewrite\Model\CmsPageUrlRewriteGenerator;
 use Magento\Config\Model\ResourceModel\Config as ResourceConfig;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Area as AppArea;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\State;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\LocalizedException;
@@ -98,6 +99,10 @@ class Stores
     /** @var ThemeCollection */
     protected $themeCollection;
 
+    /** @var ScopeConfigInterface */
+    protected $scopeConfig;
+
+
     /**
      * Stores constructor.
      * @param Helper $helper
@@ -120,6 +125,7 @@ class Stores
      * @param State $appState
      * @param ThemeRegistration $themeRegistration
      * @param ThemeCollection $themeCollection
+     * @param ScopeConfigInterface $scopeConfig
      */
 
     public function __construct(
@@ -142,7 +148,8 @@ class Stores
         CmsPageUrlRewriteGenerator $cmsPageUrlRewriteGenerator,
         State $appState,
         ThemeRegistration $themeRegistration,
-        ThemeCollection $themeCollection
+        ThemeCollection $themeCollection,
+        ScopeConfigInterface $scopeConfig
     ) {
         $this->helper = $helper;
         $this->websiteInterfaceFactory = $websiteInterfaceFactory;
@@ -164,6 +171,7 @@ class Stores
         $this->appState = $appState;
         $this->themeRegistration = $themeRegistration;
         $this->themeCollection = $themeCollection;
+        $this->scopeConfig = $scopeConfig;
     }
 
     /**
@@ -186,7 +194,16 @@ class Stores
             $website = $this->setSite($data);
             //if there is a host value, set base urls
             if (!empty($data['host'])) {
-                $this->setBaseUrls($data['host'], $website->getId());
+                switch($data['host']){
+                    case 'subdirectory':
+                        $this->setBaseUrls($this->getBaseUrlHost()."/".$data['site_code'], $website->getId());
+                        break;
+                    case 'subdomain':
+                        $this->setBaseUrls($data['site_code'].".".$this->getBaseUrlHost(), $website->getId());
+                        break;
+                    default :
+                      $this->setBaseUrls($data['host'], $website->getId());
+                }
             }
 
             //if there is no store code, skip store and view
@@ -714,6 +731,15 @@ class Stores
     {
         $this->configuration->saveConfig('web/unsecure/base_url', 'http://' . $host . '/', 'websites', $websiteId);
         $this->configuration->saveConfig('web/secure/base_url', 'https://' . $host . '/', 'websites', $websiteId);
+    }
+
+    /**
+     * @return string
+     */
+    private function getBaseUrlHost(): string
+    {
+        $baseUrl = $this->scopeConfig->getValue('web/unsecure/base_url','default',0);
+        return parse_url($baseUrl, PHP_URL_HOST);
     }
 
     /**

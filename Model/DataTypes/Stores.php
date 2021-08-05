@@ -653,6 +653,21 @@ class Stores
         return  $view->getId();
     }
 
+
+     /**
+     * @param string $viewCode
+     * @return string
+     */
+    public function getViewIdsFromCodeList(string $viewCodes)
+    {
+        $returnList=[];
+        $allCodes = explode(",",$viewCodes);
+        foreach($allCodes as $code){
+            $returnList[]=$this->getViewId(trim($code));
+        }
+        return implode(",",$returnList);
+    }
+
      /**
      * @param string $viewCode
      * @return int

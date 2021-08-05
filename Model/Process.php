@@ -21,7 +21,7 @@ class Process
     const ALL_FILES = ['stores.csv','config_default.json','config_default.csv','config_vertical.json','config_vertical.csv',
     'config_secret.json','config_secret.csv','config.json','config.csv',
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','customer_segments.csv',
-    'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','catalog_rules.csv',
+    'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv'];
 
@@ -31,7 +31,7 @@ class Process
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
     'customer_segments.csv','blocks.csv','categories.csv'];
 
-    const STAGE2 = ['products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','catalog_rules.csv',
+    const STAGE2 = ['products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv'];
 
@@ -74,6 +74,9 @@ class Process
 
     /** @var DataTypes\DynamicBlocks  */
     protected $dynamicBlockInstall;
+
+    /** @var DataTypes\Widgets  */
+    protected $widgetInstall;
 
     /** @var DataTypes\Configuration  */
     protected $configurationInstall;
@@ -181,6 +184,7 @@ class Process
      * @param DataTypes\Customers $customers
      * @param DataTypes\CustomerSegments $customerSegments
      * @param DataTypes\DynamicBlocks $dynamicBlocks
+     * @param DataTypes\Widgets $widgets
      * @param DataTypes\MsiInventory $msiInventory
      * @param DataTypes\Orders $orders
      * @param DataTypes\Pages $pages
@@ -219,6 +223,7 @@ class Process
         DataTypes\Customers $customers,
         DataTypes\CustomerSegments $customerSegments,
         DataTypes\DynamicBlocks $dynamicBlocks,
+        DataTypes\Widgets $widgets,
         DataTypes\MsiInventory $msiInventory,
         DataTypes\Orders $orders,
         DataTypes\Pages $pages,
@@ -244,6 +249,7 @@ class Process
         $this->pageInstall = $pages;
         $this->blockInstall = $blocks;
         $this->dynamicBlockInstall = $dynamicBlocks;
+        $this->widgetInstall = $widgets;
         $this->configurationInstall = $configuration;
         $this->customerGroupInstall = $customerGroups;
         $this->customerAttributeInstall = $customerAttributes;
@@ -400,6 +406,11 @@ class Process
                     case "dynamic_blocks.csv":
                         $this->helper->printMessage("Loading Dynamic Blocks", "info");
                         $this->processRows($rows, $header, $this->dynamicBlockInstall);
+                        break;
+
+                    case "widgets.csv":
+                        $this->helper->printMessage("Loading Widgets", "info");
+                        $this->processRows($rows, $header, $this->widgetInstall);
                         break;
 
                     case "config_default.json":

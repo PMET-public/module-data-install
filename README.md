@@ -114,6 +114,9 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**dynamic_blocks.csv**](#dynamic-blocks) - Creates Dynamic Blocks. Includes Page Builder compatibility
 
+[**widgets.csv**](#widgets) - It is recommended to create widgets in a Magneto store and then extract them via DB query. The data is too complex to create manually. A single layout update per widget is supported at this time.
+
+
 [**pages.csv**](#pages) - Creates and updates pages. Includes Page Builder compatibility
 
 [**templates.csv**](#templates) - Create Page Builder templates from existing Page Builder content
@@ -121,7 +124,6 @@ Each element of potential sample data is encapsulated in its own file:
 [**reviews.csv**](#reviews) - Creates reviews and ratings
 
 *To be added*
-**widgets.csv**
 **cart\_rules.csv**
 **Staging**
 **orders, refunds, credit memos**
@@ -497,6 +499,48 @@ This file is used to add or update blocks.  Updates are made by using the key of
 **title** - Required - Same as Block Title in the UI
 
 **content** - Optional. Body of the page. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers for Page Builder compatibility
+
+### Widgets
+
+*File Name* - widgets.csv
+
+This file is used to add or update widgets.  Updates are made by using the key of title
+
+Because widgets have a complex data structure, it is recommeneded that they be created in an existing magento instance and exported via DB query:
+`select wi.title, wi.instance_type,t.theme_path as 'theme', wi.store_ids as 'store_view_codes', wi.widget_parameters,wi.sort_order,wp.page_group,wp.
+layout_handle,wp.block_reference,wp.page_for,wp.entities,wp.page_template
+from widget_instance_page wp, widget_instance wi, theme t
+where wp.instance_id = wi.instance_id
+and wi.theme_id = t.theme_id`
+
+A single layout update per widget is supported at this time.
+
+The result will need a few edits to work properly: The ids in `store_view_codes` will need to be replaced with their approproiate codes. Ids in `widget_parameters` will need to be replaced by tokens depending on the entiity type as they will be substituted by the [**Content Substitution**](#content-substitution) process. The ids in `entities` will also need to be replaced by product or category tokens depending on the entity type you defined when you selected that the layout was only to be applied to specific categories
+
+*Columns*
+**title** - Required - Same as Widget Title in the UI
+**store_view_codes** - Optional.  Will default to `admin` (all stores). Can be a comma delimited list for applying to multiple views
+> If you want a page to be available across all All Store Views, use the value of **admin** as the store_view_code
+
+**instance_type** - Required. Type as defined in the UI, which is the class name
+
+**theme** - Required. Path of theme to apply the widget to (`Magento/blank`,`Magento/luma`)
+
+**widget_parameters** - Optional. JSON structure of the definition of the widget. This will include layout information and content and options defined in Widget Options. Ids should be replaced with tokens for [**Content Substitution**](#content-substitution)
+
+**sort_order** - Optional. Sort Order in UI
+
+**page_group** - Optional. Dislay On in layout updates in UI
+
+**layout_handle** - Optional. Layout applying to the page_group
+
+**block_reference** - Optional. Container in UI, where the widget is positioned
+
+**page_for** - Optional. (`all` or `specific`). Will be set as `specific` if the widget is applied to specific categories or products
+
+**entities** - Optional.  Will be populated by ids if the widget is applied to specific products or categories. Ids should be replaced with tokens for [**Content Substitution**](#content-substitution) 
+
+**page_template** - Optional. System template used to apply the widget
 
 ### Pages
 

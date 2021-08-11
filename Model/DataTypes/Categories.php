@@ -1,8 +1,8 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
-namespace MagentoEse\DataInstall\Model;
+namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\Catalog\Api\Data\CategoryInterfaceFactory;
 use Magento\Catalog\Model\Category;
@@ -11,12 +11,11 @@ use Magento\Cms\Api\Data\BlockInterfaceFactory;
 use Magento\Framework\Data\Tree\Node;
 use Magento\Store\Api\Data\StoreInterfaceFactory;
 use Magento\Store\Model\StoreManagerInterface;
+use MagentoEse\DataInstall\Helper\Helper;
+use MagentoEse\DataInstall\Model\Converter;
 
 class Categories
 {
-    /** @var array */
-    protected $settings;
-
     /** @var CategoryInterfaceFactory  */
     protected $categoryFactory;
 
@@ -38,6 +37,15 @@ class Categories
     /** @var Configuration  */
     protected $configuration;
 
+    /** @var Converter  */
+    protected $converter;
+
+    /** @var Helper  */
+    protected $helper;
+
+    /** @var Stores  */
+    protected $stores;
+
     /**
      * Categories constructor.
      * @param CategoryInterfaceFactory $categoryFactory
@@ -46,6 +54,8 @@ class Categories
      * @param StoreInterfaceFactory $storeFactory
      * @param BlockInterfaceFactory $blockFactory
      * @param Configuration $configuration
+     * @param Helper $helper
+     * @param Stores $stores
      */
     public function __construct(
         CategoryInterfaceFactory $categoryFactory,
@@ -53,7 +63,10 @@ class Categories
         StoreManagerInterface $storeManager,
         StoreInterfaceFactory $storeFactory,
         BlockInterfaceFactory $blockFactory,
-        Configuration $configuration
+        Configuration $configuration,
+        Converter $converter,
+        Helper $helper,
+        Stores $stores
     ) {
         $this->categoryFactory = $categoryFactory;
         $this->resourceCategoryTreeFactory = $resourceCategoryTreeFactory;
@@ -61,6 +74,9 @@ class Categories
         $this->storeFactory = $storeFactory;
         $this->blockFactory = $blockFactory;
         $this->configuration = $configuration;
+        $this->converter = $converter;
+        $this->helper = $helper;
+        $this->stores = $stores;
     }
 
     /**
@@ -72,11 +88,25 @@ class Categories
     {
         //TODO:Support for non default settings
         //TODO:Content block additions to categories
-        $this->settings = $settings;
 
-        $category = $this->getCategoryByPath($row['path'] . '/' . $row['name']);
+        if(empty($row['name'])){
+            $this->helper->printMessage("A value for name is required in categories.csv","warning");
+            return true;
+        }
+
+        //if(!empty($row['store_view_code'])){
+        //    $storeViewId = $this->stores->getViewId($row['store_view_code']);
+        //} else{
+        //    $storeViewId = 0;
+        //    $row['store_view_code'] = 'admin';  
+        //}
+        
+        
+        $row['store_view_code'] = $settings['store_view_code'];
+
+        $category = $this->getCategoryByPath($row['path'] . '/' . $row['name'],$row['store_view_code']);
         if (!$category) {
-            $parentCategory = $this->getCategoryByPath($row['path']);
+            $parentCategory = $this->getCategoryByPath($row['path'],$row['store_view_code']);
             if ($parentCategory) {
                 $data = [
                     'parent_id' => $parentCategory->getId(),
@@ -95,7 +125,7 @@ class Categories
 
                 $category->save();
             } else {
-                print_r("-Cannot find the parent category for " . $row['name'] . " in the path " . $row['path'] . ". That category has been skipped\n");
+                $this->helper->printMessage("-Cannot find the parent category for " . $row['name'] . " in the path " . $row['path'] . ". That category has been skipped", "warning");
             }
         }
 
@@ -123,7 +153,7 @@ class Categories
                 if ($categoryAttribute == 'landing_page') {
                     $attributeData = [$categoryAttribute => $this->getCmsBlockId($row[$categoryAttribute])];
                 } else {
-                    $attributeData = [$categoryAttribute => $row[$categoryAttribute]];
+                    $attributeData = [$categoryAttribute => $this->converter->convertContent($row[$categoryAttribute])];
                 }
 
                 $category->addData($attributeData);
@@ -137,13 +167,14 @@ class Categories
      * @param string $path
      * @return Node
      */
-    protected function getCategoryByPath(string $path)
+    protected function getCategoryByPath(string $path,$storeViewCode)
     {
         $names = array_filter(explode('/', $path));
         //if the first element in the path is a root category, use that root id and drop from array
         //else, use the root category for the default store
+        //$store = $this->stores->getView(['store_view_code'=>$storeViewCode]);
         $store = $this->storeFactory->create();
-        $store->load($this->settings['store_view_code']);
+        $store->load($storeViewCode);
         $rootCatId = $store->getGroup()->getDefaultStore()->getRootCategoryId();
 
         $tree = $this->getTree($rootCatId);

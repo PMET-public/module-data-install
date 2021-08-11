@@ -1,8 +1,8 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
-namespace MagentoEse\DataInstall\Model;
+namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Exception;
 use Magento\Cms\Api\Data\PageInterface;
@@ -16,9 +16,12 @@ use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 use Magento\Store\Api\StoreRepositoryInterface;
 use Magento\UrlRewrite\Model\ResourceModel\UrlRewrite;
-use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollection;
+use Magento\UrlRewrite\Model\ResourceModel\UrlRewriteCollectionFactory as UrlRewriteCollection;
 use Magento\UrlRewrite\Model\UrlPersistInterface;
 use Magento\UrlRewrite\Service\V1\Data\UrlRewrite as UrlRewriteService;
+use MagentoEse\DataInstall\Model\Converter;
+use MagentoEse\DataInstall\Helper\Helper;
+
 class Pages
 {
     /** @var Csv  */
@@ -51,6 +54,9 @@ class Pages
     /** @var UrlPersistInterface */
     protected $urlPersist;
 
+    /** @var Helper */
+    protected $helper;
+
     /**
      * Pages constructor.
      * @param SampleDataContext $sampleDataContext
@@ -62,6 +68,7 @@ class Pages
      * @param UrlRewrite $urlRewrite
      * @param UrlRewriteCollection $urlRewriteCollection
      * @param UrlPersistInterface $urlPersist
+     * @param Helper $helper
      */
     public function __construct(
         SampleDataContext $sampleDataContext,
@@ -72,7 +79,8 @@ class Pages
         SearchCriteriaBuilder $searchCriteria,
         UrlRewrite $urlRewrite,
         UrlRewriteCollection $urlRewriteCollection,
-        UrlPersistInterface $urlPersist
+        UrlPersistInterface $urlPersist,
+        Helper $helper
     ) {
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
@@ -84,6 +92,7 @@ class Pages
         $this->urlRewrite = $urlRewrite;
         $this->urlRewriteCollection = $urlRewriteCollection;
         $this->urlPersist = $urlPersist;
+        $this->helper = $helper;
     }
 
     /**
@@ -93,11 +102,15 @@ class Pages
      */
     public function install(array $row, array $settings)
     {
-        //TODO: set stores to use configuration if stores not in file
-        //TODO: check on multiple stores for a page
         //TODO: Set default layout of a page cms-full-width *check if necessary
         //TODO:Validate design layout types
         $row['content'] = $this->converter->convertContent($row['content']);
+
+        if (empty($row['is_active']) || $row['is_active']=='Y') {
+            $row['is_active'] = 1;
+        }else{
+            $row['is_active'] = 0;
+        }
         if (!empty($row['identifier'])) {
             $foundPage=0;
             $search = $this->searchCriteria->addFilter(PageInterface::IDENTIFIER, $row['identifier'], 'eq')->create();
@@ -118,6 +131,7 @@ class Pages
                         //is the exiting page a store zero && are we requesting a different store/stores
                         if ($updatePage->getStores()[0]==0 && $this->getStoreIds($row['store_view_code'])[0] !=0) {
                             //Save the exiting page under all other stores
+                           
                             $storeIds = $this->getAllStoreIds();
                             if (($key = array_search($this->getStoreIds($row['store_view_code'])[0], $storeIds)) !== false) {
                                 unset($storeIds[$key]);
@@ -130,7 +144,7 @@ class Pages
                             $page = $this->pageInterfaceFactory->create();
                             $page->addData($row)->setStores($this->getStoreIds($row['store_view_code']))->save();
                         }
-                        //else is the exsiting store different than requested
+                        //else is the exisiting store different than requested
                         elseif ($updatePage->getStores() != $this->getStoreIds($row['store_view_code'])) {
                             //create a new page for the new stores
                             $page = $this->pageInterfaceFactory->create();
@@ -144,12 +158,10 @@ class Pages
                         }
                     } else {
                         //multiple pages exist
-                        $e=$updatePage->getStores();
-                        $f=$this->getStoreIds($row['store_view_code'])[0];
                         if ($updatePage->getStores()[0]==$this->getStoreIds($row['store_view_code'])[0]) {
                             //update when store is found
                             $updatePage->load($row['identifier'], 'identifier');
-                            $this->pageRepository->save($updatePage->addData($row));
+                             $this->pageRepository->save($updatePage->addData($row));
                             $foundPage =1;
                         }
                     }
@@ -158,16 +170,21 @@ class Pages
                 //if its an existing page, but needs to be created for a store
                 if (count($pages) > 1 && $foundPage==0) {
                     $this->urlPersist->deleteByData(
-                    [
+                        [
                         UrlRewriteService::ENTITY_TYPE =>CmsPageUrlRewriteGenerator::ENTITY_TYPE,
                         UrlRewriteService::STORE_ID=>$this->getStoreIds($row['store_view_code']),
                         UrlRewriteService::REQUEST_PATH=>$row['identifier']
                         ]
                     );
                     $page = $this->pageInterfaceFactory->create();
-                    $page->addData($row)
+                    try{
+                        $page->addData($row)
                         ->setStores($this->getStoreIds($row['store_view_code']))
                         ->save();
+                    }catch (Exception $e){
+                        $this->helper->printMessage("The Page ".$row['title']." cannot be updated.  It is likely conflicting with page data set elsewhere.","warning");
+                    }
+                    
                 }
             }
         }
@@ -182,7 +199,7 @@ class Pages
      */
     protected function removeUrlRewrite(string $identifier, array $storeId)
     {
-        $urls = $this->urlRewriteCollection->
+        $urls = $this->urlRewriteCollection->create()->
             addFilter('request_path', $identifier, 'eq')->addFilter('store_id', $storeId, 'eq')->getItems();
         foreach ($urls as $url) {
             $this->urlRewrite->delete($url);

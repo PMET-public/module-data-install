@@ -1,8 +1,8 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
-namespace MagentoEse\DataInstall\Model;
+namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\Eav\Api\AttributeRepositoryInterface;
 use Magento\Customer\Api\CustomerMetadataInterface;
@@ -38,6 +38,12 @@ class CustomerAttributes
         $this->attributeRepository = $attributeRepository;
     }
 
+    /**
+     * @param array $data
+     * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Zend_Validate_Exception
+     */
     public function install(array $data)
     {
         //TODO; Check for minimum requirements - frontend_label,frontend_input, attribute_code
@@ -87,10 +93,7 @@ class CustomerAttributes
             $this->addOptions(0, $data["attribute_code"], explode(PHP_EOL, $data["options"]));
         }
 
-
         $useInForms=['adminhtml_customer','adminhtml_checkout','customer_account_edit','customer_account_create'];
-        $attributeOptions = ['Running','Crossfit','Pilates','Yoga'];
-        $attributeCode = 'preferred_activities';
         $mainSettings = [
             'type'         => 'varchar',
             'label'        => 'Preferred Activities',
@@ -109,6 +112,13 @@ class CustomerAttributes
         return true;
     }
 
+    /**
+     * @param $store
+     * @param $attributeCode
+     * @param array $options
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
     private function addOptions($store, $attributeCode, array $options)
     {
         $attribute = $this->attributeRepository->get(Customer::ENTITY, $attributeCode);
@@ -124,15 +134,5 @@ class CustomerAttributes
         $eavSetup = $this->eavSetupFactory->create();
 
         $eavSetup->addAttributeOption($option);
-    }
-
-    public static function getDependencies()
-    {
-        return [];
-    }
-
-    public function getAliases()
-    {
-        return [];
     }
 }

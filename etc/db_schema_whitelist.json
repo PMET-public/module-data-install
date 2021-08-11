@@ -1,0 +1,12 @@
+{
+    "magentoese_data_installer_recurring": {
+        "column": {
+            "id": true,
+            "module_name": true,
+            "is_installed": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}

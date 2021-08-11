@@ -1,13 +1,16 @@
 <?php
 /**
- * Copyright © Magento. All rights reserved.
+ * Copyright © Adobe. All rights reserved.
  */
 
 //TODO:Support for multiple addresses
 
-namespace MagentoEse\DataInstall\Model;
+namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Exception;
 use Magento\Customer\Api\AccountManagementInterface;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Api\Data\AddressInterfaceFactory;
 use Magento\Customer\Api\Data\CustomerInterfaceFactory;
 use Magento\Customer\Api\Data\RegionInterface;
@@ -17,6 +20,9 @@ use Magento\Framework\Api\DataObjectHelper;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\State;
 use Magento\Framework\Exception\LocalizedException;
+use FireGento\FastSimpleImport\Model\ImporterFactory as Importer;
+use Magento\Framework\Exception\NoSuchEntityException;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class Customers
 {
@@ -29,6 +35,7 @@ class Customers
     /** @var array $customerDataAddress */
     protected $customerDataAddress;
 
+
     /** @var CustomerGroups  */
     protected $customerGroups;
 
@@ -40,6 +47,9 @@ class Customers
 
     /** @var AddressInterfaceFactory  */
     protected $addressInterfaceFactory;
+
+    /** @var AddressRepositoryInterface  */
+    protected $addressRespository;
 
     /** @var CustomerInterfaceFactory  */
     protected $customerInterfaceFactory;
@@ -58,6 +68,16 @@ class Customers
 
     /** @var CountryFactory  */
     protected $countryFactory;
+
+    /** @var Importer  */
+    protected $importer;
+
+     /** @var Helper  */
+     protected $helper;
+    /** @var CustomerRepositoryInterface */
+     protected $customerRepositoryInterface;
+
+     protected $importUnsafeColumns=['company_admin', 'role', 'add_to_autofill','group'];
 
     /**
      * Customers constructor.
@@ -82,7 +102,11 @@ class Customers
         DataObjectHelper $dataObjectHelper,
         State $appState,
         Configuration $configuration,
-        CountryFactory $countryFactory
+        CountryFactory $countryFactory,
+        Importer $importer,
+        Helper $helper,
+        CustomerRepositoryInterface $customerRepositoryInterface,
+        AddressRepositoryInterface $addressRepositoryInterface
     ) {
         $this->customerGroups=$customerGroups;
         $this->stores = $stores;
@@ -94,9 +118,14 @@ class Customers
         $this->appState = $appState;
         $this->configuration=$configuration;
         $this->countryFactory = $countryFactory;
+        $this->importer = $importer;
+        $this->helper = $helper;
+        $this->customerRepositoryInterface = $customerRepositoryInterface;
+        $this->addressRespository = $addressRepositoryInterface;
     }
     //TODO: validate input fields
-
+    //TODO: add store and website codes if they dont exist
+    //TODO: Change website to _website
     /**
      * @param array $rows
      * @param array $header
@@ -108,42 +137,149 @@ class Customers
     public function install(array $rows, array $header, string $modulePath, array $settings)
     {
         $this->settings = $settings;
-        $startingElement = 1;
+
+        if (!empty($settings['product_validation_strategy'])) {
+            $productValidationStrategy = $settings['product_validation_strategy'];
+        } else {
+            $productValidationStrategy =  'validation-skip-errors';
+        }
+
         foreach ($rows as $row) {
-            $data = [];
-            foreach ($row as $key => $value) {
-                $data[$header[$key]] = $value;
+            $customerArray[] = array_combine($header, $row);
+        }
+        $cleanCustomerArray = $this->cleanDataForImport($customerArray);
+        $this->import($cleanCustomerArray,$productValidationStrategy);
+        //return true;
+        $startingElement = 1;
+        foreach ($cleanCustomerArray as $row) {
+            try{
+                $customer = $this->customerRepositoryInterface->get($row['email'],$this->stores->getWebsiteId($row['_website']));
+            
+            if(!empty($row['store_view_code'])){
+                $customer->setCreatedIn($this->stores->getViewName($row['store_view_code']));
+            } else{
+                $customer->setCreatedIn($this->stores->getViewName($this->settings['store_view_code']));
             }
-
-            $row = $data;
-            $customerData['profile'] = $this->convertRowData($row, $this->getDefaultCustomerProfile());
-            //if the email exists, skip
-            if (!$this->accountManagement->isEmailAvailable($customerData['profile']['email'])) {
-                return true;
-            }
-
-            $customer = $this->customerInterfaceFactory->create();
-            $this->dataObjectHelper->populateWithArray(
-                $customer,
-                $customerData['profile'],
-                '\Magento\Customer\Api\Data\CustomerInterface'
-            );
-            //add address
-            $addresses = $this->convertAddresses($row);
-            $customer->setAddresses([$addresses]);
-
             $this->appState->emulateAreaCode(
                 'frontend',
-                [$this->accountManagement, 'createAccount'],
-                [$customer, $row['password']]
+                [$this->customerRepositoryInterface, 'save'],
+                [$customer]
             );
 
+           // $this->customerRepositoryInterface->save($customer);
+            
+            ///set addresses as default
+            $addresses = $customer->getAddresses();
+            $addressesToKeep=[];
+            foreach($addresses as $address){
+                $removed = false;
+                foreach($addressesToKeep as $checking){
+                    if($checking->getStreet()==$address->getStreet()){
+                        //remove duplicate
+                        try{
+                            $this->addressRespository->delete($address);
+                        }catch(Exception $e){
+                            // There is an edge case on a data reload that if a reindex doesnt occur after the original
+                            // load, the reload can fail deleting an address.
+                        }
+                        
+                        $removed = true;
+                        break;
+                    }
+                }
+                if(!$removed){
+                    $address->setIsDefaultBilling(true);
+                    $address->setIsDefaultShipping(true);
+                    $this->addressRespository->save($address);
+                    $addressesToKeep[]=$address;
+                }
+            }
+
+            //add to autofille
             if (!empty($row['add_to_autofill']) && $row['add_to_autofill'] == 'Y') {
                 $startingElement = $this->addToAutofill($row, $startingElement);
             }
+            }catch(NoSuchEntityException $e){
+                $this->helper->printMessage("Customer ". $row['email']." wasn't imported","error");
+            }
+           
         }
 
         return true;
+    }
+
+    private function cleanDataForImport($customerArray){
+        
+        $newCustomerArray=[];
+        foreach($customerArray as $customer){
+            
+            //change website column if incorrect
+            if (!empty($customer['site_code'])) {
+                $customer['_website']=$this->stores->replaceBaseWebsiteCode($customer['site_code']);
+                unset($customer['site_code']);
+            }
+            if (!empty($customer['website']) && $customer['website']!='') {
+                $customer['_website']=$this->stores->replaceBaseWebsiteCode($customer['website']);
+                unset($customer['website']);
+            }
+
+            if(empty($customer['_website'])){
+                $customer['_website']=$this->settings['site_code'];
+            }
+            //add or change store code
+            if (!empty($customer['store_view_code'])) {
+                $customer['_store']=$customer['store_view_code'];
+                unset($customer['store_view_code']);
+            }
+            if(empty($customer['_store'])){
+                $customer['_store']=$this->settings['store_view_code'];
+            } 
+           
+            //add group_id column if it doesnt exist
+            if(empty($customer['group_id'])){
+                $customer['group_id']=1;
+            }
+            //if there is a group column, convert to id
+            if(!empty($customer['group'])){
+                $customer['group_id']=$this->customerGroups->getCustomerGroupId($customer['group']);
+            }
+            
+            //add _address_firstname, _address_lastname if not present
+            if(empty($customer['_address_firstname'])){
+                $customer['_address_firstname']=$customer['firstname'];
+            }
+            if(empty($customer['_address_lastname'])){
+                $customer['_address_lastname']=$customer['lastname'];
+            }
+            //remove columns used for other purposes, but throw errors on import
+            foreach($this->importUnsafeColumns as $column){
+                unset($customer[$column]);
+            }
+            $newCustomerArray[]=$customer;
+        }
+        return $newCustomerArray;
+    }
+
+    private function import($customerArray, $productValidationStrategy)
+    {
+        $importerModel = $this->importer->create();
+        $importerModel->setEntityCode('customer_composite');
+        $importerModel->setValidationStrategy($productValidationStrategy);
+        if ($productValidationStrategy == 'validation-stop-on-errors') {
+            $importerModel->setAllowedErrorCount(1);
+        } else {
+            $importerModel->setAllowedErrorCount(100);
+        }
+        try {
+            $importerModel->processImport($customerArray);
+        } catch (\Exception $e) {
+            $this->helper->printMessage($e->getMessage());
+        }
+
+        $this->helper->printMessage($importerModel->getLogTrace());
+        $this->helper->printMessage($importerModel->getErrorMessages());
+
+        unset($importerModel);
     }
 
     /**
@@ -197,7 +333,6 @@ class Customers
         $this->configuration->saveConfig('magentoese_autofill/general/enable_autofill', '1', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
 
         //find next empty autofill
-        //TODO:get region id
         for ($x=$startingElement; $x <= $elementCount; $x++) {
             //echo "---".$pathPrefix.$x.'/email_value'.'___'.$this->configuration->getConfig($pathPrefix.$x.'/email_value',ScopeConfigInterface::SCOPE_TYPE_DEFAULT,'default')."---";
             if (!$this->configuration->getConfig($pathPrefix . $x . '/email_value', ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 'default')) {
@@ -239,7 +374,7 @@ class Customers
     {
         $customerDataProfile = [
                 'website_id' => $this->stores->getStoreId($this->settings['site_code']),
-                'group_id' => $this->customerGroups->getCustomerGroupId($this->customerGroups->getDefaultCustomerGroup()),
+                ' _id' => $this->customerGroups->getCustomerGroupId($this->customerGroups->getDefaultCustomerGroup()),
                 'disable_auto_group_change' => '0',
                 'prefix',
                 'firstname' => '',
@@ -316,6 +451,8 @@ class Customers
                 }
 
                 $data[$rowField] = $rowValue;
+            }else{
+
             }
         }
 

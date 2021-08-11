@@ -1,11 +1,10 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
+ * Copyright © Adobe, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace MagentoEse\DataInstall\Model;
+namespace MagentoEse\DataInstall\Model\DataTypes;
 
-use Magento\Catalog\Model\ResourceModel\Product\Collection;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Review\Model\Review;
@@ -14,9 +13,14 @@ use Magento\Review\Model\ResourceModel\Review\CollectionFactory as ReviewCollect
 use Magento\Review\Model\RatingFactory;
 use Magento\Review\Model\Rating\OptionFactory;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
+use Magento\Store\Model\StoreManagerInterface;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class Reviews
 {
+
+    /** @var Helper */
+    protected $helper;
 
     /**
      * @var ReviewFactory
@@ -69,7 +73,7 @@ class Reviews
     protected $reviewProductEntityId;
 
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface
+     * @var StoreManagerInterface
      */
     protected $storeManager;
 
@@ -78,25 +82,28 @@ class Reviews
 
     /**
      * Reviews constructor.
+     * @param Helper $helper
      * @param ReviewFactory $reviewFactory
      * @param ReviewCollectionFactory $reviewCollectionFactory
      * @param RatingFactory $ratingFactory
      * @param ProductCollectionFactory $productCollectionFactory
      * @param CustomerRepositoryInterface $customerAccount
      * @param OptionFactory $ratingOptionsFactory
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param StoreManagerInterface $storeManager
      * @param Stores $stores
      */
     public function __construct(
+        Helper $helper,
         ReviewFactory $reviewFactory,
         ReviewCollectionFactory $reviewCollectionFactory,
         RatingFactory $ratingFactory,
         ProductCollectionFactory $productCollectionFactory,
         CustomerRepositoryInterface $customerAccount,
         OptionFactory $ratingOptionsFactory,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        StoreManagerInterface $storeManager,
         Stores $stores
     ) {
+        $this->helper = $helper;
         $this->reviewFactory = $reviewFactory;
         $this->reviewCollectionFactory = $reviewCollectionFactory;
         $this->ratingFactory = $ratingFactory;
@@ -115,14 +122,24 @@ class Reviews
      */
     public function install(array $row, array $settings)
     {
-        $storeId = $this->stores->getViewId($settings['store_view_code']);
-        //$storeId = [$this->storeManager->getDefaultStoreView()->getStoreId()];
-        $review = $this->prepareReview($row,$storeId);
+        //check for required columns
+        if(empty($row['sku']) || empty($row['reviewer']) || empty($row['summary']) || empty($row['review']) | empty($row['rating_code'])){
+            $this->helper->printMessage("Review skipped -- one or more of the required values is missing", "warning");
+            return true;
+        }
+        //get view id from view code, use admin if not defined
+        if (!empty($row['store_view_code'])) {
+            $storeId = $this->stores->getViewId(trim($row['store_view_code']));
+        } else {
+            $storeId = $this->stores->getViewId(trim($settings['store_view_code']));
+        }
+        
+        $review = $this->prepareReview($row, $storeId);
         $this->createRating($row['rating_code'], $storeId);
         $productId = $this->getProductIdBySku($row['sku']);
 
         if (empty($productId)) {
-            print_r("Review skipped -- Product ".$row['sku']." not found\n");
+            $this->helper->printMessage("Review skipped -- Product ".$row['sku']." not found", "warning");
             return true;
         }
         /** @var \Magento\Review\Model\ResourceModel\Review\Collection $reviewCollection */
@@ -132,7 +149,7 @@ class Reviews
             ->addFilter('entity_id', $this->getReviewEntityId())
             ->addFieldToFilter('detail.title', ['eq' => $row['summary']]);
         if ($reviewCollection->getSize() > 0) {
-            print_r("Review skipped -- Duplicate\n");
+            $this->helper->printMessage("Review skipped -- Duplicate", "warning");
             return true;
         }
 
@@ -168,7 +185,7 @@ class Reviews
      * @param array $row
      * @return Review
      */
-    protected function prepareReview($row,$storeId)
+    protected function prepareReview($row, $storeId)
     {
         /** @var $review Review */
         $review = $this->reviewFactory->create();
@@ -194,8 +211,9 @@ class Reviews
     }
 
     /**
-     * @param string $rating
-     * @return array
+     * @param $rating
+     * @return \Magento\Framework\DataObject|mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function getRating($rating)
     {
@@ -208,8 +226,8 @@ class Reviews
 
     /**
      * @param Review $review
-     * @param array $row
-     * @return void
+     * @param $row
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function setReviewRating(Review $review, $row)
     {
@@ -227,9 +245,9 @@ class Reviews
     }
 
     /**
-     * @param string $ratingCode
-     * @param array $stores
-     * @return void
+     * @param $ratingCode
+     * @param $storeId
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function createRating($ratingCode, $storeId)
     {
@@ -270,8 +288,9 @@ class Reviews
     }
 
     /**
-     * @param string $customerEmail
+     * @param $customerEmail
      * @return int|null
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     protected function getCustomerIdByEmail($customerEmail)
     {

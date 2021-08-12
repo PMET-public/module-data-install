@@ -197,6 +197,7 @@ class Stores
                 switch($data['host']){
                     case 'subdirectory':
                         $this->setBaseUrls($this->getBaseUrlHost()."/".$data['site_code'], $website->getId());
+                        $this->setMediaUrls($this->getBaseUrlHost()."/", $website->getId());
                         break;
                     case 'subdomain':
                         $this->setBaseUrls($data['site_code'].".".$this->getBaseUrlHost(), $website->getId());
@@ -731,6 +732,18 @@ class Stores
     {
         $this->configuration->saveConfig('web/unsecure/base_url', 'http://' . $host . '/', 'websites', $websiteId);
         $this->configuration->saveConfig('web/secure/base_url', 'https://' . $host . '/', 'websites', $websiteId);
+    }
+
+    /**
+     * @param string $host
+     * @param int $websiteId
+     */
+    private function setMediaUrls(string $host, int $websiteId): void
+    {
+        $this->configuration->saveConfig('web/unsecure/base_static_url', 'http://' . $host . 'static/', 'websites', $websiteId);
+        $this->configuration->saveConfig('web/secure/base_static_url', 'https://' . $host . 'static/', 'websites', $websiteId);
+        $this->configuration->saveConfig('web/unsecure/base_media_url', 'http://' . $host . 'media/', 'websites', $websiteId);
+        $this->configuration->saveConfig('web/secure/base_media_url', 'https://' . $host . 'media/', 'websites', $websiteId);
     }
 
     /**

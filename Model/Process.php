@@ -23,7 +23,7 @@ class Process
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','customer_segments.csv',
     'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
-    'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv'];
+    'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv','advanced_pricing.csv','orders.csv'];
 
     const STORE_FILES = ['stores.csv'];
 
@@ -33,7 +33,7 @@ class Process
 
     const STAGE2 = ['products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
-    'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','advanced_pricing.csv','orders.csv'];
+    'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv','advanced_pricing.csv','orders.csv'];
 
     const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv','b2b_sales_reps.csv','b2b_teams.csv'];
 
@@ -138,6 +138,9 @@ class Process
     /** @var Datatypes\CatalogRules */
     protected $catalogRulesInstall;
 
+    /** @var Datatypes\CartRules */
+    protected $cartRulesInstall;
+
     /** @var Datatypes\Companies */
     protected $companiesInstall;
 
@@ -174,6 +177,7 @@ class Process
      * @param DataTypes\AdvancedPricing $advancedPricing
      * @param DataTypes\Blocks $blocks
      * @param DataTypes\CatalogRules $catalogRules
+     * @param DataTypes\CartRules $cartRules
      * @param DataTypes\Categories $categories
      * @param Datatypes\Companies $companies
      * @param DataTypes\CompanyRoles $companyRoles
@@ -213,6 +217,7 @@ class Process
         DataTypes\AdvancedPricing $advancedPricing,
         DataTypes\Blocks $blocks,
         DataTypes\CatalogRules $catalogRules,
+        DataTypes\CartRules $cartRules,
         DataTypes\Categories $categories,
         Datatypes\Companies $companies,
         DataTypes\CompanyRoles $companyRoles,
@@ -269,6 +274,7 @@ class Process
         $this->ordersInstall = $orders;
         $this->customerSegmentsInstall = $customerSegments;
         $this->catalogRulesInstall = $catalogRules;
+        $this->cartRulesInstall = $cartRules;
         $this->companiesInstall = $companies;
         $this->companyRolesInstall = $companyRoles;
         $this->companyUserRolesInstall = $companyUserRoles;
@@ -467,6 +473,11 @@ class Process
                     case "catalog_rules.csv":
                         $this->helper->printMessage("Loading Catalog Price Rules", "info");
                         $this->processRows($rows, $header, $this->catalogRulesInstall);
+                        break;
+
+                    case "cart_rules.csv":
+                        $this->helper->printMessage("Loading Cart Price Rules", "info");
+                        $this->processRows($rows, $header, $this->cartRulesInstall);
                         break;
 
                     case "reviews.csv":

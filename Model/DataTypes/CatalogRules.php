@@ -8,7 +8,6 @@ use Magento\CatalogRule\Api\Data\RuleInterface;
 use Magento\CatalogRule\Api\Data\RuleInterfaceFactory;
 use Magento\CatalogRule\Api\CatalogRuleRepositoryInterface;
 use Magento\Customer\Api\GroupRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Area as AppArea;
 use Magento\Framework\App\State;
 use MagentoEse\DataInstall\Model\Converter;
@@ -30,9 +29,6 @@ class CatalogRules {
 
     /** @var GroupRepositoryInterface */
     protected $groupRepositoryInterface;
-
-     /** @var SearchCriteriaBuilder */
-    protected $searchCriteriaBuilder;
 
     /** @var State */
     protected $appState;
@@ -63,7 +59,6 @@ class CatalogRules {
      * @param RuleInterfaceFactory $ruleInterfaceFactory
      * @param CatalogRuleRepositoryInterface $catalogRuleRepositoryInterface
      * @param GroupRepositoryInterface $groupRepositoryInterface
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param State $appState
      * @param Stores $stores
      * @param Converter $converter
@@ -75,12 +70,11 @@ class CatalogRules {
      */
     function __construct(RuleInterfaceFactory $ruleInterfaceFactory,
         CatalogRuleRepositoryInterface $catalogRuleRepositoryInterface, GroupRepositoryInterface $groupRepositoryInterface,
-        SearchCriteriaBuilder $searchCriteriaBuilder,State $appState, Stores $stores,Converter $converter,RuleCollection $ruleCollection,
+        State $appState, Stores $stores,Converter $converter,RuleCollection $ruleCollection,
         CustomerGroups $customerGroups, BannerCollection $bannerCollection, BannerFactory $bannerFactory, Helper $helper){
         $this->ruleRepository = $catalogRuleRepositoryInterface;
         $this->ruleInterfaceFactory = $ruleInterfaceFactory;
         $this->groupRepositoryInterface = $groupRepositoryInterface;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->appState = $appState;
         $this->stores = $stores;
         $this->converter = $converter;

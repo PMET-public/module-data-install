@@ -9,6 +9,7 @@ use Magento\Customer\Api\CustomerMetadataInterface;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Eav\Model\Config;
 use Magento\Customer\Model\Customer;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class CustomerAttributes
 {
@@ -22,20 +23,26 @@ class CustomerAttributes
     /** @var AttributeRepositoryInterface  */
     private $attributeRepository;
 
+    /** @var Helper  */
+    private $helper;
+
     /**
      * CustomerAttributes constructor.
      * @param EavSetupFactory $eavSetupFactory
      * @param Config $eavConfig
      * @param AttributeRepositoryInterface $attributeRepository
+     * @param Helper $helper
      */
     public function __construct(
         EavSetupFactory $eavSetupFactory,
         Config $eavConfig,
-        AttributeRepositoryInterface $attributeRepository
+        AttributeRepositoryInterface $attributeRepository,
+        Helper $helper
     ) {
         $this->eavSetupFactory = $eavSetupFactory;
         $this->eavConfig = $eavConfig;
         $this->attributeRepository = $attributeRepository;
+        $this->helper = $helper;
     }
 
     /**
@@ -46,39 +53,67 @@ class CustomerAttributes
      */
     public function install(array $data)
     {
-        //TODO; Check for minimum requirements - frontend_label,frontend_input, attribute_code
-        $useInForms=['adminhtml_customer','adminhtml_checkout','customer_account_edit','customer_account_create'];
-        /*$data= array();
-        $data["attribute_code"] = 'preferred_activities';
-        $data["frontend_label"] = 'Preferred Activities';
-        $data["frontend_input"] = 'multiselect';
-        $data["options"]="Running
-        Crossfit
-        Pilates
-        Yoga";*/
-        if (empty($data["position"])) {
-            $data["position"]=100;
+        //check for requried fields
+        if (empty($data["attribute_code"])) {
+            $this->helper->printMessage("attribute_code for customer attribute is required. Row Skipped", "warning");
+            return true;
         }
+        if (empty($data["frontend_label"])) {
+            $this->helper->printMessage("frontend_label for customer attribute ".$data["attribute_code"]." is required. Row Skipped", "warning");
+            return true;
+        }
+        if (empty($data["frontend_input"])) {
+            $this->helper->printMessage("frontend_input for customer attribute ".$data["attribute_code"]." is required. Row Skipped", "warning");
+            return true;
+        }
+        ///set defaults if not included
+
+        if (empty($data["is_used_in_grid"])) {
+            $data["is_used_in_grid"]=1;
+        }
+        if (empty($data["is_filterable_in_grid"])) {
+            $data["is_filterable_in_grid"]=1;
+        }
+        if (empty($data["is_visible_in_grid"])) {
+            $data["is_visible_in_grid"]=1;
+        }
+        if (empty($data["is_searchable_in_grid"])) {
+            $data["is_searchable_in_grid"]=1;
+        }
+        if (empty($data["is_used_for_customer_segment"])) {
+            $data["is_used_for_customer_segment"]=1;
+        }
+        if (empty($data["is_required"])) {
+            $data["is_required"]=0;
+        }
+        if (empty($data["use_in_forms"])) {
+            $useInForms=['adminhtml_customer','adminhtml_checkout','customer_account_edit','customer_account_create'];
+        } else{
+            $useInForms = explode(",",$data["use_in_forms"]);
+        }
+        
 
         $mainSettings = [
             'type'         => 'varchar',
             'label'        => $data["frontend_label"],
             'input'        => $data["frontend_input"],
-            'required'     => 0,
+            'required'     => $data["is_required"]=='Y' ? 1 : 0,
             'visible'      => 1,
-            'is_used_in_grid' => 1,
-            'is_filterable_in_grid' => 1,
+            'is_used_in_grid' => $data["is_used_in_grid"]=='Y' ? 1 : 0,
+            'is_filterable_in_grid' => $data["is_filterable_in_grid"]=='Y' ? 1 : 0,
+            'is_visible_in_grid' => $data["is_used_in_grid"]=='Y' ? 1 : 0,
+            'is_searchable_in_grid' => $data["is_searchable_in_grid"]=='Y' ? 1 : 0,
             'user_defined' => 1,
-            'position'     => $data["position"],
+            'position'     => (empty($data["position"])) ? 100 : $data["position"],
             'system'       => 0,
             'multiline_count' => 1,
             'backend' => 'Magento\Eav\Model\Entity\Attribute\Backend\ArrayBackend',
             'source' => 'Magento\Eav\Model\Entity\Attribute\Source\Table'
         ];
-
+        $data['attribute_code'] = $this->validateCode($data['attribute_code']);
         $newAttribute = $this->eavConfig->getAttribute(CustomerMetadataInterface::ENTITY_TYPE_CUSTOMER, $data["attribute_code"]);
         $newAttribute->setData('used_in_forms', $useInForms);
-        $newAttribute->setData('is_used_for_customer_segment', 1);
+        $newAttribute->setData('is_used_for_customer_segment', $data["is_used_for_customer_segment"]=='Y' ? 1 : 0);
         $newAttribute->save($newAttribute);
         $eavSetup = $this->eavSetupFactory->create();
         $eavSetup->addAttribute(CustomerMetadataInterface::ENTITY_TYPE_CUSTOMER, $data["attribute_code"], $mainSettings);
@@ -88,29 +123,16 @@ class CustomerAttributes
             null,
             $data["attribute_code"]
         );
-
+        //add select options
         if (!empty($data["options"])) {
             $this->addOptions(0, $data["attribute_code"], explode(PHP_EOL, $data["options"]));
         }
 
-        $useInForms=['adminhtml_customer','adminhtml_checkout','customer_account_edit','customer_account_create'];
-        $mainSettings = [
-            'type'         => 'varchar',
-            'label'        => 'Preferred Activities',
-            'input'        => 'multiselect',
-            'required'     => 0,
-            'visible'      => 1,
-            'is_used_in_grid' => 1,
-            'is_filterable_in_grid' => 1,
-            'user_defined' => 1,
-            'position'     => 100,
-            'system'       => 0,
-            'multiline_count' => 1,
-            'backend' => 'Magento\Eav\Model\Entity\Attribute\Backend\ArrayBackend',
-            'source' => 'Magento\Eav\Model\Entity\Attribute\Source\Table'
-        ];
+        //TODO:default - need to get options if its multi or select
+        
         return true;
     }
+
 
     /**
      * @param $store
@@ -122,17 +144,43 @@ class CustomerAttributes
     private function addOptions($store, $attributeCode, array $options)
     {
         $attribute = $this->attributeRepository->get(Customer::ENTITY, $attributeCode);
+
+        $removeOptions = $attribute->getOptions();
+			
+        $optionsToRemove = [];
+        foreach($removeOptions as $removeOption)
+        {
+            if ($removeOption['value'])
+            {
+                $optionsToRemove['delete'][$removeOption['value']] = true;
+                $optionsToRemove['value'][$removeOption['value']] = true;
+            }
+        }
+            
+
+
         $option=[];
         $option['attribute_id'] = $attribute->getAttributeId();
         foreach ($options as $key => $value) {
-            $option['value'][$value][$store]=$value;
-            //foreach($allStores as $store){
-            //    $option['value'][$value][$store->getId()] = $value;
-            //}
+            $option['value']['a'.strval($value)][$store]=$value;
         }
 
         $eavSetup = $this->eavSetupFactory->create();
-
+        $eavSetup->addAttributeOption($optionsToRemove);	
         $eavSetup->addAttributeOption($option);
+    }
+
+    private function validateCode(string $code)
+    {
+        /*Code may only contain letters (a-z), numbers (0-9) or underscore (_), and
+        the first character must be a letter.*/
+        //remove all invalid characters
+        $code = preg_replace("/[^A-Za-z0-9_]/", '', $code);
+        //if the first character is not a letter, add an "m"
+        if (!ctype_alpha($code[0])) {
+            $code = "m" . $code;
+        }
+
+        return $code;
     }
 }

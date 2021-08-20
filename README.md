@@ -259,7 +259,7 @@ Optional file: Creates users for the Magento Admin
 *File Name* - customer\_groups.csv
 
 Used to create customer groups
-> Out of Scope: Renaming cusomter groups. Assigning Tax Class.
+> Out of Scope: Renaming customer groups. Assigning Tax Class.
 
 *Column*
 **name** - Required. Name of the customer group
@@ -269,8 +269,37 @@ Used to create customer groups
 *File Name* - customer\_attributes.csv
 
 This file is used to add and update customer attributes
-Customer attribute configurations can be complex. The purpose of this file is to address the most common settings.
-> Out of Scope: Updating Attribute codes. Any attribute setting not currently listed
+Customer attribute configurations can be complex. The purpose of this file is to address the most common settings. The file can be generated manually or from a series of database queries on an configured instance
+
+*Get Attribute information*
+`select eav.attribute_code, eav.frontend_input, eav.frontend_label,
+case when eav.is_required = 0 then 'N' else 'Y' end as is_required, 
+case when ca.is_used_in_grid = 0 then 'N' else 'Y' end as is_used_in_grid,
+case when ca.is_visible_in_grid = 0 then 'N' else 'Y' end as is_visible_in_grid,
+case when ca.is_filterable_in_grid = 0 then 'N' else 'Y' end as is_filterable_in_grid,
+case when ca.is_searchable_in_grid = 0 then 'N' else 'Y' end as is_searchable_in_grid,
+case when ca.is_used_for_customer_segment = 0 then 'N' else 'Y' end as is_used_for_customer_segment,
+ca.sort_order
+from eav_attribute eav
+inner join customer_eav_attribute ca
+on eav.attribute_id = ca.attribute_id
+where eav.attribute_code in ('...','...')`
+
+*Get value for `options` column for select or multi-part*
+`select group_concat(ov.value order by op.sort_order separator '\n') as options
+from eav_attribute_option_value ov
+left join eav_attribute_option op
+on ov.option_id = op.option_id
+where op.attribute_id in (select attribute_id from eav_attribute where attribute_code = '...')`
+
+*Get value for `use_in_forms` column*
+`select group_concat(fa.form_code separator ',') as use_in_forms
+from customer_form_attribute fa
+left join eav_attribute eav
+on fa.attribute_id = eav.attribute_id
+where eav.attribute_code = '...'`
+
+> Out of Scope: Updating Attribute codes. Store scope labels. Website scope. Any attribute setting not currently listed
 
 *Columns*
 
@@ -282,9 +311,20 @@ Customer attribute configurations can be complex. The purpose of this file is to
 
 **is\_required** - Optional: Values = Y/N. Default = N
 
-**options** - Required when input is Multi or Select. Values to show, carriage return delimited
+**options** - Required when input is Multi or Select. Values to show, carriage return delimited. Value and label will be the same
 
-**position** - Optional, Numeric.  Indicates the position of the attribute within the Attribute Group
+**sort_order** - Optional, Numeric, defaults to 100.  Indicates the position of the attribute within the Attribute Group
+
+**is_used_in_grid** - Optional, Values = Y/N. Default = Y.  Add to list of column options in the customer grid
+
+**is_filterable_in_grid** - Optional, Values = Y/N. Default = Y.  Can it be used in grid filters
+
+**is_searchable_in_grid** - Optional, Values = Y/N. Default = Y.  Can it be used in grid search
+
+**is_used_for_customer_segment** - Optional, Values = Y/N. Default = Y.  Can it be used to create customer segments
+
+**use_in_forms** - Optional, Values = adminhtml_customer,adminhtml_checkout,customer_account_edit,customer_account_create. Default = all forms.  Comma delimited list of forms where the attribute can be defined
+
 
 ### Customer Segments
 

@@ -84,6 +84,22 @@ class CustomerGroups
     }
 
     /**
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getAllCustomerGroupIds()
+    {
+        $groupIds=[];
+        $search = $this->searchCriteriaBuilder
+            ->addFilter('code', '', 'neq')->create();
+        $groupList = $this->groupRepository->getList($search)->getItems();
+        foreach ($groupList as $group) {
+            $groupIds[] = $group->getId();
+        }
+        return $groupIds;
+    }
+
+    /**
      * @return string
      */
     public function getDefaultCustomerGroup()

@@ -94,6 +94,8 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**customers.csv**](#customers)  - Creates customers. Also used to add customer data to autofill.
 
+[**customer\_addresses.csv**](#customer-addresses) - Adds address records to customers
+
 [**product_attributes.csv**](#product-attributes) - Creates product attributes and set
 
 [**categories.csv**](#categories) - Creates categories
@@ -354,11 +356,35 @@ Accepted values 2= Apply to Visitors, 1= Apply to Registered Users, 0= Both Visi
 
 Optional file: Used to create customers
 
-Uses the same file format as the native Magento customer import with the exeption of two columns:
+There are multiple file formats that can be used for importing customers. The Magento exporter supports Customer Main File, which doesn't include any address information, and Customer Addresses which include all defined addresses.  There is no export that includes a composite Customers and Addresses file that is supported by the importer. If you are exporting files you can leave them as two separate files, or combine them into a single customer file. The single customer file method will only support one address for both billing and shipping.  TODO: put a sample of all files in the sample module
+
+If you are using an export, make sure you have the correct website, store and group values for your data.  If website or store are not included, it will use the defaults in `settings.csv`. You will also need to remove any customer attribute columns that aren't needed, and to clean up any other columns that arent needed like **created_at**, **updated_at**.  Your file should just include customer profile information, store/site/group information, customer profile and attribute values.
+
+If you are importing the addresses separatly, they will need to go into the `customer_addresses.csv` file, which is detailed in its own section
+
+The customer file will use the same file format as the native Magento customer import with some exceptions:
 **add_to_autofill** - Optional.  This will add the customer as a selectable option to the [Autofil Module](https://github.com/PMET-public/module-autofill "Autofil Module")
-**group** - Optional.  Name of the customer group.  If not defined, default will be `General` 
+**group** - Optional.  Name of the customer group.  If not defined, default will be `General`. **group_id** can be used but the id must exist in the imported instance
+
+Some column names may have alaises for ease of use and consistancy with other Data Installer data files.
+**site_code** if it exists it will populate the **_website** value
+**store_view_code** if it exists it will populate the **_store** value
+**group** if it exists it will convert to an ID and populate the **group_id** value.
+**_address_firstname** and **_address_firstname** in a composite Customers and Addresses file these are optional. **firstname** and **lastname** will be substituted if they are not defined.
 
 At this time, only one address is supported and used for both billing and shipping.  However, new addresses can be added from a second module, esentially updating the customer but adding, not replacing addresses.  Last address in getst set as default.
+
+If you are getting errors while importing customers, you can try importing it via the admin UI to get better error feedback. Or in **settings.csv** add `product_validation_strategy,validation-stop-on-errors`. This will set the Allowed Error Count to 0 and give you better error output.
+
+### Customer Addresses
+
+*File Name* - customer_addresses.csv
+
+Optional file: Used to add addresses to customers
+
+It is recommended to use an exported customer address file. Make sure you have the correct `_website` populated, or remove the `_website` column. If `_website` is not included, it will use the defaults in `settings.csv`. `_entity_id` is a column required by the importer. However, it can be problematic as it is taking ids from the original instance. You can leave that column out of your file. Or, the Data Importer will clear out the values if it exists.
+
+*note that updating addresses is not supported. If you import the same address file multiple times, the addresses will be added each time.
 
 ### Categories
 

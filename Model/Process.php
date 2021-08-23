@@ -20,7 +20,7 @@ class Process
 {
     const ALL_FILES = ['stores.csv','config_default.json','config_default.csv','config_vertical.json','config_vertical.csv',
     'config_secret.json','config_secret.csv','config.json','config.csv',
-    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv','customer_segments.csv',
+    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','customer_addresses.csv','product_attributes.csv','customer_segments.csv',
     'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv','advanced_pricing.csv','orders.csv'];
@@ -28,7 +28,7 @@ class Process
     const STORE_FILES = ['stores.csv'];
 
     const STAGE1 = ['config_default.json','config_default.csv','config_vertical.json','config_vertical.csv','config_secret.json','config_secret.csv','config.json','config.csv',
-    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','product_attributes.csv',
+    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','customer_addresses.csv','product_attributes.csv',
     'customer_segments.csv','blocks.csv','categories.csv'];
 
     const STAGE2 = ['products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
@@ -89,6 +89,9 @@ class Process
 
     /** @var DataTypes\Customers  */
     protected $customerInstall;
+
+    /** @var DataTypes\CustomerAddresses  */
+    protected $customerAddressesInstall;
 
     /** @var DataTypes\Reviews  */
     protected $reviewsInstall;
@@ -186,6 +189,7 @@ class Process
      * @param DataTypes\CustomerGroups $customerGroups
      * @param DataTypes\CustomerAttributes $customerAttributes
      * @param DataTypes\Customers $customers
+     * @param DataTypes\CustomersAddresses $customerAddresses
      * @param DataTypes\CustomerSegments $customerSegments
      * @param DataTypes\DynamicBlocks $dynamicBlocks
      * @param DataTypes\Widgets $widgets
@@ -226,6 +230,7 @@ class Process
         DataTypes\CustomerGroups $customerGroups,
         DataTypes\CustomerAttributes $customerAttributes,
         DataTypes\Customers $customers,
+        DataTypes\CustomerAddresses $customerAddresses,
         DataTypes\CustomerSegments $customerSegments,
         DataTypes\DynamicBlocks $dynamicBlocks,
         DataTypes\Widgets $widgets,
@@ -259,6 +264,7 @@ class Process
         $this->customerGroupInstall = $customerGroups;
         $this->customerAttributeInstall = $customerAttributes;
         $this->customerInstall = $customers;
+        $this->customerAddressesInstall = $customerAddresses;
         $this->reviewsInstall = $reviews;
         $this->templatesInstall = $templates;
         $this->validate = $validate;
@@ -379,6 +385,11 @@ class Process
                         $this->helper->printMessage("Loading Customers", "info");
                         $this->processFile($rows, $header, $this->customerInstall, '');
                         break;
+
+                    case "customer_addresses.csv":
+                        $this->helper->printMessage("Loading Customer Addresses", "info");
+                        $this->processFile($rows, $header, $this->customerAddressesInstall, '');
+                        break;    
 
                     case "product_attributes.csv":
                         $this->helper->printMessage("Loading Product Attributes", "info");

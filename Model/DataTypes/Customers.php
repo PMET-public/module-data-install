@@ -3,7 +3,6 @@
  * Copyright © Adobe. All rights reserved.
  */
 
-//TODO:Support for multiple addresses
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -123,9 +122,7 @@ class Customers
         $this->customerRepositoryInterface = $customerRepositoryInterface;
         $this->addressRespository = $addressRepositoryInterface;
     }
-    //TODO: validate input fields
-    //TODO: add store and website codes if they dont exist
-    //TODO: Change website to _website
+
     /**
      * @param array $rows
      * @param array $header
@@ -147,8 +144,17 @@ class Customers
         foreach ($rows as $row) {
             $customerArray[] = array_combine($header, $row);
         }
+
+        ///support for a customer file without addresses (pure customer export), or single file which would need to be created manually
+        //Customer addresses export done as a separate file
         $cleanCustomerArray = $this->cleanDataForImport($customerArray);
-        $this->import($cleanCustomerArray,$productValidationStrategy);
+        if(array_key_exists('street',$header)){
+            $importMethod = 'customer_composite';
+        }else
+        {
+            $importMethod = 'customer';
+        }
+        $this->import($cleanCustomerArray,$productValidationStrategy,$importMethod);
         //return true;
         $startingElement = 1;
         foreach ($cleanCustomerArray as $row) {
@@ -244,13 +250,24 @@ class Customers
                 $customer['group_id']=$this->customerGroups->getCustomerGroupId($customer['group']);
             }
             
-            //add _address_firstname, _address_lastname if not present
-            if(empty($customer['_address_firstname'])){
-                $customer['_address_firstname']=$customer['firstname'];
+            //if it is a composite file these fields need to be populated
+            //if its not a composite file, adding these fields will generate an error
+
+            if(!empty($customer['street'])){
+                //add _address_firstname, _address_lastname if not present
+                if(empty($customer['_address_firstname'])){
+                    if(!empty($customer['firstname'])){
+                        $customer['_address_firstname']=$customer['firstname'];
+                    }
+                    
+                }
+                if(empty($customer['_address_lastname'])){
+                    if(!empty($customer['firstname'])){
+                        $customer['_address_lastname']=$customer['lastname'];
+                    }
+                }
             }
-            if(empty($customer['_address_lastname'])){
-                $customer['_address_lastname']=$customer['lastname'];
-            }
+            
             //remove columns used for other purposes, but throw errors on import
             foreach($this->importUnsafeColumns as $column){
                 unset($customer[$column]);
@@ -260,13 +277,13 @@ class Customers
         return $newCustomerArray;
     }
 
-    private function import($customerArray, $productValidationStrategy)
+    private function import($customerArray, $productValidationStrategy,$importMethod)
     {
         $importerModel = $this->importer->create();
-        $importerModel->setEntityCode('customer_composite');
+        $importerModel->setEntityCode($importMethod);
         $importerModel->setValidationStrategy($productValidationStrategy);
         if ($productValidationStrategy == 'validation-stop-on-errors') {
-            $importerModel->setAllowedErrorCount(1);
+            $importerModel->setAllowedErrorCount(0);
         } else {
             $importerModel->setAllowedErrorCount(100);
         }

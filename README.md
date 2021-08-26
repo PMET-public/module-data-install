@@ -112,6 +112,8 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**catalog\_rules.csv**](#catalog-rules) - Used to create the Catalog Promotion Rules
 
+[**cart\_rules.csv**](#cart-rules) - Used to create the Cart Promotion Rules
+
 [**blocks**](#blocks) - Creates Blocks. Includes Page Builder compatibility
 
 [**dynamic_blocks.csv**](#dynamic-blocks) - Creates Dynamic Blocks. Includes Page Builder compatibility
@@ -126,7 +128,6 @@ Each element of potential sample data is encapsulated in its own file:
 [**reviews.csv**](#reviews) - Creates reviews and ratings
 
 *To be added*
-**cart\_rules.csv**
 **Staging**
 **orders, refunds, credit memos**
 
@@ -550,6 +551,32 @@ Single customer group name or comma delimited list
 **dynamic\_blocks** - In the UI: *Related Dynamic Blocks*
 Optional: Single dynamic block name  or comma delimited list
 
+### Cart Rules
+
+*File Name* - cart\_rules.csv
+
+This file is used to add and update cart promotion rules.
+
+At this point Automatically generated coupon codes are not supported. If you do use a specific coupon code, you need to insure that it is not used by another Cart Rule, or the row will be rejected
+
+Because rule definitions are complex, the method currently in use is to create a cart rule in a test enviornment and then export that data out of the database using this query:
+`select '' as 'site_code','' as 'customer_group',r.name, r.description, r.uses_per_customer,r.is_active,r.conditions_serialized,r.actions_serialized,r.stop_rules_processing,r.is_advanced,r.sort_order,r.simple_action,r.discount_amount,r.discount_qty,r.discount_step,r.apply_to_shipping,r.times_used,r.is_rss,r.coupon_type,r.use_auto_generation,r.uses_per_coupon,r.simple_free_shipping,IFNULL(c.code,'') as 'coupon_code', rw.points_delta as 'reward_points_delta'
+from salesrule r 
+left join salesrule_coupon c
+on r.rule_id = c.rule_id
+left join magento_reward_salesrule rw
+on r.rule_id = rw.rule_id`
+
+*After Extraction Edits*
+
+**site\_code** - Optional. Single site_code or comma delimited list for multiple sites. Will take the value from settings.csv if not provided.
+
+**customer\_group** - Optional. Comma delimited names of Customer Groups. If left empty, or if the value of `all` is used, the rule will be available to all customer groups
+
+**is\_active** - Optional: Values = Y/N. Default = Y
+
+**conditions_serialized** and **actions_serialized** - Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers like product attributes, categories and attribute sets.
+
 ### Blocks
 
 *File Name* - blocks.csv
@@ -565,6 +592,7 @@ This file is used to add or update blocks.  Updates are made by using the key of
 **title** - Required - Same as Block Title in the UI
 
 **content** - Optional. Body of the page. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers for Page Builder compatibility
+
 
 ### Widgets
 

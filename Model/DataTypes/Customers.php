@@ -22,6 +22,8 @@ use Magento\Framework\Exception\LocalizedException;
 use FireGento\FastSimpleImport\Model\ImporterFactory as Importer;
 use Magento\Framework\Exception\NoSuchEntityException;
 use MagentoEse\DataInstall\Helper\Helper;
+use Magento\Reward\Model\RewardFactory;
+use Magento\Reward\Model\Reward;
 
 class Customers
 {
@@ -73,10 +75,14 @@ class Customers
 
      /** @var Helper  */
      protected $helper;
+
     /** @var CustomerRepositoryInterface */
      protected $customerRepositoryInterface;
 
-     protected $importUnsafeColumns=['company_admin', 'role', 'add_to_autofill','group'];
+    /** @var RewardFactory  */
+    protected $rewardFactory;
+
+     protected $importUnsafeColumns=['company_admin', 'role', 'add_to_autofill','group','reward_points','store_credit'];
 
     /**
      * Customers constructor.
@@ -90,6 +96,12 @@ class Customers
      * @param State $appState
      * @param Configuration $configuration
      * @param CountryFactory $countryFactory
+     * @param Importer $importer
+     * @param Helper $helper
+     * @param CustomerRepositoryInterface $customerRepositoryInterface
+     * @param AddressRepositoryInterface $addressRepositoryInterface
+     * @param AddressRepositoryInterface $addressRepositoryInterface
+     * @param RewardFactory $rewardFactory
      */
     public function __construct(
         CustomerGroups $customerGroups,
@@ -105,7 +117,8 @@ class Customers
         Importer $importer,
         Helper $helper,
         CustomerRepositoryInterface $customerRepositoryInterface,
-        AddressRepositoryInterface $addressRepositoryInterface
+        AddressRepositoryInterface $addressRepositoryInterface,
+        RewardFactory $rewardFactory
     ) {
         $this->customerGroups=$customerGroups;
         $this->stores = $stores;
@@ -121,6 +134,7 @@ class Customers
         $this->helper = $helper;
         $this->customerRepositoryInterface = $customerRepositoryInterface;
         $this->addressRespository = $addressRepositoryInterface;
+        $this->rewardFactory = $rewardFactory;
     }
 
     /**
@@ -155,7 +169,20 @@ class Customers
             $importMethod = 'customer';
         }
         $this->import($cleanCustomerArray,$productValidationStrategy,$importMethod);
-        //return true;
+        
+        //add rewards points
+        foreach($customerArray as $rewardCustomer){
+            if(!empty($rewardCustomer['reward_points'])){
+            $customer = $this->customerRepositoryInterface->get($rewardCustomer['email'],$this->stores->getWebsiteId($rewardCustomer['_website']));
+            /** @var Reward $reward */
+            $reward = $this->rewardFactory->create();
+            $reward->setWebsiteId($this->stores->getWebsiteId($rewardCustomer['_website']));
+            $reward->setCustomer($customer);
+            $reward->setPointsBalance($rewardCustomer['reward_points']);
+            $reward->save();
+            }
+        }
+    
         $startingElement = 1;
         foreach ($cleanCustomerArray as $row) {
             try{
@@ -213,7 +240,7 @@ class Customers
 
         return true;
     }
-
+    
     private function cleanDataForImport($customerArray){
         
         $newCustomerArray=[];

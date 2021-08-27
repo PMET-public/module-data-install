@@ -20,7 +20,7 @@ class Process
 {
     const ALL_FILES = ['stores.csv','config_default.json','config_default.csv','config_vertical.json','config_vertical.csv',
     'config_secret.json','config_secret.csv','config.json','config.csv',
-    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','customer_addresses.csv','product_attributes.csv','customer_segments.csv',
+    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv','customers.csv','customer_addresses.csv','product_attributes.csv','customer_segments.csv',
     'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv','advanced_pricing.csv','orders.csv'];
@@ -28,7 +28,7 @@ class Process
     const STORE_FILES = ['stores.csv'];
 
     const STAGE1 = ['config_default.json','config_default.csv','config_vertical.json','config_vertical.csv','config_secret.json','config_secret.csv','config.json','config.csv',
-    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','customers.csv','customer_addresses.csv','product_attributes.csv',
+    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv','customers.csv','customer_addresses.csv','product_attributes.csv',
     'customer_segments.csv','blocks.csv','categories.csv'];
 
     const STAGE2 = ['products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
@@ -86,6 +86,9 @@ class Process
 
     /** @var DataTypes\CustomerAttributes  */
     protected $customerAttributeInstall;
+
+     /** @var DataTypes\RewardExchangeRate  */
+     protected $rewardExchangeRateInstall;
 
     /** @var DataTypes\Customers  */
     protected $customerInstall;
@@ -188,6 +191,7 @@ class Process
      * @param DataTypes\Configuration $configuration
      * @param DataTypes\CustomerGroups $customerGroups
      * @param DataTypes\CustomerAttributes $customerAttributes
+     * @param DataTypes\RewardExchangeRate $rewardExchangeRate
      * @param DataTypes\Customers $customers
      * @param DataTypes\CustomersAddresses $customerAddresses
      * @param DataTypes\CustomerSegments $customerSegments
@@ -229,6 +233,7 @@ class Process
         DataTypes\Configuration $configuration,
         DataTypes\CustomerGroups $customerGroups,
         DataTypes\CustomerAttributes $customerAttributes,
+        DataTypes\RewardExchangeRate $rewardExchangeRate,
         DataTypes\Customers $customers,
         DataTypes\CustomerAddresses $customerAddresses,
         DataTypes\CustomerSegments $customerSegments,
@@ -263,6 +268,7 @@ class Process
         $this->configurationInstall = $configuration;
         $this->customerGroupInstall = $customerGroups;
         $this->customerAttributeInstall = $customerAttributes;
+        $this->rewardExchangeRateInstall = $rewardExchangeRate;
         $this->customerInstall = $customers;
         $this->customerAddressesInstall = $customerAddresses;
         $this->reviewsInstall = $reviews;
@@ -491,6 +497,11 @@ class Process
                         $this->processRows($rows, $header, $this->cartRulesInstall);
                         break;
 
+                    case "reward_exchange_rate.csv":
+                        $this->helper->printMessage("Loading Reward Exchange Rates", "info");
+                        $this->processRows($rows, $header, $this->rewardExchangeRateInstall);
+                        break;
+        
                     case "reviews.csv":
                         $this->helper->printMessage("Loading Reviews & Ratings", "info");
                         $this->processRows($rows, $header, $this->reviewsInstall);

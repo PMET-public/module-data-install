@@ -96,6 +96,8 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**customer\_addresses.csv**](#customer-addresses) - Adds address records to customers
 
+[**reward\_exchange\_rate.csv**](#reward-exchange-rate) - Sets the conversion values for Reward Points
+
 [**product_attributes.csv**](#product-attributes) - Creates product attributes and set
 
 [**categories.csv**](#categories) - Creates categories
@@ -366,6 +368,7 @@ If you are importing the addresses separatly, they will need to go into the `cus
 The customer file will use the same file format as the native Magento customer import with some exceptions:
 **add_to_autofill** - Optional.  This will add the customer as a selectable option to the [Autofil Module](https://github.com/PMET-public/module-autofill "Autofil Module")
 **group** - Optional.  Name of the customer group.  If not defined, default will be `General`. **group_id** can be used but the id must exist in the imported instance
+**reward_points** - Optional.  This will set set the number of Reward Points for a customer. The converion rates are defined in `reward_exchange_rate.csv` but are not needed to add points to a customer.
 
 Some column names may have alaises for ease of use and consistancy with other Data Installer data files.
 **site_code** if it exists it will populate the **_website** value
@@ -386,6 +389,23 @@ Optional file: Used to add addresses to customers
 It is recommended to use an exported customer address file. Make sure you have the correct `_website` populated, or remove the `_website` column. If `_website` is not included, it will use the defaults in `settings.csv`. `_entity_id` is a column required by the importer. However, it can be problematic as it is taking ids from the original instance. You can leave that column out of your file. Or, the Data Importer will clear out the values if it exists.
 
 *note that updating addresses is not supported. If you import the same address file multiple times, the addresses will be added each time.
+
+### Reward Exchange Rate
+
+*File Name* - reward_exchange_rate.csv
+
+Optional file: Used to set Reward Point conversion rate
+
+Only one rate per website,customer group and direction is allowed. Exsiting rates will be updated using that key
+
+*Columns*
+All columns are required
+
+**site_code** - Website code
+**customer_group** - Name of Customer Group
+**direction** - `points_to_currency` or `currency_to_points`
+**points**
+**currency_amount** 
 
 ### Categories
 

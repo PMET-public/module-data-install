@@ -2,7 +2,7 @@
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use MagentoEse\DataInstall\Helper\Helper;
-use Magento\Reward\Model\Reward\Ratefactory as RateModelFactory;
+use Magento\Reward\Model\Reward\RateFactory as RateModelFactory;
 use Magento\Reward\Model\Reward\Rate;
 use Magento\Reward\Model\ResourceModel\Reward\Rate as RateResourceModel;
 use Magento\Reward\Model\ResourceModel\Reward\Rate\CollectionFactory;

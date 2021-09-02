@@ -171,17 +171,7 @@ class Customers
         $this->import($cleanCustomerArray,$productValidationStrategy,$importMethod);
         
         //add rewards points
-        foreach($customerArray as $rewardCustomer){
-            if(!empty($rewardCustomer['reward_points'])){
-            $customer = $this->customerRepositoryInterface->get($rewardCustomer['email'],$this->stores->getWebsiteId($rewardCustomer['_website']));
-            /** @var Reward $reward */
-            $reward = $this->rewardFactory->create();
-            $reward->setWebsiteId($this->stores->getWebsiteId($rewardCustomer['_website']));
-            $reward->setCustomer($customer);
-            $reward->setPointsBalance($rewardCustomer['reward_points']);
-            $reward->save();
-            }
-        }
+        $this->addRewardsPoints($customerArray);
     
         $startingElement = 1;
         foreach ($cleanCustomerArray as $row) {
@@ -302,6 +292,33 @@ class Customers
             $newCustomerArray[]=$customer;
         }
         return $newCustomerArray;
+    }
+
+    private function addRewardsPoints($customerArray){
+        foreach($customerArray as $rewardCustomer){
+            if(!empty($rewardCustomer['reward_points'])){
+            //change website column if incorrect
+            if (!empty($rewardCustomer['site_code'])) {
+                $rewardCustomer['_website']=$this->stores->replaceBaseWebsiteCode($rewardCustomer['site_code']);
+                unset($customer['site_code']);
+            }
+            if (!empty($rewardCustomer['website']) && $rewardCustomer['website']!='') {
+                $rewardCustomer['_website']=$this->stores->replaceBaseWebsiteCode($rewardCustomer['website']);
+                unset($rewardCustomer['website']);
+            }
+
+            if(empty($rewardCustomer['_website'])){
+                $rewardCustomer['_website']=$this->settings['site_code'];
+            }    
+            $customer = $this->customerRepositoryInterface->get($rewardCustomer['email'],$this->stores->getWebsiteId($rewardCustomer['_website']));
+            /** @var Reward $reward */
+            $reward = $this->rewardFactory->create();
+            $reward->setWebsiteId($this->stores->getWebsiteId($rewardCustomer['_website']));
+            $reward->setCustomer($customer);
+            $reward->setPointsBalance($rewardCustomer['reward_points']);
+            $reward->save();
+            }
+        }
     }
 
     private function import($customerArray, $productValidationStrategy,$importMethod)

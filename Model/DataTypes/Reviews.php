@@ -10,6 +10,8 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Review\Model\Review;
 use Magento\Review\Model\ReviewFactory;
 use Magento\Review\Model\ResourceModel\Review\CollectionFactory as ReviewCollectionFactory;
+use Magento\Review\Model\ResourceModel\Rating\CollectionFactory as RatingCollectionFactory;
+use Magento\Review\Model\ResourceModel\Rating as RatingResourceModel;
 use Magento\Review\Model\RatingFactory;
 use Magento\Review\Model\Rating\OptionFactory;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
@@ -31,6 +33,19 @@ class Reviews
      * @var ReviewCollectionFactory
      */
     protected $reviewCollectionFactory;
+
+
+    /**
+     * @var RatingCollectionFactory
+     */
+    protected $ratingCollectionFactory;
+
+
+    /**
+     * @var RatingResourceModel
+     */
+    protected $ratingResourceModel;
+
 
     /**
      * @var RatingFactory
@@ -91,6 +106,8 @@ class Reviews
      * @param OptionFactory $ratingOptionsFactory
      * @param StoreManagerInterface $storeManager
      * @param Stores $stores
+     * @param RatingCollectionFactory $ratingCollectionFactory
+     * @param RatingResourceModel $ratingResourceModel
      */
     public function __construct(
         Helper $helper,
@@ -101,7 +118,9 @@ class Reviews
         CustomerRepositoryInterface $customerAccount,
         OptionFactory $ratingOptionsFactory,
         StoreManagerInterface $storeManager,
-        Stores $stores
+        Stores $stores,
+        RatingCollectionFactory $ratingCollectionFactory,
+        RatingResourceModel $ratingResourceModel
     ) {
         $this->helper = $helper;
         $this->reviewFactory = $reviewFactory;
@@ -112,6 +131,8 @@ class Reviews
         $this->ratingOptionsFactory = $ratingOptionsFactory;
         $this->storeManager = $storeManager;
         $this->stores = $stores;
+        $this->ratingCollectionFactory = $ratingCollectionFactory;
+        $this->ratingResourceModel = $ratingResourceModel;
     }
 
     /**
@@ -157,7 +178,7 @@ class Reviews
             $review->setCustomerId($this->getCustomerIdByEmail($row['email']));
         }
         $review->save();
-        $this->setReviewRating($review, $row);
+        $this->setReviewRating($review, $row,$storeId);
 
         return true;
     }
@@ -215,13 +236,20 @@ class Reviews
      * @return \Magento\Framework\DataObject|mixed
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function getRating($rating)
+    protected function getRating($rating,$storeId)
     {
-        $ratingCollection = $this->ratingFactory->create()->getResourceCollection();
-        if (empty($this->ratings[$rating])) {
-            $this->ratings[$rating] = $ratingCollection->addFieldToFilter('rating_code', $rating)->getFirstItem();
+        $ratingCollection = $this->ratingCollectionFactory->create();
+        
+        $ratingId = $ratingCollection->addFieldToFilter('rating_code', $rating)->getFirstItem()->getId();
+        $rating = $this->ratingFactory->create()->load($ratingId);
+        $ratingStores = $rating->getStores();
+        if(!in_array($storeId,$ratingStores)){
+            $ratingStores[]=$storeId;
+            $rating->setStores($ratingStores);
+            $this->ratingResourceModel->save($rating);
         }
-        return $this->ratings[$rating];
+        //$rating = $this->ratingResourceModel->load($ratingId);
+        return $rating;
     }
 
     /**
@@ -229,9 +257,9 @@ class Reviews
      * @param $row
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function setReviewRating(Review $review, $row)
+    protected function setReviewRating(Review $review, $row,$storeId)
     {
-        $rating = $this->getRating($row['rating_code']);
+        $rating = $this->getRating($row['rating_code'],$storeId);
         foreach ($rating->getOptions() as $option) {
             $optionId = $option->getOptionId();
             if (($option->getValue() == $row['rating_value']) && !empty($optionId)) {
@@ -252,7 +280,7 @@ class Reviews
     protected function createRating($ratingCode, $storeId)
     {
         //$stores[] = $storeId;
-        $rating = $this->getRating($ratingCode);
+        $rating = $this->getRating($ratingCode,$storeId);
         if (!$rating->getData()) {
             $rating->setRatingCode(
                 $ratingCode

@@ -24,6 +24,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use MagentoEse\DataInstall\Helper\Helper;
 use Magento\Reward\Model\RewardFactory;
 use Magento\Reward\Model\Reward;
+use Magento\Framework\App\Area as AppArea;
 
 class Customers
 {
@@ -162,7 +163,7 @@ class Customers
         ///support for a customer file without addresses (pure customer export), or single file which would need to be created manually
         //Customer addresses export done as a separate file
         $cleanCustomerArray = $this->cleanDataForImport($customerArray);
-        if(array_key_exists('street',$header)){
+        if(in_array('street',$header)){
             $importMethod = 'customer_composite';
         }else
         {
@@ -184,7 +185,7 @@ class Customers
                 $customer->setCreatedIn($this->stores->getViewName($this->settings['store_view_code']));
             }
             $this->appState->emulateAreaCode(
-                'frontend',
+                AppArea::AREA_FRONTEND,
                 [$this->customerRepositoryInterface, 'save'],
                 [$customer]
             );
@@ -300,7 +301,7 @@ class Customers
             //change website column if incorrect
             if (!empty($rewardCustomer['site_code'])) {
                 $rewardCustomer['_website']=$this->stores->replaceBaseWebsiteCode($rewardCustomer['site_code']);
-                unset($customer['site_code']);
+                unset($rewardCustomer['site_code']);
             }
             if (!empty($rewardCustomer['website']) && $rewardCustomer['website']!='') {
                 $rewardCustomer['_website']=$this->stores->replaceBaseWebsiteCode($rewardCustomer['website']);
@@ -326,6 +327,7 @@ class Customers
         $importerModel = $this->importer->create();
         $importerModel->setEntityCode($importMethod);
         $importerModel->setValidationStrategy($productValidationStrategy);
+        $importerModel->setBehavior('add_update');
         if ($productValidationStrategy == 'validation-stop-on-errors') {
             $importerModel->setAllowedErrorCount(0);
         } else {

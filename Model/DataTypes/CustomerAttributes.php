@@ -162,7 +162,7 @@ class CustomerAttributes
         $option=[];
         $option['attribute_id'] = $attribute->getAttributeId();
         foreach ($options as $key => $value) {
-            $option['value']['a'.strval($value)][$store]=$value;
+            $option['value']['a'.strval($value)][$store]=trim($value);
         }
 
         $eavSetup = $this->eavSetupFactory->create();

@@ -7,6 +7,7 @@ use Magento\SalesRule\Model\ResourceModel\Rule\CollectionFactory as RuleCollecti
 use Magento\SalesRule\Api\Data\ConditionInterfaceFactory;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\State;
+use Magento\Framework\App\Area as AppArea;
 use MagentoEse\DataInstall\Model\Converter;
 use MagentoEse\DataInstall\Helper\Helper;
 
@@ -192,7 +193,11 @@ class CartRules
           
 
         //save
-        $rule->save();
+        //$rule->save();
+        $this->appState->emulateAreaCode(
+            AppArea::AREA_ADMINHTML,
+            [$rule, 'save']
+        );
 
     }
     /**

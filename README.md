@@ -396,7 +396,9 @@ It is recommended to use an exported customer address file. Make sure you have t
 
 Optional file: Used to set Reward Point conversion rate
 
-Only one rate per website,customer group and direction is allowed. Exsiting rates will be updated using that key
+Only one rate per website,customer group and direction is allowed. Exsiting rates will be updated using that key. Any admin settings should be included as part of configuration (`config_vertical.csv`). You can use this query to extract the values from the database. Add the proper values to the `scope_code` column:
+`select scope, '' as scope_code, path,value from core_config_data where path like '%magento_reward%'
+and value is not null`
 
 *Columns*
 All columns are required
@@ -476,8 +478,26 @@ The standard Magento Advanced Pricing import file is used. If you export from an
 *File Name* - product\_attributes.csv
 
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
-Product attribute configurations can be complex. The purpose of this file is to address the most common settings. All settings are supported using database column names and values.
+Product attribute configurations can be complex. The columns examples below are a bare minimum needed if you were createing the file manually.  It's recommended to do a database extract.All settings are supported using database column names and values.
 
+*Get Attribute information*
+`select eav.attribute_code, eav.frontend_input, eav.frontend_label,'' as 'options', '' as 'attribute_set'
+,pa.is_global,pa.is_visible,pa.is_searchable,pa.is_filterable,pa.is_comparable,pa.is_visible_on_front,pa.is_html_allowed_on_front,pa.is_used_for_price_rules
+,pa.is_filterable_in_search,pa.used_in_product_listing,pa.used_for_sort_by,
+case when pa.apply_to is null then '' else pa.apply_to end as 'apply_to',pa.is_visible_in_advanced_search,pa.position,pa.is_wysiwyg_enabled,
+pa.is_used_for_promo_rules,pa.is_required_in_admin_store,pa.is_used_in_grid,pa.is_visible_in_grid,pa.is_filterable_in_grid,pa.search_weight,pa.is_pagebuilder_enabled,
+case when pa.additional_data is null then '' else pa.additional_data end as 'additional_data'
+from eav_attribute eav inner join catalog_eav_attribute pa on eav.attribute_id = pa.attribute_id 
+where eav.attribute_code in ('...','...')`
+
+*Get value for `options` column for select or multi-part*
+`select group_concat(ov.value order by op.sort_order separator '\n') as options
+from eav_attribute_option_value ov
+left join eav_attribute_option op
+on ov.option_id = op.option_id
+where op.attribute_id in (select attribute_id from eav_attribute where attribute_code = '...')`
+
+The values of the `attribute_set` column will need to be populated by a carriage return delimed list of sets the attribute should be added to
 
 > Out of Scope: Swatches, translations of attribute options
 

@@ -17,4 +17,18 @@
             </argument>
         </arguments>
     </type>
+
+    <type name="MagentoEse\DataInstall\Logger\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="MagentoEse\DataInstall\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">DataInstall</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">MagentoEse\DataInstall\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

@@ -137,8 +137,12 @@ class ProductAttributes
            
             $row['frontend_label'] = $frontEndLabels;
         }
+        ///allow option column for backwards compatibility
         if(!empty($row['option'])){
             $row['option'] = $this->getOption($attribute, $row);
+        }
+        if(!empty($row['options'])){
+            $row['options'] = $this->getOption($attribute, $row);
         }
         if(!empty($row['frontend_input'])){
            $row['source_model'] = $this->productHelper->getAttributeSourceModelByInputType($row['frontend_input']);

@@ -12,6 +12,7 @@ use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Cache\Frontend\Pool;
 use Magento\Indexer\Model\IndexerFactory;
 use Magento\Indexer\Model\Indexer\Collection;
+use MagentoEse\DataInstall\Logger\Logger;
 
 class Helper extends AbstractHelper
 {
@@ -33,6 +34,9 @@ class Helper extends AbstractHelper
     /** @var Collection */
     private $indexCollection;
 
+    /** @var Logger */
+    private $logger;
+
     /**
      * Helper constructor.
      * @param Context $context
@@ -40,13 +44,15 @@ class Helper extends AbstractHelper
      * @param TypeListInterface $cacheTypeList
      * @param IndexerFactory $indexFactory
      * @param Collection $indexCollection
+     * @param Logger $logger
      */
     public function __construct(
         Context $context,
         Pool $cacheFrontendPool,
         TypeListInterface $cacheTypeList,
         IndexerFactory $indexFactory,
-        Collection $indexCollection
+        Collection $indexCollection,
+        Logger $logger
     ) {
         parent::__construct($context);
         // Set up shell colors
@@ -80,6 +86,7 @@ class Helper extends AbstractHelper
             $this->cacheTypeList = $cacheTypeList;
             $this->indexCollection = $indexCollection;
             $this->indexFactory = $indexFactory;
+            $this->logger = $logger;
     }
 
     public function reindex()
@@ -127,6 +134,8 @@ class Helper extends AbstractHelper
     public function printMessage($string, $foreground_color = null, $background_color = null)
     {
         print_r($this->getColoredString($string, $foreground_color, $background_color)."\n");
+        $foreground_color = ($foreground_color='header')?'info':$foreground_color;
+        $this->logger->$foreground_color($string);
     }
 
     /**

@@ -16,6 +16,7 @@ use Magento\Framework\Filesystem\DriverInterface;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 
+
 class Process
 {
     const ALL_FILES = ['stores.csv','config_default.json','config_default.csv','config_vertical.json','config_vertical.csv',
@@ -168,6 +169,9 @@ class Process
     /** @var Datatypes\Teams */
     protected $companyTeamsInstall;
 
+    /** @var Queue\ScheduleBulk */
+    protected $scheduleBulk;
+
     /**
      * Process constructor.
      * @param CopyMedia $copyMedia
@@ -251,7 +255,8 @@ class Process
         DataTypes\Reviews $reviews,
         DataTypes\Teams $teams,
         DataTypes\Templates $templates,
-        DataTypes\Upsells $upsells
+        DataTypes\Upsells $upsells,
+        Queue\ScheduleBulk $scheduleBulk
     ) {
         $this->helper = $helper;
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
@@ -294,6 +299,7 @@ class Process
         $this->sharedCatalogsInstall = $sharedCatalogs;
         $this->sharedCatalogCategoriesInstall = $sharedCatalogCategories;
         $this->companyTeamsInstall = $teams;
+        $this->scheduleBulk = $scheduleBulk;
     }
 
     /**
@@ -308,6 +314,9 @@ class Process
 
     public function loadFiles($fileSource, $load ='', array $fileOrder = self::ALL_FILES, $reload = 0)
     {
+        //$data = [['fileSource'=>$fileSource,'load'=>$load,'fileOrder'=>$fileOrder,'reload'=>$reload]];
+        //$this->scheduleBulk->execute($data);
+        //exit;
         $fixtureDirectory = "data";
         //bypass if data is already installed
         if ($this->isModuleInstalled($fileSource)==1 && $reload===0) {

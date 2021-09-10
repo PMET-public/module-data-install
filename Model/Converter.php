@@ -178,6 +178,8 @@ class Converter
         preg_match_all($regexp, $content, $matchesCategoryUrl);
         $regexp = '/{{(categoryid[^ ]*) key="([^"]+)"}}/';
         preg_match_all($regexp, $content, $matchesCategoryId);
+        $regexp = '/{{(productid[^ ]*) sku="([^"]+)"}}/';
+        preg_match_all($regexp, $content, $matchesProductId);
         $regexp = '/{{(producturl[^ ]*) sku="([^"]+)"}}/';
         preg_match_all($regexp, $content, $matchesProductUrl);
         $regexp = '/{{(productattribute) code="([^"]*)"}}/';
@@ -201,17 +203,18 @@ class Converter
         , $matchesDynamicBlock[1]
         , $matchesAttributeSet[1]
         , $matchesCustomerGroup[1]
-        , $matchesProductUrl[1])];
+        , $matchesProductUrl[1]
+        , $matchesProductId[1])];
         $value=[];
         
         return [
             'type' => array_merge($matchesCategoryUrl[1],$matchesCategoryId[1],$matchesProductAttribute[1],
             $matchesCustomerAttribute[1],$matchesSegment[1],$matchesBlock[1],$matchesDynamicBlock[1],
-            $matchesAttributeSet[1],$matchesCustomerGroup[1],$matchesProductUrl[1]),
+            $matchesAttributeSet[1],$matchesCustomerGroup[1],$matchesProductUrl[1],$matchesProductId[1]),
             
             'value' => array_merge($matchesCategoryUrl[2],$matchesCategoryId[2],$matchesProductAttribute[2],
             $matchesCustomerAttribute[2],$matchesSegment[2],$matchesBlock[2],$matchesDynamicBlock[2],
-            $matchesAttributeSet[2],$matchesCustomerGroup[2],$matchesProductUrl[2])
+            $matchesAttributeSet[2],$matchesCustomerGroup[2],$matchesProductUrl[2],$matchesProductId[2])
         ];
     }
 
@@ -448,6 +451,28 @@ class Converter
 
         $replaceData['regexp'][] = '/{{producturl sku="' . preg_quote($matchValue) . '"}}/';
         $replaceData['value'][] = $productUrl;
+        return $replaceData;
+    }
+
+
+    /**
+     * @param string $matchValue
+     * @return array
+     */
+    protected function matcherProductId(string $matchValue)
+    {
+        $replaceData = [];
+        $productCollection = $this->productCollectionFactory->create();
+        $productItem = $productCollection->addAttributeToFilter('sku', $matchValue)
+            ->addUrlRewrite()
+            ->getFirstItem();
+        $productUrl = null;
+        if ($productItem) {
+            $productId = $productItem->getId();
+        }
+
+        $replaceData['regexp'][] = '/{{productid sku="' . preg_quote($matchValue) . '"}}/';
+        $replaceData['value'][] = $productId;
         return $replaceData;
     }
 

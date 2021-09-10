@@ -754,6 +754,9 @@ Here is a list of all substitutions currently supported
 **Product Url** - `{{producturl sku="<sku>"}}`\
 *example* - `{{producturl sku="24-MB01"}}`
 
+**Product Id** - `{{productid sku="<sku>"}}`\
+*example* - `{{productid sku="24-MB01"}}`
+
 **Product Attribute** - `{{productattribute code="<product attribute code>:<attribute value>"}}`\
 *example* - `{{productattribute code="activity:Running"}}`
 

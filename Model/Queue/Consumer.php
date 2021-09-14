@@ -129,9 +129,10 @@ class Consumer
     private function execute($data): void
     {
         $this->process->loadFiles(
-        $data['filesource'],
-        $data['load'],
-        $data['fileorder'],
-        $data['reload']);
+        $data['filesource']//,
+        //$data['load'],
+        //$data['fileorder'],
+        //$data['reload']
+    );
     }
 }

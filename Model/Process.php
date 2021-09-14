@@ -20,8 +20,8 @@ class Process
 {
     const ALL_FILES = ['stores.csv','config_default.json','config_default.csv','config_vertical.json','config_vertical.csv',
     'config_secret.json','config_secret.csv','config.json','config.csv',
-    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv','customers.csv','customer_addresses.csv','product_attributes.csv','customer_segments.csv',
-    'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
+    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv','customers.csv','customer_addresses.csv','product_attributes.csv',
+    'blocks.csv','categories.csv','customer_segments.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv','advanced_pricing.csv','orders.csv'];
 

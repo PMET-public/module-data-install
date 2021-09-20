@@ -104,7 +104,9 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**products.csv**](#products) - Creates simple and configurable products
 
-**msi source and stock - tbd**
+[**msi\_stock.csv**](#msi-stock) - Creates Stock definitions for MSI
+
+**msi source  - tbd**
 
 [**msi\_inventory.csv**](#msi-inventory) - Updates inventory for MSI sources
 
@@ -451,11 +453,24 @@ The standard Magento Product import file is used. If you export from an existing
 - Change any store codes, website, attribute set or category definitions to match your new configuration
 - Image references will be the path of the final image *example:* `i/m/image.jpg`. Those will need to be updated to the path of your import source.  Most likely the path will be removed and just the file name (`image.jpg`) will be used
 
+### MSI Stock
+
+*File Name* - msi_stock.csv
+
+The file format is simple so it is easiest to configure it manually. 
+
+Stock names cannot be updated, but the website assignments can be using the `stock_name` as key.
+
+**stock\_name** - (required) MSI Stock
+
+**site\_code** - (optional) A comma delimited list of websites to assign the Stock to.  A website can only be assigned to one Stock, so if a website is listed multiple times it will be assigned to the last Stock in the file. If this column is empty, the Stock will be created but not assigned to a website
+
+
 ### MSI Inventory
 
 *File Name* - msi_inventory.csv
 
-The standard Magento Stock Sources import file is used.
+The standard Magento Stock Sources import file is used and can be exported from a configured instance
 
 **source\_code** - MSI Source
 

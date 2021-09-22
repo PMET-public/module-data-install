@@ -96,9 +96,9 @@ class CompanyUserRoles
                      $this->acl->assignUserDefaultRole($userId, $this->getCompanyId($row['company']));
                      $this->acl->assignRoles($userId, [$role]);
             } else {
-                $this->helper->printMessage("The role ". $row['role'] ." for company ".$row['company']." does not exist", "warning");
+                $this->helper->printMessage("The role ". $row['role'] ." for company ".$row['company'].
+                " does not exist", "warning");
             }
-
         }
 
         return true;
@@ -138,7 +138,8 @@ class CompanyUserRoles
         /** @var CompanyInterface $company */
         $company = current($companyList->getItems());
         if (!$company) {
-            $this->helper->printMessage("The company ". $companyName ." requested in b2b_company_user_roles.csv does not exist", "warning");
+            $this->helper->printMessage("The company ". $companyName .
+            " requested in b2b_company_user_roles.csv does not exist", "warning");
             return false;
         } else {
             return $company->getId();

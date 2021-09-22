@@ -59,7 +59,6 @@ class MsiStock
     /** @var SourceInterfaceFactory */
     protected $sourceInterfaceFactory;
 
-
     /**
      * constructor.
      * @param Helper $helper
@@ -76,11 +75,17 @@ class MsiStock
      * @param SourceInterfaceFactory $sourceInterfaceFactory
      */
     public function __construct(
-        Helper $helper, StockInterfaceFactory $stockInterfaceFactory, 
-        StockRepositoryInterface $stockRepositoryInterface, SearchCriteriaBuilder $searchCriteria,
-        Stores $stores, SalesChannelInterfaceFactory $salesChannelInterfaceFactory,StockSourceLinkInterfaceFactory $stockSourceLinkInterfaceFactory,
-        StockSourceLinksSaveInterface $stockSourceLinksSaveInterface, SourceRepositoryInterface $sourceRepository,
-        SourceInterfaceFactory $sourceInterfaceFactory,StockSourceLinksDeleteInterface $stockSourceLinksDeleteInterface,
+        Helper $helper,
+        StockInterfaceFactory $stockInterfaceFactory,
+        StockRepositoryInterface $stockRepositoryInterface,
+        SearchCriteriaBuilder $searchCriteria,
+        Stores $stores,
+        SalesChannelInterfaceFactory $salesChannelInterfaceFactory,
+        StockSourceLinkInterfaceFactory $stockSourceLinkInterfaceFactory,
+        StockSourceLinksSaveInterface $stockSourceLinksSaveInterface,
+        SourceRepositoryInterface $sourceRepository,
+        SourceInterfaceFactory $sourceInterfaceFactory,
+        StockSourceLinksDeleteInterface $stockSourceLinksDeleteInterface,
         GetStockSourceLinksInterface $getStockSourceLinksInterface
     ) {
         $this->helper = $helper;
@@ -95,7 +100,7 @@ class MsiStock
         $this->sourceInterfaceFactory = $sourceInterfaceFactory;
         $this->stockSourceLinksDeleteInterface = $stockSourceLinksDeleteInterface;
         $this->getStockSourceLinksInterface = $getStockSourceLinksInterface;
-     }
+    }
 
     /**
      * install
@@ -109,38 +114,45 @@ class MsiStock
     public function install(array $row, array $settings)
     {
         if (empty($row['stock_name'])) {
-            $this->helper->printMessage("A row in msi_stock file does not have a value for stock_name. Row is skipped", "warning");
+            $this->helper->printMessage(
+                "A row in msi_stock file does not have a value for stock_name. Row is skipped",
+                "warning"
+            );
             return true;
         }
         //validate that site_code exists
-        $siteCodes = explode(",",preg_replace('/\s+/', '', $row['site_code']));
+        $siteCodes = explode(",", preg_replace('/\s+/', '', $row['site_code']));
         $websiteCodes = [];
-        foreach($siteCodes as $siteCode){
-            if($this->stores->getWebsiteId($siteCode)){
+        foreach ($siteCodes as $siteCode) {
+            if ($this->stores->getWebsiteId($siteCode)) {
                 $websiteCodes[] = $siteCode;
-            }elseif($siteCode !=''){
-                $this->helper->printMessage("site_code ".$siteCode. " does not exist. Assignment to stock is skipped", "warning");
+            } elseif ($siteCode !='') {
+                $this->helper->printMessage(
+                    "site_code ".$siteCode. " does not exist. Assignment to stock is skipped",
+                    "warning"
+                );
             }
         }
         
-        $search = $this->searchCriteria->addFilter(StockInterface::NAME, $row['stock_name'], 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        $search = $this->searchCriteria->addFilter(StockInterface::NAME, $row['stock_name'], 'eq')
+        ->create()->setPageSize(1)->setCurrentPage(1);
         $stock = $this->stockRepository->getList($search)->getItems();
 
-        if(!$stock){
+        if (!$stock) {
             $stock = $this->stockInterfaceFactory->create();
-        }else{
+        } else {
             $stock = $stock[0];
         }
         
         $stock->setName($row['stock_name']);
         $this->stockRepository->save($stock);
         //set sales channel on stock
-        if(!empty($websiteCodes)){
+        if (!empty($websiteCodes)) {
             $stockId = $stock->getStockId();
             //$stock = $this->stockRepository->get($stockId);
             $extensionAttributes = $stock->getExtensionAttributes();
             $salesChannels = [];
-            foreach($websiteCodes as $websiteCode){
+            foreach ($websiteCodes as $websiteCode) {
                 $salesChannel = $this->salesChannelInterfaceFactory->create();
                 $salesChannel->setCode($websiteCode);
                 $salesChannel->setType(SalesChannelInterface::TYPE_WEBSITE);
@@ -149,40 +161,42 @@ class MsiStock
             $extensionAttributes->setSalesChannels($salesChannels);
             $this->stockRepository->save($stock);
         }
-        if(!empty($row['source_code'])){
-            $this->setStockSource(explode(",",trim($row['source_code'])),$stock->getStockId());
+        if (!empty($row['source_code'])) {
+            $this->setStockSource(explode(",", trim($row['source_code'])), $stock->getStockId());
         }
         return true;
     }
 
-    private function setStockSource($sourceCodes,$stockId){
+    private function setStockSource($sourceCodes, $stockId)
+    {
         //get current links assigned to stock
         $search = $this->searchCriteria->addFilter(StockSourceLinkInterface::STOCK_ID, $stockId, 'eq')->create();
         $stockLinks = $this->getStockSourceLinksInterface->execute($search)->getItems();
         //delete current links
-        if(!empty($stockLinks)){
+        if (!empty($stockLinks)) {
             $this->stockSourceLinksDeleteInterface->execute($stockLinks);
         }
         
         //assign source to stock
          $sourceLinks=[];
          $priority = 1;
-         foreach($sourceCodes as $sourceCode){
-            try{
+        foreach ($sourceCodes as $sourceCode) {
+            try {
                 $source = $this->sourceRepository->get($sourceCode);
-            }catch(NoSuchEntityException $e){
-                $this->helper->printMessage("Msi source ".$sourceCode." is not available to assign to stock", "warning");
+            } catch (NoSuchEntityException $e) {
+                $this->helper->printMessage(
+                    "Msi source ".$sourceCode." is not available to assign to stock",
+                    "warning"
+                );
                 return;
             }
-             $sourceLink = $this->stockSourceLinkInterfaceFactory->create();
-             $sourceLink->setSourceCode($sourceCode);
-             $sourceLink->setStockId($stockId);
-             $sourceLink->setPriority($priority);
-             $sourceLinks[]=$sourceLink;
-             $priority ++;
-         }
+            $sourceLink = $this->stockSourceLinkInterfaceFactory->create();
+            $sourceLink->setSourceCode($sourceCode);
+            $sourceLink->setStockId($stockId);
+            $sourceLink->setPriority($priority);
+            $sourceLinks[]=$sourceLink;
+            $priority ++;
+        }
          $this->stockSourceLinksSaveInterface->execute($sourceLinks);
     }
-
-
 }

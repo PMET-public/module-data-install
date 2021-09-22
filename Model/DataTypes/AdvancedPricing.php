@@ -13,9 +13,7 @@ class AdvancedPricing
     /** @var string  */
     const DEFAULT_WEBSITE = 'All Websites [USD]';
 
-    /**
-     *
-     */
+    /** @var string  */
     const DEFAULT_CUSTOMER_GROUP = 'ALL GROUPS';
 
     /** @var Helper */
@@ -69,29 +67,31 @@ class AdvancedPricing
             }
             $updatedProductsArray[]=$productRow;
         }
-        $updatedProductsArray = $this->replaceBaseWebsiteCodes($updatedProductsArray,$settings);
+        $updatedProductsArray = $this->replaceBaseWebsiteCodes($updatedProductsArray, $settings);
         $this->import($updatedProductsArray, $productValidationStrategy);
 
         return true;
     }
 
      /**
-     * @param array $products
-     * @param array $settings
-     * @return array
-     */
-    private function replaceBaseWebsiteCodes($products,$settings){
+      * @param array $products
+      * @param array $settings
+      * @return array
+      */
+    private function replaceBaseWebsiteCodes($products, $settings)
+    {
         $i=0;
         foreach ($products as $product) {
             //product_websites
-            if (!empty($product['tier_price_website'])){
+            if (!empty($product['tier_price_website'])) {
                 ///value may be a comma delimited list e.g. notbase,test
-                $websiteArray = explode(",",$product['tier_price_website']);
-                if(is_int(array_search('base',$websiteArray))){
-                    $websiteArray[array_search('base',$websiteArray)]=$this->stores->replaceBaseWebsiteCode('base');
-                    $product['tier_price_website'] = implode(",",$websiteArray);
+                $websiteArray = explode(",", $product['tier_price_website']);
+                // phpcs:ignore Magento2.PHP.ReturnValueCheck.ImproperValueTesting
+                if (is_int(array_search('base', $websiteArray))) {
+                    $websiteArray[array_search('base', $websiteArray)]=$this->stores->replaceBaseWebsiteCode('base');
+                    $product['tier_price_website'] = implode(",", $websiteArray);
                 }
-            } 
+            }
             
             $products[$i] = $product;
             $i++;
@@ -108,7 +108,6 @@ class AdvancedPricing
     {
         $importerModel = $this->importer->create();
         $importerModel->setEntityCode('advanced_pricing');
-        //$importerModel->setImportImagesFileDir($imgDir);
         $importerModel->setValidationStrategy($productValidationStrategy);
         if ($productValidationStrategy == 'validation-stop-on-errors') {
             $importerModel->setAllowedErrorCount(1);
@@ -125,5 +124,5 @@ class AdvancedPricing
         $this->helper->printMessage($importerModel->getErrorMessages());
 
         unset($importerModel);
-    }    
+    }
 }

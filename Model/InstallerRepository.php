@@ -74,6 +74,7 @@ class InstallerRepository implements InstallerRepositoryInterface
         $this->installerResource->load($installer, $id);
         if (!$installer->getId()) {
             //throw new NoSuchEntityException(__('Unable to find Module with ID "%1"', $id));
+            $IntentialyEmpty = 0;
         }
         return $installer;
     }
@@ -118,7 +119,7 @@ class InstallerRepository implements InstallerRepositoryInterface
         } catch (\Exception $exception) {
              throw new CouldNotDeleteException(
                 // __('Could not delete the entry: %1', $exception->getMessage())
-            );
+             );
         }
 
         return true;

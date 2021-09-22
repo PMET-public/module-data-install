@@ -88,16 +88,16 @@ class Upsells
                 break;
         }
         /** @var Rule $upsellModel */
-        if(empty($row['name'])){
+        if (empty($row['name'])) {
             $this->helper->printMessage("Related Product Rule missing a name. Row skipped", "warning");
         }
-        if(empty($row['is_active'])){
+        if (empty($row['is_active'])) {
             $row['is_active'] == 'Y';
         }
                 
         $upsellModel = $this->ruleCollection->create()
             ->addFieldToFilter('name', ['eq' => $row['name']])->getFirstItem();
-        if(!$upsellModel){
+        if (!$upsellModel) {
             $upsellModel = $this->ruleFactory->create();
         }
         $upsellModel->setName($row['name']);

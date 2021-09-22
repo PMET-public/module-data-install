@@ -100,6 +100,7 @@ class Pages
      * @return bool
      * @throws LocalizedException
      */
+    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh
     public function install(array $row, array $settings)
     {
         //TODO: Set default layout of a page cms-full-width *check if necessary
@@ -108,7 +109,7 @@ class Pages
 
         if (empty($row['is_active']) || $row['is_active']=='Y') {
             $row['is_active'] = 1;
-        }else{
+        } else {
             $row['is_active'] = 0;
         }
         if (!empty($row['identifier'])) {
@@ -133,7 +134,9 @@ class Pages
                             //Save the exiting page under all other stores
                            
                             $storeIds = $this->getAllStoreIds();
-                            if (($key = array_search($this->getStoreIds($row['store_view_code'])[0], $storeIds)) !== false) {
+                            if (($key = array_search($this->getStoreIds(
+                                $row['store_view_code']
+                            )[0], $storeIds)) !== false) {
                                 unset($storeIds[$key]);
                             }
 
@@ -143,9 +146,8 @@ class Pages
                             //create a new page for the new stores
                             $page = $this->pageInterfaceFactory->create();
                             $page->addData($row)->setStores($this->getStoreIds($row['store_view_code']))->save();
-                        }
-                        //else is the exisiting store different than requested
-                        elseif ($updatePage->getStores() != $this->getStoreIds($row['store_view_code'])) {
+                        } elseif ($updatePage->getStores() != $this->getStoreIds($row['store_view_code'])) {
+                            //else is the exisiting store different than requested
                             //create a new page for the new stores
                             $page = $this->pageInterfaceFactory->create();
                             $page->addData($row)
@@ -177,14 +179,14 @@ class Pages
                         ]
                     );
                     $page = $this->pageInterfaceFactory->create();
-                    try{
+                    try {
                         $page->addData($row)
                         ->setStores($this->getStoreIds($row['store_view_code']))
                         ->save();
-                    }catch (Exception $e){
-                        $this->helper->printMessage("The Page ".$row['title']." cannot be updated.  It is likely conflicting with page data set elsewhere.","warning");
+                    } catch (Exception $e) {
+                        $this->helper->printMessage("The Page ".$row['title']." cannot be updated.  ".
+                        "It is likely conflicting with page data set elsewhere.", "warning");
                     }
-                    
                 }
             }
         }

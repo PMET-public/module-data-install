@@ -60,31 +60,31 @@ class AdminUsers
      */
     public function install(array $row, array $settings)
     {
-        if(empty($row['username']) || empty($row['firstname']) || empty($row['lastname']) || empty($row['password'])){
+        if (empty($row['username']) || empty($row['firstname']) || empty($row['lastname']) || empty($row['password'])) {
             $this->helper->printMessage("Required data for admin_users.csv is missing. Row skipped", "warning");
             return true;
         }
-        $user = $this->userCollection->create()->addFieldToFilter('username', ['eq' => $row['username']])->getFirstItem();
+        $user = $this->userCollection->create()->addFieldToFilter('username', ['eq' => $row['username']])
+        ->getFirstItem();
         //create user if it doesnt exist
         if (!$user->getData('username')) {
             $user = $this->userFactory->create();
-        }    
+        }
         $user->setEmail($row['email']);
         $user->setFirstName($row['firstname']);
         $user->setLastName($row['lastname']);
         $user->setUserName($row['username']);
         $user->setPassword($row['password']);
-        try{
+        try {
             $user->save();
-        }catch(Exception $e){
+        } catch (Exception $e) {
             $messages = $e->getMessages();
-            foreach($messages as $message){
+            foreach ($messages as $message) {
                 $this->helper->printMessage($message->getText(), "warning");
             }
             return true;
         }
-        
-        
+          
         $this->addUserToRole($user, $row);
 
         return true;
@@ -105,7 +105,7 @@ class AdminUsers
                 //is there the role for the user?
                 $userRole = $this->roleCollection->create()
                 ->addFieldToFilter('role_name', ['eq' => $user->getUserName()])->getFirstItem();
-                if(!$userRole->getId()){
+                if (!$userRole->getId()) {
                     $userRole=$this->roleFactory->create();
                 }
                 $userRole->setParentId($role->getId());
@@ -116,11 +116,16 @@ class AdminUsers
                 $userRole->setRoleName($user->getUserName());
                 $userRole->save();
             } else {
-                $this->helper->printMessage("Role ".$row['role']." for user ".$row['username']." does not exist", "warning");
+                $this->helper->printMessage(
+                    "Role ".$row['role']." for user ".$row['username']." does not exist",
+                    "warning"
+                );
             }
-        }
-        else{
-            $this->helper->printMessage("Role ".$row['role']." for user ".$row['username']." does not exist", "warning");
+        } else {
+            $this->helper->printMessage(
+                "Role ".$row['role']." for user ".$row['username']." does not exist",
+                "warning"
+            );
         }
     }
 
@@ -147,6 +152,7 @@ class AdminUsers
             return $role;
         } catch (\Exception $e) {
             //ignore
+            $ignore=1;
         }
     }
 }

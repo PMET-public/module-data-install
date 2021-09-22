@@ -62,17 +62,17 @@ class Templates
      */
     public function install(array $row, array $settings)
     {
-        if(empty($row['name'])){
+        if (empty($row['name'])) {
             $this->helper->printMessage("Page Builder Template is missing a name. Row skipped", "warning");
             return true;
         }
-        if(empty($row['created_for'])){
+        if (empty($row['created_for'])) {
             $row['created_for'] = 'any';
         }
         
         $template = $this->templateCollection->create()
             ->addFieldToFilter(TemplateInterface::KEY_NAME, ['eq' => $row['name']])->getFirstItem();
-        if(!$template){
+        if (!$template) {
             $template = $this->templateFactory->create();
         }
         $template->setTemplate($this->converter->convertContent($row['content']??''));

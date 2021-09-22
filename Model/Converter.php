@@ -129,7 +129,7 @@ class Converter
     public function convertContent(string $content)
     {
         //Remove .renditions/ in image references Page Builder introduced in 2.4.2
-        $newContent = str_replace(".renditions/","",$content);
+        $newContent = str_replace(".renditions/", "", $content);
         return $this->replaceMatches($newContent);
     }
 
@@ -196,25 +196,49 @@ class Converter
         preg_match_all($regexp, $content, $matchesAttributeSet);
         $regexp = '/{{(customergroup) name="([^"]*)"}}/';
         preg_match_all($regexp, $content, $matchesCustomerGroup);
-        $type=[array_merge($matchesCategoryUrl[1]  ,$matchesCategoryId[1] ,  $matchesProductAttribute[1]
-        , $matchesCustomerAttribute[1]
-        , $matchesSegment[1]
-        , $matchesBlock[1]
-        , $matchesDynamicBlock[1]
-        , $matchesAttributeSet[1]
-        , $matchesCustomerGroup[1]
-        , $matchesProductUrl[1]
-        , $matchesProductId[1])];
+        $type=[array_merge(
+            $matchesCategoryUrl[1],
+            $matchesCategoryId[1],
+            $matchesProductAttribute[1],
+            $matchesCustomerAttribute[1],
+            $matchesSegment[1],
+            $matchesBlock[1],
+            $matchesDynamicBlock[1],
+            $matchesAttributeSet[1],
+            $matchesCustomerGroup[1],
+            $matchesProductUrl[1],
+            $matchesProductId[1]
+        )];
         $value=[];
         
         return [
-            'type' => array_merge($matchesCategoryUrl[1],$matchesCategoryId[1],$matchesProductAttribute[1],
-            $matchesCustomerAttribute[1],$matchesSegment[1],$matchesBlock[1],$matchesDynamicBlock[1],
-            $matchesAttributeSet[1],$matchesCustomerGroup[1],$matchesProductUrl[1],$matchesProductId[1]),
+            'type' => array_merge(
+                $matchesCategoryUrl[1],
+                $matchesCategoryId[1],
+                $matchesProductAttribute[1],
+                $matchesCustomerAttribute[1],
+                $matchesSegment[1],
+                $matchesBlock[1],
+                $matchesDynamicBlock[1],
+                $matchesAttributeSet[1],
+                $matchesCustomerGroup[1],
+                $matchesProductUrl[1],
+                $matchesProductId[1]
+            ),
             
-            'value' => array_merge($matchesCategoryUrl[2],$matchesCategoryId[2],$matchesProductAttribute[2],
-            $matchesCustomerAttribute[2],$matchesSegment[2],$matchesBlock[2],$matchesDynamicBlock[2],
-            $matchesAttributeSet[2],$matchesCustomerGroup[2],$matchesProductUrl[2],$matchesProductId[2])
+            'value' => array_merge(
+                $matchesCategoryUrl[2],
+                $matchesCategoryId[2],
+                $matchesProductAttribute[2],
+                $matchesCustomerAttribute[2],
+                $matchesSegment[2],
+                $matchesBlock[2],
+                $matchesDynamicBlock[2],
+                $matchesAttributeSet[2],
+                $matchesCustomerGroup[2],
+                $matchesProductUrl[2],
+                $matchesProductId[2]
+            )
         ];
     }
 
@@ -228,6 +252,7 @@ class Converter
 
         foreach ($matches['value'] as $matchKey => $matchValue) {
             $callback = "matcher" . ucfirst(trim($matches['type'][$matchKey]));
+            // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
             $matchResult = call_user_func_array([$this, $callback], [$matchValue]);
             if (!empty($matchResult)) {
                 $replaceData = array_merge_recursive($replaceData, $matchResult);
@@ -454,7 +479,6 @@ class Converter
         return $replaceData;
     }
 
-
     /**
      * @param string $matchValue
      * @return array
@@ -509,7 +533,8 @@ class Converter
      */
     protected function getCustomerAttributeOptions(string $attributeCode)
     {
-        if (!$this->customerAttributeCodeOptionsPair || !isset($this->customerAttributeCodeOptionsPair[$attributeCode])) {
+        if (!$this->customerAttributeCodeOptionsPair ||
+            !isset($this->customerAttributeCodeOptionsPair[$attributeCode])) {
             $this->loadCustomerAttributeOptions($attributeCode);
         }
 

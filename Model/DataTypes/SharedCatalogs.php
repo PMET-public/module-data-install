@@ -123,7 +123,11 @@ class SharedCatalogs
     private function getSharedCatalogByName($sharedCatalogName)
     {
         $catalogSearch = $this->searchCriteriaBuilder
-        ->addFilter(SharedCatalogInterface::NAME, $sharedCatalogName, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        ->addFilter(
+            SharedCatalogInterface::NAME,
+            $sharedCatalogName,
+            'eq'
+        )->create()->setPageSize(1)->setCurrentPage(1);
         $catalogList = $this->sharedCatalogRepository->getList($catalogSearch);
         return current($catalogList->getItems());
     }

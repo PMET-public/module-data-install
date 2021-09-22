@@ -35,7 +35,6 @@ class Blocks
     /** @var Helper  */
     protected $helper;
 
-
     /**
      * Blocks constructor.
      * @param BlockInterfaceFactory $blockFactory
@@ -69,7 +68,7 @@ class Blocks
     public function install(array $row, array $settings)
     {
         
-        if(empty($row['identifier']) || empty($row['title'])){
+        if (empty($row['identifier']) || empty($row['title'])) {
             $this->helper->printMessage("Block missing identifier or title, row skipped", "warning");
             return true;
         }
@@ -80,21 +79,21 @@ class Blocks
         $row['content'] = $this->converter->convertContent($row['content']??'');
 
          //get view id from view code, use admin if not defined
-         if (!empty($row['store_view_code'])) {
+        if (!empty($row['store_view_code'])) {
             $viewId = $this->stores->getViewId(trim($row['store_view_code']));
         } else {
             $viewId = $this->stores->getViewId(trim($settings['store_view_code']));
         }
 
         //if the requested view doesnt exist, default it to 0
-        if(!$viewId){
+        if (!$viewId) {
             $viewId=0;
         }
         
-        try{
+        try {
             /** @var BlockInterface $cmsBlock */
-            $cmsBlock = $this->getBlockByIdentifier->execute($row['identifier'],$viewId);
-        }catch(Exception $e){
+            $cmsBlock = $this->getBlockByIdentifier->execute($row['identifier'], $viewId);
+        } catch (Exception $e) {
             //if block isnt found, create a new one
             $cmsBlock = $this->blockFactory->create();
         }
@@ -102,7 +101,7 @@ class Blocks
         $cmsBlock->setIdentifier($row['identifier']);
         $cmsBlock->setContent($row['content']);
         $cmsBlock->setTitle($row['title']);
-        $cmsBlock->setData('stores',$viewId);
+        $cmsBlock->setData('stores', $viewId);
         $cmsBlock->setIsActive($row['is_active']);
         $this->blockRepository->save($cmsBlock);
         unset($cmsBlock);

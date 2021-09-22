@@ -34,18 +34,15 @@ class Reviews
      */
     protected $reviewCollectionFactory;
 
-
     /**
      * @var RatingCollectionFactory
      */
     protected $ratingCollectionFactory;
 
-
     /**
      * @var RatingResourceModel
      */
     protected $ratingResourceModel;
-
 
     /**
      * @var RatingFactory
@@ -144,7 +141,8 @@ class Reviews
     public function install(array $row, array $settings)
     {
         //check for required columns
-        if(empty($row['sku']) || empty($row['reviewer']) || empty($row['summary']) || empty($row['review']) | empty($row['rating_code'])){
+        if (empty($row['sku']) || empty($row['reviewer']) || empty($row['summary'])
+        || empty($row['review']) | empty($row['rating_code'])) {
             $this->helper->printMessage("Review skipped -- one or more of the required values is missing", "warning");
             return true;
         }
@@ -178,7 +176,7 @@ class Reviews
             $review->setCustomerId($this->getCustomerIdByEmail($row['email']));
         }
         $review->save();
-        $this->setReviewRating($review, $row,$storeId);
+        $this->setReviewRating($review, $row, $storeId);
 
         return true;
     }
@@ -236,15 +234,15 @@ class Reviews
      * @return \Magento\Framework\DataObject|mixed
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function getRating($rating,$storeId)
+    protected function getRating($rating, $storeId)
     {
         $ratingCollection = $this->ratingCollectionFactory->create();
         
         $ratingId = $ratingCollection->addFieldToFilter('rating_code', $rating)->getFirstItem()->getId();
         $rating = $this->ratingFactory->create()->load($ratingId);
         $ratingStores = $rating->getStores();
-        if(is_array($ratingStores)){
-            if(!in_array($storeId,$ratingStores)){
+        if (is_array($ratingStores)) {
+            if (!in_array($storeId, $ratingStores)) {
                 $ratingStores[]=$storeId;
                 $rating->setStores($ratingStores);
                 $this->ratingResourceModel->save($rating);
@@ -258,9 +256,9 @@ class Reviews
      * @param $row
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    protected function setReviewRating(Review $review, $row,$storeId)
+    protected function setReviewRating(Review $review, $row, $storeId)
     {
-        $rating = $this->getRating($row['rating_code'],$storeId);
+        $rating = $this->getRating($row['rating_code'], $storeId);
         foreach ($rating->getOptions() as $option) {
             $optionId = $option->getOptionId();
             if (($option->getValue() == $row['rating_value']) && !empty($optionId)) {
@@ -281,7 +279,7 @@ class Reviews
     protected function createRating($ratingCode, $storeId)
     {
         //$stores[] = $storeId;
-        $rating = $this->getRating($ratingCode,$storeId);
+        $rating = $this->getRating($ratingCode, $storeId);
         if (!$rating->getData()) {
             $rating->setRatingCode(
                 $ratingCode

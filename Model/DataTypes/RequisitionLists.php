@@ -33,7 +33,6 @@ class RequisitionLists
 
     /** @var RequisitionListItemInterfaceFactory */
     protected $requisitionListItemFactory;
-
     
     public function __construct(
         Helper $helper,
@@ -63,7 +62,10 @@ class RequisitionLists
         try {
             $customer = $this->customerRepository->get($row['customer']);
         } catch (\Exception $e) {
-            $this->helper->printMessage("Requistion list ".$row['name']." cannot be created. Customer ".$row['customer']." does not exist", "warning");
+            $this->helper->printMessage(
+                "Requistion list ".$row['name']." cannot be created. Customer ".$row['customer']." does not exist",
+                "warning"
+            );
             return true;
         }
 

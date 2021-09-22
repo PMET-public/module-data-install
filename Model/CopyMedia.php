@@ -126,7 +126,10 @@ class CopyMedia
                         try {
                             $this->directoryWrite->copyFile($file, $newFileName);
                         } catch (FileSystemException $exception) {
-                            $this->helper->printMessage("Unable to copy file ".$file. " --- ".$exception->getMessage(), "warning");
+                            $this->helper->printMessage(
+                                "Unable to copy file ".$file. " --- ".$exception->getMessage(),
+                                "warning"
+                            );
                         }
                     }
                 } else {
@@ -166,6 +169,7 @@ class CopyMedia
             $fileType=$this->fileMime->getMimeType($file);
             $pos = strpos($type, $this->fileMime->getMimeType($file));
             if ($extension == $this->getFileExtension($file)) {
+                // phpcs:ignore Magento2.PHP.ReturnValueCheck.ImproperValueTesting
                 if (is_integer(strpos($type, $this->fileMime->getMimeType($file)))) {
                     return true;
                 }
@@ -180,6 +184,7 @@ class CopyMedia
      */
     private function getFileExtension(string $file): string
     {
+        // phpcs:ignore Magento2.Functions.DiscouragedFunction.DiscouragedWithAlternative
         return strtolower(pathinfo($file, 4));
     }
 }

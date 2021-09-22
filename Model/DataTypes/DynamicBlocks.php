@@ -84,21 +84,24 @@ class DynamicBlocks
     public function install(array $row)
     {
         //skip if no name
-        if(empty($row['name']) || $row['name'] == ''){
-            $this->helper->printMessage("A row in the Dynamic Blocks file does not have a value for name. Row is skipped", "warning");
+        if (empty($row['name']) || $row['name'] == '') {
+            $this->helper->printMessage(
+                "A row in the Dynamic Blocks file does not have a value for name. Row is skipped",
+                "warning"
+            );
             return true;
         }
         //remove spaces from type
-        $row['type'] = str_replace(' ','',$row['type']);
+        $row['type'] = str_replace(' ', '', $row['type']);
         
-        if(empty($row['store_code'])){
+        if (empty($row['store_code'])) {
             //backwards compatibility
-            if(!empty($row['store'])){
+            if (!empty($row['store'])) {
                 $row['store_view_code'] = $row['store'];
-            }else{
+            } else {
                  $row['store_view_code']='admin';
             }
-         }
+        }
         //get existing banner to see if we need to create or update content for different store view
         $bannerCollection = $this->bannerCollection->create();
         $banners = $bannerCollection->addFilter('name', $row['name'], 'eq')->setPageSize(1)->setCurPage(1);
@@ -114,15 +117,21 @@ class DynamicBlocks
         $banner->setName($row['name']);
         $banner->setIsEnabled(1);
         $banner->setTypes($row['type']);
-        if(!empty($row['content'])){
+        if (!empty($row['content'])) {
             $row['banner_content'] = $row['content'];
         }
 
-        $banner->setStoreContents([$this->converter->getStoreidByCode($row['store_view_code']) => $this->converter->convertContent($row['banner_content'])]);
+        $banner->setStoreContents(
+            [$this->converter->getStoreidByCode($row['store_view_code']) =>
+            $this->converter->convertContent($row['banner_content'])]
+        );
         $this->bannerResourceModel->save($banner);
         //set default if this is a new banner
         if ($banners->count()==0) {
-            $this->bannerResourceModel->saveStoreContents($banner->getId(), ['0' => $this->converter->convertContent($row['banner_content'])]);
+            $this->bannerResourceModel->saveStoreContents(
+                $banner->getId(),
+                ['0' => $this->converter->convertContent($row['banner_content'])]
+            );
         }
 
         $segments = explode(",", $row['segments']);

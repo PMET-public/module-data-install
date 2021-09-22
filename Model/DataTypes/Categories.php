@@ -96,24 +96,16 @@ class Categories
         //TODO:Support for non default settings
         //TODO:Content block additions to categories
 
-        if(empty($row['name'])){
-            $this->helper->printMessage("A value for name is required in categories.csv","warning");
+        if (empty($row['name'])) {
+            $this->helper->printMessage("A value for name is required in categories.csv", "warning");
             return true;
         }
 
-        //if(!empty($row['store_view_code'])){
-        //    $storeViewId = $this->stores->getViewId($row['store_view_code']);
-        //} else{
-        //    $storeViewId = 0;
-        //    $row['store_view_code'] = 'admin';  
-        //}
-        
-        
         $row['store_view_code'] = $settings['store_view_code'];
 
-        $category = $this->getCategoryByPath($row['path'] . '/' . $row['name'],$row['store_view_code']);
+        $category = $this->getCategoryByPath($row['path'] . '/' . $row['name'], $row['store_view_code']);
         if (!$category) {
-            $parentCategory = $this->getCategoryByPath($row['path'],$row['store_view_code']);
+            $parentCategory = $this->getCategoryByPath($row['path'], $row['store_view_code']);
             if ($parentCategory) {
                 $data = [
                     'parent_id' => $parentCategory->getId(),
@@ -132,7 +124,8 @@ class Categories
 
                 $category->save();
             } else {
-                $this->helper->printMessage("-Cannot find the parent category for " . $row['name'] . " in the path " . $row['path'] . ". That category has been skipped", "warning");
+                $this->helper->printMessage("-Cannot find the parent category for " . $row['name'].
+                " in the path " . $row['path'] . ". That category has been skipped", "warning");
             }
         }
 
@@ -160,22 +153,21 @@ class Categories
             if (!empty($row[$categoryAttribute])) {
                 if ($categoryAttribute == 'landing_page') {
                     $attributeData = [$categoryAttribute => $this->getCmsBlockId($row[$categoryAttribute])];
-                } elseif($categoryAttribute == 'custom_design')  {
+                } elseif ($categoryAttribute == 'custom_design') {
                     $attributeData = [$categoryAttribute => $this->getThemeId($row[$categoryAttribute])];
                 } else {
                     $attributeData = [$categoryAttribute => $this->converter->convertContent($row[$categoryAttribute])];
                 }
-                
-
+       
                 $category->addData($attributeData);
             }
         }
     }
 
-
-    protected function getThemeId($theme){
+    protected function getThemeId($theme)
+    {
         $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $theme)->getThemeId();
-        if(!$themeId){
+        if (!$themeId) {
             $themeId = '';
         }
         return $themeId;
@@ -187,7 +179,7 @@ class Categories
      * @param string $path
      * @return Node
      */
-    protected function getCategoryByPath(string $path,$storeViewCode)
+    protected function getCategoryByPath(string $path, $storeViewCode)
     {
         $names = array_filter(explode('/', $path));
         //if the first element in the path is a root category, use that root id and drop from array

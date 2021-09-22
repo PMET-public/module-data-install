@@ -14,7 +14,7 @@ class Collection extends AbstractCollection
      *
      * @return void
      */
-    protected function _construct()
+    protected function __construct()
     {
         $this->_init(
             \MagentoEse\DataInstall\Model\Installer::class,

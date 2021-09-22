@@ -3,6 +3,10 @@
 /**
  * Copyright © Adobe. All rights reserved.
  */
+
+ //Warnings around using native php filesytem functions are suppressed e.g. file_exists()
+ //core is still using some of those functions
+
 namespace MagentoEse\DataInstall\Model;
 
 use MagentoEse\DataInstall\Helper\Helper;
@@ -18,24 +22,33 @@ use Magento\Framework\Setup\SampleData\FixtureManager;
 
 class Process
 {
-    const ALL_FILES = ['stores.csv','config_default.json','config_default.csv','config_vertical.json','config_vertical.csv',
-    'config_secret.json','config_secret.csv','config.json','config.csv',
-    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv','customers.csv','customer_addresses.csv','product_attributes.csv',
-    'blocks.csv','categories.csv','customer_segments.csv','products.csv','msi_source.csv','msi_stock.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
+    const ALL_FILES = ['stores.csv','config_default.json','config_default.csv','config_vertical.json',
+    'config_vertical.csv','config_secret.json','config_secret.csv','config.json','config.csv',
+    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv',
+    'reward_exchange_rate.csv','customers.csv','customer_addresses.csv','product_attributes.csv',
+    'blocks.csv','categories.csv','customer_segments.csv','products.csv',
+    'msi_source.csv','msi_stock.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
+    'widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
-    'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv','advanced_pricing.csv','orders.csv'];
+    'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv',
+    'advanced_pricing.csv','orders.csv'];
 
     const STORE_FILES = ['stores.csv'];
 
-    const STAGE1 = ['config_default.json','config_default.csv','config_vertical.json','config_vertical.csv','config_secret.json','config_secret.csv','config.json','config.csv',
-    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv','customers.csv','customer_addresses.csv','product_attributes.csv',
+    const STAGE1 = ['config_default.json','config_default.csv','config_vertical.json',
+    'config_vertical.csv','config_secret.json','config_secret.csv','config.json','config.csv',
+    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv',
+    'customers.csv','customer_addresses.csv','product_attributes.csv',
     'customer_segments.csv','blocks.csv','categories.csv'];
 
-    const STAGE2 = ['products.csv','msi_source.csv','msi_stock.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
+    const STAGE2 = ['products.csv','msi_source.csv','msi_stock.csv','msi_inventory.csv','upsells.csv','blocks.csv',
+    'dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
-    'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv','advanced_pricing.csv','orders.csv'];
+    'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv',
+    'advanced_pricing.csv','orders.csv'];
 
-    const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv','b2b_sales_reps.csv','b2b_teams.csv'];
+    const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv',
+    'b2b_sales_reps.csv','b2b_teams.csv'];
 
     protected $redo=[];
 
@@ -318,14 +331,17 @@ class Process
      * @throws FileSystemException
      */
 
-    public function loadFiles($fileSource, $load ='', array $fileOrder = self::ALL_FILES, $reload = 0)
+    public function loadFiles($fileSource, $load = '', array $fileOrder = self::ALL_FILES, $reload = 0)
     {
         $fixtureDirectory = "data";
         //bypass if data is already installed
         if ($this->isModuleInstalled($fileSource)==1 && $reload===0) {
             //output reload option if cli is used
             if ($this->isCli()) {
-                $this->helper->printMessage($fileSource." has already been installed.  Add the -r option if you want to reinstall", "warning");
+                $this->helper->printMessage(
+                    $fileSource." has already been installed.  Add the -r option if you want to reinstall",
+                    "warning"
+                );
             }
             return true;
         } else {
@@ -334,10 +350,10 @@ class Process
 
         //if there is no load value, check for .default flag
         $filePath = $this->getDataPath($fileSource);
-        if($load==''){
-            try{
+        if ($load=='') {
+            try {
                 $load = $this->driverInterface->fileGetContents($filePath.$fixtureDirectory.'/.default');
-            }catch(FileSystemException $fe){
+            } catch (FileSystemException $fe) {
                 $fixtureDirectory = $filePath;
             }
         }
@@ -368,9 +384,10 @@ class Process
 
         foreach ($fileOrder as $nextFile) {
             $fileName = $filePath . $fixtureDirectory . "/" . $nextFile;
-
+            // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
             if (basename($fileName)==$nextFile && file_exists($fileName)) {
                 $fileCount++;
+                // phpcs:ignore Magento2.Functions.DiscouragedFunction.DiscouragedWithAlternative
                 if (pathinfo($fileName, PATHINFO_EXTENSION) == 'json') {
                     $fileContent = $this->driverInterface->fileGetContents($fileName);
                 } else {
@@ -380,19 +397,23 @@ class Process
                     $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
                     //validate that number of elements in header and rows is equal
                     if (!$this->validate->validateCsvFile($header, $rows)) {
-                        $this->helper->printMessage("Skipping File ".$nextFile.". The number of columns in the header does not match the number of column of data in one or more rows", "warning");
+                        $this->helper->printMessage("Skipping File ".$nextFile.
+                        ". The number of columns in the header does not match the number of column of ".
+                        "data in one or more rows", "warning");
                         continue;
                     }
                     //validate that the file is not empty
                     if (empty($rows)) {
-                        $this->helper->printMessage("Skipping File ".$nextFile.". The file is empty or not properly formatted", "warning");
+                        $this->helper->printMessage("Skipping File ".$nextFile.
+                        ". The file is empty or not properly formatted", "warning");
                         continue;
                     }
                 }
 
                 //determine path to module code for image import
+                // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
                 $modulePath = str_replace("/" . $fixtureDirectory . "/" . basename($fileName), "", $fileName);
-
+                // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
                 switch (basename($fileName)) {
                     case "stores.csv":
                         $this->helper->printMessage("Loading Stores", "info");
@@ -407,7 +428,7 @@ class Process
                     case "customer_addresses.csv":
                         $this->helper->printMessage("Loading Customer Addresses", "info");
                         $this->processFile($rows, $header, $this->customerAddressesInstall, '');
-                        break;    
+                        break;
 
                     case "product_attributes.csv":
                         $this->helper->printMessage("Loading Product Attributes", "info");
@@ -701,6 +722,7 @@ class Process
         $this->settings = self::SETTINGS;
         $setupArray=$this->settings;
         $setupFile = $filePath . $fixtureDirectory . "/settings.csv";
+        // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
         if (file_exists($setupFile)) {
             $setupRows = $this->csvReader->getData($setupFile);
             $setupHeader = array_shift($setupRows);
@@ -730,6 +752,7 @@ class Process
         //do we have all the files we need
         foreach (self::B2B_REQUIRED_FILES as $nextFile) {
             $fileName = $filePath . $fixtureDirectory . "/" . $nextFile;
+            // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
             if (basename($fileName)==$nextFile && file_exists($fileName)) {
                 $rows = $this->csvReader->getData($fileName);
                 $header = array_shift($rows);
@@ -737,13 +760,15 @@ class Process
                  $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
                 //validate that number of elements in header and rows is equal
                 if (!$this->validate->validateCsvFile($header, $rows)) {
-                    $this->helper->printMessage($nextFile." is invalid. The number of columns in the header does not match the number of column of data in one or more rows", "error");
-                    break;
+                    $this->helper->printMessage($nextFile." is invalid. The number of columns in the header does not ".
+                    "match the number of column of data in one or more rows", "error");
                     $stopFlag = 1;
+                    break;
                 }
                 $b2bData[$nextFile] = ['header'=>$header,'rows'=>$rows];
             } else {
-                $this->helper->printMessage("You are missing the required B2B file - ".$nextFile.". B2B setup did not complete", "error");
+                $this->helper->printMessage("You are missing the required B2B file - ".$nextFile.
+                ". B2B setup did not complete", "error");
                 $stopFlag = 1;
                 break;
             }
@@ -760,10 +785,19 @@ class Process
 
             //load customers (normal process)
             $this->helper->printMessage("Loading B2B Customers", "info");
-            $this->processFile($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $this->customerInstall, '');
+            $this->processFile(
+                $b2bData['b2b_customers.csv']['rows'],
+                $b2bData['b2b_customers.csv']['header'],
+                $this->customerInstall,
+                ''
+            );
             //load sales reps (admin user process)
             $this->helper->printMessage("Loading B2B Sales Reps", "info");
-            $this->processRows($b2bData['b2b_sales_reps.csv']['rows'], $b2bData['b2b_sales_reps.csv']['header'], $this->adminUsersInstall);
+            $this->processRows(
+                $b2bData['b2b_sales_reps.csv']['rows'],
+                $b2bData['b2b_sales_reps.csv']['header'],
+                $this->adminUsersInstall
+            );
             //create company (add on company admin from customers, and sales rep);
 
             $companiesData = $this->mergeCompanyData($companies, $customers, $salesReps);
@@ -775,12 +809,25 @@ class Process
 
             //add company roles
             $this->helper->printMessage("Loading B2B Company Roles", "info");
-            $this->processFile($b2bData['b2b_company_roles.csv']['rows'], $b2bData['b2b_company_roles.csv']['header'], $this->companyRolesInstall, '');
+            $this->processFile(
+                $b2bData['b2b_company_roles.csv']['rows'],
+                $b2bData['b2b_company_roles.csv']['header'],
+                $this->companyRolesInstall,
+                ''
+            );
             //assign roles to customers
-            $this->processRows($b2bData['b2b_customers.csv']['rows'], $b2bData['b2b_customers.csv']['header'], $this->companyUserRolesInstall);
+            $this->processRows(
+                $b2bData['b2b_customers.csv']['rows'],
+                $b2bData['b2b_customers.csv']['header'],
+                $this->companyUserRolesInstall
+            );
             $this->helper->printMessage("Loading B2B Teams and Company Structure", "info");
             //create company structure
-            $this->processRows($b2bData['b2b_teams.csv']['rows'], $b2bData['b2b_teams.csv']['header'], $this->companyTeamsInstall);
+            $this->processRows(
+                $b2bData['b2b_teams.csv']['rows'],
+                $b2bData['b2b_teams.csv']['header'],
+                $this->companyTeamsInstall
+            );
         }
     }
     /**
@@ -866,11 +913,11 @@ class Process
         //get the trace
         $trace = debug_backtrace();
 
-        // Get the class that is asking for who awoke it
+        // Get the class that is asking
         $class = $trace[1]['class'];
 
-        // +1 to i cos we have to account for calling this function
-        for ($i=1; $i<count($trace); $i++) {
+        $count = count($trace);
+        for ($i=1; $count; $i++) {
             if (isset($trace[$i])) { // is it set?
                 if ($class != $trace[$i]['class']) { // is it a different class
                     return $trace[$i]['class'];
@@ -953,6 +1000,7 @@ class Process
      */
     public function isCli()
     {
+        // phpcs:ignore Magento2.PHP.LiteralNamespaces.LiteralClassUsage
         if ($this->getCallingClass() === 'MagentoEse\DataInstall\Console\Command\Install') {
             return true;
         } else {

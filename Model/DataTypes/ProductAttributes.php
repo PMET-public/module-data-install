@@ -22,7 +22,8 @@ class ProductAttributes
     const DEFAULT_ATTRIBUTE_SET = 'Default';
     
     //input types not supported swatch_visual,swatch_text,media_image
-    const VALID_INPUT_TYPES = ['text','textarea','texteditor','pagebuilder','date','datetime','boolean','multiselect','select','price','weee'];
+    const VALID_INPUT_TYPES = ['text','textarea','texteditor','pagebuilder','date','datetime',
+    'boolean','multiselect','select','price','weee'];
 
     /** @var AttributeFactory  */
     protected $attributeFactory;
@@ -84,14 +85,17 @@ class ProductAttributes
     public function install(array $row)
     {
         //Required:attribute_code
-        if(empty($row['attribute_code'])){
-            $this->helper->printMessage("attribute_code value is required in product_recs.csv. Row skipped","warning");
+        if (empty($row['attribute_code'])) {
+            $this->helper->printMessage(
+                "attribute_code value is required in product_recs.csv. Row skipped",
+                "warning"
+            );
             return true;
         }
         
-        if(!empty($row['store_view_code'])){
+        if (!empty($row['store_view_code'])) {
             $storeViewId = $this->stores->getViewId($row['store_view_code']);
-        } else{
+        } else {
             $storeViewId = 0;
             $row['store_view_code'] = 'admin';
         }
@@ -100,13 +104,19 @@ class ProductAttributes
         $attribute = $this->eavConfig->getAttribute('catalog_product', $this->validateCode($row['attribute_code']));
         if (!$attribute->getId()) {
             //Required if new - frontend_label, frontend_input
-            if(empty($row['frontend_label']) || empty($row['frontend_input'])){
-                $this->helper->printMessage("frontend_label and frontend_input are required when created a product attribute. Row skipped","warning");
+            if (empty($row['frontend_label']) || empty($row['frontend_input'])) {
+                $this->helper->printMessage(
+                    "frontend_label and frontend_input are required when created a product attribute. Row skipped",
+                    "warning"
+                );
                 return true;
             }
             //validate frontend_input values
-            if(!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])){
-                $this->helper->printMessage("frontend_input value in product_recs.csv is invalid. Row skipped","warning");
+            if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
+                $this->helper->printMessage(
+                    "frontend_input value in product_recs.csv is invalid. Row skipped",
+                    "warning"
+                );
                 return true;
             }
 
@@ -118,18 +128,18 @@ class ProductAttributes
             return true;
         }
         
-        if(!empty($row['frontend_label'])){
+        if (!empty($row['frontend_label'])) {
             $existingLabels = $attribute->getFrontendLabels();
             
             $frontEndLabels = [];
             /** @var FrontendLabel $label */
-            foreach($existingLabels as $label){
+            foreach ($existingLabels as $label) {
                 $frontEndLabels[$label->getStoreId()] = $label->getLabel();
             }
 
-            if($storeViewId==0){
+            if ($storeViewId==0) {
                 $frontEndLabels[0] = $row['frontend_label'];
-            }else{
+            } else {
                 $existingLabels = $attribute->getFrontendLabels();
                 $frontEndLabels[$storeViewId] = $row['frontend_label'];
                 $frontEndLabels[0] = $attribute->getDefaultFrontendLabel();
@@ -137,13 +147,13 @@ class ProductAttributes
            
             $row['frontend_label'] = $frontEndLabels;
         }
-        if(!empty($row['option'])){
+        if (!empty($row['option'])) {
             $row['option'] = $this->getOption($attribute, $row);
         }
-        if(!empty($row['frontend_input'])){
-           $row['source_model'] = $this->productHelper->getAttributeSourceModelByInputType($row['frontend_input']);
-           $row['backend_model'] = $this->productHelper->getAttributeBackendModelByInputType($row['frontend_input']);
-           $row['backend_type'] = $attribute->getBackendTypeByInput($row['frontend_input']); 
+        if (!empty($row['frontend_input'])) {
+            $row['source_model'] = $this->productHelper->getAttributeSourceModelByInputType($row['frontend_input']);
+            $row['backend_model'] = $this->productHelper->getAttributeBackendModelByInputType($row['frontend_input']);
+            $row['backend_type'] = $attribute->getBackendTypeByInput($row['frontend_input']);
         }
         
         $row += ['is_filterable' => 0, 'is_filterable_in_search' => 0];
@@ -164,10 +174,12 @@ class ProductAttributes
         return true;
     }
 
-    protected function validateFrontendInputs($frontendInput){
-        if(is_numeric(array_search($frontendInput,self::VALID_INPUT_TYPES))){
+    protected function validateFrontendInputs($frontendInput)
+    {
+        // phpcs:ignore Magento2.PHP.ReturnValueCheck.ImproperValueTesting
+        if (is_numeric(array_search($frontendInput, self::VALID_INPUT_TYPES))) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -305,13 +317,13 @@ class ProductAttributes
         }
     }
 
-    private function removeEmptyColumns($row){
-        foreach($row as $key=>$value){
-            if ($row[$key]==''){
+    private function removeEmptyColumns($row)
+    {
+        foreach ($row as $key => $value) {
+            if ($row[$key]=='') {
                 unset($row[$key]);
             }
         }
         return $row;
     }
-
 }

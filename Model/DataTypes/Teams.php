@@ -106,7 +106,9 @@ class Teams
             try {
                  $userId = $this->customerRepository->get(trim($companyCustomerEmail))->getId();
             } catch (NoSuchEntityException $e) {
-                $this->helper->printMessage("User ".$companyCustomerEmail." was not found and will not be added to team ".$row['name']." for company ".$row['company_name'], "warning");
+                $this->helper->printMessage("User ".$companyCustomerEmail.
+                " was not found and will not be added to team ".
+                $row['name']." for company ".$row['company_name'], "warning");
                 break;
             }
             //delete structure that the user belongs to

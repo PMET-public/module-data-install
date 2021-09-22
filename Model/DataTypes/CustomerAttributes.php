@@ -59,11 +59,13 @@ class CustomerAttributes
             return true;
         }
         if (empty($data["frontend_label"])) {
-            $this->helper->printMessage("frontend_label for customer attribute ".$data["attribute_code"]." is required. Row Skipped", "warning");
+            $this->helper->printMessage("frontend_label for customer attribute ".
+            $data["attribute_code"]." is required. Row Skipped", "warning");
             return true;
         }
         if (empty($data["frontend_input"])) {
-            $this->helper->printMessage("frontend_input for customer attribute ".$data["attribute_code"]." is required. Row Skipped", "warning");
+            $this->helper->printMessage("frontend_input for customer attribute ".
+            $data["attribute_code"]." is required. Row Skipped", "warning");
             return true;
         }
         ///set defaults if not included
@@ -88,11 +90,11 @@ class CustomerAttributes
         }
         if (empty($data["use_in_forms"])) {
             $useInForms=['adminhtml_customer','adminhtml_checkout','customer_account_edit','customer_account_create'];
-        } else{
-            $useInForms = explode(",",$data["use_in_forms"]);
+        } else {
+            $useInForms = explode(",", $data["use_in_forms"]);
         }
         
-
+        // phpcs:ignore Magento2.PHP.LiteralNamespaces.LiteralClassUsage
         $mainSettings = [
             'type'         => 'varchar',
             'label'        => $data["frontend_label"],
@@ -107,16 +109,25 @@ class CustomerAttributes
             'position'     => (empty($data["position"])) ? 100 : $data["position"],
             'system'       => 0,
             'multiline_count' => 1,
+            // phpcs:ignore Magento2.PHP.LiteralNamespaces.LiteralClassUsage
             'backend' => 'Magento\Eav\Model\Entity\Attribute\Backend\ArrayBackend',
+            // phpcs:ignore Magento2.PHP.LiteralNamespaces.LiteralClassUsage
             'source' => 'Magento\Eav\Model\Entity\Attribute\Source\Table'
         ];
         $data['attribute_code'] = $this->validateCode($data['attribute_code']);
-        $newAttribute = $this->eavConfig->getAttribute(CustomerMetadataInterface::ENTITY_TYPE_CUSTOMER, $data["attribute_code"]);
+        $newAttribute = $this->eavConfig->getAttribute(
+            CustomerMetadataInterface::ENTITY_TYPE_CUSTOMER,
+            $data["attribute_code"]
+        );
         $newAttribute->setData('used_in_forms', $useInForms);
         $newAttribute->setData('is_used_for_customer_segment', $data["is_used_for_customer_segment"]=='Y' ? 1 : 0);
         $newAttribute->save($newAttribute);
         $eavSetup = $this->eavSetupFactory->create();
-        $eavSetup->addAttribute(CustomerMetadataInterface::ENTITY_TYPE_CUSTOMER, $data["attribute_code"], $mainSettings);
+        $eavSetup->addAttribute(
+            CustomerMetadataInterface::ENTITY_TYPE_CUSTOMER,
+            $data["attribute_code"],
+            $mainSettings
+        );
         $eavSetup->addAttributeToSet(
             CustomerMetadataInterface::ENTITY_TYPE_CUSTOMER,
             CustomerMetadataInterface::ATTRIBUTE_SET_ID_CUSTOMER,
@@ -133,7 +144,6 @@ class CustomerAttributes
         return true;
     }
 
-
     /**
      * @param $store
      * @param $attributeCode
@@ -146,27 +156,22 @@ class CustomerAttributes
         $attribute = $this->attributeRepository->get(Customer::ENTITY, $attributeCode);
 
         $removeOptions = $attribute->getOptions();
-			
+            
         $optionsToRemove = [];
-        foreach($removeOptions as $removeOption)
-        {
-            if ($removeOption['value'])
-            {
+        foreach ($removeOptions as $removeOption) {
+            if ($removeOption['value']) {
                 $optionsToRemove['delete'][$removeOption['value']] = true;
                 $optionsToRemove['value'][$removeOption['value']] = true;
             }
         }
-            
-
-
         $option=[];
         $option['attribute_id'] = $attribute->getAttributeId();
         foreach ($options as $key => $value) {
-            $option['value']['a'.strval($value)][$store]=trim($value);
+            $option['value']['a'.(string)$value][$store]=trim($value);
         }
 
         $eavSetup = $this->eavSetupFactory->create();
-        $eavSetup->addAttributeOption($optionsToRemove);	
+        $eavSetup->addAttributeOption($optionsToRemove);
         $eavSetup->addAttributeOption($option);
     }
 

@@ -21,8 +21,8 @@ class Process
 {
     const ALL_FILES = ['stores.csv','config_default.json','config_default.csv','config_vertical.json','config_vertical.csv',
     'config_secret.json','config_secret.csv','config.json','config.csv',
-    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv','customers.csv','customer_addresses.csv','product_attributes.csv','customer_segments.csv',
-    'blocks.csv','categories.csv','products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
+    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv','customers.csv','customer_addresses.csv','product_attributes.csv',
+    'blocks.csv','categories.csv','customer_segments.csv','products.csv','msi_source.csv','msi_stock.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv','advanced_pricing.csv','orders.csv'];
 
@@ -32,7 +32,7 @@ class Process
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv','customers.csv','customer_addresses.csv','product_attributes.csv',
     'customer_segments.csv','blocks.csv','categories.csv'];
 
-    const STAGE2 = ['products.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
+    const STAGE2 = ['products.csv','msi_source.csv','msi_stock.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv','advanced_pricing.csv','orders.csv'];
 
@@ -111,6 +111,12 @@ class Process
 
     /** @var CopyMedia */
     protected $copyMedia;
+
+    /** @var DataTypes\MsiStock */
+    protected $msiStockInstall;
+
+    /** @var DataTypes\MsiSource */
+    protected $msiSourceInstall;
 
     /** @var DataTypes\MsiInventory */
     protected $msiInventoryInstall;
@@ -202,6 +208,8 @@ class Process
      * @param DataTypes\DynamicBlocks $dynamicBlocks
      * @param DataTypes\Widgets $widgets
      * @param DataTypes\MsiInventory $msiInventory
+     * @param DataTypes\MsiStock $msiStock
+     * @param DataTypes\MsiSource $msiSource
      * @param DataTypes\Orders $orders
      * @param DataTypes\Pages $pages
      * @param DataTypes\ProductAttributes $productAttributes
@@ -243,6 +251,8 @@ class Process
         DataTypes\CustomerSegments $customerSegments,
         DataTypes\DynamicBlocks $dynamicBlocks,
         DataTypes\Widgets $widgets,
+        DataTypes\MsiStock $msiStock,
+        DataTypes\MsiSource $msiSource,
         DataTypes\MsiInventory $msiInventory,
         DataTypes\Orders $orders,
         DataTypes\Pages $pages,
@@ -281,6 +291,8 @@ class Process
         $this->validate = $validate;
         $this->upsellsInstall = $upsells;
         $this->copyMedia = $copyMedia;
+        $this->msiStockInstall = $msiStock;
+        $this->msiSourceInstall = $msiSource;
         $this->msiInventoryInstall = $msiInventory;
         $this->adminUsersInstall = $adminUsers;
         $this->adminRolesInstall = $adminRoles;
@@ -520,11 +532,22 @@ class Process
                         $this->helper->printMessage("Loading Page Builder Templates", "info");
                         $this->processRows($rows, $header, $this->templatesInstall);
                         break;
+
                     case "upsells.csv":
                         $this->helper->printMessage("Loading Related Products, Cross Sells and Upsells", "info");
                         $this->processRows($rows, $header, $this->upsellsInstall);
                         break;
 
+                    case "msi_stock.csv":
+                        $this->helper->printMessage("Loading Msi Stock", "info");
+                        $this->processRows($rows, $header, $this->msiStockInstall);
+                        break;
+
+                    case "msi_source.csv":
+                        $this->helper->printMessage("Loading Msi Sources", "info");
+                        $this->processRows($rows, $header, $this->msiSourceInstall);
+                        break;
+    
                     case "msi_inventory.csv":
                         $this->helper->printMessage("Loading Msi Inventory", "info");
                         $this->processFile($rows, $header, $this->msiInventoryInstall, $modulePath);

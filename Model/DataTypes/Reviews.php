@@ -243,12 +243,13 @@ class Reviews
         $ratingId = $ratingCollection->addFieldToFilter('rating_code', $rating)->getFirstItem()->getId();
         $rating = $this->ratingFactory->create()->load($ratingId);
         $ratingStores = $rating->getStores();
-        if(!in_array($storeId,$ratingStores)){
-            $ratingStores[]=$storeId;
-            $rating->setStores($ratingStores);
-            $this->ratingResourceModel->save($rating);
+        if(is_array($ratingStores)){
+            if(!in_array($storeId,$ratingStores)){
+                $ratingStores[]=$storeId;
+                $rating->setStores($ratingStores);
+                $this->ratingResourceModel->save($rating);
+            }
         }
-        //$rating = $this->ratingResourceModel->load($ratingId);
         return $rating;
     }
 

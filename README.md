@@ -104,7 +104,9 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**products.csv**](#products) - Creates simple and configurable products
 
-**msi source and stock - tbd**
+[**msi\_stock.csv**](#msi-stock) - Creates Stock definitions for MSI, and ties the stock to MSI sources
+
+[**msi\_source.csv**](#msi-source) - Creates MSI sources
 
 [**msi\_inventory.csv**](#msi-inventory) - Updates inventory for MSI sources
 
@@ -453,11 +455,53 @@ The standard Magento Product import file is used. If you export from an existing
 - Change any store codes, website, attribute set or category definitions to match your new configuration
 - Image references will be the path of the final image *example:* `i/m/image.jpg`. Those will need to be updated to the path of your import source.  Most likely the path will be removed and just the file name (`image.jpg`) will be used
 
+
+### MSI Source
+
+*File Name* - msi_source.csv
+
+To extract from the database:`select s.source_code, s.name, s.enabled,ifnull(s.description,'') as description,
+ifnull(s.latitude,'') as latitude,ifnull(s.longitude,'') as longitude,
+ifnull(s.region_id,'') as region_id,s.country_id, ifnull(s.city,'') as city,ifnull(s.street,'') as street,ifnull(s.postcode,'') as postcode,ifnull(s.contact_name,'') as contact_name,
+ifnull(s.email,'') as email,ifnull(s.phone,'') as phone,ifnull(s.fax,'') as fax,
+s.use_default_carrier_config,s.is_pickup_location_active,ifnull(s.frontend_name,'') as frontend_name,ifnull(s.frontend_description,'') as frontend_description
+from inventory_source s
+where  s.source_code <> 'default'` 
+
+The list of required fields depends on the configuration of in store pickup, so it is easiest to create the file by query vs. creating it manually
+
+
+Updates can be made with `source_code` as key.
+
+### MSI Stock
+
+*File Name* - msi_stock.csv
+
+To extract from the database:`select st.name as stock_name, ifnull(sc.code,'') as site_code,ifnull(GROUP_CONCAT(sl.source_code order by sl.priority),'') as source_code
+from inventory_stock st
+left outer join inventory_stock_sales_channel sc
+on st.stock_id = sc.stock_id
+left outer join inventory_source_stock_link sl
+on st.stock_id = sl.stock_id 
+where st.name <> 'Default Stock'
+group by sc.code, st.name` 
+This query will only return one site per stock. If you have multiple sites defined for a stock, the file will need to be edited.
+
+Stock names cannot be updated, but the website and source assignments can be using the `stock_name` as key.
+
+
+**stock\_name** - (required)
+
+**site\_code** - (optional) A comma delimited list of websites to assign the Stock to.  A website can only be assigned to one Stock, so if a website is listed multiple times it will be assigned to the last Stock in the file. If this column is empty, the Stock will be created but not assigned to a website
+
+**source\_code** - (optional) A comma delimited list of source to assign to the stock.
+
+
 ### MSI Inventory
 
 *File Name* - msi_inventory.csv
 
-The standard Magento Stock Sources import file is used.
+The standard Magento Stock Sources import file is used and can be exported from a configured instance
 
 **source\_code** - MSI Source
 
@@ -773,6 +817,9 @@ Here is a list of all substitutions currently supported
 
 **Product Url** - `{{producturl sku="<sku>"}}`\
 *example* - `{{producturl sku="24-MB01"}}`
+
+**Product Id** - `{{productid sku="<sku>"}}`\
+*example* - `{{productid sku="24-MB01"}}`
 
 **Product Attribute** - `{{productattribute code="<product attribute code>:<attribute value>"}}`\
 *example* - `{{productattribute code="activity:Running"}}`

@@ -13,6 +13,7 @@ use Magento\Store\Api\Data\StoreInterfaceFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use MagentoEse\DataInstall\Helper\Helper;
 use MagentoEse\DataInstall\Model\Converter;
+use Magento\Theme\Model\ResourceModel\Theme\Collection as ThemeCollection;
 
 class Categories
 {
@@ -46,6 +47,9 @@ class Categories
     /** @var Stores  */
     protected $stores;
 
+    /** @var ThemeCollection */
+    protected $themeCollection;
+
     /**
      * Categories constructor.
      * @param CategoryInterfaceFactory $categoryFactory
@@ -56,6 +60,7 @@ class Categories
      * @param Configuration $configuration
      * @param Helper $helper
      * @param Stores $stores
+     * @param ThemeCollection $themeCollection
      */
     public function __construct(
         CategoryInterfaceFactory $categoryFactory,
@@ -66,7 +71,8 @@ class Categories
         Configuration $configuration,
         Converter $converter,
         Helper $helper,
-        Stores $stores
+        Stores $stores,
+        ThemeCollection $themeCollection
     ) {
         $this->categoryFactory = $categoryFactory;
         $this->resourceCategoryTreeFactory = $resourceCategoryTreeFactory;
@@ -77,6 +83,7 @@ class Categories
         $this->converter = $converter;
         $this->helper = $helper;
         $this->stores = $stores;
+        $this->themeCollection = $themeCollection;
     }
 
     /**
@@ -145,20 +152,33 @@ class Categories
             'page_layout',
             'image',
             'description',
-            'landing_page'
+            'landing_page',
+            'custom_design'
         ];
 
         foreach ($additionalAttributes as $categoryAttribute) {
             if (!empty($row[$categoryAttribute])) {
                 if ($categoryAttribute == 'landing_page') {
                     $attributeData = [$categoryAttribute => $this->getCmsBlockId($row[$categoryAttribute])];
+                } elseif($categoryAttribute == 'custom_design')  {
+                    $attributeData = [$categoryAttribute => $this->getThemeId($row[$categoryAttribute])];
                 } else {
                     $attributeData = [$categoryAttribute => $this->converter->convertContent($row[$categoryAttribute])];
                 }
+                
 
                 $category->addData($attributeData);
             }
         }
+    }
+
+
+    protected function getThemeId($theme){
+        $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $theme)->getThemeId();
+        if(!$themeId){
+            $themeId = '';
+        }
+        return $themeId;
     }
 
     /**

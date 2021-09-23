@@ -32,7 +32,6 @@ class AdvancedPricing
         Importer $importer
     ) {
         $this->importer = $importer;
-
         $this->helper = $helper;
     }
 

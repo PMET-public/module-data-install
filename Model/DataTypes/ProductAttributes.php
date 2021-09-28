@@ -99,7 +99,29 @@ class ProductAttributes
             $storeViewId = 0;
             $row['store_view_code'] = 'admin';
         }
-        
+
+        //validate frontend_input values
+        if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
+            $this->helper->printMessage(
+                "frontend_input value in product_recs.csv is invalid. Row skipped",
+                "warning"
+            );
+            return true;
+        }
+
+        //add/update colums if type is textedit or pagebuilder
+        switch ($row['frontend_input']) {
+            case "texteditor":
+                $row['frontend_input']='textarea';
+                $row['is_wysiwyg_enabled']='1';
+                $row['is_pagebuilder_enabled']='0';
+                break;
+            case "pagebuilder":
+                $row['frontend_input']='textarea';
+                $row['is_wysiwyg_enabled']='1';
+                $row['is_pagebuilder_enabled']='1';
+                break;
+        }
         /** @var Attribute $attribute */
         $attribute = $this->eavConfig->getAttribute('catalog_product', $this->validateCode($row['attribute_code']));
         if (!$attribute->getId()) {
@@ -111,15 +133,7 @@ class ProductAttributes
                 );
                 return true;
             }
-            //validate frontend_input values
-            if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
-                $this->helper->printMessage(
-                    "frontend_input value in product_recs.csv is invalid. Row skipped",
-                    "warning"
-                );
-                return true;
-            }
-
+            
             $attribute = $this->attributeFactory->create();
         } elseif (!empty($row['only_update_sets']) && $row['only_update_sets']=='Y') {
             //facilitate adding existing attributes to set without changes.  Most likely used for system attributes

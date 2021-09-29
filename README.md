@@ -24,6 +24,7 @@ Using the CLI has multiple advantages to the `setup:upgade` method
 **If you are using the CLI method, your modules should not have the Setup classes.  This could lead to data conflicts and errors.**
 
 ###### Datapack data format
+
 Each datapack needs to have a `data` subdirectory. This can contain the data to install, or it can contain one or more subdirectories with different installation options.  For example, in our Grocery data pack there are directories for a `standalone` or `store` installation. Those can be specified by using the `--load=` option.
 A `.default` file can be created under the `data` directory containing the name of the directory you want installed if none is specified with the `--load=` option.
 
@@ -62,11 +63,11 @@ Even though `RecurringData.php` is used, its first run is logged so it only runs
 
 Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](https://github.com/PMET-public/module-storystore-sample "https://github.com/PMET-public/module-storystore-sample")
 
-###Handling of the default `base` website
+### Handling of the default `base` website
 
 When Magento installs, a default web site is created with a site code of `base`. In order to facilitate the ease of re-use of data packs, most are created assuming that the `base` web site exists. The data installer will make adjustments in the case that the `base` site code has been changed.
 
-If the data that is being installed calls for a `base` website, and that site does not exist, the Data Installer will substitute `base` with the site code of the default web site. 
+If the data that is being installed calls for a `base` website, and that site does not exist, the Data Installer will substitute `base` with the site code of the default web site.
 
 Of course you can always specify any site code where appropriate in the data.
 
@@ -98,7 +99,7 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**reward\_exchange\_rate.csv**](#reward-exchange-rate) - Sets the conversion values for Reward Points
 
-[**product_attributes.csv**](#product-attributes) - Creates product attributes and set
+[**product_attributes.csv**](#product-attributes) - Creates product attributes and sets
 
 [**categories.csv**](#categories) - Creates categories
 
@@ -123,7 +124,6 @@ Each element of potential sample data is encapsulated in its own file:
 [**dynamic_blocks.csv**](#dynamic-blocks) - Creates Dynamic Blocks. Includes Page Builder compatibility
 
 [**widgets.csv**](#widgets) - It is recommended to create widgets in a Magneto store and then extract them via DB query. The data is too complex to create manually. A single layout update per widget is supported at this time.
-
 
 [**pages.csv**](#pages) - Creates and updates pages. Includes Page Builder compatibility
 
@@ -197,6 +197,7 @@ Optional file: This file is used to add and update Sites, Stores, Store Views an
 **view\_is\_active** - Optional: values = Y/N. Default = N. If a view is set as default for a store, it cannot be deactivated.
 
 **host** - Optional: Used to set the Base Urls for a site.  There are 3 allowed values
+
 1. The desired domain name. Can use subdomains and subdirectories (example: `luma.com`, `store.luma.com`, `luma.com/canada`).
 1. `subdomain` - If you are using different subdomains for website, a base url will be generated based on the `site_code` and  default base url. (example: if the `site_code` is `us` and the default base url is `http://site.test`, the resulting base urls for this site will be `http://us.site.test` & `https://us.site.test` )
 1. `subdirectory` - If you are using different subdirectories for website, a base url will be generated based on the `site_code` and  default base url. (example: if the `site_code` is `us` and the default base url is `http://site.test`, the resulting base urls for this site will be `http://site.test/us` & `https://site.test/us` )
@@ -280,7 +281,7 @@ Customer attribute configurations can be complex. The purpose of this file is to
 
 *Get Attribute information*
 `select eav.attribute_code, eav.frontend_input, eav.frontend_label,
-case when eav.is_required = 0 then 'N' else 'Y' end as is_required, 
+case when eav.is_required = 0 then 'N' else 'Y' end as is_required,
 case when ca.is_used_in_grid = 0 then 'N' else 'Y' end as is_used_in_grid,
 case when ca.is_visible_in_grid = 0 then 'N' else 'Y' end as is_visible_in_grid,
 case when ca.is_filterable_in_grid = 0 then 'N' else 'Y' end as is_filterable_in_grid,
@@ -331,7 +332,6 @@ where eav.attribute_code = '...'`
 **is_used_for_customer_segment** - Optional, Values = Y/N. Default = Y.  Can it be used to create customer segments
 
 **use_in_forms** - Optional, Values = adminhtml_customer,adminhtml_checkout,customer_account_edit,customer_account_create. Default = all forms.  Comma delimited list of forms where the attribute can be defined
-
 
 ### Customer Segments
 
@@ -407,7 +407,7 @@ All columns are required
 **customer_group** - Name of Customer Group
 **direction** - `points_to_currency` or `currency_to_points`
 **points**
-**currency_amount** 
+**currency_amount**
 
 ### Categories
 
@@ -426,9 +426,9 @@ This file is used to create categories. Categories are also created during produ
 **path** - If left empty, the category will be top level. Subcategories will need to have their parents listed. For example
 
 - Women (no path)
-  - - - Tops (Path = Women)
-          - - - Sweaters (Path = Women/Tops)
-          - - - Jackets (Path = Women/Tops)
+      - - - Tops (Path = Women)
+            - - - Sweaters (Path = Women/Tops)
+            - - - Jackets (Path = Women/Tops)
 
 Parent categories need to be in the file before the child categories
 
@@ -453,7 +453,6 @@ The standard Magento Product import file is used. If you export from an existing
 - Change any store codes, website, attribute set or category definitions to match your new configuration
 - Image references will be the path of the final image *example:* `i/m/image.jpg`. Those will need to be updated to the path of your import source.  Most likely the path will be removed and just the file name (`image.jpg`) will be used
 
-
 ### MSI Source
 
 *File Name* - msi_source.csv
@@ -464,10 +463,9 @@ ifnull(s.region_id,'') as region_id,s.country_id, ifnull(s.city,'') as city,ifnu
 ifnull(s.email,'') as email,ifnull(s.phone,'') as phone,ifnull(s.fax,'') as fax,
 s.use_default_carrier_config,s.is_pickup_location_active,ifnull(s.frontend_name,'') as frontend_name,ifnull(s.frontend_description,'') as frontend_description
 from inventory_source s
-where  s.source_code <> 'default'` 
+where  s.source_code <> 'default'`
 
 The list of required fields depends on the configuration of in store pickup, so it is easiest to create the file by query vs. creating it manually
-
 
 Updates can be made with `source_code` as key.
 
@@ -480,20 +478,18 @@ from inventory_stock st
 left outer join inventory_stock_sales_channel sc
 on st.stock_id = sc.stock_id
 left outer join inventory_source_stock_link sl
-on st.stock_id = sl.stock_id 
+on st.stock_id = sl.stock_id
 where st.name <> 'Default Stock'
-group by sc.code, st.name` 
+group by sc.code, st.name`
 This query will only return one site per stock. If you have multiple sites defined for a stock, the file will need to be edited.
 
 Stock names cannot be updated, but the website and source assignments can be using the `stock_name` as key.
-
 
 **stock\_name** - (required)
 
 **site\_code** - (optional) A comma delimited list of websites to assign the Stock to.  A website can only be assigned to one Stock, so if a website is listed multiple times it will be assigned to the last Stock in the file. If this column is empty, the Stock will be created but not assigned to a website
 
 **source\_code** - (optional) A comma delimited list of source to assign to the stock.
-
 
 ### MSI Inventory
 
@@ -522,8 +518,39 @@ The standard Magento Advanced Pricing import file is used. If you export from an
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
 Product attribute configurations can be complex. The purpose of this file is to address the most common settings. All settings are supported using database column names and values.
 
+Query to extract attributes
+`select '' as attribute_set, eav.attribute_code, eav.frontend_input, eav.frontend_label,
+ca.is_visible,ca.is_searchable,ca.is_filterable,ca.is_comparable,ca.is_visible_on_front,ca.is_html_allowed_on_front,ca.is_used_for_price_rules,
+ca.is_filterable_in_search, ca.used_in_product_listing,ca.used_for_sort_by,ifnull(ca.apply_to,'') as apply_to,ca.is_visible_in_advanced_search,ca.position,
+ca.is_wysiwyg_enabled,ca.is_used_for_promo_rules,ca.is_required_in_admin_store,ca.is_used_in_grid,ca.is_visible_in_grid,
+ca.is_filterable_in_grid,ca.search_weight,ca.is_pagebuilder_enabled,ifnull(ca.additional_data,'') as additional_data,'' as 'option'
+from eav_attribute eav
+inner join catalog_eav_attribute ca on eav.attribute_id = ca.attribute_id where eav.attribute_code in('...','...')`
 
-> Out of Scope: Swatches, translations of attribute options
+The queries to extract option values need to be run individually for each attribute with the results placed in the `option` column of the main attribute file.
+
+Get options or simple text swatch
+`select group_concat(ov.value order by op.sort_order separator '\n') as 'option' from eav_attribute_option_value ov
+left join eav_attribute_option op on ov.option_id = op.option_id where op.attribute_id in (select attribute_id from eav_attribute where attribute_code = '...')
+order by op.option_id`
+
+Get Text Swatches with different description value
+`select group_concat(concat(os.value,'|',ov.value) order by op.sort_order separator '\n') as 'option' from eav_attribute_option_swatch os
+left join eav_attribute_option op on os.option_id = op.option_id
+left join eav_attribute_option_value ov on os.option_id = ov.option_id
+where op.attribute_id in (select attribute_id from eav_attribute where attribute_code = '...')
+and ov.store_id = 0
+order by op.option_id`
+
+Get Color Swatches
+`select group_concat(concat(ov.value,'|',os.value) order by op.sort_order separator '\n') as 'option' from eav_attribute_option_swatch os
+left join eav_attribute_option op on os.option_id = op.option_id
+left join eav_attribute_option_value ov on os.option_id = ov.option_id
+where op.attribute_id in (select attribute_id from eav_attribute where attribute_code = '...')
+and ov.store_id = 0
+order by op.option_id`
+
+> Out of Scope: Store level label settings. Image based swatches
 
 *Columns*
 
@@ -535,7 +562,7 @@ Product attribute configurations can be complex. The purpose of this file is to 
 
 **is\_required** - Optional: Values = Y/N. Default = N
 
-**option** - Required when input is Multi or Select. Values to show, carriage return delimited
+**option** - Required when input is Multi or Select or Swatch. Values to show, carriage return delimited. In the case of color swatches a pipe delimited value of label|color is used (`Green|#32faaa`). For text swatches if the value and description are different, a pipe delimited value of value|description is used (`SM|Small`). If the description is not needed, the single value of `Small` can be used.
 
 **position** - Optional, Numeric.  Indicates the position of the attribute within the Attribute Group
 
@@ -625,7 +652,7 @@ At this point Automatically generated coupon codes are not supported. If you do 
 
 Because rule definitions are complex, the method currently in use is to create a cart rule in a test enviornment and then export that data out of the database using this query:
 `select '' as 'site_code','' as 'customer_group',r.name, r.description, r.uses_per_customer,r.is_active,r.conditions_serialized,r.actions_serialized,r.stop_rules_processing,r.is_advanced,r.sort_order,r.simple_action,r.discount_amount,r.discount_qty,r.discount_step,r.apply_to_shipping,r.times_used,r.is_rss,r.coupon_type,r.use_auto_generation,r.uses_per_coupon,r.simple_free_shipping,IFNULL(c.code,'') as 'coupon_code', rw.points_delta as 'reward_points_delta'
-from salesrule r 
+from salesrule r
 left join salesrule_coupon c
 on r.rule_id = c.rule_id
 left join magento_reward_salesrule rw
@@ -656,7 +683,6 @@ This file is used to add or update blocks.  Updates are made by using the key of
 **title** - Required - Same as Block Title in the UI
 
 **content** - Optional. Body of the page. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers for Page Builder compatibility
-
 
 ### Widgets
 
@@ -696,7 +722,7 @@ The result will need a few edits to work properly: The ids in `store_view_codes`
 
 **page_for** - Optional. (`all` or `specific`). Will be set as `specific` if the widget is applied to specific categories or products
 
-**entities** - Optional.  Will be populated by ids if the widget is applied to specific products or categories. Ids should be replaced with tokens for [**Content Substitution**](#content-substitution) 
+**entities** - Optional.  Will be populated by ids if the widget is applied to specific products or categories. Ids should be replaced with tokens for [**Content Substitution**](#content-substitution)
 
 **page_template** - Optional. System template used to apply the widget
 

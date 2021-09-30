@@ -564,6 +564,8 @@ order by op.option_id`
 
 **option** - Required when input is Multi or Select or Swatch. Values to show, carriage return delimited. In the case of color swatches a pipe delimited value of label|color is used (`Green|#32faaa`). For text swatches if the value and description are different, a pipe delimited value of value|description is used (`SM|Small`). If the description is not needed, the single value of `Small` can be used.
 
+**additional\_data** - Required if attribute is using swatches. This is what will determine if swatches are used. It is recommended to use the db extract. The json data is simple though and is used to configure swatches - example `{"swatch_input_type":"visual","update_product_preview_image":"0","use_product_image_for_swatch":"0"}`
+
 **position** - Optional, Numeric.  Indicates the position of the attribute within the Attribute Group
 
 **attribute\_set** - Optional. Carriage return delimited list of Attribute Sets that the Attribute will be added to.  Sets will be created as needed based on the Default set. If no value is given, the Attribute will be added to the Default set.

@@ -19,134 +19,18 @@ use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\DriverInterface;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
+use MagentoEse\DataInstall\Model\Conf;
 
 class Process
 {
-    const ALL_FILES = ['stores.csv','config_default.json','config_default.csv','config_vertical.json',
-    'config_vertical.csv','config_secret.json','config_secret.csv','config.json','config.csv',
-    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv',
-    'reward_exchange_rate.csv','customers.csv','customer_addresses.csv','product_attributes.csv',
-    'blocks.csv','categories.csv','customer_segments.csv','products.csv',
-    'msi_source.csv','msi_stock.csv','msi_inventory.csv','upsells.csv','blocks.csv','dynamic_blocks.csv',
-    'widgets.csv','catalog_rules.csv',
-    'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
-    'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv',
-    'advanced_pricing.csv','orders.csv'];
-
-    const STORE_FILES = ['stores.csv'];
-
-    const STAGE1 = ['config_default.json','config_default.csv','config_vertical.json',
-    'config_vertical.csv','config_secret.json','config_secret.csv','config.json','config.csv',
-    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv',
-    'customers.csv','customer_addresses.csv','product_attributes.csv',
-    'customer_segments.csv','blocks.csv','categories.csv'];
-
-    const STAGE2 = ['products.csv','msi_source.csv','msi_stock.csv','msi_inventory.csv','upsells.csv','blocks.csv',
-    'dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
-    'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
-    'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv',
-    'advanced_pricing.csv','orders.csv'];
-
-    const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv',
-    'b2b_sales_reps.csv','b2b_teams.csv'];
-
-    protected $redo=[];
-
-    const SETTINGS = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
-        'root_category' => 'Default Category', 'root_category_id' => '2'];
-
     /** @var array */
-    private $settings;
+    protected $settings;
 
     /** @var Csv  */
     protected $csvReader;
 
     /** @var FixtureManager  */
     protected $fixtureManager;
-
-    /** @var DataTypes\Stores  */
-    protected $storeInstall;
-
-    /** @var DataTypes\ProductAttributes  */
-    protected $productAttributesInstall;
-
-    /** @var DataTypes\Categories  */
-    protected $categoryInstall;
-
-    /** @var DataTypes\Products  */
-    protected $productInstall;
-
-    /** @var DataTypes\DirectoryList  */
-    protected $directoryList;
-
-    /** @var DataTypes\Pages  */
-    protected $pageInstall;
-
-    /** @var DataTypes\Blocks  */
-    protected $blockInstall;
-
-    /** @var DataTypes\DynamicBlocks  */
-    protected $dynamicBlockInstall;
-
-    /** @var DataTypes\Widgets  */
-    protected $widgetInstall;
-
-    /** @var DataTypes\Configuration  */
-    protected $configurationInstall;
-
-    /** @var DataTypes\CustomerGroups  */
-    protected $customerGroupInstall;
-
-    /** @var DataTypes\CustomerAttributes  */
-    protected $customerAttributeInstall;
-
-     /** @var DataTypes\RewardExchangeRate  */
-     protected $rewardExchangeRateInstall;
-
-    /** @var DataTypes\Customers  */
-    protected $customerInstall;
-
-    /** @var DataTypes\CustomerAddresses  */
-    protected $customerAddressesInstall;
-
-    /** @var DataTypes\Reviews  */
-    protected $reviewsInstall;
-
-    /** @var Validate */
-    protected $validate;
-
-    /** @var DataTypes\Templates  */
-    protected $templatesInstall;
-
-    /** @var DataTypes\Upsells */
-    protected $upsellsInstall;
-
-    /** @var CopyMedia */
-    protected $copyMedia;
-
-    /** @var DataTypes\MsiStock */
-    protected $msiStockInstall;
-
-    /** @var DataTypes\MsiSource */
-    protected $msiSourceInstall;
-
-    /** @var DataTypes\MsiInventory */
-    protected $msiInventoryInstall;
-
-    /** @var DataTypes\AdminUsers  */
-    protected $adminUsersInstall;
-
-    /** @var DataTypes\AdminRoles  */
-    protected $adminRolesInstall;
-
-    /** @var DriverInterface */
-    protected $driverInterface;
-
-    /** @var DataTypes\AdvancedPricing */
-    protected $advancedPricingInstall;
-
-    /** @var DataTypes\Orders */
-    protected $orderInstall;
 
     /** @var Helper */
     protected $helper;
@@ -157,35 +41,11 @@ class Process
     /** @var InstallerRepositoryInterface */
     protected $dataInstallerRepository;
 
-    /** @var Datatypes\CustomerSegments */
-    protected $customerSegmentsInstall;
-
-    /** @var Datatypes\CatalogRules */
-    protected $catalogRulesInstall;
-
-    /** @var Datatypes\CartRules */
-    protected $cartRulesInstall;
-
-    /** @var Datatypes\Companies */
-    protected $companiesInstall;
-
-    /** @var Datatypes\CompanyRoles */
-    protected $companyRolesInstall;
-
-    /** @var Datatypes\CompanyUserRoles */
-    protected $companyUserRolesInstall;
-
-    /** @var Datatypes\RequisitionLists */
-    protected $requisitionListsInstall;
-
-    /** @var Datatypes\SharedCatalogs */
-    protected $sharedCatalogsInstall;
-
-    /** @var Datatypes\SharedCatalogCategories */
-    protected $sharedCatalogCategoriesInstall;
-
-    /** @var Datatypes\Teams */
-    protected $companyTeamsInstall;
+    /** @var Conf  */
+    protected $conf;
+    
+    /** @var DataTypes\Stores  */
+    protected $storeInstall;
 
     /**
      * Process constructor.
@@ -197,41 +57,9 @@ class Process
      * @param InstallerRepositoryInterface $dataInstallerRepository
      * @param SampleDataContext $sampleDataContext
      * @param Validate $validate
-     * @param DataTypes\AdminUsers $adminUsers
-     * @param DataTypes\AdminRoles $adminRoles
-     * @param DataTypes\AdvancedPricing $advancedPricing
-     * @param DataTypes\Blocks $blocks
-     * @param DataTypes\CatalogRules $catalogRules
-     * @param DataTypes\CartRules $cartRules
-     * @param DataTypes\Categories $categories
-     * @param Datatypes\Companies $companies
-     * @param DataTypes\CompanyRoles $companyRoles
-     * @param DataTypes\CompanyUserRoles $companyUserRoles
-     * @param DataTypes\Configuration $configuration
-     * @param DataTypes\CustomerGroups $customerGroups
-     * @param DataTypes\CustomerAttributes $customerAttributes
-     * @param DataTypes\RewardExchangeRate $rewardExchangeRate
-     * @param DataTypes\Customers $customers
-     * @param DataTypes\CustomersAddresses $customerAddresses
-     * @param DataTypes\CustomerSegments $customerSegments
-     * @param DataTypes\DynamicBlocks $dynamicBlocks
-     * @param DataTypes\Widgets $widgets
-     * @param DataTypes\MsiInventory $msiInventory
-     * @param DataTypes\MsiStock $msiStock
-     * @param DataTypes\MsiSource $msiSource
-     * @param DataTypes\Orders $orders
-     * @param DataTypes\Pages $pages
-     * @param DataTypes\ProductAttributes $productAttributes
-     * @param DataTypes\Products $products
-     * @param DataTypes\RequisitionLists $requisitionLists
-     * @param DataTypes\SharedCatalogs $sharedCatalogs
-     * @param DataTypes\SharedCatalogCategories $sharedCatalogCategories
+     * @param Conf $conf
      * @param DataTypes\Stores $stores
-     * @param DataTypes\Reviews $reviews
-     * @param DataTypes\Teams $teams
-     * @param DataTypes\Templates $templates
-     * @param DataTypes\Upsells $upsells
-     */
+     **/
     public function __construct(
         CopyMedia $copyMedia,
         DirectoryList $directoryList,
@@ -241,86 +69,21 @@ class Process
         InstallerRepositoryInterface $dataInstallerRepository,
         SampleDataContext $sampleDataContext,
         Validate $validate,
-        DataTypes\AdminUsers $adminUsers,
-        DataTypes\AdminRoles $adminRoles,
-        DataTypes\AdvancedPricing $advancedPricing,
-        DataTypes\Blocks $blocks,
-        DataTypes\CatalogRules $catalogRules,
-        DataTypes\CartRules $cartRules,
-        DataTypes\Categories $categories,
-        Datatypes\Companies $companies,
-        DataTypes\CompanyRoles $companyRoles,
-        DataTypes\CompanyUserRoles $companyUserRoles,
-        DataTypes\Configuration $configuration,
-        DataTypes\CustomerGroups $customerGroups,
-        DataTypes\CustomerAttributes $customerAttributes,
-        DataTypes\RewardExchangeRate $rewardExchangeRate,
-        DataTypes\Customers $customers,
-        DataTypes\CustomerAddresses $customerAddresses,
-        DataTypes\CustomerSegments $customerSegments,
-        DataTypes\DynamicBlocks $dynamicBlocks,
-        DataTypes\Widgets $widgets,
-        DataTypes\MsiStock $msiStock,
-        DataTypes\MsiSource $msiSource,
-        DataTypes\MsiInventory $msiInventory,
-        DataTypes\Orders $orders,
-        DataTypes\Pages $pages,
-        DataTypes\ProductAttributes $productAttributes,
-        DataTypes\Products $products,
-        DataTypes\RequisitionLists $requisitionLists,
-        DataTypes\SharedCatalogs $sharedCatalogs,
-        DataTypes\SharedCatalogCategories $sharedCatalogCategories,
-        DataTypes\Stores $stores,
-        DataTypes\Reviews $reviews,
-        DataTypes\Teams $teams,
-        DataTypes\Templates $templates,
-        DataTypes\Upsells $upsells
+        Conf $conf,
+        DataTypes\Stores $stores
     ) {
+        $this->copyMedia = $copyMedia;
         $this->helper = $helper;
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
         $this->csvReader = $sampleDataContext->getCsvReader();
-        $this->storeInstall = $stores;
-        $this->productAttributesInstall = $productAttributes;
-        $this->categoryInstall = $categories;
-        $this->productInstall = $products;
         $this->directoryList = $directoryList;
-        $this->pageInstall = $pages;
-        $this->blockInstall = $blocks;
-        $this->dynamicBlockInstall = $dynamicBlocks;
-        $this->widgetInstall = $widgets;
-        $this->configurationInstall = $configuration;
-        $this->customerGroupInstall = $customerGroups;
-        $this->customerAttributeInstall = $customerAttributes;
-        $this->rewardExchangeRateInstall = $rewardExchangeRate;
-        $this->customerInstall = $customers;
-        $this->customerAddressesInstall = $customerAddresses;
-        $this->reviewsInstall = $reviews;
-        $this->templatesInstall = $templates;
         $this->validate = $validate;
-        $this->upsellsInstall = $upsells;
-        $this->copyMedia = $copyMedia;
-        $this->msiStockInstall = $msiStock;
-        $this->msiSourceInstall = $msiSource;
-        $this->msiInventoryInstall = $msiInventory;
-        $this->adminUsersInstall = $adminUsers;
-        $this->adminRolesInstall = $adminRoles;
         $this->driverInterface = $driverInterface;
-        $this->advancedPricingInstall = $advancedPricing;
         $this->dataInstallerInterface = $dataInstallerInterface;
         $this->dataInstallerRepository = $dataInstallerRepository;
-        $this->ordersInstall = $orders;
-        $this->customerSegmentsInstall = $customerSegments;
-        $this->catalogRulesInstall = $catalogRules;
-        $this->cartRulesInstall = $cartRules;
-        $this->companiesInstall = $companies;
-        $this->companyRolesInstall = $companyRoles;
-        $this->companyUserRolesInstall = $companyUserRoles;
-        $this->requisitionListsInstall = $requisitionLists;
-        $this->sharedCatalogsInstall = $sharedCatalogs;
-        $this->sharedCatalogCategoriesInstall = $sharedCatalogCategories;
-        $this->companyTeamsInstall = $teams;
+        $this->conf = $conf;
+        $this->storeInstall = $stores;
     }
-
     /**
      * @param $fileSource
      * @param string $fixtureDirectory
@@ -330,19 +93,18 @@ class Process
      * @throws LocalizedException
      * @throws FileSystemException
      */
-
-    public function loadFiles($fileSource, $load = '', array $fileOrder = self::ALL_FILES, $reload = 0)
+    public function loadFiles($fileSource, $load, array $fileOrder, $reload = 0)
     {
         $fixtureDirectory = "data";
         //bypass if data is already installed
         if ($this->isModuleInstalled($fileSource)==1 && $reload===0) {
             //output reload option if cli is used
-            if ($this->isCli()) {
+            //if ($this->isCli()) {
                 $this->helper->printMessage(
                     $fileSource." has already been installed.  Add the -r option if you want to reinstall",
                     "warning"
                 );
-            }
+            //}
             return true;
         } else {
             $this->registerModule($fileSource);
@@ -361,242 +123,72 @@ class Process
 
         $fileCount = 0;
         if (count($fileOrder)==0) {
-            $fileOrder=self::ALL_FILES;
+            $fileOrder=$this->conf->getProcessConfiguration();
+            //$fileOrder=conf::ALL_FILES;
         }
-        if (count($fileOrder)==1) {
-            //for setting files when start, stores and end is used in place of file list
-            switch (strtolower($fileOrder[0])) {
-                case "stores":
-                    $fileOrder = self::STORE_FILES;
-                    break;
-                case "start":
-                    $fileOrder = self::STAGE1;
-                    break;
-                case "end":
-                    $fileOrder = self::STAGE2;
-                    break;
-            }
-        }
+        // if (count($fileOrder)==1) {
+        //     //for setting files when start, stores and end is used in place of file list
+        //     switch (strtolower($fileOrder[0])) {
+        //         case "stores":
+        //             $fileOrder = Conf::STORE_FILES;
+        //             break;
+        //         case "start":
+        //             $fileOrder = Conf::STAGE1;
+        //             break;
+        //         case "end":
+        //             $fileOrder = Conf::STAGE2;
+        //             break;
+        //     }
+        // }
         //$filePath = $this->getDataPath($fileSource);
         $this->helper->printMessage("Copying Media", "info");
         $this->copyMedia->moveFiles($filePath);
         $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
-
+        //$fileOrder = $this->conf->getProcessConfiguration();
+        //$fileOrder = ['doh.csv'];
         foreach ($fileOrder as $nextFile) {
-            $fileName = $filePath . $fixtureDirectory . "/" . $nextFile;
-            // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
-            if (basename($fileName)==$nextFile && file_exists($fileName)) {
-                $fileCount++;
-                // phpcs:ignore Magento2.Functions.DiscouragedFunction.DiscouragedWithAlternative
-                if (pathinfo($fileName, PATHINFO_EXTENSION) == 'json') {
-                    $fileContent = $this->driverInterface->fileGetContents($fileName);
-                } else {
-                    $rows = $this->csvReader->getData($fileName);
-                    $header = array_shift($rows);
-                    //Remove hidden character Excel adds to the first cell of a document
-                    $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
-                    //validate that number of elements in header and rows is equal
-                    if (!$this->validate->validateCsvFile($header, $rows)) {
-                        $this->helper->printMessage("Skipping File ".$nextFile.
-                        ". The number of columns in the header does not match the number of column of ".
-                        "data in one or more rows", "warning");
-                        continue;
-                    }
-                    //validate that the file is not empty
-                    if (empty($rows)) {
-                        $this->helper->printMessage("Skipping File ".$nextFile.
-                        ". The file is empty or not properly formatted", "warning");
-                        continue;
-                    }
-                }
-
-                //determine path to module code for image import
+            //get processing instructions based on filename
+            //returns ['filename','process','class','label'];
+            $fileInfo = $this->getProcessInstructions($nextFile);
+            if ($fileInfo) {
+                $fileName = $filePath . $fixtureDirectory . "/" . $fileInfo['filename'];
                 // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
-                $modulePath = str_replace("/" . $fixtureDirectory . "/" . basename($fileName), "", $fileName);
-                // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
-                switch (basename($fileName)) {
-                    case "stores.csv":
-                        $this->helper->printMessage("Loading Stores", "info");
-                        $this->processRows($rows, $header, $this->storeInstall);
-                        break;
+                if (basename($fileName)==$fileInfo['filename'] && file_exists($fileName)) {
+                    $fileCount++;
+                    // phpcs:ignore Magento2.Functions.DiscouragedFunction.DiscouragedWithAlternative
+                    if (pathinfo($fileName, PATHINFO_EXTENSION) == 'json') {
+                        $fileContent = $this->driverInterface->fileGetContents($fileName);
+                    } else {
+                        $rows = $this->csvReader->getData($fileName);
+                        $header = array_shift($rows);
+                        //Remove hidden character Excel adds to the first cell of a document
+                        $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
+                        //validate that number of elements in header and rows is equal
+                        if (!$this->validate->validateCsvFile($header, $rows)) {
+                            $this->helper->printMessage("Skipping File ".$fileInfo['filename'].
+                            ". The number of columns in the header does not match the number of column of ".
+                            "data in one or more rows", "warning");
+                            continue;
+                        }
+                        //validate that the file is not empty
+                        if (empty($rows)) {
+                            $this->helper->printMessage("Skipping File ".$fileInfo['filename'].
+                            ". The file is empty or not properly formatted", "warning");
+                            continue;
+                        }
+                    }
 
-                    case "customers.csv":
-                        $this->helper->printMessage("Loading Customers", "info");
-                        $this->processFile($rows, $header, $this->customerInstall, '');
-                        break;
-
-                    case "customer_addresses.csv":
-                        $this->helper->printMessage("Loading Customer Addresses", "info");
-                        $this->processFile($rows, $header, $this->customerAddressesInstall, '');
-                        break;
-
-                    case "product_attributes.csv":
-                        $this->helper->printMessage("Loading Product Attributes", "info");
-                        $this->processRows($rows, $header, $this->productAttributesInstall);
-                        break;
-
-                    case "categories.csv":
-                        $this->helper->printMessage("Loading Categories", "info");
-                        $this->processRows($rows, $header, $this->categoryInstall);
-                        break;
-
-                    case "products.csv":
-                        $this->processFile($rows, $header, $this->productInstall, $modulePath);
-                        break;
-
-                    case "advanced_pricing.csv":
-                        $this->helper->printMessage("Loading Advanced Pricing", "info");
-                        $this->processFile($rows, $header, $this->advancedPricingInstall, $modulePath);
-                        break;
-
-                    case "pages.csv":
-                        $this->helper->printMessage("Loading Pages", "info");
-                        $this->processRows($rows, $header, $this->pageInstall);
-                        break;
-
-                    case "blocks.csv":
-                        $this->helper->printMessage("Loading Blocks", "info");
-                        $this->processRows($rows, $header, $this->blockInstall);
-                        break;
-
-                    case "dynamic_blocks.csv":
-                        $this->helper->printMessage("Loading Dynamic Blocks", "info");
-                        $this->processRows($rows, $header, $this->dynamicBlockInstall);
-                        break;
-
-                    case "widgets.csv":
-                        $this->helper->printMessage("Loading Widgets", "info");
-                        $this->processRows($rows, $header, $this->widgetInstall);
-                        break;
-
-                    case "config_default.json":
-                        $this->helper->printMessage("Loading Config Default Json", "info");
-                        $this->processJson($fileContent, $this->configurationInstall);
-                        break;
-
-                    case "config_vertical.json":
-                        $this->helper->printMessage("Loading Config Vertical Json", "info");
-                        $this->processJson($fileContent, $this->configurationInstall);
-                        break;
-
-                    case "config_secret.json":
-                        $this->helper->printMessage("Loading Config Secret Json", "info");
-                        $this->processJson($fileContent, $this->configurationInstall);
-                        break;
-
-                    case "config.json":
-                        $this->helper->printMessage("Loading Config Json", "info");
-                        $this->processJson($fileContent, $this->configurationInstall);
-                        break;
-                    case "config_default.csv":
-                        $this->helper->printMessage("Loading Config Default Csv", "info");
-                        $this->processRows($rows, $header, $this->configurationInstall);
-                        break;
-                    case "config_vertical.csv":
-                        $this->helper->printMessage("Loading Config Vertical Csv", "info");
-                        $this->processRows($rows, $header, $this->configurationInstall);
-                        break;
-                    case "config_secret.csv":
-                        $this->helper->printMessage("Loading Config Secret Csv", "info");
-                        $this->processRows($rows, $header, $this->configurationInstall);
-                        break;
-                    case "config.csv":
-                        $this->helper->printMessage("Loading Config Csv", "info");
-                        $this->processRows($rows, $header, $this->configurationInstall);
-                        break;
-
-                    case "customer_groups.csv":
-                        $this->helper->printMessage("Loading Customer Groups", "info");
-                        $this->processRows($rows, $header, $this->customerGroupInstall);
-                        break;
-
-                    case "customer_attributes.csv":
-                        $this->helper->printMessage("Loading Customer Attributes", "info");
-                        $this->processRows($rows, $header, $this->customerAttributeInstall);
-                        break;
-
-                    case "customer_segments.csv":
-                        $this->helper->printMessage("Loading Customer Segments", "info");
-                        $this->processRows($rows, $header, $this->customerSegmentsInstall);
-                        break;
-
-                    case "catalog_rules.csv":
-                        $this->helper->printMessage("Loading Catalog Price Rules", "info");
-                        $this->processRows($rows, $header, $this->catalogRulesInstall);
-                        break;
-
-                    case "cart_rules.csv":
-                        $this->helper->printMessage("Loading Cart Price Rules", "info");
-                        $this->processRows($rows, $header, $this->cartRulesInstall);
-                        break;
-
-                    case "reward_exchange_rate.csv":
-                        $this->helper->printMessage("Loading Reward Exchange Rates", "info");
-                        $this->processRows($rows, $header, $this->rewardExchangeRateInstall);
-                        break;
-        
-                    case "reviews.csv":
-                        $this->helper->printMessage("Loading Reviews & Ratings", "info");
-                        $this->processRows($rows, $header, $this->reviewsInstall);
-                        break;
-
-                    case "templates.csv":
-                        $this->helper->printMessage("Loading Page Builder Templates", "info");
-                        $this->processRows($rows, $header, $this->templatesInstall);
-                        break;
-
-                    case "upsells.csv":
-                        $this->helper->printMessage("Loading Related Products, Cross Sells and Upsells", "info");
-                        $this->processRows($rows, $header, $this->upsellsInstall);
-                        break;
-
-                    case "msi_stock.csv":
-                        $this->helper->printMessage("Loading Msi Stock", "info");
-                        $this->processRows($rows, $header, $this->msiStockInstall);
-                        break;
-
-                    case "msi_source.csv":
-                        $this->helper->printMessage("Loading Msi Sources", "info");
-                        $this->processRows($rows, $header, $this->msiSourceInstall);
-                        break;
-    
-                    case "msi_inventory.csv":
-                        $this->helper->printMessage("Loading Msi Inventory", "info");
-                        $this->processFile($rows, $header, $this->msiInventoryInstall, $modulePath);
-                        break;
-
-                    case "admin_users.csv":
-                        $this->helper->printMessage("Loading Admin Users", "info");
-                        $this->processRows($rows, $header, $this->adminUsersInstall);
-                        break;
-
-                    case "admin_roles.csv":
-                        $this->helper->printMessage("Loading Admin Roles", "info");
-                        $this->processFile($rows, $header, $this->adminRolesInstall, $modulePath);
-                        break;
-
-                    case "b2b_companies.csv":
-                        $this->helper->printMessage("Loading B2B Data", "header");
-                        $this->processB2B($filePath, $fixtureDirectory);
-                        break;
-
-                    case "b2b_shared_catalogs.csv":
-                        $this->helper->printMessage("Loading B2B Shared Catalogs", "info");
-                        $this->processRows($rows, $header, $this->sharedCatalogsInstall);
-                        break;
-                    case "b2b_shared_catalog_categories.csv":
-                        $this->helper->printMessage("Loading Shared Catalog Categories", "info");
-                        $this->processFile($rows, $header, $this->sharedCatalogCategoriesInstall, $modulePath);
-                        break;
-                    case "b2b_requisition_lists.csv":
-                        $this->helper->printMessage("Loading Requisition Lists", "info");
-                        $this->processRows($rows, $header, $this->requisitionListInstall);
-                        break;
-
-                    case "orders.csv":
-                        $this->helper->printMessage("Loading Orders", "info");
-                        $this->processRows($rows, $header, $this->ordersInstall);
-                        break;
+                    //determine path to module code for image import
+                    // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
+                    $modulePath = str_replace("/" . $fixtureDirectory . "/" . basename($fileName), "", $fileName);
+                    $this->helper->printMessage($fileInfo['label'], "info");
+                    if ($fileInfo['process']=='file') {
+                        $this->processFile($rows, $header, $fileInfo['class'], $modulePath);
+                    } elseif ($fileInfo['process']=='json') {
+                        $this->processJson($rows, $header, $fileInfo['class']);
+                    } else {
+                        $this->processRows($rows, $header, $fileInfo['class']);
+                    }
                 }
             }
         }
@@ -607,6 +199,44 @@ class Process
                 $this->setModuleInstalled($fileSource);
             }
             return true;
+        }
+    }
+
+    private function getProcessInstructions($file)
+    {
+        //Is there processing information passed on with the filename?
+        //If not, then we need to look up the configuration for that file name
+        if (is_array($file)) {
+            $filename = key($file);
+            //validate the correct keys are present
+            if (empty($file[$filename]['process']) && empty($file[$filename]['class'])) {
+                $this->helper->printMessage(
+                    "File " .$filename .
+                    " does not include the correct processing instructions - skipped",
+                    "error"
+                );
+                return false;
+            }
+            if (empty($file[$filename]['label'])) {
+                $file[$filename]['label']='Processing '.$filename;
+            }
+            return ['filename'=>$filename,'process'=>$file[$filename]['process'],
+            'class'=>$file[$filename]['class'],'label'=>$file[$filename]['label']];
+        } else {
+                //get processing instructions based on default configuration information
+                $allFiles = $this->conf->getProcessConfiguration();
+            foreach ($allFiles as $key) {
+                if (key($key)==$file) {
+                    return ['filename'=>$file,'process'=>$key[$file]['process'],
+                    'class'=>$key[$file]['class'],'label'=>$key[$file]['label']];
+                }
+            }
+            $this->helper->printMessage(
+                "File " .$file .
+                " does not have processing instructions - skipped",
+                "error"
+            );
+            return false;
         }
     }
 
@@ -719,7 +349,7 @@ class Process
     private function getConfiguration(string $filePath, string $fixtureDirectory): array
     {
         $valid = false;
-        $this->settings = self::SETTINGS;
+        $this->settings = Conf::SETTINGS;
         $setupArray=$this->settings;
         $setupFile = $filePath . $fixtureDirectory . "/settings.csv";
         // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
@@ -750,7 +380,7 @@ class Process
         $b2bData = [];
         $stopFlag = 0;
         //do we have all the files we need
-        foreach (self::B2B_REQUIRED_FILES as $nextFile) {
+        foreach (Conf::B2B_REQUIRED_FILES as $nextFile) {
             $fileName = $filePath . $fixtureDirectory . "/" . $nextFile;
             // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
             if (basename($fileName)==$nextFile && file_exists($fileName)) {

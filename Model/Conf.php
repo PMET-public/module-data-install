@@ -338,12 +338,12 @@ class Conf
             'label'=>'Loading Customer Segments']],
             ['products.csv'=>['process'=>'file','class'=>$this->productInstall,
             'label'=>'Loading Products']],
-            ['msi_source.csv'=>['process'=>'rows','class'=>$this->msiSourceInstall,
-            'label'=>'Loading MSI Source']],
-            ['msi_stock.csv'=>['process'=>'rows','class'=>$this->msiStockInstall,
-            'label'=>'Loading MSI Stock']],
-            ['msi_inventory.csv'=>['process'=>'file','class'=>$this->upsellsInstall,
-            'label'=>'Loading MSI Inventory']],
+            //['msi_source.csv'=>['process'=>'rows','class'=>$this->msiSourceInstall,
+            //'label'=>'Loading MSI Source']],
+            //['msi_stock.csv'=>['process'=>'rows','class'=>$this->msiStockInstall,
+            //'label'=>'Loading MSI Stock']],
+            //['msi_inventory.csv'=>['process'=>'file','class'=>$this->msiInventoryInstall,
+            //'label'=>'Loading MSI Inventory']],
             ['upsells.csv'=>['process'=>'rows','class'=>$this->upsellsInstall,
             'label'=>'Loading Upsells']],
             ['blocks.csv'=>['process'=>'rows','class'=>$this->blockInstall,
@@ -373,9 +373,7 @@ class Conf
             ['advanced_pricing.csv'=>['process'=>'file','class'=>$this->advancedPricingInstall,
             'label'=>'Loading Advanced Pricing']],
             ['orders.csv'=>['process'=>'rows','class'=>$this->ordersInstall,
-            'label'=>'Loading Orders']],
-            ['subscriptions.csv'=>['process'=>'file','class'=>$this->subscriptionInstall,
-            'label'=>'Loading Subscriptions']]
+            'label'=>'Loading Orders']]
         ];
     }
 }

@@ -136,10 +136,18 @@ class CartRules
         }
         $rule->loadPost($row);
 
+        //set for amasty, should be done with plugin in amasty module
+        $attributes = $rule->getExtensionAttributes();
+        $attributes['limit'] = 0;
+        $attributes['count'] = 0;
+        $rule->setExtensionAttributes($attributes);
+
         $this->appState->emulateAreaCode(
             AppArea::AREA_ADMINHTML,
             [$rule, 'save']
         );
+
+        return true;
     }
     /**
      * @param string $ruleName

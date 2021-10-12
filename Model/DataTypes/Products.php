@@ -127,7 +127,7 @@ class Products
             );
         }
         $productsArray = $this->replaceBaseWebsiteCodes($productsArray, $settings);
-        $this->helper->printMessage("Importing new products", "info");
+        $this->helper->printMessage("Importing products", "info");
         
         $this->import($productsArray, $imgDir, $productValidationStrategy);
 

@@ -144,8 +144,7 @@ class Process
         $this->helper->printMessage("Copying Media", "info");
         $this->copyMedia->moveFiles($filePath);
         $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
-        //$fileOrder = $this->conf->getProcessConfiguration();
-        //$fileOrder = ['doh.csv'];
+
         foreach ($fileOrder as $nextFile) {
             //get processing instructions based on filename
             //returns ['filename','process','class','label'];

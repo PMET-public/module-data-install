@@ -246,8 +246,8 @@ class Stores
         //load site from the code.
         /** @var WebsiteInterface $website */
         $website = $this->getWebsite($data);
-        //no name,sort order, or default update - we can skip
-        if (!empty($data['site_name']) || !empty($data['site_order']) || !empty($data['is_default_site'])) {
+        //no name,sort order  update - we can skip
+        if (!empty($data['site_name']) || !empty($data['site_order'])) {
             $this->helper->printMessage($data['site_code'] . " eligible for add or update", "info");
 
             //if the site exists - update
@@ -261,10 +261,6 @@ class Stores
                     $website->setSortOrder($data['site_order']);
                 }
 
-                if (!empty($data['is_default_site'])) {
-                    $website->setIsDefault($data['is_default_site']);
-                }
-
                 $this->websiteResourceModel->save($website);
                 return $website;
             } elseif (!empty($data['site_name'])) {
@@ -274,10 +270,6 @@ class Stores
                 $website->setName($data['site_name']);
                 if (!empty($data['site_order'])) {
                     $website->setSortOrder($data['site_order']);
-                }
-
-                if (!empty($data['is_default_site'])) {
-                    $website->setIsDefault($data['is_default_site']);
                 }
 
                 $this->websiteResourceModel->save($website);

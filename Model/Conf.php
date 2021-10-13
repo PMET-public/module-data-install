@@ -1,8 +1,6 @@
 <?php
 namespace MagentoEse\DataInstall\Model;
 
-use MagentoEse\SubscriptionInstall\Model\DataTypes\Subscriptions;
-
 class Conf
 {
      /** @var DataTypes\Stores  */
@@ -118,9 +116,6 @@ class Conf
 
     /** @var Datatypes\Teams */
     protected $companyTeamsInstall;
-
-    /** @var Subscriptions $subscriptions */
-    protected $subscriptions;
 
     const ALL_FILES = ['stores.csv',
     'config_default.json',
@@ -253,8 +248,7 @@ class Conf
         DataTypes\Reviews $reviews,
         DataTypes\Teams $teams,
         DataTypes\Templates $templates,
-        DataTypes\Upsells $upsells,
-        Subscriptions $subscriptions
+        DataTypes\Upsells $upsells
     ) {
         $this->storeInstall = $stores;
         $this->productAttributesInstall = $productAttributes;
@@ -290,7 +284,6 @@ class Conf
         $this->sharedCatalogsInstall = $sharedCatalogs;
         $this->sharedCatalogCategoriesInstall = $sharedCatalogCategories;
         $this->companyTeamsInstall = $teams;
-        $this->subscriptionInstall = $subscriptions;
     }
 
     public function getProcessConfiguration()
@@ -338,12 +331,12 @@ class Conf
             'label'=>'Loading Customer Segments']],
             ['products.csv'=>['process'=>'file','class'=>$this->productInstall,
             'label'=>'Loading Products']],
-            //['msi_source.csv'=>['process'=>'rows','class'=>$this->msiSourceInstall,
-            //'label'=>'Loading MSI Source']],
-            //['msi_stock.csv'=>['process'=>'rows','class'=>$this->msiStockInstall,
-            //'label'=>'Loading MSI Stock']],
-            //['msi_inventory.csv'=>['process'=>'file','class'=>$this->msiInventoryInstall,
-            //'label'=>'Loading MSI Inventory']],
+            ['msi_source.csv'=>['process'=>'rows','class'=>$this->msiSourceInstall,
+            'label'=>'Loading MSI Source']],
+            ['msi_stock.csv'=>['process'=>'rows','class'=>$this->msiStockInstall,
+            'label'=>'Loading MSI Stock']],
+            ['msi_inventory.csv'=>['process'=>'file','class'=>$this->msiInventoryInstall,
+            'label'=>'Loading MSI Inventory']],
             ['upsells.csv'=>['process'=>'rows','class'=>$this->upsellsInstall,
             'label'=>'Loading Upsells']],
             ['blocks.csv'=>['process'=>'rows','class'=>$this->blockInstall,

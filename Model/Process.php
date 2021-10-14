@@ -93,7 +93,7 @@ class Process
      * @throws LocalizedException
      * @throws FileSystemException
      */
-    public function loadFiles($fileSource, $load, array $fileOrder, $reload = 0)
+    public function loadFiles($fileSource, $load='', array $fileOrder=[], $reload = 0)
     {
         $fixtureDirectory = "data";
         //bypass if data is already installed

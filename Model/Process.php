@@ -184,7 +184,7 @@ class Process
                     if ($fileInfo['process']=='file') {
                         $this->processFile($rows, $header, $fileInfo['class'], $modulePath);
                     } elseif ($fileInfo['process']=='json') {
-                        $this->processJson($rows, $header, $fileInfo['class']);
+                        $this->processJson($fileContent, $fileInfo['class']);
                     } else {
                         $this->processRows($rows, $header, $fileInfo['class']);
                     }

@@ -128,13 +128,11 @@ class Companies
         $newCompany = $this->getCompanyByName($row['company_name']);
         //create company
         if (!$newCompany) {
-
             $newCompany = $this->appState->emulateAreaCode(
                 'frontend',
                 [$this->companyCustomer, 'createCompany'],
                 [$adminCustomer, $row]
             );
-
 
             //$newCompany = $this->companyCustomer->createCompany($adminCustomer, $row);
         }

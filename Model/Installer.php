@@ -9,7 +9,7 @@ use MagentoEse\DataInstall\Api\Data\InstallerInterface;
 
 class Installer extends AbstractExtensibleModel implements InstallerInterface
 {
-
+    //phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
     protected function _construct()
     {
         $this->_init(ResourceModel\Installer::class);

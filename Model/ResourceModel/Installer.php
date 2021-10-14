@@ -13,6 +13,7 @@ class Installer extends AbstractDb
      *
      * @return void
      */
+    // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
     protected function _construct()
     {
         $this->_init('magentoese_data_installer_recurring', 'id');

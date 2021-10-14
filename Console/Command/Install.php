@@ -61,7 +61,12 @@ class Install extends Command
                 'Module name or path to datapack'
             ),
             new InputOption(self::LOAD, null, InputOption::VALUE_OPTIONAL, 'Data directory to load', ''),
-            new InputOption(self::FILES, null, InputOption::VALUE_OPTIONAL, 'Comma delimited list of individual files to load'),
+            new InputOption(
+                self::FILES,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Comma delimited list of individual files to load'
+            ),
             new InputOption(self::RELOAD_FLAG, '-r', InputOption::VALUE_OPTIONAL, 'Force Reload', 0)
         ];
 
@@ -91,7 +96,8 @@ class Install extends Command
         }
         $process = $this->objectManagerInterface->create(Process::class);
         if ($process->loadFiles($module, $load, $fileArray, $reload)==0) {
-            $output->writeln("No files found to load in " . $module." Check the your value of --load if used, or the default set in the datapack");
+            $output->writeln("No files found to load in " . $module.
+            " Check the your value of --load if used, or the default set in the datapack");
         }
         return $this;
     }

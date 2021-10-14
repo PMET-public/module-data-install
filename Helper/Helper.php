@@ -3,7 +3,7 @@
  * Copyright © Adobe  All rights reserved.
  */
 declare(strict_types=1);
-
+// phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
 namespace MagentoEse\DataInstall\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
@@ -94,7 +94,7 @@ class Helper extends AbstractHelper
         $indexes = $this->indexCollection->getAllIds();
         foreach ($indexes as $index) {
             $indexFactory = $this->indexFactory->create()->load($index);
-            print_r($index."\n");
+            $this->printMessage($index, "info");
             if ($index!='catalogrule_rule') {
                 $indexFactory->reindexRow($index);
             }
@@ -133,6 +133,7 @@ class Helper extends AbstractHelper
      */
     public function printMessage($string, $foreground_color = null, $background_color = null)
     {
+        // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
         print_r($this->getColoredString($string, $foreground_color, $background_color)."\n");
         $foreground_color = ($foreground_color='header')?'info':$foreground_color;
         $this->logger->$foreground_color($string);
@@ -161,7 +162,6 @@ class Helper extends AbstractHelper
             case "header":
                 $foreground_color = "light_cyan";
                 break;
-
         }
         // Check if given foreground color found
         if (isset($this->foreground_colors[$foreground_color])) {
@@ -193,35 +193,5 @@ class Helper extends AbstractHelper
     public function getBackgroundColors()
     {
         return array_keys($this->background_colors);
-    }
-
-    /**
-     * @return string
-     */
-    public function getModuleName()
-    {
-        $temp = explode("\\", $this->getCallingClass());
-        return $temp[0]."_".$temp[1];
-    }
-
-    /**
-     * @return mixed
-     */
-    private function getCallingClass()
-    {
-        //get the trace
-        $trace = debug_backtrace();
-
-        // Get the class that is asking for who awoke it
-        $class = $trace[1]['class'];
-
-        // +1 to i cos we have to account for calling this function
-        for ($i=1; $i<count($trace); $i++) {
-            if (isset($trace[$i])) { // is it set?
-                if ($class != $trace[$i]['class']) { // is it a different class
-                    return $trace[$i]['class'];
-                }
-            }
-        }
     }
 }

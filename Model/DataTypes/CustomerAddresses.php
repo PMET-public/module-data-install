@@ -59,16 +59,16 @@ class CustomerAddresses
             $customerArray[] = array_combine($header, $row);
         }
         $cleanCustomerArray = $this->cleanDataForImport($customerArray);
-        $this->import($cleanCustomerArray,$productValidationStrategy,'customer_address');
+        $this->import($cleanCustomerArray, $productValidationStrategy, 'customer_address');
         
         return true;
     }
 
-    private function cleanDataForImport($customerArray){
+    private function cleanDataForImport($customerArray)
+    {
         
         $newCustomerArray=[];
-        foreach($customerArray as $customer){
-            
+        foreach ($customerArray as $customer) {
             //change website column if incorrect
             if (!empty($customer['site_code'])) {
                 $customer['_website']=$this->stores->replaceBaseWebsiteCode($customer['site_code']);
@@ -79,15 +79,14 @@ class CustomerAddresses
                 unset($customer['website']);
             }
 
-            if(empty($customer['_website'])){
+            if (empty($customer['_website'])) {
                 $customer['_website']=$this->settings['site_code'];
             }
             //_entity_id is a required column, but if its populated it may cause unexpected errors.
             $customer['_entity_id'] = '';
-           
-            
+                      
             //remove columns used for other purposes, but throw errors on import
-            foreach($this->importUnsafeColumns as $column){
+            foreach ($this->importUnsafeColumns as $column) {
                 unset($customer[$column]);
             }
             $newCustomerArray[]=$customer;
@@ -95,7 +94,7 @@ class CustomerAddresses
         return $newCustomerArray;
     }
 
-    private function import($customerArray, $productValidationStrategy,$importMethod)
+    private function import($customerArray, $productValidationStrategy, $importMethod)
     {
         $importerModel = $this->importer->create();
         $importerModel->setEntityCode($importMethod);
@@ -116,6 +115,4 @@ class CustomerAddresses
 
         unset($importerModel);
     }
-
-    
 }

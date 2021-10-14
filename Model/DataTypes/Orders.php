@@ -52,10 +52,8 @@ class Orders
     /** @var Registry */
     protected $coreRegistry;
 
-
     /** @var ObjectManagerInterface  */
     protected $objectManager;
-
 
     public function __construct(
         Helper $helper,
@@ -100,7 +98,8 @@ class Orders
         /** @var CustomerInterface $customer */
         $customer = $this->customerRepository->get($row['customer_email'], 1);
         if (!$customer->getId()) {
-            $this->helper->printMessage("customer_email ".$row['customer_email']." was not found in orders.csv. Row is skipped", "warning");
+            $this->helper->printMessage("customer_email ".$row['customer_email'].
+            " was not found in orders.csv. Row is skipped", "warning");
             return true;
         }
         $this->createOrder($row, $customer);
@@ -115,7 +114,7 @@ class Orders
         $this->currentSession->setCustomerId($customer->getId());
         $orderCreateModel = $this->processQuote($row, $customer);
         $orderCreateModel->getQuote()->setCustomer($customer);
-        //$orderCreateModel->setShippingMethod();
+        //TBD $orderCreateModel->setShippingMethod();
         $order = $orderCreateModel->createOrder();
         $orderItem = $this->getOrderItemForTransaction($order);
         $this->invoiceOrder($orderItem);
@@ -133,7 +132,6 @@ class Orders
         $this->currentSession->unsQuoteId();
         $this->currentSession->unsStoreId();
         $this->currentSession->unsCustomerId();
-        //$r=$tt;
     }
 
     /**
@@ -153,10 +151,10 @@ class Orders
             ['quoteSession' => $this->currentSession]
         );
         $orderCreateModel->importPostData($row)->initRuleData();
-        //$orderCreateModel->setBillingAddress($this->getBillingAddress($customer));
+        //TBD $orderCreateModel->setBillingAddress($this->getBillingAddress($customer));
         //$orderCreateModel->setShippingAddress([$this->getShippingAddress($customer)]);
 
-        //$orderCreateModel->importPostData($data['order'])->initRuleData();
+        //tbd:$orderCreateModel->importPostData($data['order'])->initRuleData();
         $orderCreateModel->getBillingAddress();
         //TODO: REPLACE THIS
         $orderCreateModel->setShippingAsBilling(1);
@@ -165,7 +163,9 @@ class Orders
         $orderCreateModel->getQuote()->getShippingAddress()->setShippingMethod($row['shipping_method']);
         $orderCreateModel->getQuote()->setTotalsCollectedFlag(false);
         $orderCreateModel->collectShippingRates();
-        $orderCreateModel->getQuote()->getPayment()->addData(['method'=>$row['payment']])->setQuote($orderCreateModel->getQuote());
+        $orderCreateModel->getQuote()->getPayment()->addData(
+            ['method'=>$row['payment']]
+        )->setQuote($orderCreateModel->getQuote());
         return $orderCreateModel;
     }
 
@@ -250,6 +250,7 @@ class Orders
         if (!$order) {
             return false;
         }
+        // phpcs:ignore Magento2.PHP.LiteralNamespaces.LiteralClassUsage
         $invoiceManagement = $this->objectManager->create('Magento\Sales\Model\Service\InvoiceService');
         $invoice = $this->invoiceManagement->prepareInvoice($order, $invoiceData);
         return $invoice;

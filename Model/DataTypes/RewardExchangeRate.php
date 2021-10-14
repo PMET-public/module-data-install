@@ -43,8 +43,7 @@ class RewardExchangeRate
         RateModelFactory $rateModel,
         RateResourceModel $rateResourceModel,
         CollectionFactory $collectionFactory
-    ) 
-    {
+    ) {
         $this->customerGroups = $customerGroups;
         $this->stores = $stores;
         $this->helper = $helper;
@@ -58,52 +57,56 @@ class RewardExchangeRate
         //required points and currency_amount
         //direction 1 = points to currency
         //direction 2 = currency to points
-        if (empty($row['points'])){
-            $this->helper->printMessage("A value for points is required for a reward exchange rate. Row has been skipped.","warning");
+        if (empty($row['points'])) {
+            $this->helper->printMessage("A value for points is required for a reward exchange rate. ".
+            "Row has been skipped.", "warning");
             return true;
         }
 
-        if (empty($row['currency_amount'])){
-            $this->helper->printMessage("A value for currency_amount is required for a reward exchange rate. Row has been skipped.","warning");
+        if (empty($row['currency_amount'])) {
+            $this->helper->printMessage("A value for currency_amount is required for a reward exchange rate. ".
+            "Row has been skipped.", "warning");
             return true;
         }
 
-        if (empty($row['direction'])||($row['direction'] != 'points_to_currency' && $row['direction'] != 'currency_to_points')){
-            $this->helper->printMessage("A direction of either points_to_currency or currency_to_points is required for a reward exchange rate. Row has been skipped.","warning");
+        if (empty($row['direction']) || ($row['direction'] != 'points_to_currency' && $row['direction']
+        != 'currency_to_points')) {
+            $this->helper->printMessage("A direction of either points_to_currency or currency_to_points is required ".
+            "for a reward exchange rate. Row has been skipped.", "warning");
             return true;
         }
 
         //if websites not defined, use default
-        if(empty($row['site_code'])){
+        if (empty($row['site_code'])) {
             $row['site_code'] = $settings['site_code'];
         }
         $websiteId = $this->stores->getWebsiteId(trim($row['site_code']));
 
-        if(empty($row['customer_group'])||$row['customer_group']==''||$row['customer_group']=='all'){
+        if (empty($row['customer_group']) || $row['customer_group']=='' || $row['customer_group']=='all') {
             $groupId =0;
-        }else{
+        } else {
             $groupId = $this->customerGroups->getCustomerGroupId(trim($row['customer_group']));
         }
 
-        $direction = $row['direction'] == 'points_to_currency' ? Rate::RATE_EXCHANGE_DIRECTION_TO_CURRENCY:Rate::RATE_EXCHANGE_DIRECTION_TO_POINTS;
+        $direction = $row['direction'] == 'points_to_currency' ?
+        Rate::RATE_EXCHANGE_DIRECTION_TO_CURRENCY:Rate::RATE_EXCHANGE_DIRECTION_TO_POINTS;
                 //WEBSITE_ID_CUSTOMER_GROUP_ID_DIRECTION
         /** @var RateModel $rateModel */
         $rate = $this->collectionFactory->create()
         ->addFieldToFilter('website_id', ['eq' => $websiteId])
         ->addFieldToFilter('customer_group_id', ['eq' => $groupId])
         ->addFieldToFilter('direction', ['eq' => $direction])->getFirstItem();
-        if(!$rate){
+        if (!$rate) {
             $rate = $this->rateModel->create();
         }
-        
-       
+               
         $rate->setWebsiteId($websiteId);
         $rate->setCustomerGroupId($groupId);
         $rate->setDirection($direction);
         if ($row['direction'] == 'points_to_currency') {
             $rate->setValue($row['points']);
             $rate->setEqualValue($row['currency_amount']);
-        }else{
+        } else {
             $rate->setValue($row['currency_amount']);
             $rate->setEqualValue($row['points']);
         }
@@ -115,6 +118,5 @@ class RewardExchangeRate
         //}
 
         return true;
-
-    } 
+    }
 }

@@ -82,8 +82,6 @@ class Products
      */
     public function install(array $rows, array $header, string $modulePath, array $settings)
     {
-        
-        
         if (!empty($settings['product_image_import_directory'])) {
             $imgDir = $settings['product_image_import_directory'];
         } else {
@@ -91,8 +89,12 @@ class Products
         }
         //check to see if the image directory exists.  If not, set it to safe default
         //this will catch the case of updating products, but not needing to include image files
-        if(!$this->directoryRead->isDirectory($imgDir)){
-            $this->helper->printMessage("The directory or product images ".$imgDir." does not exist. This may cause an issue with your product import if you are expecting to include product images", "warning");
+        if (!$this->directoryRead->isDirectory($imgDir)) {
+            $this->helper->printMessage(
+                "The directory or product images ".$imgDir." does not exist. ".
+                "This may cause an issue with your product import if you are expecting to include product images",
+                "warning"
+            );
             $imgDir = self::APP_DEFAULT_IMAGE_PATH;
         }
 
@@ -119,10 +121,13 @@ class Products
             $restrictExistingProducts = $this->restrictExistingProducts($productsArray, $settings['store_view_code']);
 
             //Restrict new (not updated) products to views that arent in my store
-            $restrictNewProducts = $this->restrictNewProductsFromOtherStoreViews($productsArray, $settings['store_view_code']);
+            $restrictNewProducts = $this->restrictNewProductsFromOtherStoreViews(
+                $productsArray,
+                $settings['store_view_code']
+            );
         }
-        $productsArray = $this->replaceBaseWebsiteCodes($productsArray,$settings);
-        $this->helper->printMessage("Importing new products", "info");
+        $productsArray = $this->replaceBaseWebsiteCodes($productsArray, $settings);
+        $this->helper->printMessage("Importing products", "info");
         
         $this->import($productsArray, $imgDir, $productValidationStrategy);
 
@@ -131,15 +136,16 @@ class Products
             $this->helper->printMessage("Restricting products from other store views", "info");
 
             if (count($restrictExistingProducts) > 0) {
-                 $this->helper->printMessage("Restricting ".count($restrictExistingProducts)." products from new store view", "info");
+                 $this->helper->printMessage("Restricting ".count($restrictExistingProducts).
+                 " products from new store view", "info");
                 $this->import($restrictExistingProducts, $imgDir, $productValidationStrategy);
             }
 
             if (count($restrictNewProducts) > 0) {
-                $this->helper->printMessage("Restricting ".count($restrictNewProducts)." new products from existing store views", "info");
+                $this->helper->printMessage("Restricting ".count($restrictNewProducts).
+                " new products from existing store views", "info");
                 $this->import($restrictNewProducts, $imgDir, $productValidationStrategy);
             }
-
         }
     }
 
@@ -181,7 +187,6 @@ class Products
                 [$importerModel, 'processImport'],
                 [$productsArray]
             );
-            //$importerModel->processImport($productsArray);
         } catch (\Exception $e) {
             $this->helper->printMessage($e->getMessage());
         }
@@ -204,7 +209,8 @@ class Products
         $products = array_diff($allProductSkus, $productsToAdd);
         $newProductArray = [];
         foreach ($products as $product) {
-            $newProductArray[] = ['sku'=>$product,'store_view_code'=>$storeViewCode,'visibility'=>'Not Visible Individually'];
+            $newProductArray[] = ['sku'=>$product,'store_view_code'=>$storeViewCode,
+            'visibility'=>'Not Visible Individually'];
         }
         return $newProductArray;
     }
@@ -226,11 +232,11 @@ class Products
 
         //$allStoreCodes = $this->stores->getAllViews();
         foreach ($uniqueNewProductSkus as $product) {
-
                 //add restrictive line for each
             foreach ($allStoreCodes as $storeCode) {
                 if ($storeCode != $storeViewCode) {
-                    $restrictedProducts[] = ['sku'=>$product,'store_view_code'=>$storeCode,'visibility'=>'Not Visible Individually'];
+                    $restrictedProducts[] = ['sku'=>$product,'store_view_code'=>$storeCode,
+                    'visibility'=>'Not Visible Individually'];
                 }
             }
         }
@@ -329,23 +335,25 @@ class Products
      * @param array $settings
      * @return array
      */
-    private function replaceBaseWebsiteCodes($products,$settings){
+    private function replaceBaseWebsiteCodes($products, $settings)
+    {
         $i=0;
         foreach ($products as $product) {
             //product_websites
-            if (!empty($product['product_websites'])){
+            if (!empty($product['product_websites'])) {
                 ///value may be a comma delimited list e.g. notbase,test
-                $websiteArray = explode(",",$product['product_websites']);
-                if(is_int(array_search('base',$websiteArray))){
-                    $websiteArray[array_search('base',$websiteArray)]=$this->stores->replaceBaseWebsiteCode('base');
-                    $product['product_websites'] = implode(",",$websiteArray);
+                $websiteArray = explode(",", $product['product_websites']);
+                // phpcs:ignore Magento2.PHP.ReturnValueCheck.ImproperValueTesting
+                if (is_int(array_search('base', $websiteArray))) {
+                    // phpcs:ignore Magento2.PHP.ReturnValueCheck.ImproperValueTesting
+                    $websiteArray[array_search('base', $websiteArray)]=$this->stores->replaceBaseWebsiteCode('base');
+                    $product['product_websites'] = implode(",", $websiteArray);
                 }
-            } 
+            }
             
             $products[$i] = $product;
             $i++;
         }
         return $products;
     }
-   
 }

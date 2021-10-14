@@ -58,7 +58,7 @@ class SharedCatalogCategories
      * @param CatalogPermissionManagement $catalogPermissionManagement
      * @param ScheduleBulk $scheduleBulk
      */
-     public function __construct(
+    public function __construct(
         SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         CategoryManagementInterface $categoryManagementInterface,
@@ -114,14 +114,16 @@ class SharedCatalogCategories
                 ///this returns category ids, it should be categories.
                 // get an instance of CategoryCollection
                 $catIds = $this->categoryManagementInterface->getCategories($catalogId);
-                if(count($catIds) > 0){
+                if (count($catIds) > 0) {
                     $categories = $this->categoryCollection->create();
                     
                     // add a filter to get the IDs you need
-                    $categories->addFieldToFilter('entity_id', $this->categoryManagementInterface->getCategories($catalogId));
-                    //$r=$this->categoryManagementInterface->getCategories($catalogId);
-                    $catlist=[];
-                    foreach($categories as $cat){
+                    $categories->addFieldToFilter(
+                        'entity_id',
+                        $this->categoryManagementInterface->getCategories($catalogId)
+                    );
+                     $catlist=[];
+                    foreach ($categories as $cat) {
                         $catlist[] = $cat;
                     }
                     $this->appState->emulateAreaCode(
@@ -129,10 +131,8 @@ class SharedCatalogCategories
                         [$this->categoryManagementInterface, 'unassignCategories'],
                         [$catalogId, $catlist]
                     );
-                    //$this->categoryManagementInterface->unassignCategories($catalogId, $catlist);
                 }
                 
-
                 //get ids of added categories by path
                 $newCategories = $this->getCategoriesByPath($categoryArray, $settings);
                 //add new categories
@@ -147,7 +147,10 @@ class SharedCatalogCategories
                 if ($catalogType == SharedCatalogInterface::TYPE_PUBLIC) {
                     $groupIds[]=0;
                 }
-                $this->catalogPermissionManagement->setDenyPermissions(array_diff($allCategoryIds, $catgoryIds), $groupIds);
+                $this->catalogPermissionManagement->setDenyPermissions(
+                    array_diff($allCategoryIds, $catgoryIds),
+                    $groupIds
+                );
                 $this->scheduleBulk->execute($allCategoryIds, $groupIds);
             }
         }
@@ -174,7 +177,11 @@ class SharedCatalogCategories
     private function getSharedCatalogByName($sharedCatalogName)
     {
         $catalogSearch = $this->searchCriteriaBuilder
-        ->addFilter(SharedCatalogInterface::NAME, $sharedCatalogName, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        ->addFilter(
+            SharedCatalogInterface::NAME,
+            $sharedCatalogName,
+            'eq'
+        )->create()->setPageSize(1)->setCurrentPage(1);
         $catalogList = $this->sharedCatalogRepository->getList($catalogSearch);
         return current($catalogList->getItems());
     }

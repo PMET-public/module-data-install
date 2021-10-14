@@ -74,6 +74,10 @@ class Upsells
      */
     public function install(array $row, array $settings)
     {
+        if (empty($row['apply_to'])) {
+            $this->helper->printMessage("Related Product Rule apply_to column is missing. Row skipped", "warning");
+            return true;
+        }
         switch (strtolower($row['apply_to'])) {
             case "upsell":
                 $applyTo = Rule::UP_SELLS;
@@ -88,16 +92,17 @@ class Upsells
                 break;
         }
         /** @var Rule $upsellModel */
-        if(empty($row['name'])){
+        if (empty($row['name'])) {
             $this->helper->printMessage("Related Product Rule missing a name. Row skipped", "warning");
+            return;
         }
-        if(empty($row['is_active'])){
+        if (empty($row['is_active'])) {
             $row['is_active'] == 'Y';
         }
                 
         $upsellModel = $this->ruleCollection->create()
             ->addFieldToFilter('name', ['eq' => $row['name']])->getFirstItem();
-        if(!$upsellModel){
+        if (!$upsellModel) {
             $upsellModel = $this->ruleFactory->create();
         }
         $upsellModel->setName($row['name']);

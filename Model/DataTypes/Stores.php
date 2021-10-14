@@ -102,7 +102,6 @@ class Stores
     /** @var ScopeConfigInterface */
     protected $scopeConfig;
 
-
     /**
      * Stores constructor.
      * @param Helper $helper
@@ -194,7 +193,7 @@ class Stores
             $website = $this->setSite($data);
             //if there is a host value, set base urls
             if (!empty($data['host'])) {
-                switch($data['host']){
+                switch ($data['host']) {
                     case 'subdirectory':
                         $this->setBaseUrls($this->getBaseUrlHost()."/".$data['site_code'], $website->getId());
                         $this->setMediaUrls($this->getBaseUrlHost()."/", $website->getId());
@@ -202,8 +201,8 @@ class Stores
                     case 'subdomain':
                         $this->setBaseUrls($data['site_code'].".".$this->getBaseUrlHost(), $website->getId());
                         break;
-                    default :
-                      $this->setBaseUrls($data['host'], $website->getId());
+                    default:
+                        $this->setBaseUrls($data['host'], $website->getId());
                 }
             }
 
@@ -247,8 +246,8 @@ class Stores
         //load site from the code.
         /** @var WebsiteInterface $website */
         $website = $this->getWebsite($data);
-        //no name,sort order, or default update - we can skip
-        if (!empty($data['site_name']) || !empty($data['site_order']) || !empty($data['is_default_site'])) {
+        //no name,sort order  update - we can skip
+        if (!empty($data['site_name']) || !empty($data['site_order'])) {
             $this->helper->printMessage($data['site_code'] . " eligible for add or update", "info");
 
             //if the site exists - update
@@ -262,10 +261,6 @@ class Stores
                     $website->setSortOrder($data['site_order']);
                 }
 
-                if (!empty($data['is_default_site'])) {
-                    $website->setIsDefault($data['is_default_site']);
-                }
-
                 $this->websiteResourceModel->save($website);
                 return $website;
             } elseif (!empty($data['site_name'])) {
@@ -277,15 +272,14 @@ class Stores
                     $website->setSortOrder($data['site_order']);
                 }
 
-                if (!empty($data['is_default_site'])) {
-                    $website->setIsDefault($data['is_default_site']);
-                }
-
                 $this->websiteResourceModel->save($website);
                 return $website;
             } else {
                 //if the site doesnt exist and the name isn't provided, error out
-                $this->helper->printMessage("site_name column needs to be included with a value when creating a site", "error");
+                $this->helper->printMessage(
+                    "site_name column needs to be included with a value when creating a site",
+                    "error"
+                );
                 return null;
             }
         } else {
@@ -316,7 +310,6 @@ class Stores
             $rootCategoryId = $this->settings['root_category_id'];
             if (!empty($data['store_root_category'])) {
                 $rootCategoryId = $this->getRootCategoryByName($data);
-                //$this->helper->printMessage( "requested root cat=".$data['store_root_category']."Id=".$rootCategoryId."\n");
                 if (!$rootCategoryId) {
                     $rootCategoryId = $this->createRootCategory($data);
                     $this->helper->printMessage($data['store_root_category'] . " root category created", "info");
@@ -480,7 +473,10 @@ class Stores
                 $this->helper->printMessage($data['store_view_code'] . " view created", "info");
             } else {
                 //if the view doesnt exist and the view isn't provided, error out
-                $this->helper->printMessage("view_name needs to be included with a value when creating a view", "error");
+                $this->helper->printMessage(
+                    "view_name needs to be included with a value when creating a view",
+                    "error"
+                );
             }
         } else {
             $this->helper->printMessage($data['store_view_code'] . " skipping view add/update", "info");
@@ -504,7 +500,6 @@ class Stores
                 $page->setStoreId($storeId);
                 $rewrites[] = $this->cmsPageUrlRewriteGenerator->generate($page);
             }
-
         }
 
         $urls = array_merge($urls, ... $rewrites);
@@ -521,9 +516,8 @@ class Stores
         return  $this->websiteInterfaceFactory->create()->load($data['site_code']);
     }
 
-
     /**
-      * @return string
+     * @return string
      */
     public function getDefaultWebsiteCode()
     {
@@ -532,13 +526,13 @@ class Stores
     }
 
     /**
-      * @return string
-      * In the situations where the default website code may not be 'base'
-      * get the value of the default website code
+     * @return string
+     * In the situations where the default website code may not be 'base'
+     * get the value of the default website code
      */
     public function replaceBaseWebsiteCode($websiteCode)
     {
-        if($websiteCode=='base'){
+        if ($websiteCode=='base') {
             $websiteCode = $this->websiteRepository->getDefault()->getCode();
         }
         return $websiteCode;
@@ -654,25 +648,24 @@ class Stores
         return  $view->getId();
     }
 
-
      /**
-     * @param string $viewCode
-     * @return string
-     */
+      * @param string $viewCode
+      * @return string
+      */
     public function getViewIdsFromCodeList(string $viewCodes)
     {
         $returnList=[];
-        $allCodes = explode(",",$viewCodes);
-        foreach($allCodes as $code){
+        $allCodes = explode(",", $viewCodes);
+        foreach ($allCodes as $code) {
             $returnList[]=$this->getViewId(trim($code));
         }
-        return implode(",",$returnList);
+        return implode(",", $returnList);
     }
 
      /**
-     * @param string $viewCode
-     * @return int
-     */
+      * @param string $viewCode
+      * @return int
+      */
     public function getViewName(string $viewCode)
     {
         $data = ['store_view_code'=>$viewCode];
@@ -755,10 +748,30 @@ class Stores
      */
     private function setMediaUrls(string $host, int $websiteId): void
     {
-        $this->configuration->saveConfig('web/unsecure/base_static_url', 'http://' . $host . 'static/', 'websites', $websiteId);
-        $this->configuration->saveConfig('web/secure/base_static_url', 'https://' . $host . 'static/', 'websites', $websiteId);
-        $this->configuration->saveConfig('web/unsecure/base_media_url', 'http://' . $host . 'media/', 'websites', $websiteId);
-        $this->configuration->saveConfig('web/secure/base_media_url', 'https://' . $host . 'media/', 'websites', $websiteId);
+        $this->configuration->saveConfig(
+            'web/unsecure/base_static_url',
+            'http://' . $host . 'static/',
+            'websites',
+            $websiteId
+        );
+        $this->configuration->saveConfig(
+            'web/secure/base_static_url',
+            'https://' . $host . 'static/',
+            'websites',
+            $websiteId
+        );
+        $this->configuration->saveConfig(
+            'web/unsecure/base_media_url',
+            'http://' . $host . 'media/',
+            'websites',
+            $websiteId
+        );
+        $this->configuration->saveConfig(
+            'web/secure/base_media_url',
+            'https://' . $host . 'media/',
+            'websites',
+            $websiteId
+        );
     }
 
     /**
@@ -766,7 +779,9 @@ class Stores
      */
     private function getBaseUrlHost(): string
     {
-        $baseUrl = $this->scopeConfig->getValue('web/unsecure/base_url','default',0);
+        $baseUrl = $this->scopeConfig->getValue('web/unsecure/base_url', 'default', 0);
+        //parse_url is used frequently in core
+        // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
         return parse_url($baseUrl, PHP_URL_HOST);
     }
 

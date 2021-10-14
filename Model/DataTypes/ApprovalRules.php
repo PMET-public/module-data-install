@@ -157,7 +157,8 @@ class ApprovalRules
             $returnMessage.="Rule conditions have not been configured\n";
         }
 
-        if (!isset($ruleData['conditions']['attribute']) || !isset($ruleData['conditions']['operator']) || !isset($ruleData['conditions']['value'])) {
+        if (!isset($ruleData['conditions']['attribute']) || !isset($ruleData['conditions']['operator']) ||
+        !isset($ruleData['conditions']['value'])) {
             $returnMessage.="Required data is missing from a rule condition\n";
         }
 
@@ -208,7 +209,8 @@ class ApprovalRules
         if (empty($row['currency_code'])) {
             $row['currency_code']='USD';
         }
-        $row['conditions'] = ['attribute'=>$row['rule_type'],'operator'=>$row['rule'],'value'=>$row['amount_value'],'currency_code'=>$row['currency_code']];
+        $row['conditions'] = ['attribute'=>$row['rule_type'],'operator'=>$row['rule'],
+        'value'=>$row['amount_value'],'currency_code'=>$row['currency_code']];
         //convert approval_roles to list of roles
         $row['approval_roles'] = $this->convertRoleNamesToIds($row['company_id'], $row['approval_roles']);
 
@@ -252,7 +254,10 @@ class ApprovalRules
         $company = current($companyList->getItems());
 
         if (!$company) {
-            $this->helper->printMessage("The company ". $name ." requested in b2b_approval_rules.csv does not exist", "warning");
+            $this->helper->printMessage(
+                "The company ". $name ." requested in b2b_approval_rules.csv does not exist",
+                "warning"
+            );
         } else {
             return $company->getId();
         }
@@ -272,7 +277,10 @@ class ApprovalRules
         $company = current($companyList->getItems());
 
         if (!$company) {
-            $this->helper->printMessage("The company ". $name ." requested in b2b_approval_rules.csv does not exist", "warning");
+            $this->helper->printMessage(
+                "The company ". $name ." requested in b2b_approval_rules.csv does not exist",
+                "warning"
+            );
         } else {
             /**@var CompanyInterface $company */
             return $company->getSuperUserId();

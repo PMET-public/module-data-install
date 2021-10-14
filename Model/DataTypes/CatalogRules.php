@@ -17,7 +17,8 @@ use Magento\Banner\Model\ResourceModel\Banner\CollectionFactory as BannerCollect
 use Magento\Banner\Model\ResourceModel\BannerFactory;
 use MagentoEse\DataInstall\Helper\Helper;
 
-class CatalogRules {
+class CatalogRules
+{
 
     const SIMPLE_ACTIONS = ['by_percent','by_fixed','to_percent','to_fixed'];
 
@@ -68,10 +69,19 @@ class CatalogRules {
      * @param BannerFactory $bannerFactory
      * @param Helper $helper
      */
-    function __construct(RuleInterfaceFactory $ruleInterfaceFactory,
-        CatalogRuleRepositoryInterface $catalogRuleRepositoryInterface, GroupRepositoryInterface $groupRepositoryInterface,
-        State $appState, Stores $stores,Converter $converter,RuleCollection $ruleCollection,
-        CustomerGroups $customerGroups, BannerCollection $bannerCollection, BannerFactory $bannerFactory, Helper $helper){
+    public function __construct(
+        RuleInterfaceFactory $ruleInterfaceFactory,
+        CatalogRuleRepositoryInterface $catalogRuleRepositoryInterface,
+        GroupRepositoryInterface $groupRepositoryInterface,
+        State $appState,
+        Stores $stores,
+        Converter $converter,
+        RuleCollection $ruleCollection,
+        CustomerGroups $customerGroups,
+        BannerCollection $bannerCollection,
+        BannerFactory $bannerFactory,
+        Helper $helper
+    ) {
         $this->ruleRepository = $catalogRuleRepositoryInterface;
         $this->ruleInterfaceFactory = $ruleInterfaceFactory;
         $this->groupRepositoryInterface = $groupRepositoryInterface;
@@ -88,67 +98,74 @@ class CatalogRules {
     public function install(array $row, array $settings)
     {
         //if there is no name, reject it
-        if(empty($row['name'])) {
-            $this->helper->printMessage("A row in the Catalog Rules file does not have a value for name. Row is skipped", "warning");
+        if (empty($row['name'])) {
+            $this->helper->printMessage(
+                "A row in the Catalog Rules file does not have a value for name. Row is skipped",
+                "warning"
+            );
             return true;
         }
 
         //if discount_amount is non numeric, reject row
-        if(empty($row['discount_amount']) || !is_numeric($row['discount_amount'])) {
-            $this->helper->printMessage("A row in the Catalog Rules file does not have a valid value for discount_amount. Row is skipped", "warning");
+        if (empty($row['discount_amount']) || !is_numeric($row['discount_amount'])) {
+            $this->helper->printMessage(
+                "A row in the Catalog Rules file does not have a valid value for discount_amount. Row is skipped",
+                "warning"
+            );
             return true;
         }
         //if there is no simple_action, or if its invalid reject
-        if(empty($row['simple_action']) || !$this->validateSimpleAction($row['simple_action'])) {
-            $this->helper->printMessage("A row in the Catalog Rules file does not have a valid value for simple_action. Row is skipped", "warning");
+        if (empty($row['simple_action']) || !$this->validateSimpleAction($row['simple_action'])) {
+            $this->helper->printMessage(
+                "A row in the Catalog Rules file does not have a valid value for simple_action. Row is skipped",
+                "warning"
+            );
             return true;
         }
 
         //if there is no site_code, take the default
-        if(empty($row['site_code'])) {
+        if (empty($row['site_code'])) {
             $row['site_code'] = $settings['site_code'];
         }
         //convert site codes to ids, put in array
         $siteCodes = explode(",", $row['site_code']);
         $siteIds = [];
-        foreach($siteCodes as $siteCode){
+        foreach ($siteCodes as $siteCode) {
             $siteCode = $this->stores->replaceBaseWebsiteCode($siteCode);
             $siteId = $this->stores->getWebsiteId(trim($siteCode));
-            if($siteId){
+            if ($siteId) {
                 $siteIds[] = $siteId;
             }
-
         }
          //set status as active if not defined properly
          $row['is_active']??='Y';
          $row['is_active'] = 'Y' ? 1:0;
 
         //if no stop_rules_processing, default to N
-        if(empty($row['stop_rules_processing'])) {
+        if (empty($row['stop_rules_processing'])) {
             $row['stop_rules_processing']=0;
         }
-        if(!is_numeric($row['stop_rules_processing'])){
+        if (!is_numeric($row['stop_rules_processing'])) {
             $row['stop_rules_processing'] = $row['stop_rules_processing']=='Y' ? 1:0;
         }
 
          //if no sort_order, default to 0
-         if(empty($row['sort_order'])) {
+        if (empty($row['sort_order'])) {
             $row['sort_order']=0;
         }
 
         //if there is no customer_groups default to not logged in and general
-        if(empty($row['customer_groups'])) {
+        if (empty($row['customer_groups'])) {
             $row['customer_groups'] = 'NOT LOGGED IN,General';
         }
         //convert site codes to ids, put in array
         $groups = explode(",", $row['customer_groups']);
         $groupIds = [];
-        foreach($groups as $group){
+        foreach ($groups as $group) {
             $groupId = $this->customerGroups->getCustomerGroupId(trim($group));
-            if(is_numeric($groupId)){
+            if (is_numeric($groupId)) {
                 $groupIds[] = $groupId;
             }
-
         }
 
         //convert tags in conditions_serialized and actions_serialized
@@ -157,19 +174,28 @@ class CatalogRules {
         //check json format of serialized fields
         $jsonValidate = json_decode($row['conditions_serialized'], true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->helper->printMessage("A row in the Catalog Rules file has invalid Json data for conditions_serialized. Row is skipped", "warning");
+            $this->helper->printMessage(
+                "A row in the Catalog Rules file has invalid Json data for conditions_serialized. Row is skipped",
+                "warning"
+            );
             return true;
         }
 
         //get banner ids
         $banners =  $groups = explode(",", $row['dynamic_blocks']);
         $bannerIds = [];
-        foreach($banners as $banner){
-            $bannerToAdd = $this->bannerCollection->create()->addFieldToFilter('name', ['eq' => trim($banner)])->getFirstItem();
-            if($bannerToAdd->getId()){
+        foreach ($banners as $banner) {
+            $bannerToAdd = $this->bannerCollection->create()->addFieldToFilter(
+                'name',
+                ['eq' => trim($banner)]
+            )->getFirstItem();
+            if ($bannerToAdd->getId()) {
                 $bannerIds[] = $bannerToAdd->getId();
-            } else{
-                $this->helper->printMessage("Dynamic block ".$banner." for Catalog Rule ".$row['name']." does not exist", "warning");
+            } else {
+                $this->helper->printMessage(
+                    "Dynamic block ".$banner." for Catalog Rule ".$row['name']." does not exist",
+                    "warning"
+                );
             }
         }
 
@@ -177,7 +203,7 @@ class CatalogRules {
         /** @var RuleInterface $rule */
         $rule = $this->ruleCollection->create()->addFieldToFilter('name', ['eq' => $row['name']])->getFirstItem();
 
-        if(!$rule->getName()){
+        if (!$rule->getName()) {
             $rule = $this->ruleInterfaceFactory->create();
         }
 
@@ -195,10 +221,8 @@ class CatalogRules {
         $this->ruleRepository->save($rule);
 
         //add rule to banners
-        $this->bannerFactory->create()->bindBannersToCatalogRule($rule->getId(),$bannerIds);
-
+        $this->bannerFactory->create()->bindBannersToCatalogRule($rule->getId(), $bannerIds);
     }
-
 
     /**
      * validateSimpleAction
@@ -206,10 +230,11 @@ class CatalogRules {
      * @param  string $simpleAction
      * @return bool
      */
-    private function validateSimpleAction($simpleAction){
-        if(in_array($simpleAction,self::SIMPLE_ACTIONS)){
+    private function validateSimpleAction($simpleAction)
+    {
+        if (in_array($simpleAction, self::SIMPLE_ACTIONS)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }

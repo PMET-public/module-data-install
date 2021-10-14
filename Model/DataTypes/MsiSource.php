@@ -14,9 +14,6 @@ use Magento\InventoryApi\Api\SourceRepositoryInterface;
 use Magento\InventoryApi\Api\Data\SourceInterfaceFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
 
-
-
-
 class MsiSource
 {
     /** @var Helper */
@@ -51,9 +48,12 @@ class MsiSource
      * @param SourceInterfaceFactory $sourceInterfaceFactory
      */
     public function __construct(
-        Helper $helper, StockInterfaceFactory $stockInterfaceFactory, 
-        StockRepositoryInterface $stockRepositoryInterface, SearchCriteriaBuilder $searchCriteria,
-        Stores $stores, SourceRepositoryInterface $sourceRepository,
+        Helper $helper,
+        StockInterfaceFactory $stockInterfaceFactory,
+        StockRepositoryInterface $stockRepositoryInterface,
+        SearchCriteriaBuilder $searchCriteria,
+        Stores $stores,
+        SourceRepositoryInterface $sourceRepository,
         SourceInterfaceFactory $sourceInterfaceFactory
     ) {
         $this->helper = $helper;
@@ -63,8 +63,7 @@ class MsiSource
         $this->stores = $stores;
         $this->sourceRepository = $sourceRepository;
         $this->sourceInterfaceFactory = $sourceInterfaceFactory;
-
-     }
+    }
 
     /**
      * install
@@ -76,56 +75,84 @@ class MsiSource
      * @return void
      */
     public function install(array $row, array $settings)
-    {   
+    {
         //name, source_code,country, region, postcode required
         //If its a pickup location, phone, city, street are required
         if (empty($row['source_code'])) {
-            $this->helper->printMessage("A row in msi_source file does not have a value for source_code. Row is skipped", "warning");
+            $this->helper->printMessage(
+                "A row in msi_source file does not have a value for source_code. Row is skipped",
+                "warning"
+            );
             return true;
         }
         if (empty($row['name'])) {
-            $this->helper->printMessage($row['source_code']." in msi_source file does not have a value for name. Row is skipped", "warning");
+            $this->helper->printMessage(
+                $row['source_code']." in msi_source file does not have a value for name. Row is skipped",
+                "warning"
+            );
             return true;
         }
         if (empty($row['country_id'])) {
-            $this->helper->printMessage($row['source_code']." in msi_source file does not have a value for country_id. Row is skipped", "warning");
+            $this->helper->printMessage(
+                $row['source_code']." in msi_source file does not have a value for country_id. Row is skipped",
+                "warning"
+            );
             return true;
         }
         if (empty($row['region_id'])) {
-            $this->helper->printMessage($row['source_code']." in msi_source file does not have a value for region_id. Row is skipped", "warning");
+            $this->helper->printMessage(
+                $row['source_code']." in msi_source file does not have a value for region_id. Row is skipped",
+                "warning"
+            );
             return true;
         }
         if (empty($row['postcode'])) {
-            $this->helper->printMessage($row['source_code']." in msi_source file does not have a value for postcode. Row is skipped", "warning");
+            $this->helper->printMessage(
+                $row['source_code'].
+                " in msi_source file does not have a value for postcode. Row is skipped",
+                "warning"
+            );
             return true;
         }
-        if(empty($row['is_pickup_location_active'])){
+        if (empty($row['is_pickup_location_active'])) {
             $row['is_pickup_location_active']=0;
         }
-        if($row['is_pickup_location_active']==1){
+        if ($row['is_pickup_location_active']==1) {
             if (empty($row['city'])) {
-                $this->helper->printMessage("An msi source is flagged as a pickup location, but city is not defined. Row is skipped", "warning");
+                $this->helper->printMessage(
+                    "An msi source is flagged as a pickup location, but city is not defined. "."
+                Row is skipped",
+                    "warning"
+                );
                 return true;
             }
             if (empty($row['street'])) {
-                $this->helper->printMessage("An msi source is flagged as a pickup location, but street is not defined. Row is skipped", "warning");
+                $this->helper->printMessage(
+                    "An msi source is flagged as a pickup location, but street is not defined. "."
+                Row is skipped",
+                    "warning"
+                );
                 return true;
             }
             if (empty($row['phone'])) {
-                $this->helper->printMessage("An msi source is flagged as a pickup location, but phone is not defined. Row is skipped", "warning");
+                $this->helper->printMessage(
+                    "An msi source is flagged as a pickup location, but phone is not defined. "."
+                Row is skipped",
+                    "warning"
+                );
                 return true;
             }
         }
 
-        if(empty($row['enabled'])){
+        if (empty($row['enabled'])) {
             $row['enabled']=false;
-        }else{
+        } else {
             $row['enabled']=true;
         }
                 
-        try{
+        try {
             $source = $this->sourceRepository->get($row['source_code']);
-        }catch(NoSuchEntityException $e){
+        } catch (NoSuchEntityException $e) {
             $source = $this->sourceInterfaceFactory->create();
         }
         $source->setSourceCode($row['source_code']);
@@ -134,35 +161,34 @@ class MsiSource
         $source->setPostcode($row['postcode']);
         $source->setRegionId($row['region_id']);
         $source->setEnabled($row['enabled']);
-        if(!empty($row['description'])){
+        if (!empty($row['description'])) {
             $source->setDescription($row['description']);
         }
-        if(!empty($row['latitude'])){
+        if (!empty($row['latitude'])) {
             $source->setLatitude((float) $row['latitude']);
         }
-        if(!empty($row['longitude'])){
+        if (!empty($row['longitude'])) {
             $source->setLongitude((float) $row['longitude']);
         }
-        if(!empty($row['street'])){
+        if (!empty($row['street'])) {
             $source->setStreet($row['street']);
         }
-        if(!empty($row['city'])){
+        if (!empty($row['city'])) {
             $source->setCity($row['city']);
         }
-        if(!empty($row['contact_name'])){
+        if (!empty($row['contact_name'])) {
             $source->setContactName($row['contact_name']);
         }
-        if(!empty($row['email'])){
+        if (!empty($row['email'])) {
             $source->setEmail($row['email']);
         }
-        if(!empty($row['phone'])){
+        if (!empty($row['phone'])) {
             $source->setPhone($row['phone']);
         }
-        if(!empty($row['fax'])){
+        if (!empty($row['fax'])) {
             $source->setFax($row['fax']);
         }
-        
-
+  
         //add in store pickup attributes
         $extensionAttributes = $source->getExtensionAttributes();
         $extensionAttributes->setIsPickupLocationActive($row['is_pickup_location_active']);
@@ -171,8 +197,6 @@ class MsiSource
         $source->setExtensionAttributes($extensionAttributes);
         
         $this->sourceRepository->save($source);
-
-       
       
         return true;
     }

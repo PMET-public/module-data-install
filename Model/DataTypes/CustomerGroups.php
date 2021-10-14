@@ -51,7 +51,7 @@ class CustomerGroups
      */
     public function install(array $row)
     {
-        if(empty($row['name'])){
+        if (empty($row['name'])) {
             $this->helper->printMessage("Customer group missing name, row skipped", "warning");
             return true;
         }
@@ -62,7 +62,8 @@ class CustomerGroups
             $this->groupRepository->save($group);
         } catch (\Exception $e) {
             //error will likely be trying to add duplicate group
-            $this->helper->printMessage("Customer Group ".$row['name']." not installed, another group with the same name likely exists", "warning");
+            $this->helper->printMessage("
+            Customer Group ".$row['name']." not installed, another group with the same name likely exists", "warning");
         }
 
         return true;

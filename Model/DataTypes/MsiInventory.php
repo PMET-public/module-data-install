@@ -5,13 +5,13 @@
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
-use Magento\Framework\ObjectManagerInterface;
+use FireGento\FastSimpleImport\Model\ImporterFactory as Importer;
 use MagentoEse\DataInstall\Helper\Helper;
 
 class MsiInventory
 {
-    /** @var ObjectManagerInterface  */
-    protected $objectManager;
+    /** @var Importer */
+    protected $importer;
 
     /** @var Helper */
     protected $helper;
@@ -23,10 +23,10 @@ class MsiInventory
      */
     public function __construct(
         Helper $helper,
-        ObjectManagerInterface $objectManager
+        Importer $importer
     ) {
         $this->helper = $helper;
-        $this->objectManager=$objectManager;
+        $this->importer = $importer;
     }
 
     /**
@@ -43,9 +43,30 @@ class MsiInventory
         foreach ($rows as $row) {
             $productsArray[] = array_combine($header, $row);
         }
-        $importerModel = $this->objectManager->create('FireGento\FastSimpleImport\Model\Importer');
+        if (!empty($settings['product_validation_strategy'])) {
+            $productValidationStrategy = $settings['product_validation_strategy'];
+        } else {
+            $productValidationStrategy =  'validation-skip-errors';
+        }
+        $this->import($productsArray, $productValidationStrategy);
+        return true;
+    }
+
+    /**
+     * @param $productsArray
+     * @param $imgDir
+     * @param $productValidationStrategy
+     */
+    private function import($productsArray, $productValidationStrategy)
+    {
+        $importerModel = $this->importer->create();
         $importerModel->setEntityCode('stock_sources');
-        $importerModel->setValidationStrategy('validation-skip-errors');
+        $importerModel->setValidationStrategy($productValidationStrategy);
+        if ($productValidationStrategy == 'validation-stop-on-errors') {
+            $importerModel->setAllowedErrorCount(1);
+        } else {
+            $importerModel->setAllowedErrorCount(100);
+        }
         try {
             $importerModel->processImport($productsArray);
         } catch (\Exception $e) {

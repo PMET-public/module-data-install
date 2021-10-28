@@ -850,4 +850,7 @@ Here is a list of all substitutions currently supported
 **Dynamic Block** - `{{dynamicblock name="<block name>"}}`\
 *example* - `{{dynamicblock name="VIP Header"}}`
 
+**pages** - `{{pageid key="<page identifier>"}}`\
+*example* - `{{pageid key="new-home-page"}}`
+
 # Content export

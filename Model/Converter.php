@@ -386,7 +386,7 @@ class Converter
     {
         $replaceData = [];
         $search = $this->searchCriteriaBuilder
-            ->addFilter(PageInterface::IDENTIFIER, $matchValue, 'eq')->create();
+            ->addFilter(PageInterface::IDENTIFIER, $matchValue, 'eq')->create()->setCurrentPage(1);
         $pageList = $this->pageRepository->getList($search)->getItems();
         foreach ($pageList as $page) {
             $pageId = $page->getId();

@@ -106,7 +106,6 @@ class Pages
         //TODO: Set default layout of a page cms-full-width *check if necessary
         //TODO:Validate design layout types
         $row['content'] = $this->converter->convertContent($row['content']);
-
         if (empty($row['is_active']) || $row['is_active']=='Y') {
             $row['is_active'] = 1;
         } else {

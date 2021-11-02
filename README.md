@@ -599,7 +599,7 @@ This file is used to add Related Products rules. At this time, the easiest metho
 
 **positions\_limit** - Numeric. Max number of products to display
 
-**apply to** - Values: related, upsells, crosssells
+**apply to** - Values: related, upsell, crosssell
 
 **sort_order** - Numeric
 

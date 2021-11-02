@@ -351,9 +351,6 @@ class Conf
             'label'=>'Loading Pages']],
             ['templates.csv'=>['process'=>'rows','class'=>$this->templatesInstall,
             'label'=>'Loading Templates']],
-            //second page load because a page may reference another page
-            ['pages.csv'=>['process'=>'rows','class'=>$this->pageInstall,
-            'label'=>'Loading Pages']],
             ['reviews.csv'=>['process'=>'rows','class'=>$this->reviewsInstall,
             'label'=>'Loading Reviews']],
             ['b2b_companies.csv'=>['process'=>'rows','class'=>$this->companiesInstall,

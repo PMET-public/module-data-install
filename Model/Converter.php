@@ -81,7 +81,6 @@ class Converter
     /** @var PageRepositoryInterface  */
     protected $pageRepository;
 
-
     /**
      * Converter constructor.
      * @param CategoryCollectionFactory $categoryFactory
@@ -171,7 +170,7 @@ class Converter
         $matches = $this->getMatches($content);
         if (!empty($matches['value'])) {
             $replaces = $this->getReplaces($matches);
-            if(!empty($replaces)){
+            if (!empty($replaces)) {
                 $content = preg_replace($replaces['regexp'], $replaces['value'], $content);
             }
         }

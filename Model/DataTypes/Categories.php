@@ -109,7 +109,7 @@ class Categories
             if ($parentCategory) {
                 $data = [
                     'parent_id' => $parentCategory->getId(),
-                    'name' => str_replace('\/','/',$row['name']),
+                    'name' => str_replace('\/', '/', $row['name']),
                     'is_active' => $row['active'] ?? 1,
                     'is_anchor' => $row['is_anchor'] ?? 1,
                     'include_in_menu' => $row['include_in_menu'] ?? 1,
@@ -182,7 +182,7 @@ class Categories
     protected function getCategoryByPath(string $path, $storeViewCode)
     {
         //replace escaped / charcters in category names
-        $path = str_replace('\/','~~',$path);
+        $path = str_replace('\/', '~~', $path);
         $names = array_filter(explode('/', $path));
         //if the first element in the path is a root category, use that root id and drop from array
         //else, use the root category for the default store
@@ -193,9 +193,9 @@ class Categories
 
         $tree = $this->getTree($rootCatId);
         foreach ($names as $name) {
-            $tree = $this->findTreeChild($tree, str_replace('~~','/',$name));
+            $tree = $this->findTreeChild($tree, str_replace('~~', '/', $name));
             if (!$tree) {
-                $tree = $this->findTreeChild($this->getTree($rootCatId, true), str_replace('~~','/',$name));
+                $tree = $this->findTreeChild($this->getTree($rootCatId, true), str_replace('~~', '/', $name));
             }
 
             if (!$tree) {

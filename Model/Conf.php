@@ -14,6 +14,9 @@ class Conf
  
      /** @var DataTypes\Products  */
      protected $productInstall;
+
+     /** @var DataTypes\GiftCards  */
+     protected $giftCardsInstall;
  
      /** @var DataTypes\DirectoryList  */
      protected $directoryList;
@@ -138,6 +141,7 @@ class Conf
     'categories.csv',
     'customer_segments.csv',
     'products.csv',
+    'gift_cards.csv',
     'msi_source.csv',
     'msi_stock.csv',
     'msi_inventory.csv',
@@ -205,6 +209,7 @@ class Conf
      * @param DataTypes\Pages $pages
      * @param DataTypes\ProductAttributes $productAttributes
      * @param DataTypes\Products $products
+     * @param DataTypes\GiftCards $giftCards
      * @param DataTypes\RequisitionLists $requisitionLists
      * @param DataTypes\SharedCatalogs $sharedCatalogs
      * @param DataTypes\SharedCatalogCategories $sharedCatalogCategories
@@ -241,6 +246,7 @@ class Conf
         DataTypes\Pages $pages,
         DataTypes\ProductAttributes $productAttributes,
         DataTypes\Products $products,
+        DataTypes\GiftCards $giftCards,
         DataTypes\RequisitionLists $requisitionLists,
         DataTypes\SharedCatalogs $sharedCatalogs,
         DataTypes\SharedCatalogCategories $sharedCatalogCategories,
@@ -254,6 +260,7 @@ class Conf
         $this->productAttributesInstall = $productAttributes;
         $this->categoryInstall = $categories;
         $this->productInstall = $products;
+        $this->giftCardsInstall = $giftCards;
         $this->pageInstall = $pages;
         $this->blockInstall = $blocks;
         $this->dynamicBlockInstall = $dynamicBlocks;
@@ -335,6 +342,8 @@ class Conf
             'label'=>'Loading MSI Stock']],
             ['products.csv'=>['process'=>'file','class'=>$this->productInstall,
             'label'=>'Loading Products']],
+            ['gift_cards.csv'=>['process'=>'rows','class'=>$this->giftCardsInstall,
+            'label'=>'Updating Gift Cards']],
             ['msi_inventory.csv'=>['process'=>'file','class'=>$this->msiInventoryInstall,
             'label'=>'Loading MSI Inventory']],
             ['upsells.csv'=>['process'=>'rows','class'=>$this->upsellsInstall,

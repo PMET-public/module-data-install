@@ -105,6 +105,8 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**products.csv**](#products) - Creates simple and configurable products
 
+[**gift\_cards.csv**](#gift-cards) - Updates products of type giftcard due to importer issue
+
 [**msi\_stock.csv**](#msi-stock) - Creates Stock definitions for MSI, and ties the stock to MSI sources
 
 [**msi\_source.csv**](#msi-source) - Creates MSI sources
@@ -453,6 +455,17 @@ The standard Magento Product import file is used. If you export from an existing
 - Change any store codes, website, attribute set or category definitions to match your new configuration
 - Image references will be the path of the final image *example:* `i/m/image.jpg`. Those will need to be updated to the path of your import source.  Most likely the path will be removed and just the file name (`image.jpg`) will be used
 
+### Gift Cards
+
+*File Name* - gift_cards.csv
+
+There is an issue with the giftcard product type where an imported gift card isn't correct until it is saved. This file will load in the product and save it, thus completing the process.
+
+*Columns*
+**sku** - (required)
+
+sku is the only column required.  All other gift card information is included in the `products.csv` file
+
 ### MSI Source
 
 *File Name* - msi_source.csv
@@ -485,6 +498,7 @@ This query will only return one site per stock. If you have multiple sites defin
 
 Stock names cannot be updated, but the website and source assignments can be using the `stock_name` as key.
 
+*Columns*
 **stock\_name** - (required)
 
 **site\_code** - (optional) A comma delimited list of websites to assign the Stock to.  A website can only be assigned to one Stock, so if a website is listed multiple times it will be assigned to the last Stock in the file. If this column is empty, the Stock will be created but not assigned to a website
@@ -497,6 +511,7 @@ Stock names cannot be updated, but the website and source assignments can be usi
 
 The standard Magento Stock Sources import file is used and can be exported from a configured instance
 
+*Columns*
 **source\_code** - MSI Source
 
 **sku** - Procuct sku

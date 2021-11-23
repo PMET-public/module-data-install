@@ -113,7 +113,17 @@ class CartRules
             $groupInputArray = explode(",", $row['customer_group']);
             $groupIds = [];
             foreach ($groupInputArray as $group) {
-                $groupIds[]=$this->customerGroups->getCustomerGroupId(trim($group));
+                if($this->customerGroups->getCustomerGroupId(trim($group))){
+                    $groupIds[]=$this->customerGroups->getCustomerGroupId(trim($group));
+                }
+                
+            }
+            if(empty($groupIds)){
+                $this->helper->printMessage(
+                    "A customer group for cart rule ".$row["name"]." does not exist. Row has been skipped.",
+                    "warning"
+                );
+                return true;
             }
         }
        

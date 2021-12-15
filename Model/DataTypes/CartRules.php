@@ -130,8 +130,13 @@ class CartRules
         if (empty($row['is_active'])) {
             $row['is_active']=1;
         }
-        $row['is_active'] = $row['is_active']== 'Y' ? 1:0;
-
+        if($row['is_active']== 'Y'){
+            $row['is_active']=1;
+        }
+        elseif($row['is_active']== 'N'){
+            $row['is_active']=0;
+        }
+        
         //get existing rule
         $rule = $this->getCartRuleByName($row['name']);
 

@@ -526,6 +526,23 @@ class Stores
     }
 
     /**
+     * @return array
+     */
+    public function getAllWebsiteCodes()
+    {
+        $siteList=[];
+        $sites = $this->websiteRepository->getList();
+        foreach ($sites as $site) {
+            ///remove admin because its not a valid view for these purposes
+            if ($site->getCode()!='admin') {
+                $siteList[]=$site->getCode();
+            }
+        }
+
+        return $siteList;
+    }
+
+    /**
      * @return string
      * In the situations where the default website code may not be 'base'
      * get the value of the default website code

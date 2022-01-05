@@ -13,6 +13,7 @@ Optional arguments:
 `--load[=LOAD]  Data directory to load`
  `--files[=FILES] Comma delimited list of individual files to load`
  `-r, --reload[=RELOAD] Force Reload`
+ `--host[=HOST] Override of host values in stores.csv file`
 
 Using the CLI has multiple advantages to the `setup:upgade` method
 

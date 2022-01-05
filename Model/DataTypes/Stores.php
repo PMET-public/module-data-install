@@ -181,7 +181,7 @@ class Stores
      * @throws LocalizedException
      * @throws UrlAlreadyExistsException
      */
-    public function install(array $data, array $settings)
+    public function install(array $data, array $settings,$cliHost)
     {
         $this->settings = $settings;
         $this->helper->printMessage("--------------------", "header");
@@ -192,6 +192,9 @@ class Stores
             $this->helper->printMessage("-updating site", "info");
             $website = $this->setSite($data);
             //if there is a host value, set base urls
+            if($cliHost){
+                $data['host']=$cliHost;
+            }
             if (!empty($data['host'])) {
                 switch ($data['host']) {
                     case 'subdirectory':

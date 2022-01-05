@@ -12,7 +12,7 @@
  *
  * Options
  *
- * --data=<directory> - can be any other sub directory in the data pack
+ * --load=<directory> - can be any other sub directory in the data pack
  * --files=stores.csv,products.csv - comma delimite list of specific files to load
  * -r force reload if already loaded
  **/
@@ -34,6 +34,7 @@ class Install extends Command
     const DATAPACK = 'datapack';
     const LOAD = 'load';
     const FILES = 'files';
+    const HOST = 'host';
     const RELOAD_FLAG = 'reload';
     
     /** @var ObjectManagerInterface  */
@@ -67,6 +68,12 @@ class Install extends Command
                 InputOption::VALUE_OPTIONAL,
                 'Comma delimited list of individual files to load'
             ),
+            new InputOption(
+                self::HOST,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Override of host value in stores.csv file'
+            ),
             new InputOption(self::RELOAD_FLAG, '-r', InputOption::VALUE_OPTIONAL, 'Force Reload', 0)
         ];
 
@@ -89,13 +96,14 @@ class Install extends Command
         $load = $input->getOption(self::LOAD);
         $reload = $input->getOption(self::RELOAD_FLAG);
         $files = $input->getOption(self::FILES);
+        $host = $input->getOption(self::HOST);
         if ($files=='') {
             $fileArray=[];
         } else {
             $fileArray = explode(",", $files);
         }
         $process = $this->objectManagerInterface->create(Process::class);
-        if ($process->loadFiles($module, $load, $fileArray, $reload)==0) {
+        if ($process->loadFiles($module, $load, $fileArray, $reload,$host)==0) {
             $output->writeln("No files found to load in " . $module.
             " Check the your value of --load if used, or the default set in the datapack");
         }

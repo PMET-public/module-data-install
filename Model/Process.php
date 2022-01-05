@@ -89,11 +89,12 @@ class Process
      * @param string $fixtureDirectory
      * @param array|string[] $fileOrder
      * @param int $reload
+     * @param string $host
      * @return bool
      * @throws LocalizedException
      * @throws FileSystemException
      */
-    public function loadFiles($fileSource, $load = '', array $fileOrder = [], $reload = 0)
+    public function loadFiles($fileSource, $load = '', array $fileOrder = [], $reload = 0,$host)
     {
         $fixtureDirectory = "data";
         //bypass if data is already installed
@@ -182,11 +183,11 @@ class Process
                     $modulePath = str_replace("/" . $fixtureDirectory . "/" . basename($fileName), "", $fileName);
                     $this->helper->printMessage($fileInfo['label'], "info");
                     if ($fileInfo['process']=='file') {
-                        $this->processFile($rows, $header, $fileInfo['class'], $modulePath);
+                        $this->processFile($rows, $header, $fileInfo['class'], $modulePath,$host);
                     } elseif ($fileInfo['process']=='json') {
-                        $this->processJson($fileContent, $fileInfo['class']);
+                        $this->processJson($fileContent, $fileInfo['class'],$host);
                     } else {
-                        $this->processRows($rows, $header, $fileInfo['class']);
+                        $this->processRows($rows, $header, $fileInfo['class'],$host);
                     }
                 }
             }
@@ -244,7 +245,7 @@ class Process
      * @param array $header
      * @param object $process
      */
-    private function processRows(array $rows, array $header, object $process): void
+    private function processRows(array $rows, array $header, object $process,$host): void
     {
         foreach ($rows as $row) {
             $data = [];
@@ -252,7 +253,7 @@ class Process
                 $data[$header[$key]] = $value;
             }
 
-            $this->collectRedos($process->install($data, $this->settings), $row, $header, $process);
+            $this->collectRedos($process->install($data, $this->settings,$host), $row, $header, $process);
         }
     }
 
@@ -260,9 +261,9 @@ class Process
      * @param string $fileContent
      * @param object $process
      */
-    private function processJson(string $fileContent, object $process): void
+    private function processJson(string $fileContent, object $process,$host): void
     {
-        $process->installJson($fileContent, $this->settings);
+        $process->installJson($fileContent, $this->settings,$host);
     }
 
     /**
@@ -271,9 +272,9 @@ class Process
      * @param object $process
      * @param string $modulePath
      */
-    private function processFile(array $rows, array $header, object $process, string $modulePath): void
+    private function processFile(array $rows, array $header, object $process, string $modulePath,$host): void
     {
-        $process->install($rows, $header, $modulePath, $this->settings);
+        $process->install($rows, $header, $modulePath, $this->settings,$host);
     }
 
     private function collectRedos($success, $row, $header, $process)
@@ -296,7 +297,7 @@ class Process
         $redos = $this->redo;
         $this->redo = [];
         foreach ($redos as $redo) {
-            $this->processRows($redo['row'], $redo['header'], $redo['process']);
+            $this->processRows($redo['row'], $redo['header'], $redo['process'],'');
         }
 
         ///if its failed again, fail the process
@@ -418,14 +419,14 @@ class Process
                 $b2bData['b2b_customers.csv']['rows'],
                 $b2bData['b2b_customers.csv']['header'],
                 $this->customerInstall,
-                ''
+                '',''
             );
             //load sales reps (admin user process)
             $this->helper->printMessage("Loading B2B Sales Reps", "info");
             $this->processRows(
                 $b2bData['b2b_sales_reps.csv']['rows'],
                 $b2bData['b2b_sales_reps.csv']['header'],
-                $this->adminUsersInstall
+                $this->adminUsersInstall,''
             );
             //create company (add on company admin from customers, and sales rep);
 
@@ -442,20 +443,20 @@ class Process
                 $b2bData['b2b_company_roles.csv']['rows'],
                 $b2bData['b2b_company_roles.csv']['header'],
                 $this->companyRolesInstall,
-                ''
+                '',''
             );
             //assign roles to customers
             $this->processRows(
                 $b2bData['b2b_customers.csv']['rows'],
                 $b2bData['b2b_customers.csv']['header'],
-                $this->companyUserRolesInstall
+                $this->companyUserRolesInstall,''
             );
             $this->helper->printMessage("Loading B2B Teams and Company Structure", "info");
             //create company structure
             $this->processRows(
                 $b2bData['b2b_teams.csv']['rows'],
                 $b2bData['b2b_teams.csv']['header'],
-                $this->companyTeamsInstall
+                $this->companyTeamsInstall,''
             );
         }
     }

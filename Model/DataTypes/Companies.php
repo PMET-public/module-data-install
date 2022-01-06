@@ -58,6 +58,9 @@ class Companies
     /** @var State */
     protected $appState;
 
+    /** @var Stores */
+    protected $stores;
+
     /**
      * Companies constructor.
      * @param CompanyCustomer $companyCustomer
@@ -70,6 +73,7 @@ class Companies
      * @param StructureRepository $structureRepository
      * @param CompanyRepositoryInterface $companyRepositoryInterface
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param Stores $stores
      */
     public function __construct(
         CompanyCustomer $companyCustomer,
@@ -82,7 +86,8 @@ class Companies
         StructureRepository $structureRepository,
         CompanyRepositoryInterface $companyRepositoryInterface,
         SearchCriteriaBuilder $searchCriteriaBuilder,
-        State $appState
+        State $appState,
+        Stores $stores
     ) {
         $this->companyCustomer = $companyCustomer;
         $this->customer = $customer;
@@ -95,6 +100,7 @@ class Companies
         $this->companyRepositoryInterface = $companyRepositoryInterface;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->appState = $appState;
+        $this->stores = $stores;
     }
 
     /**
@@ -111,17 +117,25 @@ class Companies
         //TODO: Enable Purchase Orders
 
         $region = $this->region->create();
-
+        if (empty($row['site_code'])) {
+            $row['site_code'] = $settings['site_code'];
+        }
+        $websiteId = $this->stores->getWebsiteId($row['site_code']);
         $row['region_id'] = $region->loadByCode($row['region'], $row['country_id'])->getId();
         //$row['company_customers'] = explode(",", $row['company_customers']);
         //get customer for admin user
-        $adminCustomer = $this->customer->get($row['admin_email']);
+
+        $adminCustomer = $this->customer->get($row['company_admin'], $websiteId);
         //get sales rep
+        if (empty($row['sales_rep'])) {
+            $row['sales_rep'] = 'admin';
+        }
         $salesRep = $this->userFactory->create();
+
         $salesRep->loadByUsername($row['sales_rep']);
         //if company email isn't defined, use the admin email
         if (empty($row['company_email'])) {
-            $row['company_email']=$row['admin_email'];
+            $row['company_email']=$row['company_admin'];
         }
 
         /** @var CompanyInterface $newCompany */
@@ -152,7 +166,7 @@ class Companies
             foreach ($row['company_customers'] as $companyCustomerEmail) {
                 //tie other customers to company
 
-                $companyCustomer = $this->customer->get(trim($companyCustomerEmail));
+                $companyCustomer = $this->customer->get(trim($companyCustomerEmail), $websiteId);
                 $this->addCustomerToCompany($newCompany, $companyCustomer);
                 /* add the customer in the tree under the admin user
                 //They may be moved later on if they are part of a team */

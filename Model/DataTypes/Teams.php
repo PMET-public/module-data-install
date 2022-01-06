@@ -45,6 +45,9 @@ class Teams
     /** @var int */
     protected $companyId;
 
+    /** @var Stores */
+    protected $stores;
+
     /**
      * Teams constructor.
      * @param Helper $helper
@@ -55,6 +58,7 @@ class Teams
      * @param StructureInterfaceFactory $structureFactory
      * @param SearchCriteriaInterface $searchCriteriaInterface
      * @param StructureRepository $structureRepository
+     * @param Stores $stores
      */
     public function __construct(
         Helper $helper,
@@ -64,7 +68,8 @@ class Teams
         CustomerRepositoryInterface $customerRepository,
         StructureInterfaceFactory $structureFactory,
         SearchCriteriaInterface $searchCriteriaInterface,
-        StructureRepository $structureRepository
+        StructureRepository $structureRepository,
+        Stores $stores
     ) {
         $this->helper = $helper;
         $this->teamFactory = $teamFactory;
@@ -74,6 +79,7 @@ class Teams
         $this->structureFactory = $structureFactory;
         $this->structureRepository = $structureRepository;
         $this->searchCriteriaInterface = $searchCriteriaInterface;
+        $this->stores = $stores;
     }
 
     /**
@@ -84,8 +90,12 @@ class Teams
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\StateException
      */
-    public function install($row, $header)
+    public function install($row, $settings)
     {
+        if (empty($row['site_code'])) {
+            $row['site_code'] = $settings['site_code'];
+        }
+        $websiteId = $this->stores->getWebsiteId($row['site_code']);
         $data['members'] = explode(",", $row['members']);
         //create array from members addresses
         // Create Team
@@ -104,7 +114,7 @@ class Teams
         foreach ($data['members'] as $companyCustomerEmail) {
             //get user id from email
             try {
-                 $userId = $this->customerRepository->get(trim($companyCustomerEmail))->getId();
+                 $userId = $this->customerRepository->get(trim($companyCustomerEmail), $websiteId)->getId();
             } catch (NoSuchEntityException $e) {
                 $this->helper->printMessage("User ".$companyCustomerEmail.
                 " was not found and will not be added to team ".

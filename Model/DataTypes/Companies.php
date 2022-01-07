@@ -17,7 +17,10 @@
  use Magento\Company\Api\CompanyRepositoryInterface;
  use Magento\Framework\Api\SearchCriteriaBuilder;
  use Magento\Company\Api\Data\CompanyInterface;
+ use Magento\CompanyCredit\Api\CreditLimitRepositoryInterface;
  use Magento\Framework\App\State;
+ use Magento\Framework\Exception\NoSuchEntityException;
+ use MagentoEse\DataInstall\Helper\Helper;
 
 class Companies
 {
@@ -40,6 +43,9 @@ class Companies
     /** @var CreditLimitManagementInterface  */
     protected $creditLimitManagement;
 
+    /** @var CreditLimitRepositoryInterface  */
+    protected $creditLimitRepository;
+
     /** @var UserInterfaceFactory  */
     protected $userFactory;
 
@@ -61,6 +67,9 @@ class Companies
     /** @var Stores */
     protected $stores;
 
+    /** @var Helper */
+    protected $helper;
+
     /**
      * Companies constructor.
      * @param CompanyCustomer $companyCustomer
@@ -68,12 +77,14 @@ class Companies
      * @param Customer $customerResource
      * @param StructureInterfaceFactory $structure
      * @param CreditLimitManagementInterface $creditLimitManagement
+     * @param CreditLimitRepositoryInterface $creditLimitRepository
      * @param UserFactory $userFactory
      * @param RegionFactory $region
      * @param StructureRepository $structureRepository
      * @param CompanyRepositoryInterface $companyRepositoryInterface
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param Stores $stores
+     * @param Helper $helper
      */
     public function __construct(
         CompanyCustomer $companyCustomer,
@@ -81,13 +92,15 @@ class Companies
         Customer $customerResource,
         StructureInterfaceFactory $structure,
         CreditLimitManagementInterface $creditLimitManagement,
+        CreditLimitRepositoryInterface $creditLimitRepository,
         UserFactory $userFactory,
         RegionFactory $region,
         StructureRepository $structureRepository,
         CompanyRepositoryInterface $companyRepositoryInterface,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         State $appState,
-        Stores $stores
+        Stores $stores,
+        Helper $helper
     ) {
         $this->companyCustomer = $companyCustomer;
         $this->customer = $customer;
@@ -101,6 +114,8 @@ class Companies
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->appState = $appState;
         $this->stores = $stores;
+        $this->helper = $helper;
+        $this->creditLimitRepository = $creditLimitRepository;
     }
 
     /**
@@ -115,27 +130,93 @@ class Companies
     public function install(array $row, array $settings)
     {
         //TODO: Enable Purchase Orders
+        //validate and set optional values
+        //required company_name,company_admin,street,city,country_id,region,postcode,telephone,company_admin
+        //set default - sales_rep ,company_email,site_code,credit_limit
 
+        if (empty($row['company_name'])) {
+            $this->helper->printMessage("Company missing name, row skipped", "warning");
+            return true;
+        }
+        
+        if (empty($row['street'])) {
+            $this->helper->printMessage("Company ".$row['company_name'].
+            " missing street, row skipped", "warning");
+            return true;
+        }
+
+        if (empty($row['company_admin'])) {
+            $this->helper->printMessage("Company ".$row['company_name'].
+            " missing company_admin, row skipped", "warning");
+            return true;
+        }
+
+        if (empty($row['city'])) {
+            $this->helper->printMessage("Company ".$row['company_name'].
+            "  missing city, row skipped", "warning");
+            return true;
+        }
+
+        if (empty($row['region'])) {
+            $this->helper->printMessage("Company ".$row['company_name'].
+            "  missing region, row skipped", "warning");
+            return true;
+        }
+
+        if (empty($row['country_id'])) {
+            $this->helper->printMessage("Company ".$row['company_name'].
+            "  missing country_id, row skipped", "warning");
+            return true;
+        }
+        
         $region = $this->region->create();
+        $row['region_id'] = $region->loadByCode($row['region'], $row['country_id'])->getId();
+        if (empty($row['region_id'])) {
+            $this->helper->printMessage("Either your region or country_id is invalid for "
+            .$row['company_name'].", row skipped", "warning");
+            return true;
+        }
+
+        if (empty($row['telephone'])) {
+            $this->helper->printMessage("Company ".$row['company_name'].
+            "  missing telephone, row skipped", "warning");
+            return true;
+        }
+
+        if (empty($row['postcode'])) {
+            $this->helper->printMessage("Company ".$row['company_name'].
+            "  missing postcode, row skipped", "warning");
+            return true;
+        }
+
         if (empty($row['site_code'])) {
             $row['site_code'] = $settings['site_code'];
         }
         $websiteId = $this->stores->getWebsiteId($row['site_code']);
-        $row['region_id'] = $region->loadByCode($row['region'], $row['country_id'])->getId();
-        //$row['company_customers'] = explode(",", $row['company_customers']);
-        //get customer for admin user
+        
+        try {
+            $adminCustomer = $this->customer->get($row['company_admin'], $websiteId);
+        } catch (NoSuchEntityException $e) {
+            $this->helper->printMessage("Company admin user ".$row['company_admin'].
+            " is missing, row skipped", "warning");
+            return true;
+        }
 
-        $adminCustomer = $this->customer->get($row['company_admin'], $websiteId);
-        //get sales rep
+        //get sales rep, use admin as default
         if (empty($row['sales_rep'])) {
             $row['sales_rep'] = 'admin';
         }
         $salesRep = $this->userFactory->create();
-
         $salesRep->loadByUsername($row['sales_rep']);
+
         //if company email isn't defined, use the admin email
         if (empty($row['company_email'])) {
             $row['company_email']=$row['company_admin'];
+        }
+
+        //set credit_limit if not defined
+        if (empty($row['credit_limit'])) {
+            $row['credit_limit']=0;
         }
 
         /** @var CompanyInterface $newCompany */
@@ -147,8 +228,6 @@ class Companies
                 [$this->companyCustomer, 'createCompany'],
                 [$adminCustomer, $row]
             );
-
-            //$newCompany = $this->companyCustomer->createCompany($adminCustomer, $row);
         }
 
         $newCompany->setSalesRepresentativeId($salesRep->getId());
@@ -160,7 +239,7 @@ class Companies
         //set credit limit
         $creditLimit = $this->creditLimitManagement->getCreditByCompanyId($newCompany->getId());
         $creditLimit->setCreditLimit($row['credit_limit']);
-        $creditLimit->save();
+        $this->creditLimitRepository->save($creditLimit);
 
         if (count($row['company_customers']) > 0) {
             foreach ($row['company_customers'] as $companyCustomerEmail) {

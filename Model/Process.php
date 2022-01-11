@@ -23,6 +23,8 @@ use MagentoEse\DataInstall\Model\Conf;
 
 class Process
 {
+    const FIXTURE_DIRECTORY = 'data';
+
     /** @var array */
     protected $settings;
 
@@ -96,8 +98,21 @@ class Process
      */
     public function loadFiles($fileSource, $load = '', array $fileOrder = [], $reload = 0, $host = null)
     {
-        $fixtureDirectory = "data";
+        $fixtureDirectory = self::FIXTURE_DIRECTORY;
+        
+        //if there is no load value, check for .default flag
+        $filePath = $this->getDataPath($fileSource);
+        if ($load=='') {
+            try {
+                $load = $this->driverInterface->fileGetContents($filePath.$fixtureDirectory.'/.default');
+            } catch (FileSystemException $fe) {
+                $fixtureDirectory = $filePath;
+            }
+        }
+        $fixtureDirectory = 'data/'.$load;
+
         //bypass if data is already installed
+        $fileSource .="/".$fixtureDirectory;
         if ($this->isModuleInstalled($fileSource)==1 && $reload===0) {
             //output reload option if cli is used
             //if ($this->isCli()) {
@@ -111,37 +126,13 @@ class Process
             $this->registerModule($fileSource);
         }
 
-        //if there is no load value, check for .default flag
-        $filePath = $this->getDataPath($fileSource);
-        if ($load=='') {
-            try {
-                $load = $this->driverInterface->fileGetContents($filePath.$fixtureDirectory.'/.default');
-            } catch (FileSystemException $fe) {
-                $fixtureDirectory = $filePath;
-            }
-        }
-        $fixtureDirectory = 'data/'.$load;
-
+        
         $fileCount = 0;
         if (count($fileOrder)==0) {
             $fileOrder=$this->conf->getProcessConfiguration();
             //$fileOrder=conf::ALL_FILES;
         }
-        // if (count($fileOrder)==1) {
-        //     //for setting files when start, stores and end is used in place of file list
-        //     switch (strtolower($fileOrder[0])) {
-        //         case "stores":
-        //             $fileOrder = Conf::STORE_FILES;
-        //             break;
-        //         case "start":
-        //             $fileOrder = Conf::STAGE1;
-        //             break;
-        //         case "end":
-        //             $fileOrder = Conf::STAGE2;
-        //             break;
-        //     }
-        // }
-        //$filePath = $this->getDataPath($fileSource);
+       
         $this->helper->printMessage("Copying Media", "info");
         $this->copyMedia->moveFiles($filePath);
         $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
@@ -593,7 +584,6 @@ class Process
     {
         $tracker = $this->dataInstallerInterface->create();
         $tracker = $this->dataInstallerRepository->getByModuleName($moduleName);
-        $f=$tracker->isInstalled();
         return $tracker->isInstalled();
     }
 

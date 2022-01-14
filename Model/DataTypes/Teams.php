@@ -6,6 +6,7 @@ namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\Company\Api\Data\TeamInterfaceFactory;
 use Magento\Company\Api\CompanyRepositoryInterface;
+use Magento\Company\Api\TeamRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Company\Api\Data\CompanyInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -26,6 +27,9 @@ class Teams
 
     /** @var CompanyRepositoryInterface */
     protected $companyRepository;
+
+     /** @var TeamRepositoryInterface */
+     protected $teamRepository;
 
     /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
@@ -53,6 +57,7 @@ class Teams
      * @param Helper $helper
      * @param TeamInterfaceFactory $teamFactory
      * @param CompanyRepositoryInterface $companyRepository
+     * @param TeamRepositoryInterface $teamRepository
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param CustomerRepositoryInterface $customerRepository
      * @param StructureInterfaceFactory $structureFactory
@@ -64,6 +69,7 @@ class Teams
         Helper $helper,
         TeamInterfaceFactory $teamFactory,
         CompanyRepositoryInterface $companyRepository,
+        TeamRepositoryInterface $teamRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         CustomerRepositoryInterface $customerRepository,
         StructureInterfaceFactory $structureFactory,
@@ -74,6 +80,7 @@ class Teams
         $this->helper = $helper;
         $this->teamFactory = $teamFactory;
         $this->companyRepository = $companyRepository;
+        $this->teamRepository = $teamRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->customerRepository = $customerRepository;
         $this->structureFactory = $structureFactory;
@@ -92,19 +99,37 @@ class Teams
      */
     public function install($row, $settings)
     {
+        //company name and team name required
+        if (empty($row['company_name'])) {
+            $this->helper->printMessage("company_name is required in b2b_teams.csv, row skipped", "warning");
+                return true;
+        }
+
+        if (empty($row['name'])) {
+            $this->helper->printMessage("name is required in b2b_teams.csv, row skipped", "warning");
+                return true;
+        }
+
         if (empty($row['site_code'])) {
             $row['site_code'] = $settings['site_code'];
         }
+        //get admin user id - will also validate that company exists
+        $adminUserId = $this->getCompanyAdminIdByName($row['company_name']);
+        if (!$adminUserId) {
+            $this->helper->printMessage("Company ".$row['company_name'].
+            " in b2b_teams.csv does not exist, row skipped", "warning");
+            return true;
+        }
         $websiteId = $this->stores->getWebsiteId($row['site_code']);
-        $data['members'] = explode(",", $row['members']);
         //create array from members addresses
+        $data['members'] = explode(",", $row['members']);
+        
         // Create Team
         $newTeam = $this->teamFactory->create();
         $newTeam->setName($row['name']);
-        $newTeam->save();
-
-        //get admin user id
-        $adminUserId = $this->getCompanyAdminIdByName($row['company_name']);
+        $this->teamRepository->create($newTeam, $this->getCompanyIdByName($row['company_name']));
+        //$this->teamRepository->save($newTeam);
+        
         //get admins structure
         $parentId = $this->getStructureByEntity($adminUserId, 0)->getDataByKey('structure_id');
         $teamId =($newTeam->getId());
@@ -185,6 +210,27 @@ class Teams
         } else {
             /**@var CompanyInterface $company */
             return $company->getSuperUserId();
+        }
+    }
+
+    /**
+     * @param $name
+     * @return int
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    private function getCompanyIdByName($name)
+    {
+        $companySearch = $this->searchCriteriaBuilder
+        ->addFilter('company_name', $name, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        $companyList = $this->companyRepository->getList($companySearch);
+        /** @var CompanyInterface $company */
+        $company = current($companyList->getItems());
+
+        if (!$company) {
+            $this->helper->printMessage("The company ". $name ." requested in b2b_teams.csv does not exist", "warning");
+        } else {
+            /**@var CompanyInterface $company */
+            return $company->getId();
         }
     }
 

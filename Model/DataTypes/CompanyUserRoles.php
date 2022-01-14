@@ -97,6 +97,12 @@ class CompanyUserRoles
         $websiteId = $this->stores->getWebsiteId($row['site_code']);
         //skip company admin roles
         if (!empty($row['role']) && $row['company_admin']!='Y') {
+            $companyid = $this->getCompanyId($row['company']);
+            if (!$companyid) {
+                $this->helper->printMessage("The company ". $row['company'] .
+                " in setting user roles does not exist", "warning");
+                return true;
+            }
             //does role exist, print message if it doesnt
             $role = $this->getCompanyRole($row['company'], $row['role']);
             if ($role) {
@@ -149,7 +155,7 @@ class CompanyUserRoles
         $company = current($companyList->getItems());
         if (!$company) {
             $this->helper->printMessage("The company ". $companyName .
-            " requested in b2b_company_user_roles.csv does not exist", "warning");
+            " in setting user roles does not exist", "warning");
             return false;
         } else {
             return $company->getId();

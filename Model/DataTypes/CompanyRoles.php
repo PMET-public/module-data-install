@@ -13,6 +13,7 @@ use Magento\Company\Api\Data\PermissionInterface;
 use Magento\Company\Api\CompanyRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Company\Api\Data\CompanyInterface;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class CompanyRoles
 {
@@ -37,25 +38,33 @@ class CompanyRoles
     protected $searchCriteriaBuilder;
 
     /**
+     * @var Helper
+     */
+    protected $helper;
+
+    /**
      * CompanyRoles constructor.
      * @param RoleFactory $roleFactory
      * @param RoleRepositoryInterface $roleRepositoryInterface
      * @param PermissionFactory $permissionFactory
      * @param CompanyRepositoryInterface $companyRepository
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param Helper $helper
      */
     public function __construct(
         RoleFactory $roleFactory,
         RoleRepositoryInterface $roleRepositoryInterface,
         PermissionFactory $permissionFactory,
         CompanyRepositoryInterface $companyRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        Helper $helper
     ) {
         $this->roleRepository = $roleRepositoryInterface;
         $this->roleFactory = $roleFactory;
         $this->permissionFactory = $permissionFactory;
         $this->companyRepository = $companyRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->helper = $helper;
     }
 
     /**

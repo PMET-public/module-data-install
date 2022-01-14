@@ -207,7 +207,8 @@ class Companies
             $row['sales_rep'] = 'admin';
         }
         $salesRep = $this->userFactory->create();
-        $salesRep->loadByUsername($row['sales_rep']);
+        
+        $salesRep->load($row['sales_rep']);
 
         //if company email isn't defined, use the admin email
         if (empty($row['company_email'])) {

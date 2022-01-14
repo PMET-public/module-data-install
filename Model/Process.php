@@ -125,12 +125,10 @@ class Process
         } else {
             $this->registerModule($fileSource);
         }
-
         
         $fileCount = 0;
         if (count($fileOrder)==0) {
             $fileOrder=$this->conf->getProcessConfiguration();
-            //$fileOrder=conf::ALL_FILES;
         }
        
         $this->helper->printMessage("Copying Media", "info");

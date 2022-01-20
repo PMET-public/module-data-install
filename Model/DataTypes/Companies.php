@@ -21,6 +21,7 @@
  use Magento\Framework\App\State;
  use Magento\Framework\Exception\NoSuchEntityException;
  use MagentoEse\DataInstall\Helper\Helper;
+ use Magento\Company\Api\Data\StructureInterface;
 
 class Companies
 {
@@ -251,13 +252,38 @@ class Companies
                 /* add the customer in the tree under the admin user
                 //They may be moved later on if they are part of a team */
                 if ($row['admin_email']!='Y') {
+                    //delete user if currently tied to admin
+                    $userStruct = $this->getStructureByEntity($companyCustomer->getId(), 1);
+                    if ($userStruct) {
+                        $structureId = $userStruct->getDataByKey('structure_id');
+                        $this ->structureRepository->deleteById($structureId);
+                    }
+                    //delete user if part of team
+                    $userStruct = $this->getStructureByEntity($companyCustomer->getId(), 0);
+                    if ($userStruct) {
+                        $structureId = $userStruct->getDataByKey('structure_id');
+                        $this ->structureRepository->deleteById($structureId);
+                    }
                     $this->addToTree($companyCustomer->getId(), $adminCustomer->getId());
                 }
             }
         }
         return true;
     }
-
+    /**
+     * @param $entityId
+     * @param $entityType
+     * @return \Magento\Company\Api\Data\StructureInterface|mixed
+     */
+    private function getStructureByEntity($entityId, $entityType)
+    {
+        $builder = $this->searchCriteriaBuilder;
+        $builder->addFilter(StructureInterface::ENTITY_ID, $entityId)
+        ->addFilter(StructureInterface::ENTITY_TYPE, $entityType);
+        $structures = $this->structureRepository->getList($builder->create())->getItems();
+        return reset($structures);
+    }
+  
     /**
      * @param $newCompany
      * @param $companyCustomer
@@ -268,7 +294,6 @@ class Companies
      */
     private function addCustomerToCompany($newCompany, $companyCustomer)
     {
-
         //assign to company
         if ($companyCustomer->getExtensionAttributes() !== null
             && $companyCustomer->getExtensionAttributes()->getCompanyAttributes() !== null) {

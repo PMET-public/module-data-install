@@ -127,13 +127,27 @@ class Teams
         $data['members'] = explode(",", $row['members']);
         
         //get existing team
-        $teamSearch = $this->searchCriteriaBuilder
-        ->addFilter(TeamInterface::NAME, $row['name'], 'eq')->create()->setPageSize(1)->setCurrentPage(1);
-        $teamList = $this->teamRepository->getList($teamSearch);
-        $currentTeam = current($teamList->getItems());
-        // Create Team if needed
-        if ($teamList->getTotalCount()!=0) {
-            $this->teamRepository->delete($currentTeam);
+        $existingTeam = $this->getExistingTeam($row['name'], $adminUserId);
+        // Delete existing team if needed
+        if ($existingTeam) {
+            foreach ($data['members'] as $companyCustomerEmail) {
+                //get user id from email
+                try {
+                     $userId = $this->customerRepository->get(trim($companyCustomerEmail), $websiteId)->getId();
+                } catch (NoSuchEntityException $e) {
+                    $this->helper->printMessage("User ".$companyCustomerEmail.
+                    " was not found and will not be added to team ".
+                    $row['name']." for company ".$row['company_name'], "warning");
+                    break;
+                }
+                //delete structure that the user belongs to
+                $userStruct = $this->getStructureByEntity($userId, 0);
+                if ($userStruct) {
+                    $structureId = $userStruct->getDataByKey('structure_id');
+                    $this ->structureRepository->deleteById($structureId);
+                }
+            }
+            $this->teamRepository->delete($existingTeam);
         }
         $newTeam = $this->teamFactory->create();
         $newTeam->setName($row['name']);
@@ -164,6 +178,40 @@ class Teams
         }
         return true;
     }
+    
+    /**
+     * @param string $teamName
+     * @param int $adminUserId
+     * @return \Magento\Company\Api\Data\TeamInterface;
+     */
+    private function getExistingTeam($teamName, $adminUserId)
+    {
+        $teamSearch = $this->searchCriteriaBuilder
+        ->addFilter(TeamInterface::NAME, $teamName, 'eq')->create();
+        $teamList = $this->teamRepository->getList($teamSearch);
+        //if there is no result return false
+        if ($teamList->getTotalCount()==0) {
+            return false;
+        } elseif ($teamList->getTotalCount()==1) {
+        //if there is one result, return it
+            return current($teamList->getItems());
+        } else {
+        //if there is more than one result, filter further
+            foreach ($teamList as $team) {
+                $structSearch = $this->searchCriteriaBuilder
+                ->addFilter(StructureInterface::ENTITY_TYPE, 1, 'eq')
+                ->addFilter(StructureInterface::PARENT_ID, $adminUserId, 'eq')
+                ->addFilter(StructureInterface::ENTITY_ID, $team->getId(), 'eq')
+                ->create()->setPageSize(1)->setCurrentPage(1);
+                $structList = $this->teamRepository->getList($structSearch);
+                if ($structList->getTotalCount()==1) {
+                    /** @var StructureInterface $teamStruct */
+                    $teamStruct = current($structList->getItems());
+                    return $this->teamRepository->get($teamStruct->getEntityId());
+                }
+            }
+        }
+    }
 
      /**
       * @param int $userId
@@ -192,8 +240,8 @@ class Teams
     private function getStructureByEntity($entityId, $entityType)
     {
         $builder = $this->searchCriteriaBuilder;
-        $builder->addFilter('entity_id', $entityId);
-        $builder->addFilter('entity_type', $entityType);
+        $builder->addFilter(StructureInterface::ENTITY_ID, $entityId)
+        ->addFilter(StructureInterface::ENTITY_TYPE, $entityType);
         $structures = $this->structureRepository->getList($builder->create())->getItems();
         return reset($structures);
     }
@@ -214,7 +262,7 @@ class Teams
         if (!$company) {
             $this->helper->printMessage("The company ". $name ." requested in b2b_teams.csv does not exist", "warning");
         } else {
-            /**@var CompanyInterface $company */
+            /** @var CompanyInterface $company */
             return $company->getSuperUserId();
         }
     }

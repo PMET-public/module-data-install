@@ -11,6 +11,8 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Company\Api\Data\CompanyInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Company\Api\Data\StructureInterfaceFactory;
+use Magento\Company\Api\Data\StructureInterface;
+use Magento\Company\Api\Data\TeamInterface;
 use Magento\Company\Model\StructureRepository;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use MagentoEse\DataInstall\Helper\Helper;
@@ -124,17 +126,20 @@ class Teams
         //create array from members addresses
         $data['members'] = explode(",", $row['members']);
         
-        // Create Team
+        //get existing team
+        $teamSearch = $this->searchCriteriaBuilder
+        ->addFilter(TeamInterface::NAME, $row['name'], 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        $teamList = $this->teamRepository->getList($teamSearch);
+        $currentTeam = current($teamList->getItems());
+        // Create Team if needed
+        if ($teamList->getTotalCount()!=0) {
+            $this->teamRepository->delete($currentTeam);
+        }
         $newTeam = $this->teamFactory->create();
         $newTeam->setName($row['name']);
         $this->teamRepository->create($newTeam, $this->getCompanyIdByName($row['company_name']));
-        //$this->teamRepository->save($newTeam);
-        
-        //get admins structure
-        $parentId = $this->getStructureByEntity($adminUserId, 0)->getDataByKey('structure_id');
         $teamId =($newTeam->getId());
-        //put team under admin users
-        $teamStruct = $this->addTeamToTree($teamId, $parentId);
+
         //loop over team members
         foreach ($data['members'] as $companyCustomerEmail) {
             //get user id from email
@@ -154,6 +159,7 @@ class Teams
             }
 
             //add them to the new team
+            $teamStruct = $this->getTeamStruct($teamId);
             $this->addUserToTeamTree($userId, $teamStruct->getId(), $teamStruct->getPath());
         }
         return true;
@@ -172,9 +178,9 @@ class Teams
         $newStruct->setEntityType(0);
         $newStruct->setParentId($parentId);
         $newStruct->setLevel(2);
-        $newStruct->save();
+        $this->structureRepository->save($newStruct);
         $newStruct->setPath($path.'/'.$newStruct->getId());
-        $newStruct->save();
+        $this->structureRepository->save($newStruct);
         return $newStruct;
     }
 
@@ -200,7 +206,7 @@ class Teams
     private function getCompanyAdminIdByName($name)
     {
         $companySearch = $this->searchCriteriaBuilder
-        ->addFilter('company_name', $name, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        ->addFilter(CompanyInterface::NAME, $name, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
         $companyList = $this->companyRepository->getList($companySearch);
         /** @var CompanyInterface $company */
         $company = current($companyList->getItems());
@@ -236,6 +242,20 @@ class Teams
 
     /**
      * @param $teamId
+     * @return \Magento\Company\Api\Data\StructureInterface
+     */
+    private function getTeamStruct($teamId)
+    {
+        $teamStructSearch = $this->searchCriteriaBuilder
+        ->addFilter(StructureInterface::ENTITY_ID, $teamId, 'eq')
+        ->addFilter(StructureInterface::ENTITY_TYPE, 1, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
+        $teamStructList = $this->structureRepository->getList($teamStructSearch);
+        /** @var CompanyInterface $company */
+        return current($teamStructList->getItems());
+    }
+
+    /**
+     * @param $teamId
      * @param $parentId
      * @return \Magento\Company\Api\Data\StructureInterface
      */
@@ -247,9 +267,9 @@ class Teams
         $newStruct->setEntityType(1);
         $newStruct->setParentId($parentId);
         $newStruct->setLevel(1);
-        $newStruct->save();
+        $this->structureRepository->save($newStruct);
         $newStruct->setPath($parentId.'/'.$newStruct->getId());
-        $newStruct->save();
+        $this->structureRepository->save($newStruct);
         return $newStruct;
     }
 }

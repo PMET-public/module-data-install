@@ -78,15 +78,17 @@ class CompanyRoles
         foreach ($rows as $row) {
             $rolesArray[] = array_combine($header, $row);
         }
-        //convert into company->role->permission structure
-        foreach ($rolesArray as $roleRow) {
-            $rolesData[$roleRow['company']][$roleRow['role']][]=$roleRow['resource_id'];
-        }
+        if (!empty($rolesArray)) {
+            //convert into company->role->permission structure
+            foreach ($rolesArray as $roleRow) {
+                $rolesData[$roleRow['company']][$roleRow['role']][]=$roleRow['resource_id'];
+            }
 
-        foreach ($rolesData as $companyName => $companyRoles) {
-            $this->createCompanyRole($companyName, $companyRoles);
+            foreach ($rolesData as $companyName => $companyRoles) {
+                $this->createCompanyRole($companyName, $companyRoles);
+            }
         }
-
+        
         return true;
     }
 

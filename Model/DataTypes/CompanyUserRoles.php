@@ -126,7 +126,7 @@ class CompanyUserRoles
      * @return RoleInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    private function getCompanyRole($companyName, $role)
+    public function getCompanyRole($companyName, $role)
     {
         $companyId = $this->getCompanyId($companyName);
         if ($companyId) {

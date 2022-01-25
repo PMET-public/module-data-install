@@ -120,6 +120,9 @@ class Conf
     /** @var Datatypes\Teams */
     protected $companyTeamsInstall;
 
+    /** @var Datatypes\ApprovalRules */
+    protected $approvalRulesInstall;
+
     const ALL_FILES = ['stores.csv',
     'config_default.json',
     'config_default.csv',
@@ -157,6 +160,7 @@ class Conf
     'b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv',
     'b2b_requisition_lists.csv',
+    'b2b_approval_rules.csv',
     'cart_rules.csv',
     'advanced_pricing.csv',
     'orders.csv'];
@@ -186,6 +190,7 @@ class Conf
      * @param DataTypes\AdminUsers $adminUsers
      * @param DataTypes\AdminRoles $adminRoles
      * @param DataTypes\AdvancedPricing $advancedPricing
+     * @param DataTypes\ApprovalRules $approvalRules
      * @param DataTypes\Blocks $blocks
      * @param DataTypes\CatalogRules $catalogRules
      * @param DataTypes\CartRules $cartRules
@@ -223,6 +228,7 @@ class Conf
         DataTypes\AdminUsers $adminUsers,
         DataTypes\AdminRoles $adminRoles,
         DataTypes\AdvancedPricing $advancedPricing,
+        DataTypes\ApprovalRules $approvalRules,
         DataTypes\Blocks $blocks,
         DataTypes\CatalogRules $catalogRules,
         DataTypes\CartRules $cartRules,
@@ -280,6 +286,7 @@ class Conf
         $this->adminUsersInstall = $adminUsers;
         $this->adminRolesInstall = $adminRoles;
         $this->advancedPricingInstall = $advancedPricing;
+        $this->approvalRulesInstall = $approvalRules;
         $this->ordersInstall = $orders;
         $this->customerSegmentsInstall = $customerSegments;
         $this->catalogRulesInstall = $catalogRules;
@@ -374,6 +381,8 @@ class Conf
             'label'=>'Loading B2B Shared Catalog Categories']],
             ['b2b_requisition_lists.csv'=>['process'=>'rows','class'=>$this->requisitionListsInstall,
             'label'=>'Loading B2B Requisiton Lists']],
+            ['b2b_approval_rules.csv'=>['process'=>'rows','class'=>$this->approvalRulesInstall,
+            'label'=>'Loading B2B Approval Rules']],
             ['cart_rules.csv'=>['process'=>'rows','class'=>$this->cartRulesInstall,
             'label'=>'Loading Cart Rules']],
             ['advanced_pricing.csv'=>['process'=>'file','class'=>$this->advancedPricingInstall,

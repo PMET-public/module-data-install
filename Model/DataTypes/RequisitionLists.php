@@ -33,6 +33,9 @@ class RequisitionLists
 
     /** @var RequisitionListItemInterfaceFactory */
     protected $requisitionListItemFactory;
+
+     /** @var Stores */
+     protected $stores;
     
     public function __construct(
         Helper $helper,
@@ -40,7 +43,8 @@ class RequisitionLists
         RequisitionListRepositoryInterface $requisitionListRepository,
         CustomerRepositoryInterface $customerRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
-        RequisitionListItemInterfaceFactory $requisitionListItemFactory
+        RequisitionListItemInterfaceFactory $requisitionListItemFactory,
+        Stores $stores
     ) {
         $this->helper = $helper;
         $this->requisitionListFactory = $requisitionListFactory;
@@ -48,6 +52,7 @@ class RequisitionLists
         $this->customerRepository = $customerRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->requisitionListItemFactory = $requisitionListItemFactory;
+        $this->stores = $stores;
     }
 
     /**
@@ -58,12 +63,24 @@ class RequisitionLists
      */
     public function install(array $row, array $settings)
     {
-        //validate user
+        if (empty($row['name'])) {
+            $this->helper->printMessage("Requisition List requires a name, row skipped", "warning");
+            return true;
+        }
+
+        if (empty($row['site_code'])) {
+            $row['site_code']=$settings['site_code'];
+        }
+
+        //get website id and validate
+        $websiteId = $this->stores->getWebsiteId($row['site_code']);
+
+        //validate customer
         try {
-            $customer = $this->customerRepository->get($row['customer']);
+            $customer = $this->customerRepository->get($row['customer_email'],$websiteId);
         } catch (\Exception $e) {
             $this->helper->printMessage(
-                "Requistion list ".$row['name']." cannot be created. Customer ".$row['customer']." does not exist",
+                "Requistion list ".$row['name']." cannot be created. Customer ".$row['customer_email']." does not exist",
                 "warning"
             );
             return true;
@@ -85,14 +102,22 @@ class RequisitionLists
 
         //add items to list
         $listItems=[];
-        foreach ($skus as $sku) {
-            /** @var RequisitionListItemInterface $listItem */
-            $listItem = $this->requisitionListItemFactory->create();
-            $listItem->setSku($sku);
-            $listItem->setQty(1);
-            $listItems[]=$listItem;
+        if($skus[0]!=""){
+           foreach ($skus as $sku) {
+                $skuArray = explode("|",$sku);
+                //if quantity isnt given, set it to 1
+                if(count($skuArray)==1){
+                    $skuArray[1]=1;
+                }
+                /** @var RequisitionListItemInterface $listItem */
+                $listItem = $this->requisitionListItemFactory->create();
+                $listItem->setSku($skuArray[0]);
+                $listItem->setQty($skuArray[1]);
+                $listItems[]=$listItem;
+            }
+            $requisitionList->setItems($listItems); 
         }
-        $requisitionList->setItems($listItems);
+        
         $this->requisitionListRepository->save($requisitionList);
 
         return true;

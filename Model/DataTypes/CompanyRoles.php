@@ -81,7 +81,7 @@ class CompanyRoles
         if (!empty($rolesArray)) {
             //convert into company->role->permission structure
             foreach ($rolesArray as $roleRow) {
-                $rolesData[$roleRow['company']][$roleRow['role']][]=$roleRow['resource_id'];
+                $rolesData[$roleRow['company_name']][$roleRow['role']][]=$roleRow['resource_id'];
             }
 
             foreach ($rolesData as $companyName => $companyRoles) {

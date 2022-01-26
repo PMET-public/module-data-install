@@ -58,7 +58,7 @@ class ApprovalRules
         SearchCriteriaBuilder $searchCriteriaBuilder,
         RoleManagementInterface  $roleManagement,
         ConditionBuilderFactory $conditionBuilderFactory,
-        RuleConditionPool $ruleConditionPool,
+        //RuleConditionPool $ruleConditionPool,
         RuleRepositoryInterface $ruleRepository,
         Companies $companies,
         CompanyUserRoles $companyUserRoles,
@@ -68,7 +68,7 @@ class ApprovalRules
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->roleManagement = $roleManagement;
         $this->conditionBuilderFactory = $conditionBuilderFactory;
-        $this->ruleConditionPool = $ruleConditionPool;
+        //$this->ruleConditionPool = $ruleConditionPool;
         $this->ruleRepository = $ruleRepository;
         $this->companies = $companies;
         $this->companyUserRoles = $companyUserRoles;
@@ -172,7 +172,7 @@ class ApprovalRules
             $rule->setAppliesToRoleIds($ruleData['apply_to_roles']);
         }
         $rule->setIsActive($ruleData['is_active']);
-        $rule->setConditionsSerialized($this->buildSerializedCondition([$ruleData['conditions']]));
+        //$rule->setConditionsSerialized($this->buildSerializedCondition([$ruleData['conditions']]));
         $rule->setCompanyId($ruleData['company_id']);
         $rule->setCreatedBy((int) $this->companies->getCompanyByName($ruleData['company_name'])->getSuperUserId());
         $rule->setAdminApprovalRequired($ruleData['requires_admin_approval']);

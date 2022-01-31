@@ -921,7 +921,7 @@ Quality, Price and Value rating codes are installed by default but the visibilit
 
 *File Name* - b2b_approval_rules.csv
 
-This file is used to add and update B2B Approval Rules. `company_name` and `name` are keys and are used for updates. Currently the ability to use Approval Rules needs to be set manually in the Admin.
+This file is used to add and update B2B Approval Rules. `company_name` and `name` are keys and are used for updates. Currently the ability to use Approval Rules needs to be set manually per company in the Admin.
 
 *Columns*
 **company_name** - Required

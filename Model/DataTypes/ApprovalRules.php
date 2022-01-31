@@ -12,7 +12,6 @@ use Magento\PurchaseOrderRule\Model\Rule\ConditionBuilderFactory;
 use Magento\PurchaseOrderRule\Model\RuleConditionPool;
 use Magento\PurchaseOrderRule\Api\RuleRepositoryInterface;
 use MagentoEse\DataInstall\Helper\Helper;
-use Magento\PurchaseOrderRule\Model\Rule\Condition\Combine;
 
 class ApprovalRules
 {
@@ -38,7 +37,7 @@ class ApprovalRules
 
     /** @var CompanyUserRoles */
     protected $companyUserRoles;
-
+    
     /** @var Helper */
     protected $helper;
 
@@ -50,8 +49,6 @@ class ApprovalRules
      * @param ConditionBuilderFactory $conditionBuilderFactory
      * @param RuleConditionPool $ruleConditionPool
      * @param RuleRepositoryInterface $ruleRepository
-     * @param Companies $companies
-     * @param CompanyUserRoles $companyUserRoles
      * @param Helper $helper
      */
     public function __construct(
@@ -59,7 +56,7 @@ class ApprovalRules
         SearchCriteriaBuilder $searchCriteriaBuilder,
         RoleManagementInterface  $roleManagement,
         ConditionBuilderFactory $conditionBuilderFactory,
-        //RuleConditionPool $ruleConditionPool,
+        RuleConditionPool $ruleConditionPool,
         RuleRepositoryInterface $ruleRepository,
         Companies $companies,
         CompanyUserRoles $companyUserRoles,
@@ -69,7 +66,7 @@ class ApprovalRules
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->roleManagement = $roleManagement;
         $this->conditionBuilderFactory = $conditionBuilderFactory;
-        //$this->ruleConditionPool = $ruleConditionPool;
+        $this->ruleConditionPool = $ruleConditionPool;
         $this->ruleRepository = $ruleRepository;
         $this->companies = $companies;
         $this->companyUserRoles = $companyUserRoles;
@@ -83,7 +80,7 @@ class ApprovalRules
      */
     public function install(array $row, array $settings)
     {
-        //required all, except description, is_active, currency_code in skus
+         //required all, except description, is_active, currency_code in skus
         //company,name,description,is_active,apply_to_roles,rule_type,rule,amount_value,currency_code,approval_from
         if (empty($row['name'])) {
             $this->helper->printMessage("Approval rules missing name, row skipped", "warning");
@@ -150,7 +147,6 @@ class ApprovalRules
         }
         //convert data row to usable values
         $ruleData = $this->convertRow($row);
-        
         //get rule if exists to update
         $ruleSearch =  $this->searchCriteriaBuilder
         ->addFilter(RuleInterface::KEY_COMPANY_ID, $ruleData['company_id'], 'eq')
@@ -163,7 +159,7 @@ class ApprovalRules
             /** @var StructureInterface $teamStruct */
             $rule = current($ruleList->getItems());
         }
-        $rule->setName($ruleData['name']);
+            $rule->setName($ruleData['name']);
         $rule->setDescription($ruleData['description']);
         $this->setRuleApprovers($rule, $ruleData['approval_roles']);
         if ($ruleData['applies_to_all'] === '1') {
@@ -181,13 +177,12 @@ class ApprovalRules
         $this->ruleRepository->save($rule);
         return true;
     }
-
-     /**
-      * @param array $rolesToValidate
-      * @param int $companyId
-      * @param string $approvalType
-      * @return bool
-      */
+/**
+ * @param array $rolesToValidate
+ * @param int $companyId
+ * @param string $approvalType
+ * @return bool
+ */
     private function validateRoles(array $rolesToValidate, int $companyId, $approvalType = 'apply_to_roles')
     {
         //Company Administrator and Purchaser's Manager are available as default roles for approval_from
@@ -196,7 +191,7 @@ class ApprovalRules
         } else {
             $approvedRoles=[];
         }
-        
+          
         $allRoles = $this->roleManagement->getRolesByCompanyId($companyId, true);
         foreach ($allRoles as $role) {
             //a role like Company Administrator is nested, so it is skipped
@@ -211,7 +206,6 @@ class ApprovalRules
         }
         return true;
     }
-    
     /**
      * Set the approver role IDs required for the rule and whether admin or manager approval is required.
      *
@@ -261,7 +255,7 @@ class ApprovalRules
         if (empty($row['currency_code'])) {
             $row['currency_code']='USD';
         }
-         //convert rule information to conditions array
+        //convert rule information to conditions array
         $row['conditions'] = ['attribute'=>$row['rule_type'],'operator'=>$row['rule'],
         'value'=>$row['amount_value'],'currency_code'=>$row['currency_code']];
         //convert approval_roles to list of roles
@@ -277,7 +271,7 @@ class ApprovalRules
         } else {
             $row['requires_manager_approval']=false;
         }
-        return $row;
+                return $row;
     }
 
     /**
@@ -302,7 +296,6 @@ class ApprovalRules
     }
 
     /**
-     * copied from magento/module-purchase-order-rule/Controller/Create/Save.php
      * Build up conditions for the rule based on the users input
      *
      * @param array $conditions

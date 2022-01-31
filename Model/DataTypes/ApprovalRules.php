@@ -12,6 +12,7 @@ use Magento\PurchaseOrderRule\Model\Rule\ConditionBuilderFactory;
 use Magento\PurchaseOrderRule\Model\RuleConditionPool;
 use Magento\PurchaseOrderRule\Api\RuleRepositoryInterface;
 use MagentoEse\DataInstall\Helper\Helper;
+use Magento\PurchaseOrderRule\Model\Rule\Condition\Combine;
 
 class ApprovalRules
 {
@@ -172,7 +173,7 @@ class ApprovalRules
             $rule->setAppliesToRoleIds($ruleData['apply_to_roles']);
         }
         $rule->setIsActive($ruleData['is_active']);
-        //$rule->setConditionsSerialized($this->buildSerializedCondition([$ruleData['conditions']]));
+        $rule->setConditionsSerialized($this->buildSerializedCondition([$ruleData['conditions']]));
         $rule->setCompanyId($ruleData['company_id']);
         $rule->setCreatedBy((int) $this->companies->getCompanyByName($ruleData['company_name'])->getSuperUserId());
         $rule->setAdminApprovalRequired($ruleData['requires_admin_approval']);
@@ -256,11 +257,11 @@ class ApprovalRules
             $row['apply_to_roles'] = $this->convertRoleNamesToIds($row['company_id'], $row['apply_to_roles']);
         }
 
-        //convert rule information to conditions array
         //default currency code to USD
         if (empty($row['currency_code'])) {
             $row['currency_code']='USD';
         }
+         //convert rule information to conditions array
         $row['conditions'] = ['attribute'=>$row['rule_type'],'operator'=>$row['rule'],
         'value'=>$row['amount_value'],'currency_code'=>$row['currency_code']];
         //convert approval_roles to list of roles
@@ -301,6 +302,7 @@ class ApprovalRules
     }
 
     /**
+     * copied from magento/module-purchase-order-rule/Controller/Create/Save.php
      * Build up conditions for the rule based on the users input
      *
      * @param array $conditions

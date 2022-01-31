@@ -77,10 +77,11 @@ class RequisitionLists
 
         //validate customer
         try {
-            $customer = $this->customerRepository->get($row['customer_email'],$websiteId);
+            $customer = $this->customerRepository->get($row['customer_email'], $websiteId);
         } catch (\Exception $e) {
             $this->helper->printMessage(
-                "Requistion list ".$row['name']." cannot be created. Customer ".$row['customer_email']." does not exist",
+                "Requistion list ".$row['name']." cannot be created. Customer ".
+                $row['customer_email']." does not exist",
                 "warning"
             );
             return true;
@@ -102,11 +103,11 @@ class RequisitionLists
 
         //add items to list
         $listItems=[];
-        if($skus[0]!=""){
-           foreach ($skus as $sku) {
-                $skuArray = explode("|",$sku);
+        if ($skus[0]!="") {
+            foreach ($skus as $sku) {
+                $skuArray = explode("|", $sku);
                 //if quantity isnt given, set it to 1
-                if(count($skuArray)==1){
+                if (count($skuArray)==1) {
                     $skuArray[1]=1;
                 }
                 /** @var RequisitionListItemInterface $listItem */
@@ -115,7 +116,7 @@ class RequisitionLists
                 $listItem->setQty($skuArray[1]);
                 $listItems[]=$listItem;
             }
-            $requisitionList->setItems($listItems); 
+            $requisitionList->setItems($listItems);
         }
         
         $this->requisitionListRepository->save($requisitionList);

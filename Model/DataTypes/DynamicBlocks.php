@@ -91,6 +91,15 @@ class DynamicBlocks
             );
             return true;
         }
+        if (empty($row['is_enabled'])) {
+            $row['is_enabled']='Y';
+        }
+        if (empty($row['type'])) {
+            $row['type']='';
+        }
+        if (empty($row['segments'])) {
+            $row['segments']='';
+        }
         //remove spaces from type
         $row['type'] = str_replace(' ', '', $row['type']);
         
@@ -101,6 +110,9 @@ class DynamicBlocks
             } else {
                  $row['store_view_code']='admin';
             }
+        }
+        if (empty($row['store_view_code'])) {
+            $row['store_view_code']='admin';
         }
         //get existing banner to see if we need to create or update content for different store view
         $bannerCollection = $this->bannerCollection->create();
@@ -115,7 +127,7 @@ class DynamicBlocks
         ///types, segments
         /** @var BannerModel $banner */
         $banner->setName($row['name']);
-        $banner->setIsEnabled(1);
+        $banner->setIsEnabled($row['is_enabled']);
         $banner->setTypes($row['type']);
         if (!empty($row['content'])) {
             $row['banner_content'] = $row['content'];

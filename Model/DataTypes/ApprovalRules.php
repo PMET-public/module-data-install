@@ -6,33 +6,22 @@ namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\PurchaseOrderRule\Api\Data\RuleInterfaceFactory;
 use Magento\PurchaseOrderRule\Api\Data\RuleInterface;
-use Magento\Company\Api\CompanyRepositoryInterface;
-use Magento\Company\Api\Data\CompanyInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Company\Api\RoleManagementInterface;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Company\Api\RoleRepositoryInterface;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\PurchaseOrderRule\Model\Rule\ConditionBuilderFactory;
 use Magento\PurchaseOrderRule\Model\RuleConditionPool;
 use Magento\PurchaseOrderRule\Api\RuleRepositoryInterface;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class ApprovalRules
 {
-    /** @var RuleInterface */
+    const RULE_TYPES = ['grand_total', 'shipping_incl_tax', 'number_of_skus'];
+    
+    /** @var RuleInterfaceFactory */
     protected $ruleFactory;
-
-    /** @var CompanyRepositoryInterface */
-    protected $companyRepository;
 
     /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
-
-    /** @var RoleManagementInterface */
-    protected $roleManagement;
-
-    /** @var RoleRepositoryInterface */
-    protected $roleRepository;
 
     /** @var ConditionBuilderFactory */
     protected $conditionBuilderFactory;
@@ -43,35 +32,45 @@ class ApprovalRules
     /** @var RuleRepositoryInterface */
     protected $ruleRepository;
 
+    /** @var Companies */
+    protected $companies;
+
+    /** @var CompanyUserRoles */
+    protected $companyUserRoles;
+    
+    /** @var Helper */
+    protected $helper;
+
     /**
      * ApprovalRules constructor.
      * @param RuleInterfaceFactory $ruleFactory
-     * @param CompanyRepositoryInterface $companyRepositoryInterface
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param RoleManagementInterface $roleManagement
-     * @param RoleRepositoryInterface $roleRepositoryInterface
      * @param ConditionBuilderFactory $conditionBuilderFactory
      * @param RuleConditionPool $ruleConditionPool
      * @param RuleRepositoryInterface $ruleRepository
+     * @param Helper $helper
      */
     public function __construct(
         RuleInterfaceFactory $ruleFactory,
-        CompanyRepositoryInterface $companyRepositoryInterface,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         RoleManagementInterface  $roleManagement,
-        RoleRepositoryInterface $roleRepositoryInterface,
         ConditionBuilderFactory $conditionBuilderFactory,
         RuleConditionPool $ruleConditionPool,
-        RuleRepositoryInterface $ruleRepository
+        RuleRepositoryInterface $ruleRepository,
+        Companies $companies,
+        CompanyUserRoles $companyUserRoles,
+        Helper $helper
     ) {
         $this->ruleFactory = $ruleFactory;
-        $this->companyRepository = $companyRepositoryInterface;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->roleManagement = $roleManagement;
-        $this->roleRepository = $roleRepositoryInterface;
         $this->conditionBuilderFactory = $conditionBuilderFactory;
         $this->ruleConditionPool = $ruleConditionPool;
         $this->ruleRepository = $ruleRepository;
+        $this->companies = $companies;
+        $this->companyUserRoles = $companyUserRoles;
+        $this->helper = $helper;
     }
 
     /**
@@ -81,16 +80,86 @@ class ApprovalRules
      */
     public function install(array $row, array $settings)
     {
-        //TODO:Allow updates to rule by name as key
-        //convert data row to usable values
-        $ruleData = $this->convertRow($row);
-        //validate data
-        if ($this->validate($ruleData)!='') {
+         //required all, except description, is_active, currency_code in skus
+        //company,name,description,is_active,apply_to_roles,rule_type,rule,amount_value,currency_code,approval_from
+        if (empty($row['name'])) {
+            $this->helper->printMessage("Approval rules missing name, row skipped", "warning");
             return true;
         }
-        $this->helper->printMessage("Creating approval rule ".$ruleData['name'], "info");
+        if (empty($row['company_name'])) {
+            $this->helper->printMessage("Approval rule ".$row['name'].
+            " missing Company name, row skipped", "warning");
+            return true;
+        } elseif (!$this->companies->getCompanyByName($row['company_name'])) {
+            $this->helper->printMessage("Approval rules company ".$row['company_name'].
+            " does not exist, row skipped", "warning");
+            return true;
+        }
+        if (empty($row['apply_to_roles'])) {
+            $this->helper->printMessage("Approval rule ".$row['name'].
+            " missing apply_to_roles, row skipped", "warning");
+            return true;
+        }
+        $row['apply_to_roles'] = explode(",", $row['apply_to_roles']);
+        if (!$this->validateRoles(
+            $row['apply_to_roles'],
+            $this->companies->getCompanyByName($row['company_name'])->getId()
+        )) {
+            $this->helper->printMessage("Approval rule ".$row['name'].
+            " has invalid apply_to_roles value, row skipped", "warning");
+            return true;
+        }
+        if (empty($row['rule_type'])) {
+            $this->helper->printMessage("Approval rule ".$row['name']." missing rule_type, row skipped", "warning");
+            return true;
+        } elseif (!in_array(trim($row['rule_type']), self::RULE_TYPES)) {
+            $this->helper->printMessage("Approval rule ".$row['name']." rule_type is invalid, row skipped", "warning");
+            return true;
+        }
+        if (empty($row['rule'])) {
+            $this->helper->printMessage("Approval rule ".$row['name']." missing rule, row skipped", "warning");
+            return true;
+        } elseif (!in_array(trim($row['rule']), ['>','<','>=','<='])) {
+            $this->helper->printMessage("Approval rule ".$row['name'].
+            " rule value must be one of: >,<,>= or<=, row skipped", "warning");
+            return true;
+        }
+        if (empty($row['amount_value'])) {
+            $this->helper->printMessage("Approval rule ".$row['name']." missing amount_value, row skipped", "warning");
+            return true;
+        }
+        if (empty($row['approval_from'])) {
+            $this->helper->printMessage("Approval rule ".$row['name']." missing approval_from, row skipped", "warning");
+            return true;
+        }
+        $row['approval_from'] = explode(",", $row['approval_from']);
+        if (!$this->validateRoles(
+            $row['approval_from'],
+            $this->companies->getCompanyByName($row['company_name'])->getId(),
+            'approval_from'
+        )) {
+            $this->helper->printMessage("Approval rule ".$row['name'].
+            " has invalid approval_from value, row skipped", "warning");
+            return true;
+        }
+        if (empty($row['description'])) {
+            $row['description']='';
+        }
+        //convert data row to usable values
+        $ruleData = $this->convertRow($row);
+        //get rule if exists to update
+        $ruleSearch =  $this->searchCriteriaBuilder
+        ->addFilter(RuleInterface::KEY_COMPANY_ID, $ruleData['company_id'], 'eq')
+        ->addFilter(RuleInterface::KEY_NAME, $ruleData['name'], 'eq')
+        ->create()->setPageSize(1)->setCurrentPage(1);
+        $ruleList = $this->ruleRepository->getList($ruleSearch);
+        /** @var RuleInterface $rule */
         $rule = $this->ruleFactory->create();
-        $rule->setName($ruleData['name']);
+        if ($ruleList->getTotalCount()==1) {
+            /** @var StructureInterface $teamStruct */
+            $rule = current($ruleList->getItems());
+        }
+            $rule->setName($ruleData['name']);
         $rule->setDescription($ruleData['description']);
         $this->setRuleApprovers($rule, $ruleData['approval_roles']);
         if ($ruleData['applies_to_all'] === '1') {
@@ -102,11 +171,41 @@ class ApprovalRules
         $rule->setIsActive($ruleData['is_active']);
         $rule->setConditionsSerialized($this->buildSerializedCondition([$ruleData['conditions']]));
         $rule->setCompanyId($ruleData['company_id']);
-        $rule->setCreatedBy((int) $this->getCompanyAdminIdByName($ruleData['company']));
+        $rule->setCreatedBy((int) $this->companies->getCompanyByName($ruleData['company_name'])->getSuperUserId());
+        $rule->setAdminApprovalRequired($ruleData['requires_admin_approval']);
+        $rule->setManagerApprovalRequired($ruleData['requires_manager_approval']);
         $this->ruleRepository->save($rule);
         return true;
     }
-
+/**
+ * @param array $rolesToValidate
+ * @param int $companyId
+ * @param string $approvalType
+ * @return bool
+ */
+    private function validateRoles(array $rolesToValidate, int $companyId, $approvalType = 'apply_to_roles')
+    {
+        //Company Administrator and Purchaser's Manager are available as default roles for approval_from
+        if ($approvalType=='approval_from') {
+            $approvedRoles=["Company Administrator","Purchaser's Manager"];
+        } else {
+            $approvedRoles=[];
+        }
+          
+        $allRoles = $this->roleManagement->getRolesByCompanyId($companyId, true);
+        foreach ($allRoles as $role) {
+            //a role like Company Administrator is nested, so it is skipped
+            if (is_string($role->getRoleName())) {
+                $approvedRoles[]=$role->getRoleName();
+            }
+        }
+        foreach ($rolesToValidate as $inputRole) {
+            if (!in_array($inputRole, $approvedRoles)) {
+                return false;
+            }
+        }
+        return true;
+    }
     /**
      * Set the approver role IDs required for the rule and whether admin or manager approval is required.
      *
@@ -133,58 +232,6 @@ class ApprovalRules
     }
 
     /**
-     * @param $ruleData
-     * @return string
-     * @throws LocalizedException
-     * @throws NoSuchEntityException
-     */
-    private function validate($ruleData)
-    {
-        // company,name,description,is_active,apply_to_roles,rule_type,rule,amount_value,currency_code,approval_roles
-        $returnMessage='';
-        //verify company id
-        if (empty($ruleData['company_id'])) {
-            $returnMessage.="Company missing or invalid\n";
-        }
-
-        // Verify that name is present
-        if (empty($ruleData['name']) || trim($ruleData['name']) === "") {
-            $returnMessage.="Approval rule is missing a name\n";
-        }
-
-        // Verify the conditions are present in the request and are an array with at least one entry
-        if (!$this->validateParamArray($ruleData['conditions'])) {
-            $returnMessage.="Rule conditions have not been configured\n";
-        }
-
-        if (!isset($ruleData['conditions']['attribute']) || !isset($ruleData['conditions']['operator']) ||
-        !isset($ruleData['conditions']['value'])) {
-            $returnMessage.="Required data is missing from a rule condition\n";
-        }
-
-        // Verify at least one approver is set
-        if (!$this->validateParamArray($ruleData['approval_roles'])) {
-            $returnMessage.="Verify the approver from the company is correct to configure this rule";
-        }
-
-        // Verify the rule is applied to all, or at least one approver is selected
-        if ($ruleData['applies_to_all'] === '0'
-            && !$ruleData['apply_to_roles']
-        ) {
-            $returnMessage.="This rule must apply to at least one or all roles\n";
-        }
-
-        // Validate roles for both the applies to & approvers
-        $returnMessage.= $this->validateRoles($ruleData['apply_to_roles'], "Applies To");
-        $returnMessage.= $this->validateRoles($ruleData['approval_roles'], "Approver");
-        //TODO validate rule types
-        //TODO validate rule
-        //TODO validate amount value is numeric
-        return $returnMessage;
-    }
-    //company,name,description,is_active,apply_to_roles,rule_type,rule,amount_value,currency_code,approval_roles
-
-    /**
      * @param array $row
      * @return array
      * @throws LocalizedException
@@ -192,7 +239,7 @@ class ApprovalRules
     private function convertRow(array $row)
     {
         //convert company to company_id
-        $row['company_id'] = $this->getCompanyIdbyName($row['company']);
+        $row['company_id'] = $this->companies->getCompanyByName($row['company_name'])->getId();
         //convert is_active to 1/0
         $row['is_active'] = $row['is_active']== 'Y' ? 1:0;
         //convert app_to_roles to list of roles
@@ -204,17 +251,27 @@ class ApprovalRules
             $row['apply_to_roles'] = $this->convertRoleNamesToIds($row['company_id'], $row['apply_to_roles']);
         }
 
-        //convert rule information to conditions array
-            //default currency code to USD
+        //default currency code to USD
         if (empty($row['currency_code'])) {
             $row['currency_code']='USD';
         }
+        //convert rule information to conditions array
         $row['conditions'] = ['attribute'=>$row['rule_type'],'operator'=>$row['rule'],
         'value'=>$row['amount_value'],'currency_code'=>$row['currency_code']];
         //convert approval_roles to list of roles
-        $row['approval_roles'] = $this->convertRoleNamesToIds($row['company_id'], $row['approval_roles']);
+        $row['approval_roles'] = $this->convertRoleNamesToIds($row['company_id'], $row['approval_from']);
+        if (in_array("Company Administrator", $row['approval_from'])) {
+            $row['requires_admin_approval']=true;
+        } else {
+            $row['requires_admin_approval']=false;
+        }
 
-        return $row;
+        if (in_array("Purchaser's Manager", $row['approval_from'])) {
+            $row['requires_manager_approval']=true;
+        } else {
+            $row['requires_manager_approval']=false;
+        }
+                return $row;
     }
 
     /**
@@ -222,11 +279,9 @@ class ApprovalRules
      * @param $roles
      * @return array
      */
-    private function convertRoleNamesToIds($companyId, $roles)
+    private function convertRoleNamesToIds($companyId, $roleNames)
     {
         $roleIds = [];
-        //change list to array
-        $roleNames = explode(',', $roles);
         //get roles for company
         $companyRoles = $this->roleManagement->getRolesByCompanyId($companyId);
         foreach ($roleNames as $roleName) {
@@ -238,105 +293,6 @@ class ApprovalRules
             }
         }
         return $roleIds;
-    }
-
-    /**
-     * @param $name
-     * @return int|null
-     * @throws LocalizedException
-     */
-    private function getCompanyIdbyName($name)
-    {
-        $companySearch = $this->searchCriteriaBuilder
-        ->addFilter('company_name', $name, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
-        $companyList = $this->companyRepository->getList($companySearch);
-        /** @var CompanyInterface $company */
-        $company = current($companyList->getItems());
-
-        if (!$company) {
-            $this->helper->printMessage(
-                "The company ". $name ." requested in b2b_approval_rules.csv does not exist",
-                "warning"
-            );
-        } else {
-            return $company->getId();
-        }
-    }
-
-    /**
-     * @param $name
-     * @return int
-     * @throws LocalizedException
-     */
-    private function getCompanyAdminIdByName($name)
-    {
-        $companySearch = $this->searchCriteriaBuilder
-        ->addFilter('company_name', $name, 'eq')->create()->setPageSize(1)->setCurrentPage(1);
-        $companyList = $this->companyRepository->getList($companySearch);
-        /** @var CompanyInterface $company */
-        $company = current($companyList->getItems());
-
-        if (!$company) {
-            $this->helper->printMessage(
-                "The company ". $name ." requested in b2b_approval_rules.csv does not exist",
-                "warning"
-            );
-        } else {
-            /**@var CompanyInterface $company */
-            return $company->getSuperUserId();
-        }
-    }
-
-    /**
-     * Validate a request param of type array
-     *
-     * @param array $array
-     * @return bool
-     */
-    private function validateParamArray($array)
-    {
-        return is_array($array) && count($array) > 0;
-    }
-
-    /**
-     * @param array $conditions
-     * @return string
-     */
-    private function validateConditions(array $conditions)
-    {
-        // Iterate through conditions and ensure all required data is present
-        foreach ($conditions as $condition) {
-            if (!isset($condition['attribute']) || !isset($condition['operator']) || !isset($condition['value'])) {
-                return 'Required data is missing from a rule condition.';
-            }
-        }
-    }
-
-    /**
-     * @param array $approvers
-     * @param $message
-     * @return string
-     */
-    private function validateRoles(array $approvers, $message)
-    {
-        // Verify all approvers exist and are assigned to the users company
-        foreach ($approvers as $approver) {
-            if ($approver == $this->roleManagement->getCompanyAdminRoleId() ||
-                $approver == $this->roleManagement->getCompanyManagerRoleId()) {
-                continue;
-            }
-
-            try {
-                $companyRole = $this->roleRepository->get($approver);
-            } catch (NoSuchEntityException $e) {
-                return "One of the '".$message."' roles does not exist\n";
-            }
-
-            // If the role is not part of the users current company we throw a generic does not exist error
-            //if (!$companyRole || $this->companyUser->getCurrentCompanyId() !== $companyRole->getCompanyId()) {
-            //    throw new LocalizedException($errorMessage);
-            //}
-        }
     }
 
     /**

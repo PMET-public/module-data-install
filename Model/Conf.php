@@ -14,6 +14,9 @@ class Conf
  
      /** @var DataTypes\Products  */
      protected $productInstall;
+
+     /** @var DataTypes\GiftCards  */
+     protected $giftCardsInstall;
  
      /** @var DataTypes\DirectoryList  */
      protected $directoryList;
@@ -117,6 +120,9 @@ class Conf
     /** @var Datatypes\Teams */
     protected $companyTeamsInstall;
 
+    /** @var Datatypes\ApprovalRules */
+    protected $approvalRulesInstall;
+
     const ALL_FILES = ['stores.csv',
     'config_default.json',
     'config_default.csv',
@@ -138,6 +144,7 @@ class Conf
     'categories.csv',
     'customer_segments.csv',
     'products.csv',
+    'gift_cards.csv',
     'msi_source.csv',
     'msi_stock.csv',
     'msi_inventory.csv',
@@ -153,6 +160,7 @@ class Conf
     'b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv',
     'b2b_requisition_lists.csv',
+    'b2b_approval_rules.csv',
     'cart_rules.csv',
     'advanced_pricing.csv',
     'orders.csv'];
@@ -182,6 +190,7 @@ class Conf
      * @param DataTypes\AdminUsers $adminUsers
      * @param DataTypes\AdminRoles $adminRoles
      * @param DataTypes\AdvancedPricing $advancedPricing
+     * @param DataTypes\ApprovalRules $approvalRules
      * @param DataTypes\Blocks $blocks
      * @param DataTypes\CatalogRules $catalogRules
      * @param DataTypes\CartRules $cartRules
@@ -205,6 +214,7 @@ class Conf
      * @param DataTypes\Pages $pages
      * @param DataTypes\ProductAttributes $productAttributes
      * @param DataTypes\Products $products
+     * @param DataTypes\GiftCards $giftCards
      * @param DataTypes\RequisitionLists $requisitionLists
      * @param DataTypes\SharedCatalogs $sharedCatalogs
      * @param DataTypes\SharedCatalogCategories $sharedCatalogCategories
@@ -218,6 +228,7 @@ class Conf
         DataTypes\AdminUsers $adminUsers,
         DataTypes\AdminRoles $adminRoles,
         DataTypes\AdvancedPricing $advancedPricing,
+        DataTypes\ApprovalRules $approvalRules,
         DataTypes\Blocks $blocks,
         DataTypes\CatalogRules $catalogRules,
         DataTypes\CartRules $cartRules,
@@ -241,6 +252,7 @@ class Conf
         DataTypes\Pages $pages,
         DataTypes\ProductAttributes $productAttributes,
         DataTypes\Products $products,
+        DataTypes\GiftCards $giftCards,
         DataTypes\RequisitionLists $requisitionLists,
         DataTypes\SharedCatalogs $sharedCatalogs,
         DataTypes\SharedCatalogCategories $sharedCatalogCategories,
@@ -254,6 +266,7 @@ class Conf
         $this->productAttributesInstall = $productAttributes;
         $this->categoryInstall = $categories;
         $this->productInstall = $products;
+        $this->giftCardsInstall = $giftCards;
         $this->pageInstall = $pages;
         $this->blockInstall = $blocks;
         $this->dynamicBlockInstall = $dynamicBlocks;
@@ -273,6 +286,7 @@ class Conf
         $this->adminUsersInstall = $adminUsers;
         $this->adminRolesInstall = $adminRoles;
         $this->advancedPricingInstall = $advancedPricing;
+        $this->approvalRulesInstall = $approvalRules;
         $this->ordersInstall = $orders;
         $this->customerSegmentsInstall = $customerSegments;
         $this->catalogRulesInstall = $catalogRules;
@@ -329,12 +343,14 @@ class Conf
             'label'=>'Loading Categories']],
             ['customer_segments.csv'=>['process'=>'rows','class'=>$this->customerSegmentsInstall,
             'label'=>'Loading Customer Segments']],
-            ['products.csv'=>['process'=>'file','class'=>$this->productInstall,
-            'label'=>'Loading Products']],
             ['msi_source.csv'=>['process'=>'rows','class'=>$this->msiSourceInstall,
             'label'=>'Loading MSI Source']],
             ['msi_stock.csv'=>['process'=>'rows','class'=>$this->msiStockInstall,
             'label'=>'Loading MSI Stock']],
+            ['products.csv'=>['process'=>'file','class'=>$this->productInstall,
+            'label'=>'Loading Products']],
+            ['gift_cards.csv'=>['process'=>'rows','class'=>$this->giftCardsInstall,
+            'label'=>'Updating Gift Cards']],
             ['msi_inventory.csv'=>['process'=>'file','class'=>$this->msiInventoryInstall,
             'label'=>'Loading MSI Inventory']],
             ['upsells.csv'=>['process'=>'rows','class'=>$this->upsellsInstall,
@@ -353,14 +369,20 @@ class Conf
             'label'=>'Loading Templates']],
             ['reviews.csv'=>['process'=>'rows','class'=>$this->reviewsInstall,
             'label'=>'Loading Reviews']],
-            ['b2b_companies.csv'=>['process'=>'rows','class'=>$this->companiesInstall,
-            'label'=>'Loading B2B Companies']],
+            ['b2b_companies.csv'=>['process'=>'b2b',
+            'class'=>['customerInstall'=>$this->customerInstall,'adminUsersInstall'=>$this->adminUsersInstall,
+            'companiesInstall'=>$this->companiesInstall,'companyRolesInstall'=>$this->companyRolesInstall,
+            'companyUserRolesInstall'=>$this->companyUserRolesInstall,
+            'companyTeamsInstall'=>$this->companyTeamsInstall],
+            'label'=>'Loading B2B Data']],
             ['b2b_shared_catalogs.csv'=>['process'=>'rows','class'=>$this->sharedCatalogsInstall,
             'label'=>'Loading B2B Shared Catalogs']],
             ['b2b_shared_catalog_categories.csv'=>['process'=>'file','class'=>$this->sharedCatalogCategoriesInstall,
             'label'=>'Loading B2B Shared Catalog Categories']],
             ['b2b_requisition_lists.csv'=>['process'=>'rows','class'=>$this->requisitionListsInstall,
             'label'=>'Loading B2B Requisiton Lists']],
+            ['b2b_approval_rules.csv'=>['process'=>'rows','class'=>$this->approvalRulesInstall,
+            'label'=>'Loading B2B Approval Rules']],
             ['cart_rules.csv'=>['process'=>'rows','class'=>$this->cartRulesInstall,
             'label'=>'Loading Cart Rules']],
             ['advanced_pricing.csv'=>['process'=>'file','class'=>$this->advancedPricingInstall,

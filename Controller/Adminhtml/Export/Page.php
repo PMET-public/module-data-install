@@ -84,7 +84,7 @@ class Page extends Action implements HttpPostActionInterface
      */
     public function execute()
     {
-        $fileName = 'page.csv';
+        $fileName = 'pages.csv';
         $filePath = $this->directoryList->getPath(DirectoryList::VAR_DIR)
             . "/" . $fileName;
 
@@ -121,7 +121,7 @@ class Page extends Action implements HttpPostActionInterface
         $result = [];
         //$customerData = $customer->getData();
         $result[] = [
-            'urlkey',
+            'identifier',
             'title',
             'content',
             'page_layout',

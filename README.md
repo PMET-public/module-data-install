@@ -13,8 +13,9 @@ Optional arguments:
 `--load[=LOAD]  Data directory to load`
  `--files[=FILES] Comma delimited list of individual files to load`
  `-r, --reload[=RELOAD] Force Reload`
+ `--host[=HOST] Override of host values in stores.csv file`
 
-Using the CLI has multiple advantages to the `setup:upgade` method
+Using the CLI has multiple advantages to the `setup:upgrade` method
 
 1. You don't need to use a Magento module unless you want to
 1. The module becomes very simple with no need for the Setup classes
@@ -25,8 +26,18 @@ Using the CLI has multiple advantages to the `setup:upgade` method
 
 ###### Datapack data format
 
-Each datapack needs to have a `data` subdirectory. This can contain the data to install, or it can contain one or more subdirectories with different installation options.  For example, in our Grocery data pack there are directories for a `standalone` or `store` installation. Those can be specified by using the `--load=` option.
-A `.default` file can be created under the `data` directory containing the name of the directory you want installed if none is specified with the `--load=` option.
+1. Each datapack needs to have a `data` subdirectory. This can contain the data to install, or it can contain one or more subdirectories with different installation options.  For example, in our Grocery data pack there are directories for a `standalone` or `store` installation. Those can be specified by using the `--load=` option.
+
+2. A `.default` file can be created under the `data` directory containing the name of the directory you want installed if none is specified with the `--load=` option.
+
+3. The `media` directory is used for images and other assets. Most items are copied to their correct destinations under `pub/media` with the exception of product assets which read by the importer. Supported sub-directories include:
+   * `catalog` - Mostly contains product images under the `product` subdirectory. From there any image path should follow what is expected in the product import file.
+   * `downloadable_products` - downloadable product assets to be assigned during product import
+   * `favicon` - As defined in the config files
+   * `logo` - As defined in the config files
+   * `template_manager` - Images used in `templates.csv`
+   * `wysiwyg` - CMS images. It is recommended that they be placed in a unique subdirectory to make it cleaner in the UI if multiple data packs are loaded. The path needs to match what is referenced in CMS items.
+   * `email` - email logo as defined in config files
 
 ###### Usage
 
@@ -37,20 +48,20 @@ Install data from the `MySpace_MyData` module. This module can reside in either 
 Install data from any directory under the Magento root.  In this case `var/import/importdata/MyData`. This does not need to be a Magento module, but only needs to contain the .csv files and media
 
 - `bin/magento gxd:datainstall MySpace_MyData --load=store1`
-Use a specific directory for the .csv files This would allow you to potentally have multiple data sets in the same module *data*,*data2*,*store1*, etc.
+Use a specific directory for the .csv files This would allow you to potentially have multiple data sets in the same module *data*,*data2*,*store1*, etc.
 
 - `bin/magento gxd:datainstall MySpace_MyData --files=customers.csv,pages.csv`
 Mostly used for testing.  You can pass a comma delimited list specific files you want loaded rather than loading everything
 
-- `bin/magento gxd:datainstall MySpace_MyData -r` Each data pack is logged and will only install once. The `-r` option allows you to reinstall an existing data pack.  If you are going to reinstall, it is a good idea to clear the cache first.  Some configurations are retained in cache, and you may see errors around stores not being found or gxd namespace errors if you reinstall without clearing the cache.
+- `bin/magento gxd:datainstall MySpace_MyData -r` Each data directory(`load` value) is logged and will only install once. The `-r` option allows you to reinstall an existing data pack.  If you are going to reinstall, it is a good idea to clear the cache first.  Some configurations are retained in cache, and you may see errors around stores not being found or gxd namespace errors if you reinstall without clearing the cache.
 
 - If you need to install multiple data packs at the same time, you can chain commands together:`bin/magento gxd:datainstall MySpace_MyData;bin/magento gxd:datainstall MySpace_MyData2;bin/magento gxd:datainstall MySpace_MyData3`
 
 Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](https://github.com/PMET-public/module-storystore-sample "https://github.com/PMET-public/module-storystore-sample")
 
-### Setup:Upgrade (or install)
+### Setup:Upgrade (or install) -Deprecated
 
-Although CLI is the preferred method, you can still create modules and install data during Magento installation or setup upgrade.  This method may not work when installing multiple data packs especailly around multiple sites stores and views. We have separated the process out to require 3 different setup classes in order to optomize for success.
+Although CLI is the preferred method, you can still create modules and install data during Magento installation or setup upgrade.  This method may not work when installing multiple data packs especially around multiple sites stores and views. We have separated the process out to require 3 different setup classes in order to optimize for success.
 
 Sample setup:upgrade compatible data pack
 
@@ -81,7 +92,7 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**stores.csv**](#Stores) - Used to create sites, stores, store views and root categories
 
-[**Configuration files**](#Configuration) - **config_default.json, config_default.csv, config_vertical.json, config_vertical.csv, config_secret.json, config_secret.csv, config.json, config.csv**.  These files contain settings that would mostly be set in Stores->Configuration: Payment methods, store information, admin settings, etc.  See the [**Configuration files**](#Configuration) section for details on their usage.
+[**Configuration files**](#Configuration) - **config_default.json, config_default.csv, config_vertical.json, config_vertical.csv, config_secret.json, config_secret.csv, config.json, config.csv**. - These files contain settings that would mostly be set in Stores->Configuration: Payment methods, store information, admin settings, etc.  See the [**Configuration files**](#Configuration) section for details on their usage.
 
 [**admin\_roles.csv**](#admin-roles) - Creates customer groups
 
@@ -105,6 +116,8 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**products.csv**](#products) - Creates simple and configurable products
 
+[**gift\_cards.csv**](#gift-cards) - Updates products of type giftcard due to importer issue
+
 [**msi\_stock.csv**](#msi-stock) - Creates Stock definitions for MSI, and ties the stock to MSI sources
 
 [**msi\_source.csv**](#msi-source) - Creates MSI sources
@@ -119,7 +132,7 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**cart\_rules.csv**](#cart-rules) - Used to create the Cart Promotion Rules
 
-[**blocks**](#blocks) - Creates Blocks. Includes Page Builder compatibility
+[**blocks.csv**](#blocks) - Creates Blocks. Includes Page Builder compatibility
 
 [**dynamic_blocks.csv**](#dynamic-blocks) - Creates Dynamic Blocks. Includes Page Builder compatibility
 
@@ -131,11 +144,33 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**reviews.csv**](#reviews) - Creates reviews and ratings
 
-*To be added*
-**Staging**
-**orders, refunds, credit memos**
+### B2B Files
+[**b2b_approval_rules.csv**](#b2b-approval-rules) - Creates purchase order rules
 
-Files are processed in the order as listed above.  This does potentially present a chicken/egg situation for some data points.  For example, Categories can contain Blocks that can contain Categories. There is a mechanism in place to defer adding sample data if the required elements arent yet installed. At this point it is mostly untested and not supported.
+[**b2b_companies.csv**](#b2b-companies) - Creates companies
+
+[**b2b_company_roles.csv**](#b2b-company-roles) - Creates roles used by customers within companies
+
+[**b2b_customers.csv**](#b2b-customers) - Creates customers within a company
+
+[**b2b_requisition_lists.csv**](#b2b-requisition-lists) - Creates requisition lists for B2B customers
+
+[**b2b_sales_reps.csv**](#b2b-sales-reps) - Creates B2B sales reps
+
+[**b2b_shared_catalog_categories.csv**](#b2b-shared-catalog-categories) - Ties product categories to a shared catalog
+
+[**b2b_shared_catalogs.csv**](#b2b-shared-catalogs) - Creates shared catalog
+
+[**b2b_teams.csv**](#b2b-teams) - Creates company structure and assigns users to teams
+
+*Not yet supported*
+**staging,orders, refunds, credit memos or anything else not listed**
+
+All non B2B files are mostly processed in the order listed as there are some dependencies between files. For example, Catalog Rules depend on Products being loaded.  There are some circular dependencies that may come up (Categories can contain Blocks that can contain Categories). There is a mechanism in place that will process some files twice to solve these issues
+
+B2B files have many interdependencies, so you may have a load rejected if you are missing a file. Or if you try to load a specific B2B file, you may see all B2B files get processed. There are also many data dependencies, for example data may be rejected if references to Company Name, or Company Customers are incorrect
+
+------------
 
 # Files
 
@@ -143,11 +178,11 @@ Files are processed in the order as listed above.  This does potentially present
 
 *File Name* - settings.csv
 
-Optional file. This file contains settings used by the install process. This file is optional if you are adding data to a base installation.  It will be used in a multi-store scenerio, or if you are going outside of some of the defaults. This will remove the requirement of having to use the included values in other data files.
+Optional file. This file contains settings used by the install process. This file is optional if you are adding data to a base installation.  It will be used in a multi-store scenario, or if you are going outside of some of the defaults. This will remove the requirement of having to use the included values in other data files.
 
 *Columns* - **name,value**
 
-*Recoginzed name/value pairs*
+*Recognized name/value pairs*
 
 **site\_code** - Default : base
 
@@ -176,21 +211,19 @@ Optional file: This file is used to add and update Sites, Stores, Store Views an
 
 **site\_order** - Optional: Default is zero
 
-**is\_default\_site** - Optional: Allowed value =Y. There can only be one default site. If it is set muliple times, the last site updated will be the default. Default cannot be removed, it can only be assigned to a different site.
-
 **store\_code** - Required when updating or adding a store or view. Store code may only contain letters (a-z), numbers (0-9) or underscore (\_), and the first character must be a letter. Code will be fixed automatically if needed
 
 **store\_name** - Required when updating a store name, or creating a store
 
 **store\_root\_category** - Optional: Default is the installation Default Category. Needs to be provided if a different Root Category is required. If the Root Category given does not exist, one will be created and assigned to the store.
 
-**is\_default\_store** Optional: Allowed value = Y. There can only be one default store per site. If it is defined muliple times, the last store updated will be the default. The default store cannot be removed from a site, only changed to a different store.
+**is\_default\_store** Optional: Allowed value = Y. There can only be one default store per site. If it is defined multiple times, the last store updated will be the default. The default store cannot be removed from a site, only changed to a different store.
 
 **store\_view\_code** - Required when updating or adding a view. View code may only contain letters (a-z), numbers (0-9) or underscore (\_), and the first character must be a letter.  Code will be fixed automatically if needed
 
 **view\_name** - Required when updating a view name, or creating a view
 
-**is\_default\_view** - Optional: Allowed value = Y. There can only be one default view per store. If it is defined muliple times, the last view updated will be the default. The default view cannot be removed from a store, only changed to a different view.
+**is\_default\_view** - Optional: Allowed value = Y. There can only be one default view per store. If it is defined multiple times, the last view updated will be the default. The default view cannot be removed from a store, only changed to a different view.
 
 **view\_order** - Optional: Default is zero
 
@@ -210,7 +243,7 @@ This is set at the website level. If it needs to be set for another scope, that 
 
 *File Names* - config_default.json, config_default.csv, config_vertical.json, config_vertical.csv, config_secret.json, config_secret.csv, config.json, config.csv
 
-The .json and .csv files are interchangable. Both formats serve the same purpose, so it is up to personal preference which format is used. All files are optional, but it is recommended to have the default file in order to create the settings to have a reasonablly operational store.
+The .json and .csv files are interchangeable. Both formats serve the same purpose, so it is up to personal preference which format is used. All files are optional, but it is recommended to have the default file in order to create the settings to have a reasonably operational store.
 
 These files are used to set values that would normally be set in the store admin under Stores -> Configuration.
 
@@ -218,17 +251,17 @@ The purpose of having the multiple files (default, vertical,secret,config) is to
 
 ##### File Processing Order
 
-**config_default.json, config_default.csv** - These files would likely be induded in a base data pack, and would likely not be changed.  It would include common admin settings like security settings, basic payment and shippping settings, etc. These files would contain the basic settings to get a site up and running, and would likely not be changed.
+**config_default.json, config_default.csv** - These files would likely be included in a base data pack, and would likely not be changed.  It would include common admin settings like security settings, basic payment and shipping settings, etc. These files would contain the basic settings to get a site up and running, and would likely not be changed.
 
 **config_vertical.json, config_vertical.csv** - Adds to or overrides settings in the default files. These would normally be things that are applicable to the specific data set like Venia or Luma German, or Grocery. Generally should not be edited by the end user if they are loading a prepared data set
 
-**config_secret.json, config_secret.csv** - This file could contain private information like API keys, passwords, etc.  That information is not required to go into this file, and could go in any configuration file. However it should be a best practice in order to easily remove private information if publically distributing the rest of the data pack
+**config_secret.json, config_secret.csv** - This file could contain private information like API keys, passwords, etc.  That information is not required to go into this file, and could go in any configuration file. However it should be a best practice in order to easily remove private information if publicly distributing the rest of the data pack
 
 **config.json, config.csv** - These files are final files loaded and are used to add to or override any previous settings.  This is likely where an end user would make changes specific to their needs.
 
-*json file format* - Needs to be documented. This is the same structure in the other json files, with nodes matching the path of the variable to set
+*Json file format* - This structure has nodes matching the path of the variable to set
 
-*using the encode function* - needs to be documented
+*Handling Encryption* - There are some values that need to be encrypted by Magento before they are stored (passwords,API keys, etc.). Those unencrypted values can be placed within an `encrypt()` tag. For example, in a json file `"public_key": "encrypt(2mafn9s8fjae89)",`
 
 *CSV file Columns*  - the file format matches the values stored in the core\_config\_data table
 
@@ -241,25 +274,37 @@ The purpose of having the multiple files (default, vertical,secret,config) is to
 
 *File Name* - admin\_roles.csv
 
-Optional file: Creates roles and their settings for admin users
+Optional file: Creates roles and their settings for admin users. Updates are done for the whole role, not incrementally by row
 
 *Columns*
-**name** - Required. Name of the role
+**role** - Required. Name of the role
 **resource_id** - Resource to activate for the role (eg: `Magento_Backend::admin`) one per row
 
-Resource Ids can be obtained by createing a role in the UI and retrieving the information from the authroization_rule table.
+Resource Ids can be obtained by creating a role in the UI and retrieving the information from the `authorization_rule` table.
+`select a.role_name as 'role', b.resource_id 
+from authorization_role a, authorization_rule b
+where a.role_id = b.role_id
+and a.role_name = '...'
+and b.permission = 'allow'`
+
+If you are adding a role with access to All, you only need one row
+
+|role|resource_id|
+| --- | ----------- |
+|Sales Admin|Administrators	Magento_Backend::all|
 
 ### Admin Users
 
 *File Name* - admin\_users.csv
 
-Optional file: Creates users for the Magento Admin
+Optional file: Creates users for the Magento Admin.
 
 *Columns*
-**email** - Required.
+**email** - Required. Key used for updates
 **username** - Required.
 **firstname** - Required.
 **lastname** - Required.
+**password** - Required.
 **role** - Optional. Needs to be an existing role
 
 ### Customer Groups
@@ -331,14 +376,17 @@ where eav.attribute_code = '...'`
 
 **is_used_for_customer_segment** - Optional, Values = Y/N. Default = Y.  Can it be used to create customer segments
 
-**use_in_forms** - Optional, Values = adminhtml_customer,adminhtml_checkout,customer_account_edit,customer_account_create. Default = all forms.  Comma delimited list of forms where the attribute can be defined
+**use_in_forms** - Optional, Values = `adminhtml_customer,adminhtml_checkout,customer_account_edit,customer_account_create`. Default = all forms.  Comma delimited list of forms where the attribute can be defined
 
 ### Customer Segments
 
 *File Name* - customer\_segments.csv
 
 This file is used to add and update customer segments.
-Because segments are complex, the method currently in use is to create a segment in a test enviornment and then export that data out of the database to put in the .csv file
+Because segments are complex, the best method is to create a segment in a test environment and then export that data out of the database to put in the .csv file. You will need to use token substitution in the `conditions_serialized` if there are required references to ids.
+`select name, '...' as site_code, description, is_active,apply_to,conditions_serialized
+from magento_customersegment_segment
+where name in '...'`
 
 *Columns*
 
@@ -348,7 +396,7 @@ Because segments are complex, the method currently in use is to create a segment
 
 **description** - Optional. Description of the segment
 
-**is\_active** - Optional: Values = Y/N. Default = Y
+**is\_active** - Optional: Values = 1/0. Default = 1
 
 **apply\_to** - Optional. Defaults to 0.
 Accepted values 2= Apply to Visitors, 1= Apply to Registered Users, 0= Both Visitors and Registered
@@ -361,24 +409,24 @@ Accepted values 2= Apply to Visitors, 1= Apply to Registered Users, 0= Both Visi
 
 Optional file: Used to create customers
 
-There are multiple file formats that can be used for importing customers. The Magento exporter supports Customer Main File, which doesn't include any address information, and Customer Addresses which include all defined addresses.  There is no export that includes a composite Customers and Addresses file that is supported by the importer. If you are exporting files you can leave them as two separate files, or combine them into a single customer file. The single customer file method will only support one address for both billing and shipping.  TODO: put a sample of all files in the sample module
+There are multiple file formats that can be used for importing customers. The Magento exporter supports Customer Main File, which doesn't include any address information, and Customer Addresses which include all defined addresses.  There is no export that includes a composite Customers and Addresses file that is supported by the importer. If you are exporting files you can leave them as two separate files, or combine them into a single customer file. The single customer file method will only support one address for both billing and shipping.
 
-If you are using an export, make sure you have the correct website, store and group values for your data.  If website or store are not included, it will use the defaults in `settings.csv`. You will also need to remove any customer attribute columns that aren't needed, and to clean up any other columns that arent needed like **created_at**, **updated_at**.  Your file should just include customer profile information, store/site/group information, customer profile and attribute values.
+If you are using an export, make sure you have the correct website, store and group values for your data.  If website or store are not included, it will use the defaults in `settings.csv`. You will also need to remove any customer attribute columns that aren't needed, and to clean up any other columns that aren't needed like **created_at**, **updated_at**.  Your file should just include customer profile information, store/site/group information, customer profile and attribute values.
 
-If you are importing the addresses separatly, they will need to go into the `customer_addresses.csv` file, which is detailed in its own section
+If you are importing the addresses separately, they will need to go into the `customer_addresses.csv` file, which is detailed in its own section
 
 The customer file will use the same file format as the native Magento customer import with some exceptions:
-**add_to_autofill** - Optional.  This will add the customer as a selectable option to the [Autofil Module](https://github.com/PMET-public/module-autofill "Autofil Module")
+**add_to_autofill** - Optional.  This will add the customer as a selectable option to the [Autofill Module](https://github.com/PMET-public/module-autofill "Autofill Module")
 **group** - Optional.  Name of the customer group.  If not defined, default will be `General`. **group_id** can be used but the id must exist in the imported instance
-**reward_points** - Optional.  This will set set the number of Reward Points for a customer. The converion rates are defined in `reward_exchange_rate.csv` but are not needed to add points to a customer.
+**reward_points** - Optional.  This will set set the number of Reward Points for a customer. The conversion rates are defined in `reward_exchange_rate.csv` but are not needed to add points to a customer.
 
-Some column names may have alaises for ease of use and consistancy with other Data Installer data files.
+Some column names may have alaises for ease of use and consistency with other Data Installer data files.
 **site_code** if it exists it will populate the **_website** value
 **store_view_code** if it exists it will populate the **_store** value
 **group** if it exists it will convert to an ID and populate the **group_id** value.
 **_address_firstname** and **_address_firstname** in a composite Customers and Addresses file these are optional. **firstname** and **lastname** will be substituted if they are not defined.
 
-At this time, only one address is supported and used for both billing and shipping.  However, new addresses can be added from a second module, esentially updating the customer but adding, not replacing addresses.  Last address in getst set as default.
+At this time, only one address is supported and used for both billing and shipping.  However, new addresses can be added from a second module, essentially updating the customer but adding, not replacing addresses.  Last address in gets set as default.
 
 If you are getting errors while importing customers, you can try importing it via the admin UI to get better error feedback. Or in **settings.csv** add `product_validation_strategy,validation-stop-on-errors`. This will set the Allowed Error Count to 0 and give you better error output.
 
@@ -398,18 +446,16 @@ It is recommended to use an exported customer address file. Make sure you have t
 
 Optional file: Used to set Reward Point conversion rate
 
-Only one rate per website,customer group and direction is allowed. Exsiting rates will be updated using that key. Any admin settings should be included as part of configuration (`config_vertical.csv`). You can use this query to extract the values from the database. Add the proper values to the `scope_code` column:
-`select scope, '' as scope_code, path,value from core_config_data where path like '%magento_reward%'
-and value is not null`
+Only one rate per website,customer group and direction is allowed. Existing rates will be updated using that key
 
 *Columns*
 All columns are required
 
-**site_code** - Website code
-**customer_group** - Name of Customer Group
-**direction** - `points_to_currency` or `currency_to_points`
-**points**
-**currency_amount**
+**site_code** - Optional: Website code, will default to value in `settings.csv` if not included
+**customer_group** - Optional. Name of Customer Group or `all`, will default to `all` if not included
+**direction** - Values: `points_to_currency` or `currency_to_points`
+**points** 
+**currency_amount** 
 
 ### Categories
 
@@ -417,7 +463,6 @@ All columns are required
 
 This file is used to create categories. Categories are also created during product import so this file may be optional. It can be used if you want control over position and visibility.
 
-> Out of Scope: Updating existing categories. Setting categories for specific views. Support for Layout, landing page, image and display mode attributes is coming.
 
 *Columns*
 
@@ -444,7 +489,22 @@ Parent categories need to be in the file before the child categories
 
 **description** - Optional.  Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers for Page Builder compatibility
 
-**display_mode** - Optional. Default=PRODUCTS. Allowed values: PRODUCTS, PAGE, PRODUCTS_AND_PAGE
+**display_mode** - Optional. Default=PRODUCTS. Allowed values: `PRODUCTS`, `PAGE`, `PRODUCTS_AND_PAGE`
+
+**landing_page** - Required when display mode is `PAGE` or `PRODUCTS_AND_PAGE`, identifier of block to include
+
+**custom_design** - Required when setting page layout.  Theme namespace/name. For example Magento/luma
+
+**page_layout** - Optional. Based on values selectable from the UI
+| UI selection | Value |
+| --- | ----------- |
+| Empty | empty |
+| 2 Columns with left bar | 2column-left |
+| 2 Columns with right bar | 2column-right |
+| 3 Columns | 3columns |
+| Page -- Full Width | cms-full-width |
+| Category -- Full Width | category-full-width |
+| Product -- Full Width | product-full-width |
 
 ### Products
 
@@ -454,6 +514,17 @@ The standard Magento Product import file is used. If you export from an existing
 
 - Change any store codes, website, attribute set or category definitions to match your new configuration
 - Image references will be the path of the final image *example:* `i/m/image.jpg`. Those will need to be updated to the path of your import source.  Most likely the path will be removed and just the file name (`image.jpg`) will be used
+
+### Gift Cards
+
+*File Name* - gift_cards.csv
+
+There is an issue with the giftcard product type where an imported gift card isn't correct until it is saved. This file will load in the product and save it, thus completing the process.
+
+*Columns*
+**sku** - (required)
+
+sku is the only column required.  All other gift card information is included in the `products.csv` file
 
 ### MSI Source
 
@@ -487,6 +558,7 @@ This query will only return one site per stock. If you have multiple sites defin
 
 Stock names cannot be updated, but the website and source assignments can be using the `stock_name` as key.
 
+*Columns*
 **stock\_name** - (required)
 
 **site\_code** - (optional) A comma delimited list of websites to assign the Stock to.  A website can only be assigned to one Stock, so if a website is listed multiple times it will be assigned to the last Stock in the file. If this column is empty, the Stock will be created but not assigned to a website
@@ -498,10 +570,13 @@ Stock names cannot be updated, but the website and source assignments can be usi
 *File Name* - msi_inventory.csv
 
 The standard Magento Stock Sources import file is used and can be exported from a configured instance
+Due to issues with MSI Inventory not being able to be updated in the same command as a product import, the `gxd:datainstall` command needs to be run a second time, where you can limit it just to the MSI Inventory file
+`bin/magento gxd:datainstall MySpace_MyData --files=msi_inventory.csv -r`
 
+*Columns*
 **source\_code** - MSI Source
 
-**sku** - Procuct sku
+**sku** - Product sku
 
 **qty** - Inventory to assign to source
 
@@ -575,7 +650,7 @@ order by op.option_id`
 **only\_update\_sets** - Optional Value=Y. Only requires attribute\_code. This would be flagged in the case where the only action is to add an attribute to a set.  Most likely usage would be for assigning default system attributes to a set.
 
 *Translating Front End Labels*
-After the attributes are created, the translation of front end lables for additional stores can be added with a simpler file. Only one store code per front end lable is allowed per file at this point
+After the attributes are created, the translation of front end labels for additional stores can be added with a simpler file. Only one store code per front end label is allowed per file at this point
 
 **store\_view\_code** - Optional, will set the default label if not defined
 
@@ -588,6 +663,9 @@ After the attributes are created, the translation of front end lables for additi
 *File Name* - upsells.csv
 
 This file is used to add Related Products rules. At this time, the easiest method is to create the rules in an existing store, then take the serialized values from the database
+`select name, if(is_active=1,'Y','N') as is_active,conditions_serialized,actions_serialized,positions_limit,
+case apply_to WHEN 1 THEN 'related' WHEN 2 THEN 'upsell' WHEN 3 THEN 'crosssell' end apply_to,sort_order
+from magento_targetrule where name in '...'`
 
 *Columns*
 
@@ -595,13 +673,13 @@ This file is used to add Related Products rules. At this time, the easiest metho
 
 **is\_active** - Y or N, Default = Y
 
-**conditions\_serialized** - Value taken from the`conditions_serialized` column in the `targetrule` table. Content is run through the [**Content Substitution**](#content-substitution) process that will replace identifiers, most likely category ids. Make sure to double quotes for csv file compatibilit.
+**conditions\_serialized** - Value taken from the`conditions_serialized` column in the `targetrule` table. Content is run through the [**Content Substitution**](#content-substitution) process that will replace identifiers, most likely category ids. Make sure to double quotes for csv file compatibility.
 
 **actions\_serialized** - Value taken from the`actions_serialized` column in the `targetrule` table. Content is run through the [**Content Substitution**](#content-substitution) process that will replace identifiers, most likely category ids. Make sure to double quotes for csv file compatibility.
 
 **positions\_limit** - Numeric. Max number of products to display
 
-**apply to** - Values: related, upsells, crosssells
+**apply to** - Values: related, upsell, crosssell
 
 **sort_order** - Numeric
 
@@ -610,7 +688,15 @@ This file is used to add Related Products rules. At this time, the easiest metho
 *File Name* - catalog\_rules.csv
 
 This file is used to add and update catalog promotion rules.
-Because rule definitions are complex, the method currently in use is to create a catalog rule in a test enviornment and then export that data out of the database to put in the .csv file
+Because rule definitions are complex, the method currently in use is to create a catalog rule in a test environment and then export that data out of the database to put in the .csv file
+
+`select '' as site_code, '' as customer_groups,name,description,if(is_active=1,'Y','N') as is_active,conditions_serialized,actions_serialized,
+if(stop_rules_processing=1,'Y','N') as stop_rules_processing,sort_order,simple_action,discount_amount,'' as dynamic_blocks
+from catalogrule where name in ('...')`
+
+After extraction `site_code`, `customer_groups` and `dynamic_blocks` will need to be filled out.  `actions_serialized` and `conditions_serialized` will need to have content substitution tokens added where necessary
+
+
 
 *Columns*
 
@@ -622,7 +708,9 @@ Because rule definitions are complex, the method currently in use is to create a
 
 **is\_active** - Optional: Values = Y/N. Default = Y
 
-**conditions_serialized** - Optional (but if you dont put anything in, then really whats the point?) - This is taken from the database catalogrulet.conditions_serialized column. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers like product attributes.
+**conditions_serialized** - Optional (but if you dont put anything in, then really whats the point?) - This is taken from the database catalogrule.conditions_serialized column. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers like product attributes.
+
+**actions_serialized** - Optional (but if you dont put anything in, then really whats the point?) - This is taken from the database catalogrule.conditions_serialized column. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers like product attributes.
 
 **stop\_rules\_processing** - In the UI: *Discard subsequent rules*
 Optional: Values = Y/N. Default = N
@@ -652,9 +740,9 @@ Optional: Single dynamic block name  or comma delimited list
 
 This file is used to add and update cart promotion rules.
 
-At this point Automatically generated coupon codes are not supported. If you do use a specific coupon code, you need to insure that it is not used by another Cart Rule, or the row will be rejected
+At this point Automatically generated coupon codes are not supported. If you do use a specific coupon code, you need to insure that it is not used by another Cart Rule, or the row will be rejected. Also labels and store specific labels are not supported.
 
-Because rule definitions are complex, the method currently in use is to create a cart rule in a test enviornment and then export that data out of the database using this query:
+Because rule definitions are complex, the method currently in use is to create a cart rule in a test environment and then export that data out of the database using this query:
 `select '' as 'site_code','' as 'customer_group',r.name, r.description, r.uses_per_customer,r.is_active,r.conditions_serialized,r.actions_serialized,r.stop_rules_processing,r.is_advanced,r.sort_order,r.simple_action,r.discount_amount,r.discount_qty,r.discount_step,r.apply_to_shipping,r.times_used,r.is_rss,r.coupon_type,r.use_auto_generation,r.uses_per_coupon,r.simple_free_shipping,IFNULL(c.code,'') as 'coupon_code', rw.points_delta as 'reward_points_delta'
 from salesrule r
 left join salesrule_coupon c
@@ -668,25 +756,54 @@ on r.rule_id = rw.rule_id`
 
 **customer\_group** - Optional. Comma delimited names of Customer Groups. If left empty, or if the value of `all` is used, the rule will be available to all customer groups
 
-**is\_active** - Optional: Values = Y/N. Default = Y
-
 **conditions_serialized** and **actions_serialized** - Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers like product attributes, categories and attribute sets.
 
 ### Blocks
 
 *File Name* - blocks.csv
 
-This file is used to add or update blocks.  Updates are made by using the key of store_view_code and identifier
+This file is used to add or update blocks.  Updates are made by using the key of store_view_code and identifier.
+Most information can be extracted from the Magento Admin UI from the Blocks grid by selecting the required blocks and selecting the *Export Content* Action
 
 *Columns*
-**store_view_code** - Optional. Store View the page should be assigned to. If none is provided, the code of the view defined in settings.csv, or the global default of *default* is used.
+**store_view_code** - Optional. Comma delimited list of Store View Codes the block should be assigned to. If none is provided, the code of the view defined in settings.csv, or the global default of *default* is used.
 > If you want a page to be available across all All Store Views, use the value of **admin** as the store_view_code
 
-**identifier** - Required.
+**identifier** - Required. Key used for updating
+
+**is_active** - Optional Y/N. Defaults to Y
 
 **title** - Required - Same as Block Title in the UI
 
-**content** - Optional. Body of the page. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers for Page Builder compatibility
+**content** - Optional. Body of the block. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers for Page Builder compatibility
+
+### Dynamic Blocks
+
+*File Name* - dynamic_blocks.csv
+
+This file is used to add or update Dynamic Blocks (Banners).  Updates are made by using the name as key. Setting of Related Promotions is not supported.
+
+If pulling from existing configuration:
+`select b.name as name, if(b.is_enabled=1,'Y','N') as is_enabled,'' as segments, 'admin' as store_view_code,b.types,bc.banner_content as banner_content
+from magento_banner b, magento_banner_content bc 
+where b.banner_id = bc.banner_id
+and b.name in (...)`
+You may to then update `store_view_code`,`segments` and `banner_content`
+
+*Columns*
+
+**name** - Required
+
+**is_enabled** - Optional. Defaults to Y. Values Y/N
+
+**type** - Optional. If left empty it will be set to Any Dynamic block Type. Other valid values are a comma delimited list of one or more of :`content`,`footer`,`header`,`leftcol`,`rightcol`
+
+**store_view_code** - Optional. Default is `admin`, which makes it available across all stores
+
+**segments** - Optional. Comma delimited lists of qualifying segment names. If left empty it will be made available to all segments
+
+**banner_content** - Optional. Body of the block. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers for Page Builder compatibility
+
 
 ### Widgets
 
@@ -694,7 +811,7 @@ This file is used to add or update blocks.  Updates are made by using the key of
 
 This file is used to add or update widgets.  Updates are made by using the key of title
 
-Because widgets have a complex data structure, it is recommeneded that they be created in an existing magento instance and exported via DB query:
+Because widgets have a complex data structure, it is recommended that they be created in an existing magento instance and exported via DB query:
 `select wi.title, wi.instance_type,t.theme_path as 'theme', wi.store_ids as 'store_view_codes', wi.widget_parameters,wi.sort_order,wp.page_group,wp.
 layout_handle,wp.block_reference,wp.page_for,wp.entities,wp.page_template
 from widget_instance_page wp, widget_instance wi, theme t
@@ -703,12 +820,11 @@ and wi.theme_id = t.theme_id`
 
 A single layout update per widget is supported at this time.
 
-The result will need a few edits to work properly: The ids in `store_view_codes` will need to be replaced with their approproiate codes. Ids in `widget_parameters` will need to be replaced by tokens depending on the entiity type as they will be substituted by the [**Content Substitution**](#content-substitution) process. The ids in `entities` will also need to be replaced by product or category tokens depending on the entity type you defined when you selected that the layout was only to be applied to specific categories
+The result will need a few edits to work properly: The ids in `store_view_codes` will need to be replaced with their appropriate codes. Ids in `widget_parameters` will need to be replaced by tokens depending on the entity type as they will be substituted by the [**Content Substitution**](#content-substitution) process. The ids in `entities` will also need to be replaced by product or category tokens depending on the entity type you defined when you selected that the layout was only to be applied to specific categories
 
 *Columns*
 **title** - Required - Same as Widget Title in the UI
 **store_view_codes** - Optional.  Will default to `admin` (all stores). Can be a comma delimited list for applying to multiple views
-> If you want a page to be available across all All Store Views, use the value of **admin** as the store_view_code
 
 **instance_type** - Required. Type as defined in the UI, which is the class name
 
@@ -718,7 +834,7 @@ The result will need a few edits to work properly: The ids in `store_view_codes`
 
 **sort_order** - Optional. Sort Order in UI
 
-**page_group** - Optional. Dislay On in layout updates in UI
+**page_group** - Optional. Display On in layout updates in UI
 
 **layout_handle** - Optional. Layout applying to the page_group
 
@@ -734,9 +850,8 @@ The result will need a few edits to work properly: The ids in `store_view_codes`
 
 *File Name* - pages.csv
 
-This file is used to add or update pages.  Updates are made by using the key of store_view_code and identifier
-
-> Out of Scope: Any property of a page that is not listed.
+This file is used to add or update pages.  Updates are made by using the key of `store_view_code` and `identifier`
+Most information can be extracted from the Magento Admin UI from the Pages grid by selecting the required blocks and selecting the *Export Content* Action
 
 *Columns*
 **store_view_code** - Optional. Store View the page should be assigned to. If none is provided, the code of the view defined in settings.csv, or the global default of *default* is used.
@@ -751,6 +866,8 @@ This file is used to add or update pages.  Updates are made by using the key of 
 **page\_layout** - Optional. Default = cms-full-width. Value entered in Design->Layout section of UI.  Acceptable values include empty, 1column, 2columns-left, 2columns-right, 3columns, cms-full-width ,category-full-width, product-full-width
 
 **meta\_keywords** - Optional
+
+**meta\title** - Optional
 
 **meta\_description** - Optional
 
@@ -782,7 +899,7 @@ This file is used to add reviews and ratings to products. If a review already ex
 
 Quality, Price and Value rating codes are installed by default but the visibility is not set for a website, so those values could not be used unless activated in the admin before the data is imported.
 
-> Out of Scope: Support for mulitple ratings per review. Updating of existing reviews or ratings.
+> Out of Scope: Support for multiple ratings per review. Updating of existing reviews or ratings.
 
 *Columns*
 
@@ -800,22 +917,145 @@ Quality, Price and Value rating codes are installed by default but the visibilit
 
 **email** - Optional. Email of a registered customer to attach review to.
 
-Content
-Note on pages...names to use to replace the default install pages
+### B2B Approval Rules
 
-# Content subsitution
+*File Name* - b2b_approval_rules.csv
 
-There are some elements of content, particularily from Page Builder, that reference IDs of blocks, categories, etc. Because those IDs aren't known until something is installed, there needs to be a mechanism to reference those elements to be replaced with IDs later.
+This file is used to add and update B2B Approval Rules. `company_name` and `name` are keys and are used for updates. Currently the ability to use Approval Rules needs to be set manually per company in the Admin.
+
+*Columns*
+**company_name** - Required
+**name** - Required
+**description** - Optional
+**is_active** - Optional (values Y/N), defaults to Y
+**apply_to_roles** - Required. Comma delimited list of roles to apply the rule to. This includes any custom company roles created, along with `Default User`
+**rule_type** - Required. Value is one of `grand_total`, `shipping_incl_tax`, `number_of_skus`
+**rule** - Required. Value is one of `>`,`<`,`>=`,`<=`
+**amount_value** - Required
+**currency_code** - Optional, defaults to `USD`. Needs to be a valid currency code
+**approval_from** - Required. Comma delimited list of approval roles. This includes any custom company roles created, along with `Default User`,`Company Administrator` and `Purchaser's Manager` 
+### B2b Companies
+
+*File Name* - b2b_companies.csv
+
+This file is used to add companies. Updates are made by using `company_name` as key
+
+*Columns*
+**company_name** - Required
+**site_code** - Optional. Will default to the `site_code` defined in `settings.csv`
+**street** - Required
+**city** - Required
+**country_id** - Required
+**region** - Required
+**postcode** - Required
+**telephone** - Required
+**status** - Optional (Values Y/N), Defaults to Y
+**credit_limit** - Optional
+**company_email** - Optional, will default to `company_admin`
+**company_admin** - Email Address of Company Admin as defined in `b2b_customers.csv`
+### B2B Company Roles
+
+*File Name* - b2b_company_roles.csv
+
+This file is used to add company customer roles. Values cannot be updated, so each role will be recreated on update. It is recommended to create the roles in a Magento instance and then extract them from the DB
+`select c.company_name,cr.role_name as 'role', cp.resource_id 
+from company_permissions cp, company_roles cr, company c
+where cp.role_id = cr.role_id
+and cr.company_id = c.entity_id
+and cr.role_name in ('Buyer') 
+and cp.permission = 'allow'`
+
+*Columns*
+**company_name** - Required
+**role** - Required. Name of role to create
+**resource_id** - Required. Valid Magento ACL resource. Example - `Magento_Company::index`
+
+### B2B Customers
+
+*File Name* - b2b_customers.csv
+
+This file is used to add the customers within a company. A regular customer file format can be used as outlined in [**customers.csv**](#customers)
+
+There are a few required columns that will need to be added
+**company_name** - As defined in `b2b_companies.csv`
+**company_admin** - (Y/N) Sets this customer as the company admin. Only one admin per company is allowed
+**role** - Customer role as defined in `b2b_company_roles.csv`
+
+### B2B Requisition Lists
+
+*File Name* - b2b_requisition_lists.csv
+
+This file is used to add Requisition Lists to Customers. Updates are done by using `name` and `customer_email` as key.
+
+*Columns*
+**customer_email** - Required. Should be an email defined in `b2b_customers.csv`
+**site_code** - Optional.  Will default to value in `settings.csv`. HOWEVER it needs to match the website that `customer_email` was created in
+**name** - Required
+**description** - Optional
+**skus** - Optional. A comma and pipe delimited list of sku|quantity. *Example* - `24-MB01|5,10061|2 `. If no quantity is given it will be set to 1. If the sku is invalid the product will still be added, but will show as invalid in the requisition list
+
+### B2B Sales Reps
+
+*File Name* - b2b_sales_reps.csv
+
+This file is used to add company sales reps. These are different in that they aren't company users, but have access to the Magento admin to process orders and quotes, build catalogs, etc. Update key is `username`.
+
+*Columns*
+**email** - Required
+**username** - Required
+**firstname** - Required
+**lastname** - Required
+**password** - Required
+**company** - Required. Should match company in `b2b_companies.csv`
+**role** - Required. Should match role in `admin_roles.csv`
+
+### B2B Shared Catalogs
+
+*File Name* - b2b_shared_catalogs.csv
+
+This file is used to add and update Shared Catalogs. Update is done using `name` as key
+
+*Columns*
+**name** - Required
+**companies** - Optional. Comma delimited list of companies defined in `b2b_companies.csv` to tie to the catalog
+**type** - Optional. Values `Custom` or `Public`. Defaults to `Custom`. Remember you are only allowed one `Public` catalog
+**description** - Optional
+
+### B2B Shared Catalog Categories
+
+*File Name* - b2b_shared_catalog_categories.csv
+
+This file assigns the category and its contained products to a shared catalog. One row per category added.On an update the data is reset to the incoming values. 
+
+*Columns*
+**shared_catalog** - Required. Catalog as defined in `b2b_shared_catalogs`
+**category** - Required. Full path of category to add *Example*:`B2B Root Category/Gear/Bags/Duffel`
+
+
+### B2B Teams
+
+*File Name* - b2b_teams.csv
+
+This file is used to set up company structure, add teams and assign users to them. Only one level of nesting is supported. Teams are assigned to the admin user, and company customers assigned to the Team. On update, structure and members can be updated by `name`. However, `name` itself cannot be updated
+
+*Columns*
+**site_code** - Optional. Will default to value in `settings.csv`. This code needs to match the website that the `members` were created in
+**name** - Required
+**company_name** - Required. Company defined in `b2b_companies.csv`
+**members** - Optional. Comma delimited list of email addresses defined in `b2b_customers.csv`
+# Content substitution
+
+There are some elements of content, particularly from Page Builder, that reference IDs of blocks, categories, etc. Because those IDs aren't known until something is installed, there needs to be a mechanism to reference those elements to be replaced with IDs later.
 
 For example, the following code would be seen in Page Builder content when including a block
 
 `{{widget type="Magento\Cms\Block\Widget\Block" template="widget/static_block/default.phtml" block_id="3" type_name="CMS Static Block"}}`
 
-The block included (Contact us info) in the current installation has an id of 3, which may not be the case in any new data installation. In order to have the content work in other installations, we need to replace the ID of the block we want to include (3) with a string that includes its idendifier (contact-us-info).  
+The block included (Contact us info) in the current installation has an id of 3, which may not be the case in any new data installation. In order to have the content work in other installations, we need to replace the ID of the block we want to include (3) with a string that includes its identifier (contact-us-info).  
 
 `{{widget type="Magento\Cms\Block\Widget\Block" template="widget/static_block/default.phtml" block_id="{{block code="contact-us-info"}}" type_name="CMS Static Block"}}`
 
-If no correct replacement is found, the substituion will not occur.
+If no correct replacement is found, the substitution will not occur.
 
 Here is a list of all substitutions currently supported
 
@@ -852,4 +1092,8 @@ Here is a list of all substitutions currently supported
 **Dynamic Block** - `{{dynamicblock name="<block name>"}}`\
 *example* - `{{dynamicblock name="VIP Header"}}`
 
+**pages** - `{{pageid key="<page identifier>"}}`\
+*example* - `{{pageid key="new-home-page"}}`
+
 # Content export
+TBD

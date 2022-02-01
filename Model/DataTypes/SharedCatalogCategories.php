@@ -15,6 +15,7 @@ use Magento\SharedCatalog\Model\CatalogPermissionManagement;
 use Magento\SharedCatalog\Model\ResourceModel\Permission\CategoryPermissions\ScheduleBulk;
 use Magento\Framework\App\Area as AppArea;
 use Magento\Framework\App\State;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class SharedCatalogCategories
 {
@@ -47,6 +48,9 @@ class SharedCatalogCategories
      /** @var State */
     protected $appState;
 
+    /** @var Helper */
+    protected $helper;
+
     /**
      * SharedCatalogCategories constructor.
      * @param SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface
@@ -57,6 +61,7 @@ class SharedCatalogCategories
      * @param SharedCatalogAssignment $sharedCatalogAssignment
      * @param CatalogPermissionManagement $catalogPermissionManagement
      * @param ScheduleBulk $scheduleBulk
+     * @param Helper $helper
      */
     public function __construct(
         SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface,
@@ -67,7 +72,8 @@ class SharedCatalogCategories
         SharedCatalogAssignment $sharedCatalogAssignment,
         CatalogPermissionManagement $catalogPermissionManagement,
         ScheduleBulk $scheduleBulk,
-        State $appState
+        State $appState,
+        Helper $helper
     ) {
         $this->sharedCatalogRepository = $sharedCatalogRepositoryInterface;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
@@ -78,6 +84,7 @@ class SharedCatalogCategories
         $this->catalogPermissionManagement = $catalogPermissionManagement;
         $this->scheduleBulk = $scheduleBulk;
         $this->appState = $appState;
+        $this->helper = $helper;
     }
 
     /**
@@ -90,6 +97,16 @@ class SharedCatalogCategories
      */
     public function install(array $rows, array $header, string $modulePath, array $settings)
     {
+        if (!in_array('shared_catalog', $header)) {
+            $this->helper->printMessage("b2b_shared_catalog_categories requires a shared_catalog column.", "warning");
+            return true;
+        }
+
+        if (!in_array('category', $header)) {
+            $this->helper->printMessage("b2b_shared_catalog_categories requires a category column.", "warning");
+            return true;
+        }
+        
         foreach ($rows as $row) {
             $categoryRowArray[] = array_combine($header, $row);
         }
@@ -136,7 +153,15 @@ class SharedCatalogCategories
                 //get ids of added categories by path
                 $newCategories = $this->getCategoriesByPath($categoryArray, $settings);
                 //add new categories
-                $this->categoryManagementInterface->assignCategories($catalogId, $newCategories);
+                try {
+                    $this->categoryManagementInterface->assignCategories($catalogId, $newCategories);
+                } catch (\Exception $e) {
+                    $this->helper->printMessage("b2b_shared_catalog_categories generated an error. "
+                    ."This could be due to incorrect values in the file, or a category may be disabled", "warning");
+                    $this->helper->printMessage($e->getMessage(), "warning");
+                    return true;
+                }
+                
                 //add products in categories
                 $catgoryIds = $this->getCategoryIds($newCategories);
                 $this->sharedCatalogAssignment->assignProductsForCategories($catalogId, $catgoryIds);
@@ -153,6 +178,7 @@ class SharedCatalogCategories
                 );
                 $this->scheduleBulk->execute($allCategoryIds, $groupIds);
             }
+            ;
         }
     }
 

@@ -7,6 +7,7 @@ namespace MagentoEse\DataInstall\Model\DataTypes;
 use Magento\Authorization\Model\RoleFactory;
 use Magento\Authorization\Model\ResourceModel\Role\CollectionFactory as RoleCollection;
 use Magento\Authorization\Model\RulesFactory;
+use MagentoEse\DataInstall\Helper\Helper;
 
 class AdminRoles
 {
@@ -20,20 +21,26 @@ class AdminRoles
     /** @var RulesFactory */
     protected $rulesFactory;
 
+    /** @var Helper */
+    protected $helper;
+
     /**
      * AdminRoles constructor.
      * @param RoleFactory $roleFactory
      * @param RoleCollection $roleCollection
      * @param RulesFactory $rulesFactory
+     * @param Helper $helper
      */
     public function __construct(
         RoleFactory $roleFactory,
         RoleCollection $roleCollection,
-        RulesFactory $rulesFactory
+        RulesFactory $rulesFactory,
+        Helper $helper
     ) {
         $this->roleFactory = $roleFactory;
         $this->roleCollection = $roleCollection;
         $this->rulesFactory = $rulesFactory;
+        $this->helper = $helper;
     }
 
     /**
@@ -44,6 +51,8 @@ class AdminRoles
      */
     public function install($rows, $header)
     {
+        //this import is set as file type as the resources need to be added as a complete array
+        //and connot be added individually
         $rolesData = [];
         foreach ($rows as $row) {
             $rolesArray[] = array_combine($header, $row);
@@ -51,6 +60,8 @@ class AdminRoles
         foreach ($rolesArray as $roleRow) {
             if (!empty($roleRow['role']) && !empty($roleRow['resource_id'])) {
                 $rolesData[$roleRow['role']][]=$roleRow['resource_id'];
+            } else {
+                $this->helper->printMessage("admin_role does not include role or resource_id, row skipped", "warning");
             }
         }
 

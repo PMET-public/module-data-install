@@ -117,7 +117,7 @@ class Block extends Action implements HttpPostActionInterface
         $result = [];
         //$customerData = $customer->getData();
         $result[] = [
-            'indentifier',
+            'identifier',
             'title',
             'content'
         ];

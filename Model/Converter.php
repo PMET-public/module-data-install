@@ -22,6 +22,8 @@ use Magento\Banner\Model\ResourceModel\Banner\CollectionFactory as BannerCollect
 use Magento\Eav\Api\AttributeSetRepositoryInterface;
 use Magento\Customer\Model\ResourceModel\Attribute\CollectionFactory as CustomerAttributeCollectionFactory;
 use Magento\Store\Api\StoreRepositoryInterface;
+use Magento\Cms\Api\PageRepositoryInterface;
+use Magento\Cms\Api\Data\PageInterface;
 
 class Converter
 {
@@ -76,6 +78,9 @@ class Converter
     /** @var StoreRepositoryInterface  */
     protected $storeRepository;
 
+    /** @var PageRepositoryInterface  */
+    protected $pageRepository;
+
     /**
      * Converter constructor.
      * @param CategoryCollectionFactory $categoryFactory
@@ -91,6 +96,7 @@ class Converter
      * @param GroupRepositoryInterface $groupRepository
      * @param CustomerAttributeCollectionFactory $customerAttributeCollectionFactory
      * @param StoreRepositoryInterface $storeRepository
+     * @param PageRepositoryInterface $pageRepository
      */
     public function __construct(
         CategoryCollectionFactory $categoryFactory,
@@ -105,7 +111,8 @@ class Converter
         AttributeSetRepositoryInterface $attributeSetRepository,
         GroupRepositoryInterface $groupRepository,
         CustomerAttributeCollectionFactory $customerAttributeCollectionFactory,
-        StoreRepositoryInterface $storeRepository
+        StoreRepositoryInterface $storeRepository,
+        PageRepositoryInterface $pageRepository
     ) {
         $this->categoryFactory = $categoryFactory;
         $this->eavConfig = $eavConfig;
@@ -120,6 +127,7 @@ class Converter
         $this->groupRepository = $groupRepository;
         $this->customerAttributeCollectionFactory = $customerAttributeCollectionFactory;
         $this->storeRepository = $storeRepository;
+        $this->pageRepository = $pageRepository;
     }
 
     /**
@@ -162,7 +170,9 @@ class Converter
         $matches = $this->getMatches($content);
         if (!empty($matches['value'])) {
             $replaces = $this->getReplaces($matches);
-            $content = preg_replace($replaces['regexp'], $replaces['value'], $content);
+            if (!empty($replaces)) {
+                $content = preg_replace($replaces['regexp'], $replaces['value'], $content);
+            }
         }
 
         return $content;
@@ -192,6 +202,8 @@ class Converter
         preg_match_all($regexp, $content, $matchesBlock);
         $regexp = '/{{(dynamicblock) name="([^"]*)"}}/';
         preg_match_all($regexp, $content, $matchesDynamicBlock);
+        $regexp = '/{{(pageid[^ ]*) key="([^"]+)"}}/';
+        preg_match_all($regexp, $content, $matchesPageId);
         $regexp = '/{{(attributeset) name="([^"]*)"}}/';
         preg_match_all($regexp, $content, $matchesAttributeSet);
         $regexp = '/{{(customergroup) name="([^"]*)"}}/';
@@ -204,6 +216,7 @@ class Converter
             $matchesSegment[1],
             $matchesBlock[1],
             $matchesDynamicBlock[1],
+            $matchesPageId[1],
             $matchesAttributeSet[1],
             $matchesCustomerGroup[1],
             $matchesProductUrl[1],
@@ -220,6 +233,7 @@ class Converter
                 $matchesSegment[1],
                 $matchesBlock[1],
                 $matchesDynamicBlock[1],
+                $matchesPageId[1],
                 $matchesAttributeSet[1],
                 $matchesCustomerGroup[1],
                 $matchesProductUrl[1],
@@ -234,6 +248,7 @@ class Converter
                 $matchesSegment[2],
                 $matchesBlock[2],
                 $matchesDynamicBlock[2],
+                $matchesPageId[2],
                 $matchesAttributeSet[2],
                 $matchesCustomerGroup[2],
                 $matchesProductUrl[2],
@@ -352,6 +367,30 @@ class Converter
             $blockId = $block->getId();
             $replaceData['regexp'][] = '/{{block code="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = $blockId;
+        }
+
+        return $replaceData;
+    }
+
+    /**  ********  */
+    /**  Pages    */
+    /**  *******   */
+
+    /**
+     * @param string $matchValue
+     * @return array
+     * @throws LocalizedException
+     */
+    protected function matcherPageId(string $matchValue)
+    {
+        $replaceData = [];
+        $search = $this->searchCriteriaBuilder
+            ->addFilter(PageInterface::IDENTIFIER, $matchValue, 'eq')->create()->setCurrentPage(1);
+        $pageList = $this->pageRepository->getList($search)->getItems();
+        foreach ($pageList as $page) {
+            $pageId = $page->getId();
+            $replaceData['regexp'][] = '/{{pageid key="' . preg_quote($matchValue) . '"}}/';
+            $replaceData['value'][] = $pageId;
         }
 
         return $replaceData;

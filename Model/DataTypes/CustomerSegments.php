@@ -89,7 +89,11 @@ class CustomerSegments
             $row['site_code'] = $settings['site_code'];
         }
         //convert site codes to ids, put in array
-        $siteCodes = explode(",", $row['site_code']);
+        if ($row['site_code']=='all') {
+            $siteCodes = $this->stores->getAllWebsiteCodes();
+        } else {
+            $siteCodes = explode(",", $row['site_code']);
+        }
         $siteIds = [];
         foreach ($siteCodes as $siteCode) {
             $siteCode = $this->stores->replaceBaseWebsiteCode($siteCode);

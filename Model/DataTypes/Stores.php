@@ -181,7 +181,7 @@ class Stores
      * @throws LocalizedException
      * @throws UrlAlreadyExistsException
      */
-    public function install(array $data, array $settings)
+    public function install(array $data, array $settings, $cliHost)
     {
         $this->settings = $settings;
         $this->helper->printMessage("--------------------", "header");
@@ -192,6 +192,9 @@ class Stores
             $this->helper->printMessage("-updating site", "info");
             $website = $this->setSite($data);
             //if there is a host value, set base urls
+            if ($cliHost) {
+                $data['host']=$cliHost;
+            }
             if (!empty($data['host'])) {
                 switch ($data['host']) {
                     case 'subdirectory':
@@ -523,6 +526,23 @@ class Stores
     {
         $defaultWebsite = $this->websiteRepository->getDefault();
         return $defaultWebsite->getCode();
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllWebsiteCodes()
+    {
+        $siteList=[];
+        $sites = $this->websiteRepository->getList();
+        foreach ($sites as $site) {
+            ///remove admin because its not a valid view for these purposes
+            if ($site->getCode()!='admin') {
+                $siteList[]=$site->getCode();
+            }
+        }
+
+        return $siteList;
     }
 
     /**

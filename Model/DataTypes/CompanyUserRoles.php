@@ -45,6 +45,9 @@ class CompanyUserRoles
     /** @var AclInterface */
     protected $acl;
 
+    /** @var Stores */
+    protected $stores;
+
     /**
      * CompanyUserRoles constructor.
      * @param Helper $helper
@@ -55,6 +58,7 @@ class CompanyUserRoles
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param CustomerRepositoryInterface $customerRepository
      * @param AclInterface $aclInterface
+     * @param Stores $stores
      */
     public function __construct(
         Helper $helper,
@@ -64,7 +68,8 @@ class CompanyUserRoles
         CompanyRepositoryInterface $companyRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
         CustomerRepositoryInterface $customerRepository,
-        AclInterface $aclInterface
+        AclInterface $aclInterface,
+        Stores $stores
     ) {
         $this->helper = $helper;
         $this->roleRepository = $roleRepositoryInterface;
@@ -74,6 +79,7 @@ class CompanyUserRoles
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->customerRepository = $customerRepository;
         $this->acl = $aclInterface;
+        $this->stores = $stores;
     }
 
     /**
@@ -85,13 +91,23 @@ class CompanyUserRoles
      */
     public function install($row, $settings)
     {
+        if (empty($row['site_code'])) {
+            $row['site_code'] = $settings['site_code'];
+        }
+        $websiteId = $this->stores->getWebsiteId($row['site_code']);
         //skip company admin roles
         if (!empty($row['role']) && $row['company_admin']!='Y') {
+            $companyid = $this->getCompanyId($row['company']);
+            if (!$companyid) {
+                $this->helper->printMessage("The company ". $row['company'] .
+                " in setting user roles does not exist", "warning");
+                return true;
+            }
             //does role exist, print message if it doesnt
             $role = $this->getCompanyRole($row['company'], $row['role']);
             if ($role) {
                 //add user to role
-                $userId = $this->customerRepository->get(trim($row['email']))->getId();
+                $userId = $this->customerRepository->get(trim($row['email']), $websiteId)->getId();
                 //assign role to user
                      $this->acl->assignUserDefaultRole($userId, $this->getCompanyId($row['company']));
                      $this->acl->assignRoles($userId, [$role]);
@@ -110,7 +126,7 @@ class CompanyUserRoles
      * @return RoleInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    private function getCompanyRole($companyName, $role)
+    public function getCompanyRole($companyName, $role)
     {
         $companyId = $this->getCompanyId($companyName);
         if ($companyId) {
@@ -139,7 +155,7 @@ class CompanyUserRoles
         $company = current($companyList->getItems());
         if (!$company) {
             $this->helper->printMessage("The company ". $companyName .
-            " requested in b2b_company_user_roles.csv does not exist", "warning");
+            " in setting user roles does not exist", "warning");
             return false;
         } else {
             return $company->getId();

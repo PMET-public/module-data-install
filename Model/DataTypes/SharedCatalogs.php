@@ -72,8 +72,17 @@ class SharedCatalogs
      */
     public function install(array $row, array $settings)
     {
+        //required - name, companies is optional, but set column if it doesnt exist
+        if (empty($row['name'])) {
+            $this->helper->printMessage("name is required in b2b_shared_catalogs.csv, row skipped", "warning");
+                return true;
+        }
+
+        if (empty($row['companies'])) {
+            $row['companies'] = '';
+        }
         //check for existing shared catalog to update
-         /** @var SharedCatalogInterface $sharedCatalog */
+        /** @var SharedCatalogInterface $sharedCatalog */
         $sharedCatalog = $this->getSharedCatalogByName($row['name']);
 
         if (!$sharedCatalog) {
@@ -111,7 +120,6 @@ class SharedCatalogs
             $this->companyManagementInterface->assignCompanies($sharedCatalog->getId(), $companiesToAssign);
         }
 
-        //$r = $u;
         return true;
     }
 

@@ -7,8 +7,17 @@
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
     <table name="magentoese_data_installer_recurring">
         <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity Id"/>
-         <column xsi:type="varchar" name="module_name" nullable="false" length="255" comment="Module Name"/>
+         <column xsi:type="varchar" name="module_name" nullable="false" length="255" comment="Directory path of data installed"/>
         <column xsi:type="int" name="is_installed" padding="10" unsigned="true" nullable="false" comment="Recurring elements installed"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="magentoese_data_installer_log">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity Id"/>
+         <column xsi:type="text" name="message" nullable="false" comment="message logged"/>
+        <column xsi:type="varchar" length="50" name="level" nullable="false" comment="type of message" default="info"/>
+        <column xsi:type="timestamp" name="add_date" nullable="false" default="CURRENT_TIMESTAMP"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>
         </constraint>

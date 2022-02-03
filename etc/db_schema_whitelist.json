@@ -8,5 +8,16 @@
         "constraint": {
             "PRIMARY": true
         }
+    },
+    "magentoese_data_installer_log": {
+        "column": {
+            "id": true,
+            "message": true,
+            "level": true,
+            "add_date": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
     }
 }

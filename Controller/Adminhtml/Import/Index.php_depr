@@ -1,16 +1,6 @@
 <?php
 namespace MagentoEse\DataInstall\Controller\Adminhtml\Import;
 
-use Magento\Backend\App\Action\Context;
-use Magento\Framework\App\Action\HttpGetActionInterface;
-use Magento\Framework\View\Result\Page;
-use Magento\Framework\View\Result\PageFactory;
-
-//https://inchoo.net/magento-2/file-upload-in-magento-2-store-configuration/
-//https://www.mageplaza.com/devdocs/four-steps-to-create-a-custom-form-in-magento-2.html
-//*****https://magecomp.com/blog/add-custom-file-upload-control-magento-2/ 
-
-
 use Magento\Backend\App\Action;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Exception\LocalizedException;
@@ -24,9 +14,9 @@ class Index extends Action
  
     protected $uploaderFactory;
  
-    protected $allowedExtensions = ['csv']; // to allow file upload types 
+    protected $allowedExtensions = ['csv']; // to allow file upload types
  
-    protected $fileId = 'file'; // name of the input file box  
+    protected $fileId = 'file'; // name of the input file box
     
     /** @var \ZipArchive */
     protected $zip;
@@ -55,18 +45,17 @@ class Index extends Action
         $zip = new \ZipArchive;
   
 // Zip File Name
-if ($zip->open($destinationPath.'BaseB2cWebsite.zip') === TRUE) {
-  
-    // Unzip Path
-    //directory is created if it doesnt exist
-    $zip->extractTo($destinationPath.'tmp-archive');
-    $zip->close();
-    echo 'Unzipped Process Successful!';
-} else {
-    echo 'Unzipped Process failed';
-}
+        if ($zip->open($destinationPath.'b2bsample.zip') === true) {
+            // Unzip Path
+            //directory is created if it doesnt exist
+            $zip->extractTo($destinationPath.'tmp-archive');
+            $zip->close();
+            echo 'Unzipped Process Successful!';
+        } else {
+            echo 'Unzipped Process failed';
+        }
         $operation = [];
-        $operation['fileSource']='var/tmp/tmp-archive/BaseB2cWebsite';
+        $operation['fileSource']='var/tmp/tmp-archive/b2bsample';
         $operation['load']=[];
         $operation['fileOrder']='';
         $operation['reload']='1';

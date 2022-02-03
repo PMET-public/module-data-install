@@ -8,9 +8,6 @@ use Magento\Framework\DataObject\IdentityGeneratorInterface;
 use Magento\Authorization\Model\UserContextInterface;
 use Magento\Framework\UrlInterface;
 
-/**
- * Class ScheduleBulk
- */
 class ScheduleBulk
 {
     /**
@@ -80,21 +77,17 @@ class ScheduleBulk
      */
     public function execute($operationData)
     {
-        
-        //$this->validateProductAttributes($attributesData);
-        //$this->publish(['attributes'=>'1'], ['webremove'=>'1'], ['webaddd'=>'1'], 0, 0, [1,2,3,4]);
-        
         $operationCount = count($operationData);
         if ($operationCount > 0) {
             $bulkUuid = $this->identityService->generateId();
-            $bulkDescription = 'Data Vertical Import - '.$operationData[0]['fileSource'];
+            $bulkDescription = 'Data Pack Import - '.basename($operationData[0]['packFile'],'.zip');
 
             $operations = [];
             foreach ($operationData as $operation) {
-
                 $serializedData = [
-                    'meta_information' => 'Data Pack Import',//this data will be displayed in Failed item grid in the column "Meta Info"
-                    'filesource'  => $operation['fileSource'], 
+                    'meta_information' => 'Data Pack Import',
+                    //this data will be displayed in Failed item grid in the column "Meta Info"
+                    'filesource'  => $operation['fileSource'],
                     'load' => $operation['load'],
                     'fileorder' => $operation['fileOrder'],
                     'reload' => $operation['reload'],
@@ -115,9 +108,8 @@ class ScheduleBulk
                 /** @var OperationInterface $operation */
                 $operation = $this->operationFactory->create($data);
                 $operations[] = $operation;
-
             }
-            //TODO:Remove 
+            //TODO:Remove
             //$userId = $this->userContext->getUserId();
             $userId = 1;
             $result = $this->bulkManagement->scheduleBulk($bulkUuid, $operations, $bulkDescription, $userId);
@@ -128,5 +120,4 @@ class ScheduleBulk
             }
         }
     }
-   
 }

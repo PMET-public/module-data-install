@@ -46,10 +46,8 @@ class Consumer
      * @var Process
      */
     private $process;
-
    
     public function __construct(
-       
         OperationManagementInterface $operationManagement,
         LoggerInterface $logger,
         SerializerInterface $serializer,
@@ -128,11 +126,18 @@ class Consumer
      */
     private function execute($data): void
     {
+       //loadFiles($fileSource, $load = '', array $fileOrder = [], $reload = 0, $host = null)
         $this->process->loadFiles(
-        $data['filesource']//,
-        //$data['load'],
-        //$data['fileorder'],
-        //$data['reload']
-    );
+            $data['filesource']//,
+            //$data['load'],
+            //$data['fileorder'],
+            //$data['reload']
+        );
+        $this->process->loadFiles(
+            $data['filesource'],
+            '',//$data['load'],
+            ['msi_inventory.csv'],//$data['fileorder'],
+            1//$data['reload']
+        );
     }
 }

@@ -1,50 +1,29 @@
 <?php
 namespace MagentoEse\DataInstall\Controller\Adminhtml\Import;
 
-use Magento\Backend\App\Action;
-use Magento\Backend\App\Action\Context;
-use Magento\Framework\App\Action\HttpGetActionInterface;
-use Magento\Framework\View\Result\Page;
-use Magento\Framework\View\Result\PageFactory;
-
-/**
- * Class Index
- */
-class Upload extends Action implements HttpGetActionInterface
+class Upload extends \Magento\Backend\App\Action
 {
-    const MENU_ID = 'MagentoEse_DataInstall::import_vertical';
 
     /**
-     * @var PageFactory
+     *
+     * @var \Magento\Framework\View\Result\PageFactory
      */
     protected $resultPageFactory;
-
-    /**
-     * Index constructor.
-     *
-     * @param Context $context
-     * @param PageFactory $resultPageFactory
-     */
+  
     public function __construct(
-        Context $context,
-        PageFactory $resultPageFactory
+        \Magento\Backend\App\Action\Context $context,
+        \Magento\Framework\View\Result\PageFactory $resultPageFactory
     ) {
         parent::__construct($context);
-
         $this->resultPageFactory = $resultPageFactory;
     }
-
-    /**
-     * Load the page defined in view/adminhtml/layout/exampleadminnewpage_helloworld_index.xml
-     *
-     * @return Page
-     */
+  
     public function execute()
     {
+      /** @var \Magento\Backend\Model\View\Result\Page $resultPage */
         $resultPage = $this->resultPageFactory->create();
-        $resultPage->setActiveMenu(static::MENU_ID);
-        $resultPage->getConfig()->getTitle()->prepend(__('Vertical Importer'));
-
+        $resultPage->setActiveMenu('MagentoEse_DataInstall::import_vertical');
+        $resultPage->getConfig()->getTitle()->prepend(__('Import Data Pack'));
         return $resultPage;
     }
 }

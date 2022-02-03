@@ -9,7 +9,6 @@ class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
      * @param string $name
      * @param string $primaryFieldName
      * @param string $requestFieldName
-     * @param CollectionFactory $employeeCollectionFactory
      * @param array $meta
      * @param array $data
      */
@@ -35,7 +34,7 @@ class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
         return [];
     }
     public function addFilter(\Magento\Framework\Api\Filter $filter)
-{
-    return null;
-}
+    {
+        return null;
+    }
 }

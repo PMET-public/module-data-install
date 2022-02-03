@@ -21,7 +21,6 @@ use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 use MagentoEse\DataInstall\Model\Conf;
 
-
 class Process
 {
     const FIXTURE_DIRECTORY = 'data';

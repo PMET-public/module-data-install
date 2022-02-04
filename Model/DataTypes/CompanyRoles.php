@@ -120,7 +120,7 @@ class CompanyRoles
         /** @var CompanyInterface $company */
         $company = current($companyList->getItems());
         if (!$company) {
-            $this->helper->printMessage("The company ". $companyName .
+            $this->helper->logMessage("The company ". $companyName .
             " requested in b2b_customers.csv does not exist", "warning");
             return false;
         } else {

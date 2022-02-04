@@ -102,8 +102,12 @@ class Install extends Command
         } else {
             $fileArray = explode(",", $files);
         }
+        if($reload===null){
+             $reload=1;
+        }
+        $jobSettings = ['filesource'=>$module,'load'=>$load,'reload'=>$reload,'fileorder'=>$fileArray,'host'=>$host];
         $process = $this->objectManagerInterface->create(Process::class);
-        if ($process->loadFiles($module, $load, $fileArray, $reload, $host)==0) {
+        if ($process->loadFiles($jobSettings)==0) {
             $output->writeln("No files found to load in " . $module.
             " Check the your values of --load or --files if used, or the default set in the datapack");
         }

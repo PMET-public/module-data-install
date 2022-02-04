@@ -15,8 +15,10 @@
     </table>
     <table name="magentoese_data_installer_log">
         <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity Id"/>
-         <column xsi:type="text" name="message" nullable="false" comment="message logged"/>
+        <column xsi:type="varchar" length="255" name="job_id" nullable="true" comment="id of scheduled job"/>
+        <column xsi:type="varchar" length="255" name="datapack" nullable="false" comment="path of data pack"/>
         <column xsi:type="varchar" length="50" name="level" nullable="false" comment="type of message" default="info"/>
+        <column xsi:type="text" name="message" nullable="false" comment="message logged"/>
         <column xsi:type="timestamp" name="add_date" nullable="false" default="CURRENT_TIMESTAMP"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>

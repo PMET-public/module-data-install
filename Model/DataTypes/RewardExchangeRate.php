@@ -58,20 +58,20 @@ class RewardExchangeRate
         //direction 1 = points to currency
         //direction 2 = currency to points
         if (empty($row['points'])) {
-            $this->helper->printMessage("A value for points is required for a reward exchange rate. ".
+            $this->helper->logMessage("A value for points is required for a reward exchange rate. ".
             "Row has been skipped.", "warning");
             return true;
         }
 
         if (empty($row['currency_amount'])) {
-            $this->helper->printMessage("A value for currency_amount is required for a reward exchange rate. ".
+            $this->helper->logMessage("A value for currency_amount is required for a reward exchange rate. ".
             "Row has been skipped.", "warning");
             return true;
         }
 
         if (empty($row['direction']) || ($row['direction'] != 'points_to_currency' && $row['direction']
         != 'currency_to_points')) {
-            $this->helper->printMessage("A direction of either points_to_currency or currency_to_points is required ".
+            $this->helper->logMessage("A direction of either points_to_currency or currency_to_points is required ".
             "for a reward exchange rate. Row has been skipped.", "warning");
             return true;
         }
@@ -113,7 +113,7 @@ class RewardExchangeRate
         //try{
             $this->rateResourceModel->save($rate);
         //}catch(AlreadyExistsException $e){
-        //    $this->helper->printMessage("already exists","warning");
+        //    $this->helper->logMessage("already exists","warning");
         //    $this->rateResourceModel->delete($rate);
         //}
 

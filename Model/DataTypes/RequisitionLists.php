@@ -64,7 +64,7 @@ class RequisitionLists
     public function install(array $row, array $settings)
     {
         if (empty($row['name'])) {
-            $this->helper->printMessage("Requisition List requires a name, row skipped", "warning");
+            $this->helper->logMessage("Requisition List requires a name, row skipped", "warning");
             return true;
         }
 
@@ -79,7 +79,7 @@ class RequisitionLists
         try {
             $customer = $this->customerRepository->get($row['customer_email'], $websiteId);
         } catch (\Exception $e) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "Requistion list ".$row['name']." cannot be created. Customer ".
                 $row['customer_email']." does not exist",
                 "warning"

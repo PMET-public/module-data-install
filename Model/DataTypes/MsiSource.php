@@ -79,35 +79,35 @@ class MsiSource
         //name, source_code,country, region, postcode required
         //If its a pickup location, phone, city, street are required
         if (empty($row['source_code'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "A row in msi_source file does not have a value for source_code. Row is skipped",
                 "warning"
             );
             return true;
         }
         if (empty($row['name'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 $row['source_code']." in msi_source file does not have a value for name. Row is skipped",
                 "warning"
             );
             return true;
         }
         if (empty($row['country_id'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 $row['source_code']." in msi_source file does not have a value for country_id. Row is skipped",
                 "warning"
             );
             return true;
         }
         if (empty($row['region_id'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 $row['source_code']." in msi_source file does not have a value for region_id. Row is skipped",
                 "warning"
             );
             return true;
         }
         if (empty($row['postcode'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 $row['source_code'].
                 " in msi_source file does not have a value for postcode. Row is skipped",
                 "warning"
@@ -119,7 +119,7 @@ class MsiSource
         }
         if ($row['is_pickup_location_active']==1) {
             if (empty($row['city'])) {
-                $this->helper->printMessage(
+                $this->helper->logMessage(
                     "An msi source is flagged as a pickup location, but city is not defined. "."
                 Row is skipped",
                     "warning"
@@ -127,7 +127,7 @@ class MsiSource
                 return true;
             }
             if (empty($row['street'])) {
-                $this->helper->printMessage(
+                $this->helper->logMessage(
                     "An msi source is flagged as a pickup location, but street is not defined. "."
                 Row is skipped",
                     "warning"
@@ -135,7 +135,7 @@ class MsiSource
                 return true;
             }
             if (empty($row['phone'])) {
-                $this->helper->printMessage(
+                $this->helper->logMessage(
                     "An msi source is flagged as a pickup location, but phone is not defined. "."
                 Row is skipped",
                     "warning"

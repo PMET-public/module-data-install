@@ -183,13 +183,13 @@ class Pages
                         ->setStores($this->getStoreIds($row['store_view_code']))
                         ->save();
                     } catch (Exception $e) {
-                        $this->helper->printMessage("The Page ".$row['title']." cannot be updated.  ".
+                        $this->helper->logMessage("The Page ".$row['title']." cannot be updated.  ".
                         "It is likely conflicting with page data set elsewhere.", "warning");
                     }
                 }
             }
         } else {
-            $this->helper->printMessage("A row in pages.csv does not have a value in the identifier columnm. ".
+            $this->helper->logMessage("A row in pages.csv does not have a value in the identifier columnm. ".
                         "The row has been skipped.", "warning");
         }
 

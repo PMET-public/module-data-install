@@ -2,10 +2,10 @@
 /**
  * Copyright © Adobe, Inc. All rights reserved.
  */
-namespace MagentoEse\DataInstall\Model\ResourceModel\Logger;
+namespace MagentoEse\DataInstall\Model\ResourceModel\Installer;
 
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
-use MagentoEse\DataInstall\Model\ResourceModel\Logger;
+use MagentoEse\DataInstall\Model\ResourceModel\Installer;
 
 class Collection extends AbstractCollection
 {
@@ -17,8 +17,8 @@ class Collection extends AbstractCollection
     protected function __construct()
     {
         $this->_init(
-            \MagentoEse\DataInstall\Model\Logger::class,
-            Logger::class
+            \MagentoEse\DataInstall\Model\Installer::class,
+            Installer::class
         );
     }
 }

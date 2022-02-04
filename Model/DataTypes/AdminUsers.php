@@ -61,7 +61,7 @@ class AdminUsers
     public function install(array $row, array $settings)
     {
         if (empty($row['username']) || empty($row['firstname']) || empty($row['lastname']) || empty($row['password'])) {
-            $this->helper->printMessage("Required data for admin_users.csv is missing. Row skipped", "warning");
+            $this->helper->logMessage("Required data for admin_users.csv is missing. Row skipped", "warning");
             return true;
         }
         $user = $this->userCollection->create()->addFieldToFilter('username', ['eq' => $row['username']])
@@ -80,7 +80,7 @@ class AdminUsers
         } catch (Exception $e) {
             $messages = $e->getMessages();
             foreach ($messages as $message) {
-                $this->helper->printMessage($message->getText(), "warning");
+                $this->helper->logMessage($message->getText(), "warning");
             }
             return true;
         }
@@ -116,13 +116,13 @@ class AdminUsers
                 $userRole->setRoleName($user->getUserName());
                 $userRole->save();
             } else {
-                $this->helper->printMessage(
+                $this->helper->logMessage(
                     "Role ".$row['role']." for user ".$row['username']." does not exist",
                     "warning"
                 );
             }
         } else {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "Role ".$row['role']." for user ".$row['username']." does not exist",
                 "warning"
             );

@@ -143,7 +143,7 @@ class Reviews
         //check for required columns
         if (empty($row['sku']) || empty($row['reviewer']) || empty($row['summary'])
         || empty($row['review']) | empty($row['rating_code'])) {
-            $this->helper->printMessage("Review skipped -- one or more of the required values is missing", "warning");
+            $this->helper->logMessage("Review skipped -- one or more of the required values is missing", "warning");
             return true;
         }
         //get view id from view code, use admin if not defined
@@ -158,7 +158,7 @@ class Reviews
         $productId = $this->getProductIdBySku($row['sku']);
 
         if (empty($productId)) {
-            $this->helper->printMessage("Review skipped -- Product ".$row['sku']." not found", "warning");
+            $this->helper->logMessage("Review skipped -- Product ".$row['sku']." not found", "warning");
             return true;
         }
         /** @var \Magento\Review\Model\ResourceModel\Review\Collection $reviewCollection */
@@ -168,7 +168,7 @@ class Reviews
             ->addFilter('entity_id', $this->getReviewEntityId())
             ->addFieldToFilter('detail.title', ['eq' => $row['summary']]);
         if ($reviewCollection->getSize() > 0) {
-            $this->helper->printMessage("Review skipped -- Duplicate", "warning");
+            $this->helper->logMessage("Review skipped -- Duplicate", "warning");
             return true;
         }
 

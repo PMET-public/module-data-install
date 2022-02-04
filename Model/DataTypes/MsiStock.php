@@ -114,7 +114,7 @@ class MsiStock
     public function install(array $row, array $settings)
     {
         if (empty($row['stock_name'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "A row in msi_stock file does not have a value for stock_name. Row is skipped",
                 "warning"
             );
@@ -127,7 +127,7 @@ class MsiStock
             if ($this->stores->getWebsiteId($siteCode)) {
                 $websiteCodes[] = $siteCode;
             } elseif ($siteCode !='') {
-                $this->helper->printMessage(
+                $this->helper->logMessage(
                     "site_code ".$siteCode. " does not exist. Assignment to stock is skipped",
                     "warning"
                 );
@@ -184,7 +184,7 @@ class MsiStock
             try {
                 $source = $this->sourceRepository->get($sourceCode);
             } catch (NoSuchEntityException $e) {
-                $this->helper->printMessage(
+                $this->helper->logMessage(
                     "Msi source ".$sourceCode." is not available to assign to stock",
                     "warning"
                 );

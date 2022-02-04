@@ -37,6 +37,9 @@ class Helper extends AbstractHelper
     /** @var Logger */
     private $logger;
 
+    /** @var array */
+    private $settings;
+
     /**
      * Helper constructor.
      * @param Context $context
@@ -89,6 +92,13 @@ class Helper extends AbstractHelper
             $this->logger = $logger;
     }
 
+    /**
+     * @param array $settings
+     */
+    public function setSettings(array $settings){
+        $this->settings = $settings;
+    }
+
     public function reindex()
     {
         $indexes = $this->indexCollection->getAllIds();
@@ -131,12 +141,26 @@ class Helper extends AbstractHelper
      * @param null $foreground_color
      * @param null $background_color
      */
-    public function printMessage($string, $foreground_color = null, $background_color = null)
+    public function printMessage($string, $foreground_color = null)
     {
         // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
-        print_r($this->getColoredString($string, $foreground_color, $background_color)."\n");
+        print_r($this->getColoredString($string, $foreground_color, null)."\n");
+    }
+
+    /**
+     * @param $string
+     * @param $messageType
+     * @param array $info
+     */
+    public function logMessage($string, $messageType='info')
+    {
+        //print to terminal
+        $this->printMessage($string, $messageType);
+        //write to log
         $foreground_color = ($foreground_color='header')?'info':$foreground_color;
         $this->logger->$foreground_color($string);
+        //write to db
+        
     }
 
     /**

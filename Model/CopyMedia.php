@@ -126,14 +126,14 @@ class CopyMedia
                         try {
                             $this->directoryWrite->copyFile($file, $newFileName);
                         } catch (FileSystemException $exception) {
-                            $this->helper->printMessage(
+                            $this->helper->logMessage(
                                 "Unable to copy file ".$file. " --- ".$exception->getMessage(),
                                 "warning"
                             );
                         }
                     }
                 } else {
-                    $this->helper->printMessage($file." is an invalid type and was not copied", "warning");
+                    $this->helper->logMessage($file." is an invalid type and was not copied", "warning");
                 }
             }
         }

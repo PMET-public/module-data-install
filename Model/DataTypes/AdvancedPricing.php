@@ -116,11 +116,11 @@ class AdvancedPricing
         try {
             $importerModel->processImport($productsArray);
         } catch (\Exception $e) {
-            $this->helper->printMessage($e->getMessage());
+            $this->helper->logMessage($e->getMessage());
         }
 
-        $this->helper->printMessage($importerModel->getLogTrace());
-        $this->helper->printMessage($importerModel->getErrorMessages());
+        $this->helper->logMessage($importerModel->getLogTrace());
+        $this->helper->logMessage($importerModel->getErrorMessages());
 
         unset($importerModel);
     }

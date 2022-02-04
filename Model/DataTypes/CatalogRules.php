@@ -99,7 +99,7 @@ class CatalogRules
     {
         //if there is no name, reject it
         if (empty($row['name'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "A row in the Catalog Rules file does not have a value for name. Row is skipped",
                 "warning"
             );
@@ -108,7 +108,7 @@ class CatalogRules
 
         //if discount_amount is non numeric, reject row
         if (empty($row['discount_amount']) || !is_numeric($row['discount_amount'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "A row in the Catalog Rules file does not have a valid value for discount_amount. Row is skipped",
                 "warning"
             );
@@ -116,7 +116,7 @@ class CatalogRules
         }
         //if there is no simple_action, or if its invalid reject
         if (empty($row['simple_action']) || !$this->validateSimpleAction($row['simple_action'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "A row in the Catalog Rules file does not have a valid value for simple_action. Row is skipped",
                 "warning"
             );
@@ -174,7 +174,7 @@ class CatalogRules
         //check json format of serialized fields
         $jsonValidate = json_decode($row['conditions_serialized'], true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "A row in the Catalog Rules file has invalid Json data for conditions_serialized. Row is skipped",
                 "warning"
             );
@@ -192,7 +192,7 @@ class CatalogRules
             if ($bannerToAdd->getId()) {
                 $bannerIds[] = $bannerToAdd->getId();
             } else {
-                $this->helper->printMessage(
+                $this->helper->logMessage(
                     "Dynamic block ".$banner." for Catalog Rule ".$row['name']." does not exist",
                     "warning"
                 );

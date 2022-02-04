@@ -85,7 +85,7 @@ class DynamicBlocks
     {
         //skip if no name
         if (empty($row['name']) || $row['name'] == '') {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "A row in the Dynamic Blocks file does not have a value for name. Row is skipped",
                 "warning"
             );

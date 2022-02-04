@@ -98,12 +98,12 @@ class SharedCatalogCategories
     public function install(array $rows, array $header, string $modulePath, array $settings)
     {
         if (!in_array('shared_catalog', $header)) {
-            $this->helper->printMessage("b2b_shared_catalog_categories requires a shared_catalog column.", "warning");
+            $this->helper->logMessage("b2b_shared_catalog_categories requires a shared_catalog column.", "warning");
             return true;
         }
 
         if (!in_array('category', $header)) {
-            $this->helper->printMessage("b2b_shared_catalog_categories requires a category column.", "warning");
+            $this->helper->logMessage("b2b_shared_catalog_categories requires a category column.", "warning");
             return true;
         }
         
@@ -156,9 +156,9 @@ class SharedCatalogCategories
                 try {
                     $this->categoryManagementInterface->assignCategories($catalogId, $newCategories);
                 } catch (\Exception $e) {
-                    $this->helper->printMessage("b2b_shared_catalog_categories generated an error. "
+                    $this->helper->logMessage("b2b_shared_catalog_categories generated an error. "
                     ."This could be due to incorrect values in the file, or a category may be disabled", "warning");
-                    $this->helper->printMessage($e->getMessage(), "warning");
+                    $this->helper->logMessage($e->getMessage(), "warning");
                     return true;
                 }
                 

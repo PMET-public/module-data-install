@@ -60,11 +60,11 @@ class GiftCards
                     [$product]
                 );
             } catch (Exception $e) {
-                $this->helper->printMessage("Product with sku ".$row['sku'].
+                $this->helper->logMessage("Product with sku ".$row['sku'].
                 " not found in in gift_cards.csv", "warning");
             }
         } else {
-            $this->helper->printMessage("sku column required in gift_cards.csv", "warning");
+            $this->helper->logMessage("sku column required in gift_cards.csv", "warning");
         }
         return true;
     }

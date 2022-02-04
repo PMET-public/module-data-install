@@ -136,36 +136,36 @@ class Companies
         //set default - sales_rep ,company_email,site_code,credit_limit
 
         if (empty($row['company_name'])) {
-            $this->helper->printMessage("Company missing name, row skipped", "warning");
+            $this->helper->logMessage("Company missing name, row skipped", "warning");
             return true;
         }
         
         if (empty($row['street'])) {
-            $this->helper->printMessage("Company ".$row['company_name'].
+            $this->helper->logMessage("Company ".$row['company_name'].
             " missing street, row skipped", "warning");
             return true;
         }
 
         if (empty($row['company_admin'])) {
-            $this->helper->printMessage("Company ".$row['company_name'].
+            $this->helper->logMessage("Company ".$row['company_name'].
             " missing company_admin, row skipped", "warning");
             return true;
         }
 
         if (empty($row['city'])) {
-            $this->helper->printMessage("Company ".$row['company_name'].
+            $this->helper->logMessage("Company ".$row['company_name'].
             "  missing city, row skipped", "warning");
             return true;
         }
 
         if (empty($row['region'])) {
-            $this->helper->printMessage("Company ".$row['company_name'].
+            $this->helper->logMessage("Company ".$row['company_name'].
             "  missing region, row skipped", "warning");
             return true;
         }
 
         if (empty($row['country_id'])) {
-            $this->helper->printMessage("Company ".$row['company_name'].
+            $this->helper->logMessage("Company ".$row['company_name'].
             "  missing country_id, row skipped", "warning");
             return true;
         }
@@ -173,19 +173,19 @@ class Companies
         $region = $this->region->create();
         $row['region_id'] = $region->loadByCode($row['region'], $row['country_id'])->getId();
         if (empty($row['region_id'])) {
-            $this->helper->printMessage("Either your region or country_id is invalid for "
+            $this->helper->logMessage("Either your region or country_id is invalid for "
             .$row['company_name'].", row skipped", "warning");
             return true;
         }
 
         if (empty($row['telephone'])) {
-            $this->helper->printMessage("Company ".$row['company_name'].
+            $this->helper->logMessage("Company ".$row['company_name'].
             "  missing telephone, row skipped", "warning");
             return true;
         }
 
         if (empty($row['postcode'])) {
-            $this->helper->printMessage("Company ".$row['company_name'].
+            $this->helper->logMessage("Company ".$row['company_name'].
             "  missing postcode, row skipped", "warning");
             return true;
         }
@@ -198,7 +198,7 @@ class Companies
         try {
             $adminCustomer = $this->customer->get($row['company_admin'], $websiteId);
         } catch (NoSuchEntityException $e) {
-            $this->helper->printMessage("Company admin user ".$row['company_admin'].
+            $this->helper->logMessage("Company admin user ".$row['company_admin'].
             " is missing, row skipped", "warning");
             return true;
         }

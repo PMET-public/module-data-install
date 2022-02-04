@@ -90,7 +90,7 @@ class Products
         //check to see if the image directory exists.  If not, set it to safe default
         //this will catch the case of updating products, but not needing to include image files
         if (!$this->directoryRead->isDirectory($imgDir)) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "The directory or product images ".$imgDir." does not exist. ".
                 "This may cause an issue with your product import if you are expecting to include product images",
                 "warning"
@@ -127,22 +127,22 @@ class Products
             );
         }
         $productsArray = $this->replaceBaseWebsiteCodes($productsArray, $settings);
-        $this->helper->printMessage("Importing products", "info");
+        $this->helper->logMessage("Importing products", "info");
         
         $this->import($productsArray, $imgDir, $productValidationStrategy);
 
         /// Restrict products from other stores
         if ($restrictProductsFromViews=='Y') {
-            $this->helper->printMessage("Restricting products from other store views", "info");
+            $this->helper->logMessage("Restricting products from other store views", "info");
 
             if (count($restrictExistingProducts) > 0) {
-                 $this->helper->printMessage("Restricting ".count($restrictExistingProducts).
+                 $this->helper->logMessage("Restricting ".count($restrictExistingProducts).
                  " products from new store view", "info");
                 $this->import($restrictExistingProducts, $imgDir, $productValidationStrategy);
             }
 
             if (count($restrictNewProducts) > 0) {
-                $this->helper->printMessage("Restricting ".count($restrictNewProducts).
+                $this->helper->logMessage("Restricting ".count($restrictNewProducts).
                 " new products from existing store views", "info");
                 $this->import($restrictNewProducts, $imgDir, $productValidationStrategy);
             }
@@ -188,11 +188,11 @@ class Products
                 [$productsArray]
             );
         } catch (\Exception $e) {
-            $this->helper->printMessage($e->getMessage());
+            $this->helper->logMessage($e->getMessage());
         }
 
-        $this->helper->printMessage($importerModel->getLogTrace());
-        $this->helper->printMessage($importerModel->getErrorMessages());
+        $this->helper->logMessage($importerModel->getLogTrace());
+        $this->helper->logMessage($importerModel->getErrorMessages());
 
         unset($importerModel);
     }

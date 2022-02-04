@@ -87,7 +87,7 @@ class ProductAttributes
     {
         //Required:attribute_code
         if (empty($row['attribute_code'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "attribute_code value is required in product_attributes.csv. Row skipped",
                 "warning"
             );
@@ -103,7 +103,7 @@ class ProductAttributes
         
         //validate frontend_input values
         if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "frontend_input value in product_attributes.csv is invalid. Row skipped",
                 "warning"
             );
@@ -112,7 +112,7 @@ class ProductAttributes
 
         //validate frontend_input values
         if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "frontend_input value in product_attributes.csv is invalid. ".$row['attribute_code']. " row skipped",
                 "warning"
             );
@@ -137,7 +137,7 @@ class ProductAttributes
         if (!$attribute->getId()) {
             //Required if new - frontend_label, frontend_input
             if (empty($row['frontend_label']) || empty($row['frontend_input'])) {
-                $this->helper->printMessage(
+                $this->helper->logMessage(
                     "frontend_label and frontend_input are required when created a product attribute. "
                     .$row['attribute_code']. " row skipped",
                     "warning"

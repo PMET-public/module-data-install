@@ -1,5 +1,5 @@
 <?php
-namespace MagentoEse\DataInstall\Model\Import;
+namespace MagentoEse\DataInstall\Model\Logger;
 
 class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
 {

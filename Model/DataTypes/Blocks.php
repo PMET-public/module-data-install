@@ -69,7 +69,7 @@ class Blocks
     {
         
         if (empty($row['identifier']) || empty($row['title'])) {
-            $this->helper->printMessage("Block missing identifier or title, row skipped", "warning");
+            $this->helper->logMessage("Block missing identifier or title, row skipped", "warning");
             return true;
         }
         //set status as active if not defined properly

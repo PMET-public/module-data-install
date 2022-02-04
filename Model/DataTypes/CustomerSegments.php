@@ -79,7 +79,7 @@ class CustomerSegments
         
          //if there is no name, reject it
         if (empty($row['name'])) {
-            $this->helper->printMessage("A row in the Customer Segments file does not have a value for name. ".
+            $this->helper->logMessage("A row in the Customer Segments file does not have a value for name. ".
             "Row is skipped", "warning");
             return true;
         }
@@ -119,7 +119,7 @@ class CustomerSegments
         
             $jsonValidate = json_decode($row['conditions_serialized'], true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->helper->printMessage("A row in the Customer Segments file has invalid Json data for ".
+                $this->helper->logMessage("A row in the Customer Segments file has invalid Json data for ".
                 "conditions_serialized. Row is skipped", "warning");
                 return true;
             }

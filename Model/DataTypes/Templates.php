@@ -63,7 +63,7 @@ class Templates
     public function install(array $row, array $settings)
     {
         if (empty($row['name'])) {
-            $this->helper->printMessage("Page Builder Template is missing a name. Row skipped", "warning");
+            $this->helper->logMessage("Page Builder Template is missing a name. Row skipped", "warning");
             return true;
         }
         if (empty($row['created_for'])) {

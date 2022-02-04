@@ -83,20 +83,20 @@ class ApprovalRules
          //required all, except description, is_active, currency_code in skus
         //company,name,description,is_active,apply_to_roles,rule_type,rule,amount_value,currency_code,approval_from
         if (empty($row['name'])) {
-            $this->helper->printMessage("Approval rules missing name, row skipped", "warning");
+            $this->helper->logMessage("Approval rules missing name, row skipped", "warning");
             return true;
         }
         if (empty($row['company_name'])) {
-            $this->helper->printMessage("Approval rule ".$row['name'].
+            $this->helper->logMessage("Approval rule ".$row['name'].
             " missing Company name, row skipped", "warning");
             return true;
         } elseif (!$this->companies->getCompanyByName($row['company_name'])) {
-            $this->helper->printMessage("Approval rules company ".$row['company_name'].
+            $this->helper->logMessage("Approval rules company ".$row['company_name'].
             " does not exist, row skipped", "warning");
             return true;
         }
         if (empty($row['apply_to_roles'])) {
-            $this->helper->printMessage("Approval rule ".$row['name'].
+            $this->helper->logMessage("Approval rule ".$row['name'].
             " missing apply_to_roles, row skipped", "warning");
             return true;
         }
@@ -105,31 +105,31 @@ class ApprovalRules
             $row['apply_to_roles'],
             $this->companies->getCompanyByName($row['company_name'])->getId()
         )) {
-            $this->helper->printMessage("Approval rule ".$row['name'].
+            $this->helper->logMessage("Approval rule ".$row['name'].
             " has invalid apply_to_roles value, row skipped", "warning");
             return true;
         }
         if (empty($row['rule_type'])) {
-            $this->helper->printMessage("Approval rule ".$row['name']." missing rule_type, row skipped", "warning");
+            $this->helper->logMessage("Approval rule ".$row['name']." missing rule_type, row skipped", "warning");
             return true;
         } elseif (!in_array(trim($row['rule_type']), self::RULE_TYPES)) {
-            $this->helper->printMessage("Approval rule ".$row['name']." rule_type is invalid, row skipped", "warning");
+            $this->helper->logMessage("Approval rule ".$row['name']." rule_type is invalid, row skipped", "warning");
             return true;
         }
         if (empty($row['rule'])) {
-            $this->helper->printMessage("Approval rule ".$row['name']." missing rule, row skipped", "warning");
+            $this->helper->logMessage("Approval rule ".$row['name']." missing rule, row skipped", "warning");
             return true;
         } elseif (!in_array(trim($row['rule']), ['>','<','>=','<='])) {
-            $this->helper->printMessage("Approval rule ".$row['name'].
+            $this->helper->logMessage("Approval rule ".$row['name'].
             " rule value must be one of: >,<,>= or<=, row skipped", "warning");
             return true;
         }
         if (empty($row['amount_value'])) {
-            $this->helper->printMessage("Approval rule ".$row['name']." missing amount_value, row skipped", "warning");
+            $this->helper->logMessage("Approval rule ".$row['name']." missing amount_value, row skipped", "warning");
             return true;
         }
         if (empty($row['approval_from'])) {
-            $this->helper->printMessage("Approval rule ".$row['name']." missing approval_from, row skipped", "warning");
+            $this->helper->logMessage("Approval rule ".$row['name']." missing approval_from, row skipped", "warning");
             return true;
         }
         $row['approval_from'] = explode(",", $row['approval_from']);
@@ -138,7 +138,7 @@ class ApprovalRules
             $this->companies->getCompanyByName($row['company_name'])->getId(),
             'approval_from'
         )) {
-            $this->helper->printMessage("Approval rule ".$row['name'].
+            $this->helper->logMessage("Approval rule ".$row['name'].
             " has invalid approval_from value, row skipped", "warning");
             return true;
         }

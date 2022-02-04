@@ -74,7 +74,7 @@ class SharedCatalogs
     {
         //required - name, companies is optional, but set column if it doesnt exist
         if (empty($row['name'])) {
-            $this->helper->printMessage("name is required in b2b_shared_catalogs.csv, row skipped", "warning");
+            $this->helper->logMessage("name is required in b2b_shared_catalogs.csv, row skipped", "warning");
                 return true;
         }
 

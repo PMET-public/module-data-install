@@ -103,12 +103,12 @@ class Teams
     {
         //company name and team name required
         if (empty($row['company_name'])) {
-            $this->helper->printMessage("company_name is required in b2b_teams.csv, row skipped", "warning");
+            $this->helper->logMessage("company_name is required in b2b_teams.csv, row skipped", "warning");
                 return true;
         }
 
         if (empty($row['name'])) {
-            $this->helper->printMessage("name is required in b2b_teams.csv, row skipped", "warning");
+            $this->helper->logMessage("name is required in b2b_teams.csv, row skipped", "warning");
                 return true;
         }
 
@@ -118,7 +118,7 @@ class Teams
         //get admin user id - will also validate that company exists
         $adminUserId = $this->getCompanyAdminIdByName($row['company_name']);
         if (!$adminUserId) {
-            $this->helper->printMessage("Company ".$row['company_name'].
+            $this->helper->logMessage("Company ".$row['company_name'].
             " in b2b_teams.csv does not exist, row skipped", "warning");
             return true;
         }
@@ -135,7 +135,7 @@ class Teams
                 try {
                      $userId = $this->customerRepository->get(trim($companyCustomerEmail), $websiteId)->getId();
                 } catch (NoSuchEntityException $e) {
-                    $this->helper->printMessage("User ".$companyCustomerEmail.
+                    $this->helper->logMessage("User ".$companyCustomerEmail.
                     " was not found and will not be added to team ".
                     $row['name']." for company ".$row['company_name'], "warning");
                     break;
@@ -160,7 +160,7 @@ class Teams
             try {
                  $userId = $this->customerRepository->get(trim($companyCustomerEmail), $websiteId)->getId();
             } catch (NoSuchEntityException $e) {
-                $this->helper->printMessage("User ".$companyCustomerEmail.
+                $this->helper->logMessage("User ".$companyCustomerEmail.
                 " was not found and will not be added to team ".
                 $row['name']." for company ".$row['company_name'], "warning");
                 break;
@@ -260,7 +260,7 @@ class Teams
         $company = current($companyList->getItems());
 
         if (!$company) {
-            $this->helper->printMessage("The company ". $name ." requested in b2b_teams.csv does not exist", "warning");
+            $this->helper->logMessage("The company ". $name ." requested in b2b_teams.csv does not exist", "warning");
         } else {
             /** @var CompanyInterface $company */
             return $company->getSuperUserId();
@@ -281,7 +281,7 @@ class Teams
         $company = current($companyList->getItems());
 
         if (!$company) {
-            $this->helper->printMessage("The company ". $name ." requested in b2b_teams.csv does not exist", "warning");
+            $this->helper->logMessage("The company ". $name ." requested in b2b_teams.csv does not exist", "warning");
         } else {
             /**@var CompanyInterface $company */
             return $company->getId();

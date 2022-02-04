@@ -92,17 +92,21 @@ class Process
         $this->storeInstall = $stores;
     }
     /**
-     * @param $fileSource
-     * @param string $fixtureDirectory
-     * @param array|string[] $fileOrder
-     * @param int $reload
-     * @param string $host
+     * @param $jobSettings
      * @return bool
      * @throws LocalizedException
      * @throws FileSystemException
      */
-    public function loadFiles($fileSource, $load = '', array $fileOrder = [], $reload = 0, $host = null)
+    public function loadFiles($jobSettings)
     {
+        $jobSettings = $this->setDefaults($jobSettings);
+        $fileSource = $jobSettings['filesource'];
+        $load = $jobSettings['load'];
+        $fileOrder = $jobSettings['fileorder'];
+        $reload = $jobSettings['reload'];
+        $host = $jobSettings['host'];
+        $jobId = $jobSettings['jobid'];
+        
         $fixtureDirectory = self::FIXTURE_DIRECTORY;
         
         //if there is no load value, check for .default flag
@@ -121,7 +125,7 @@ class Process
         if ($this->isModuleInstalled($fileSource)==1 && $reload===0) {
             //output reload option if cli is used
             //if ($this->isCli()) {
-                $this->helper->printMessage(
+                $this->helper->logMessage(
                     $fileSource." has already been installed.  Add the -r option if you want to reinstall",
                     "warning"
                 );
@@ -135,11 +139,14 @@ class Process
         if (count($fileOrder)==0) {
             $fileOrder=$this->conf->getProcessConfiguration();
         }
-       
-        $this->helper->printMessage("Copying Media", "info");
-        $this->copyMedia->moveFiles($filePath);
+        
         $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
-
+        $this->settings['jobSettings'] = $jobSettings;
+        $this->helper->setSettings($this->settings);
+        $this->helper->logMessage("Copying Media", "info");
+        
+        $this->copyMedia->moveFiles($filePath);
+        
         foreach ($fileOrder as $nextFile) {
             //get processing instructions based on filename
             //returns ['filename','process','class','label'];
@@ -159,14 +166,14 @@ class Process
                         $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
                         //validate that number of elements in header and rows is equal
                         if (!$this->validate->validateCsvFile($header, $rows)) {
-                            $this->helper->printMessage("Skipping File ".$fileInfo['filename'].
+                            $this->helper->logMessage("Skipping File ".$fileInfo['filename'].
                             ". The number of columns in the header does not match the number of column of ".
                             "data in one or more rows", "warning");
                             continue;
                         }
                         //validate that the file is not empty
                         if (empty($rows)) {
-                            $this->helper->printMessage("Skipping File ".$fileInfo['filename'].
+                            $this->helper->logMessage("Skipping File ".$fileInfo['filename'].
                             ". The file is empty or not properly formatted", "warning");
                             continue;
                         }
@@ -175,7 +182,7 @@ class Process
                     //determine path to module code for image import
                     // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
                     $modulePath = str_replace("/" . $fixtureDirectory . "/" . basename($fileName), "", $fileName);
-                    $this->helper->printMessage($fileInfo['label'], "info");
+                    $this->helper->logMessage($fileInfo['label'], "info");
                     if ($fileInfo['process']=='file') {
                         $this->processFile($rows, $header, $fileInfo['class'], $modulePath, $host);
                     } elseif ($fileInfo['process']=='json') {
@@ -198,6 +205,28 @@ class Process
         }
     }
 
+    private function setDefaults($jobSettings){
+
+        if(empty($jobSettings['filesource'])){
+            $jobSettings['filesource'] = '';
+        }
+        if(empty($jobSettings['load'])){
+            $jobSettings['load'] ='';
+        }
+        if(empty($jobSettings['fileorder'])){
+            $jobSettings['fileorder'] =[];
+        }
+        if(empty($jobSettings['reload'])){
+            $jobSettings['reload']=0;
+        }
+        if(empty($jobSettings['host'])){
+            $jobSettings['host'] = null;
+        }
+        if(empty($jobSettings['jobid'])){
+            $jobSettings['jobid']='';
+        }
+        return $jobSettings;
+    }
     private function getProcessInstructions($file)
     {
         //Is there processing information passed on with the filename?
@@ -206,7 +235,7 @@ class Process
             $filename = key($file);
             //validate the correct keys are present
             if (empty($file[$filename]['process']) && empty($file[$filename]['class'])) {
-                $this->helper->printMessage(
+                $this->helper->logMessage(
                     "File " .$filename .
                     " does not include the correct processing instructions - skipped",
                     "error"
@@ -227,7 +256,7 @@ class Process
                     'class'=>$key[$file]['class'],'label'=>$key[$file]['label']];
                 }
             }
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "File " .$file .
                 " does not have processing instructions - skipped",
                 "error"
@@ -299,7 +328,7 @@ class Process
         ///if its failed again, fail the process
         if (count($this->redo) > 0) {
             foreach ($this->redo as $redo) {
-                $this->helper->printMessage(
+                $this->helper->logMessage(
                     "Installing " . $this->getClassName(get_class($redo['process'])) .
                     " was not fully successful, likely due to a dependency on other sample data that doesnt exist",
                     "error"
@@ -363,6 +392,8 @@ class Process
         //if website requested is "base" get the default website code in case it has changed
         //the is mostly to get around changed webside codes for livesearch environments
         $setupArray['site_code'] = $this->storeInstall->replaceBaseWebsiteCode($setupArray['site_code']);
+        $setupArray['fixture_directory'] = $fixtureDirectory;
+        $setupArray['file_path'] = $filePath;
         return $setupArray;
     }
 
@@ -386,14 +417,14 @@ class Process
                  $header = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header);
                 //validate that number of elements in header and rows is equal
                 if (!$this->validate->validateCsvFile($header, $rows)) {
-                    $this->helper->printMessage($nextFile." is invalid. The number of columns in the header does not ".
+                    $this->helper->logMessage($nextFile." is invalid. The number of columns in the header does not ".
                     "match the number of column of data in one or more rows", "error");
                     $stopFlag = 1;
                     break;
                 }
                 $b2bData[$nextFile] = ['header'=>$header,'rows'=>$rows];
             } else {
-                $this->helper->printMessage("You are missing the required B2B file - ".$nextFile.
+                $this->helper->logMessage("You are missing the required B2B file - ".$nextFile.
                 ". B2B setup did not complete", "error");
                 $stopFlag = 1;
                 break;
@@ -402,7 +433,7 @@ class Process
         if ($stopFlag == 0) {
             //validate referential integrity of the data
             if (!$this->validate->validateB2bData($b2bData)) {
-                $this->helper->printMessage("Bad Data", "error");
+                $this->helper->logMessage("Bad Data", "error");
                     ///probably need to throw an error to roll back everything
             }
             $salesReps = $this->buildB2bDataArrays($b2bData['b2b_sales_reps.csv']);
@@ -410,7 +441,7 @@ class Process
             $customers = $this->buildB2bDataArrays($b2bData['b2b_customers.csv']);
 
             //load customers (normal process)
-            $this->helper->printMessage("Loading B2B Customers", "info");
+            $this->helper->logMessage("Loading B2B Customers", "info");
             $this->processFile(
                 $b2bData['b2b_customers.csv']['rows'],
                 $b2bData['b2b_customers.csv']['header'],
@@ -419,7 +450,7 @@ class Process
                 ''
             );
             //load sales reps (admin user process)
-            $this->helper->printMessage("Loading B2B Sales Reps", "info");
+            $this->helper->logMessage("Loading B2B Sales Reps", "info");
             $this->processRows(
                 $b2bData['b2b_sales_reps.csv']['rows'],
                 $b2bData['b2b_sales_reps.csv']['header'],
@@ -429,14 +460,14 @@ class Process
             //create company (add on company admin from customers, and sales rep);
 
             $companiesData = $this->mergeCompanyData($companies, $customers, $salesReps);
-            $this->helper->printMessage("Loading B2B Companies", "info");
+            $this->helper->logMessage("Loading B2B Companies", "info");
 
             foreach ($companiesData as $companyData) {
                 $classes['companiesInstall']->install($companyData, $this->settings);
             }
 
             //add company roles
-            $this->helper->printMessage("Loading B2B Company Roles", "info");
+            $this->helper->logMessage("Loading B2B Company Roles", "info");
             $this->processFile(
                 $b2bData['b2b_company_roles.csv']['rows'],
                 $b2bData['b2b_company_roles.csv']['header'],
@@ -451,7 +482,7 @@ class Process
                 $classes['companyUserRolesInstall'],
                 ''
             );
-            $this->helper->printMessage("Loading B2B Teams and Company Structure", "info");
+            $this->helper->logMessage("Loading B2B Teams and Company Structure", "info");
             //create company structure
             $this->processRows(
                 $b2bData['b2b_teams.csv']['rows'],
@@ -527,15 +558,7 @@ class Process
         }
     }
 
-    /**
-     * @return string
-     */
-    private function getModuleName()
-    {
-        return $this->helper->getModuleName($this->getCallingClass());
-    }
-
-    /**
+        /**
      * @return mixed
      */
     private function getCallingClass()

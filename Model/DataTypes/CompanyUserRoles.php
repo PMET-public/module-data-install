@@ -99,7 +99,7 @@ class CompanyUserRoles
         if (!empty($row['role']) && $row['company_admin']!='Y') {
             $companyid = $this->getCompanyId($row['company']);
             if (!$companyid) {
-                $this->helper->printMessage("The company ". $row['company'] .
+                $this->helper->logMessage("The company ". $row['company'] .
                 " in setting user roles does not exist", "warning");
                 return true;
             }
@@ -112,7 +112,7 @@ class CompanyUserRoles
                      $this->acl->assignUserDefaultRole($userId, $this->getCompanyId($row['company']));
                      $this->acl->assignRoles($userId, [$role]);
             } else {
-                $this->helper->printMessage("The role ". $row['role'] ." for company ".$row['company'].
+                $this->helper->logMessage("The role ". $row['role'] ." for company ".$row['company'].
                 " does not exist", "warning");
             }
         }
@@ -154,7 +154,7 @@ class CompanyUserRoles
         /** @var CompanyInterface $company */
         $company = current($companyList->getItems());
         if (!$company) {
-            $this->helper->printMessage("The company ". $companyName .
+            $this->helper->logMessage("The company ". $companyName .
             " in setting user roles does not exist", "warning");
             return false;
         } else {

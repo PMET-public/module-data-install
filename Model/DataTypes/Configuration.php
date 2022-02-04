@@ -107,7 +107,7 @@ class Configuration
         try {
             $config = json_decode($json)->configuration;
         } catch (\Exception $e) {
-            $this->helper->printMessage("The JSON in your configuration file is invalid", "error");
+            $this->helper->logMessage("The JSON in your configuration file is invalid", "error");
             return true;
         }
 
@@ -165,7 +165,7 @@ class Configuration
         if ($scopeId!==null) {
             $this->resourceConfig->saveConfig($path, $this->setEncryption($value), $scope, $scopeId);
         } else {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "Error setting configuration " . $path . ". Check your scope codes as the " .
                 $scope . " code you used does not exist",
                 "error"

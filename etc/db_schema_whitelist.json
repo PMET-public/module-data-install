@@ -14,7 +14,9 @@
             "id": true,
             "message": true,
             "level": true,
-            "add_date": true
+            "add_date": true,
+            "job_id": true,
+            "datapack": true
         },
         "constraint": {
             "PRIMARY": true

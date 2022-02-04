@@ -64,14 +64,14 @@ class Widgets
     {
     //type, theme, title, store is required
         if (empty($row['title'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "title is required in the widgets data file. Row has been skipped.",
                 "warning"
             );
             return true;
         }
         if (empty($row['instance_type'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "instance_type is required in the widgets data file. Row has been skipped.",
                 "warning"
             );
@@ -104,7 +104,7 @@ class Widgets
     //validate type
         $type = $widget->getWidgetReference('type', $row['instance_type'], 'type');
         if (!$type) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "Type ".$row['instance_type']." is invalid for widget ".$row['title'].". Row has been skipped.",
                 "warning"
             );

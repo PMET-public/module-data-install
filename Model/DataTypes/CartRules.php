@@ -77,7 +77,7 @@ class CartRules
     {
         //required name
         if (empty($row['name'])) {
-            $this->helper->printMessage(
+            $this->helper->logMessage(
                 "name is required in the cart_rules data file. Row has been skipped.",
                 "warning"
             );
@@ -87,7 +87,7 @@ class CartRules
         //reject if coupon code is being used by a different rule
         if (!empty($row['coupon_code'])) {
             if ($this->isCouponCodeConflict($row['name'], $row['coupon_code'])) {
-                $this->helper->printMessage("The coupon code ".$row['coupon_code']." in cart rule ".$row['name'].
+                $this->helper->logMessage("The coupon code ".$row['coupon_code']." in cart rule ".$row['name'].
                 " is being used in a different rule. Row has been skipped", "warning");
                 return true;
             }
@@ -118,7 +118,7 @@ class CartRules
                 }
             }
             if (empty($groupIds)) {
-                $this->helper->printMessage(
+                $this->helper->logMessage(
                     "A customer group for cart rule ".$row["name"]." does not exist. Row has been skipped.",
                     "warning"
                 );

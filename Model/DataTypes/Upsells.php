@@ -75,7 +75,7 @@ class Upsells
     public function install(array $row, array $settings)
     {
         if (empty($row['apply_to'])) {
-            $this->helper->printMessage("Related Product Rule apply_to column is missing. Row skipped", "warning");
+            $this->helper->logMessage("Related Product Rule apply_to column is missing. Row skipped", "warning");
             return true;
         }
         switch (strtolower($row['apply_to'])) {
@@ -93,7 +93,7 @@ class Upsells
         }
         /** @var Rule $upsellModel */
         if (empty($row['name'])) {
-            $this->helper->printMessage("Related Product Rule missing a name. Row skipped", "warning");
+            $this->helper->logMessage("Related Product Rule missing a name. Row skipped", "warning");
             return;
         }
         if (empty($row['is_active'])) {

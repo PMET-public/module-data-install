@@ -55,16 +55,16 @@ class CustomerAttributes
     {
         //check for requried fields
         if (empty($data["attribute_code"])) {
-            $this->helper->printMessage("attribute_code for customer attribute is required. Row Skipped", "warning");
+            $this->helper->logMessage("attribute_code for customer attribute is required. Row Skipped", "warning");
             return true;
         }
         if (empty($data["frontend_label"])) {
-            $this->helper->printMessage("frontend_label for customer attribute ".
+            $this->helper->logMessage("frontend_label for customer attribute ".
             $data["attribute_code"]." is required. Row Skipped", "warning");
             return true;
         }
         if (empty($data["frontend_input"])) {
-            $this->helper->printMessage("frontend_input for customer attribute ".
+            $this->helper->logMessage("frontend_input for customer attribute ".
             $data["attribute_code"]." is required. Row Skipped", "warning");
             return true;
         }

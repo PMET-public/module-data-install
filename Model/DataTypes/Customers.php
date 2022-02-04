@@ -228,7 +228,7 @@ class Customers
                      $startingElement = $this->addToAutofill($row, $startingElement);
                  }
              } catch (NoSuchEntityException $e) {
-                 $this->helper->printMessage("Customer ". $row['email']." wasn't imported", "error");
+                 $this->helper->logMessage("Customer ". $row['email']." wasn't imported", "error");
              }
          }
 
@@ -342,11 +342,11 @@ class Customers
          try {
              $importerModel->processImport($customerArray);
          } catch (\Exception $e) {
-             $this->helper->printMessage($e->getMessage());
+             $this->helper->logMessage($e->getMessage());
          }
 
-         $this->helper->printMessage($importerModel->getLogTrace());
-         $this->helper->printMessage($importerModel->getErrorMessages());
+         $this->helper->logMessage($importerModel->getLogTrace());
+         $this->helper->logMessage($importerModel->getErrorMessages());
 
          unset($importerModel);
      }

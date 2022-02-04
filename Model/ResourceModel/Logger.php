@@ -1,0 +1,21 @@
+<?php
+/**
+ * Copyright © Adobe, Inc. All rights reserved.
+ */
+namespace MagentoEse\DataInstall\Model\ResourceModel;
+
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+
+class Logger extends AbstractDb
+{
+    /**
+     * Initialize resource model
+     *
+     * @return void
+     */
+    // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+    protected function _construct()
+    {
+        $this->_init('magentoese_data_installer_log', 'id');
+    }
+}

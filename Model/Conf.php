@@ -228,7 +228,7 @@ class Conf
         DataTypes\AdminUsers $adminUsers,
         DataTypes\AdminRoles $adminRoles,
         DataTypes\AdvancedPricing $advancedPricing,
-        DataTypes\ApprovalRules $approvalRules,
+        //DataTypes\ApprovalRules $approvalRules,
         DataTypes\Blocks $blocks,
         DataTypes\CatalogRules $catalogRules,
         DataTypes\CartRules $cartRules,
@@ -286,7 +286,7 @@ class Conf
         $this->adminUsersInstall = $adminUsers;
         $this->adminRolesInstall = $adminRoles;
         $this->advancedPricingInstall = $advancedPricing;
-        $this->approvalRulesInstall = $approvalRules;
+        //$this->approvalRulesInstall = $approvalRules;
         $this->ordersInstall = $orders;
         $this->customerSegmentsInstall = $customerSegments;
         $this->catalogRulesInstall = $catalogRules;
@@ -381,8 +381,8 @@ class Conf
             'label'=>'Loading B2B Shared Catalog Categories']],
             ['b2b_requisition_lists.csv'=>['process'=>'rows','class'=>$this->requisitionListsInstall,
             'label'=>'Loading B2B Requisiton Lists']],
-            ['b2b_approval_rules.csv'=>['process'=>'rows','class'=>$this->approvalRulesInstall,
-            'label'=>'Loading B2B Approval Rules']],
+            // ['b2b_approval_rules.csv'=>['process'=>'rows','class'=>$this->approvalRulesInstall,
+            // 'label'=>'Loading B2B Approval Rules']],
             ['cart_rules.csv'=>['process'=>'rows','class'=>$this->cartRulesInstall,
             'label'=>'Loading Cart Rules']],
             ['advanced_pricing.csv'=>['process'=>'file','class'=>$this->advancedPricingInstall,

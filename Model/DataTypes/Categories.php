@@ -97,7 +97,7 @@ class Categories
         //TODO:Content block additions to categories
 
         if (empty($row['name'])) {
-            $this->helper->printMessage("A value for name is required in categories.csv", "warning");
+            $this->helper->logMessage("A value for name is required in categories.csv", "warning");
             return true;
         }
 
@@ -124,7 +124,7 @@ class Categories
 
                 $category->save();
             } else {
-                $this->helper->printMessage("-Cannot find the parent category for " . $row['name'].
+                $this->helper->logMessage("-Cannot find the parent category for " . $row['name'].
                 " in the path " . $row['path'] . ". That category has been skipped", "warning");
             }
         }

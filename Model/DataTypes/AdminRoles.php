@@ -61,7 +61,7 @@ class AdminRoles
             if (!empty($roleRow['role']) && !empty($roleRow['resource_id'])) {
                 $rolesData[$roleRow['role']][]=$roleRow['resource_id'];
             } else {
-                $this->helper->printMessage("admin_role does not include role or resource_id, row skipped", "warning");
+                $this->helper->logMessage("admin_role does not include role or resource_id, row skipped", "warning");
             }
         }
 

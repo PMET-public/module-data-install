@@ -74,6 +74,7 @@ class Consumer
         try {
             $serializedData = $operation->getSerializedData();
             $data = $this->serializer->unserialize($serializedData);
+            $data['jobid']=$operation->getBulkUuid();
             $this->execute($data);
         } catch (\Zend_Db_Adapter_Exception $e) {
             $this->logger->critical($e->getMessage());
@@ -127,17 +128,8 @@ class Consumer
     private function execute($data): void
     {
        //loadFiles($fileSource, $load = '', array $fileOrder = [], $reload = 0, $host = null)
-        $this->process->loadFiles(
-            $data['filesource']//,
-            //$data['load'],
-            //$data['fileorder'],
-            //$data['reload']
-        );
-        $this->process->loadFiles(
-            $data['filesource'],
-            '',//$data['load'],
-            ['msi_inventory.csv'],//$data['fileorder'],
-            1//$data['reload']
-        );
+        $this->process->loadFiles($data);
+        $data['fileorder'] = ['msi_inventory.csv'];
+        $this->process->loadFiles($data);
     }
 }

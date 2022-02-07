@@ -36,7 +36,7 @@ interface LoggerRepositoryInterface
     public function save(\MagentoEse\DataInstall\Api\Data\LoggerInterface $logger);
 
     /**
-     * @param \MagentoEse\DataInstall\Api\Data\StudentInterface $logger
+     * @param \MagentoEse\DataInstall\Api\Data\LoggerInterface $logger
      * @return bool true on success
      * @throws \Magento\Framework\Exception\CouldNotDeleteException
      */
@@ -44,7 +44,7 @@ interface LoggerRepositoryInterface
 
     /**
      * @param \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
-     * @return \MagentoEse\DataInstall\Api\Data\StudentSearchResultInterface
+     * @return \MagentoEse\DataInstall\Api\Data\LoggerSearchResultInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function getList(\Magento\Framework\Api\SearchCriteriaInterface $searchCriteria);

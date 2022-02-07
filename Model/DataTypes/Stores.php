@@ -184,7 +184,6 @@ class Stores
     public function install(array $data, array $settings, $cliHost)
     {
         $this->settings = $settings;
-        $this->helper->logMessage("--------------------", "header");
         if (!empty($data['site_code'])) {
             //fix site code if its not correct
             $data['site_code'] = $this->validateCode($data['site_code']);

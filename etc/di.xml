@@ -6,10 +6,10 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="MagentoEse\DataInstall\Api\Data\InstallerInterface" type="MagentoEse\DataInstall\Model\Installer" />
-    <!-- <preference for="MagentoEse\DataInstall\Api\Data\InstallTrackertSearchResultInterface" type="MagentoEse\DataInstallModel\StudentSearchResult" /> -->
     <preference for="MagentoEse\DataInstall\Api\InstallerRepositoryInterface" type="MagentoEse\DataInstall\Model\InstallerRepository" />
-
-
+    <preference for="MagentoEse\DataInstall\Api\Data\LoggerInterface" type="MagentoEse\DataInstall\Model\Logger" />
+    <preference for="MagentoEse\DataInstall\Api\LoggerRepositoryInterface" type="MagentoEse\DataInstall\Model\LoggerRepository" />
+    
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">

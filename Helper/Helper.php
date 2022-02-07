@@ -13,6 +13,8 @@ use Magento\Framework\App\Cache\Frontend\Pool;
 use Magento\Indexer\Model\IndexerFactory;
 use Magento\Indexer\Model\Indexer\Collection;
 use MagentoEse\DataInstall\Logger\Logger;
+use MagentoEse\DataInstall\Api\Data\LoggerInterfaceFactory;
+use MagentoEse\DataInstall\Api\LoggerRepositoryInterface;
 
 class Helper extends AbstractHelper
 {
@@ -40,6 +42,12 @@ class Helper extends AbstractHelper
     /** @var array */
     private $settings;
 
+    /** @var LoggerInterfaceFactory */
+    protected $loggerInterface;
+
+    /** @var LoggerRepositoryInterface */
+    protected $loggerRepository;
+
     /**
      * Helper constructor.
      * @param Context $context
@@ -48,6 +56,8 @@ class Helper extends AbstractHelper
      * @param IndexerFactory $indexFactory
      * @param Collection $indexCollection
      * @param Logger $logger
+     * @param LoggerInterfaceFactory $loggerInterface
+     * @param LoggerRepositoryInterface $loggerRepository
      */
     public function __construct(
         Context $context,
@@ -55,7 +65,9 @@ class Helper extends AbstractHelper
         TypeListInterface $cacheTypeList,
         IndexerFactory $indexFactory,
         Collection $indexCollection,
-        Logger $logger
+        Logger $logger,
+        LoggerInterfaceFactory $loggerInterface,
+        LoggerRepositoryInterface $loggerRepository
     ) {
         parent::__construct($context);
         // Set up shell colors
@@ -90,6 +102,8 @@ class Helper extends AbstractHelper
             $this->indexCollection = $indexCollection;
             $this->indexFactory = $indexFactory;
             $this->logger = $logger;
+            $this->loggerInterface = $loggerInterface;
+            $this->loggerRepository = $loggerRepository;
     }
 
     /**
@@ -160,7 +174,18 @@ class Helper extends AbstractHelper
         $foreground_color = ($foreground_color='header')?'info':$foreground_color;
         $this->logger->$foreground_color($string);
         //write to db
+        $this->setDbLog($string,$messageType);
         
+    }
+
+    private function setDbLog($message,$messageType)
+    {
+        $logger = $this->loggerInterface->create();
+        $logger->setjobId($this->settings['job_settings']['jobid']);
+        $logger->setMessage($message);
+        $logger->setLevel($messageType);
+        $logger->setDataPack($this->settings['job_settings']['filesource']);
+        $this->loggerRepository->save($logger);
     }
 
     /**

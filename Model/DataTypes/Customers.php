@@ -346,9 +346,10 @@ class Customers
          }
 
          $this->helper->logMessage($importerModel->getLogTrace());
-         $this->helper->logMessage($importerModel->getErrorMessages());
-
-         unset($importerModel);
+         if($importerModel->getErrorMessages()!=""){
+            $this->helper->logMessage($importerModel->getErrorMessages(),"warning");
+        }
+        unset($importerModel);
      }
 
     /**

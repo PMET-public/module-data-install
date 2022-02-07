@@ -141,7 +141,7 @@ class Process
         }
         
         $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
-        $this->settings['jobSettings'] = $jobSettings;
+        $this->settings['job_settings'] = $jobSettings;
         $this->helper->setSettings($this->settings);
         $this->helper->logMessage("Copying Media", "info");
         

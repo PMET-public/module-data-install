@@ -192,8 +192,10 @@ class Products
         }
 
         $this->helper->logMessage($importerModel->getLogTrace());
-        $this->helper->logMessage($importerModel->getErrorMessages());
-
+        if($importerModel->getErrorMessages()!=""){
+            $this->helper->logMessage($importerModel->getErrorMessages(),"warning");
+        }
+  
         unset($importerModel);
     }
 

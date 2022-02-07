@@ -28,6 +28,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use MagentoEse\DataInstall\Model\Process;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\App\State;
+use Magento\Framework\App\Area as AppArea;
 
 class Install extends Command
 {
@@ -43,14 +45,19 @@ class Install extends Command
     /** @var ModuleStatus */
     protected $moduleStatus;
 
+     /** @var State */
+     protected $appState;
+
     /**
      * Install constructor.
      * @param Process $process
      */
-    public function __construct(ObjectManagerInterface $objectManagerInterface)
+    public function __construct(ObjectManagerInterface $objectManagerInterface, State $appState)
     {
-        $this->objectManagerInterface = $objectManagerInterface;
         parent::__construct();
+        $this->objectManagerInterface = $objectManagerInterface;
+        $this->appState = $appState;
+        
     }
 
     protected function configure()
@@ -106,7 +113,12 @@ class Install extends Command
              $reload=1;
         }
         $jobSettings = ['filesource'=>$module,'load'=>$load,'reload'=>$reload,'fileorder'=>$fileArray,'host'=>$host];
-        $process = $this->objectManagerInterface->create(Process::class);
+
+        $process = $this->appState->emulateAreaCode(
+            AppArea::AREA_ADMINHTML,
+            [$this->objectManagerInterface, 'create'],[Process::class]
+        );
+        //$process = $this->objectManagerInterface->create(Process::class);
         if ($process->loadFiles($jobSettings)==0) {
             $output->writeln("No files found to load in " . $module.
             " Check the your values of --load or --files if used, or the default set in the datapack");

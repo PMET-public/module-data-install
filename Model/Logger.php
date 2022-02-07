@@ -74,9 +74,9 @@ class Logger extends AbstractExtensibleModel implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function setLevel($isInstalled)
+    public function setLevel($level)
     {
-        return $this->setData(self::LEVEL, $isInstalled);
+        return $this->setData(self::LEVEL, $level);
     }
 
     /**

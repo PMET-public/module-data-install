@@ -119,7 +119,11 @@ class Process
             }
         }
         $fixtureDirectory = 'data/'.$load;
-
+        
+        $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
+        $this->settings['job_settings'] = $jobSettings;
+        $this->helper->setSettings($this->settings);
+        
         //bypass if data is already installed
         $fileSource .="/".$fixtureDirectory;
         if ($this->isModuleInstalled($fileSource)==1 && $reload===0) {
@@ -140,9 +144,7 @@ class Process
             $fileOrder=$this->conf->getProcessConfiguration();
         }
         
-        $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
-        $this->settings['job_settings'] = $jobSettings;
-        $this->helper->setSettings($this->settings);
+        
         $this->helper->logMessage("Copying Media", "info");
         
         $this->copyMedia->moveFiles($filePath);

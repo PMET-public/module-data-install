@@ -198,9 +198,7 @@ class Process
         if ($fileCount==0) {
             return false;
         } else {
-            if ($this->isCli() || $this->isRecurring()) {
-                $this->setModuleInstalled($fileSource);
-            }
+            $this->setModuleInstalled($fileSource);
             return true;
         }
     }

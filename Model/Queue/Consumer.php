@@ -130,6 +130,7 @@ class Consumer
        //loadFiles($fileSource, $load = '', array $fileOrder = [], $reload = 0, $host = null)
         $this->process->loadFiles($data);
         $data['fileorder'] = ['msi_inventory.csv'];
+        $data['reload'] = 1;
         $this->process->loadFiles($data);
     }
 }

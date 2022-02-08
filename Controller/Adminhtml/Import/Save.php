@@ -48,7 +48,6 @@ class Save extends \Magento\Backend\App\Action
             !$this->_formKeyValidator->validate($this->getRequest())) {
                 throw new LocalizedException(__('Invalid Request'));
             }
-
             $fileUploader = null;
             $params = $this->getRequest()->getParams();
             try {
@@ -72,15 +71,18 @@ class Save extends \Magento\Backend\App\Action
                 //if an except is thrown, no image has been uploaded
                 throw new LocalizedException(__('Data Pack is required'));
             }
+            
+            $operationConditions = $this->setAdvancedConditions($params['advanced_conditions']);
 
             if ($this->unzipFile($fileInfo)) {
               ///schedule import
                 $operation = [];
                 $operation['fileSource']=$this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR).'/'.basename($fileInfo['name'],'.zip');
                 $operation['packFile']=$fileInfo['name'];
-                $operation['load']=[];
-                $operation['fileOrder']='';
-                $operation['reload']='1';
+                $operation['load']=$operationConditions['load'];
+                $operation['fileOrder']=$operationConditions['files'];
+                $operation['reload']=$operationConditions['reload'];
+                $operation['host']=$operationConditions['host'];
                 $this->scheduleBulk->execute([$operation]);
             } else {
                 $this->messageManager->addErrorMessage(__('Data Pack could not be unzipped. Please check file format'));
@@ -99,6 +101,30 @@ class Save extends \Magento\Backend\App\Action
             $this->messageManager->addErrorMessage(__('An error occurred, please try again later.'));
             return $this->_redirect('*/*/upload');
         }
+    }
+
+    protected function setAdvancedConditions($conditions){
+        $settings = ["reload"=>0,"load"=>"", "files"=>"", "host"=>""];
+       // $conditions='--files="b2b_approval_rules.csv" -r --host=subdomain --load=store';
+        $commands = explode(" ",$conditions);
+        foreach($commands as $command){
+            $element = explode("=",trim($command));
+            switch ($element[0]) {
+                case "--files":
+                    $settings["files"]=explode(",",trim($element[1],'"'));
+                    break;
+                case "-r":
+                    $settings["reload"]=1;
+                    break;
+                case "--host":
+                    $settings["host"]=$element[1];
+                    break;
+                case "--load":
+                    $settings["load"]=$element[1];
+                    break;    
+            }
+        }
+        return $settings;
     }
 
     protected function unzipFile($fileInfo)

@@ -28,7 +28,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use MagentoEse\DataInstall\Model\Process;
 use Magento\Framework\ObjectManagerInterface;
-
+use Magento\Framework\App\State;
+use Magento\Framework\App\Area as AppArea;
 class Install extends Command
 {
     const DATAPACK = 'datapack';
@@ -47,10 +48,19 @@ class Install extends Command
      * Install constructor.
      * @param Process $process
      */
-    public function __construct(ObjectManagerInterface $objectManagerInterface)
+    /** @var State */
+    protected $appState;
+
+    /**
+     * Install constructor.
+     * @param ObjectManagerInterface $objectManagerInterface
+     * @param State $appState
+     */
+    public function __construct(ObjectManagerInterface $objectManagerInterface, State $appState)
     {
-        $this->objectManagerInterface = $objectManagerInterface;
         parent::__construct();
+        $this->objectManagerInterface = $objectManagerInterface;
+        $this->appState = $appState;
     }
 
     protected function configure()
@@ -102,7 +112,11 @@ class Install extends Command
         } else {
             $fileArray = explode(",", $files);
         }
-        $process = $this->objectManagerInterface->create(Process::class);
+        $process = $this->appState->emulateAreaCode(
+            AppArea::AREA_ADMINHTML,
+            [$this->objectManagerInterface, 'create'],
+            [Process::class]
+        );
         if ($process->loadFiles($module, $load, $fileArray, $reload, $host)==0) {
             $output->writeln("No files found to load in " . $module.
             " Check the your values of --load or --files if used, or the default set in the datapack");

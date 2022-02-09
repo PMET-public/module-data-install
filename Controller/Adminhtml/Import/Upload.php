@@ -1,26 +1,39 @@
 <?php
+/**
+ * Copyright © Adobe  All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Controller\Adminhtml\Import;
 
-class Upload extends \Magento\Backend\App\Action
+use Magento\Backend\App\Action;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Backend\Model\View\Result\Page;
+use Magento\Backend\App\Action\Context;
+
+class Upload extends Action
 {
 
-    /**
-     *
-     * @var \Magento\Framework\View\Result\PageFactory
-     */
+    /** @var PageFactory */
     protected $resultPageFactory;
-  
+
+    /**
+     * Upload constructor.
+     * @param Context $context
+     * @param PageFactory $resultPageFactory
+     */
     public function __construct(
-        \Magento\Backend\App\Action\Context $context,
-        \Magento\Framework\View\Result\PageFactory $resultPageFactory
+        Context $context,
+        PageFactory $resultPageFactory
     ) {
         parent::__construct($context);
         $this->resultPageFactory = $resultPageFactory;
     }
-  
+
+    /**
+     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|\Page
+     */
     public function execute()
     {
-      /** @var \Magento\Backend\Model\View\Result\Page $resultPage */
+      /** @var \Page $resultPage */
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('MagentoEse_DataInstall::import_vertical');
         $resultPage->getConfig()->getTitle()->prepend(__('Import Data Pack'));

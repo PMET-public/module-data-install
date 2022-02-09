@@ -1,4 +1,7 @@
 <?php
+/**
+ * Copyright © Adobe  All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Controller\Adminhtml\Import;
 
 use Magento\Backend\App\Action\Context;
@@ -12,7 +15,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 
 class Save extends \Magento\Backend\App\Action
 {
-  
+
     const ZIPPED_DIR = 'datapacks/zipfiles';
     const UNZIPPED_DIR = 'datapacks/unzipped';
     /** @var UploaderFactory */
@@ -20,13 +23,22 @@ class Save extends \Magento\Backend\App\Action
 
     /** @var Filesystem\Directory\WriteInterface */
     protected $verticalDirectory;
-  
+
     /** @var File */
     protected $file;
 
     /** @var ScheduleBulk */
     protected $scheduleBulk;
 
+    /**
+     * Save constructor.
+     * @param Context $context
+     * @param UploaderFactory $uploaderFactory
+     * @param Filesystem $filesystem
+     * @param ScheduleBulk $scheduleBulk
+     * @param File $file
+     * @throws \Magento\Framework\Exception\FileSystemException
+     */
     public function __construct(
         Context $context,
         UploaderFactory $uploaderFactory,
@@ -41,6 +53,9 @@ class Save extends \Magento\Backend\App\Action
         $this->file = $file;
     }
 
+    /**
+     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
+     */
     public function execute()
     {
         try {
@@ -54,6 +69,7 @@ class Save extends \Magento\Backend\App\Action
                   $verticalId = 'vertical';
                 if (isset($params['vertical']) && count($params['vertical'])) {
                     $verticalId = $params['vertical'][0];
+                    //phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
                     if (!file_exists($verticalId['tmp_name'])) {
                           $verticalId['tmp_name'] = $verticalId['path'] . '/' . $verticalId['file'];
                     }
@@ -71,13 +87,15 @@ class Save extends \Magento\Backend\App\Action
                 //if an except is thrown, no image has been uploaded
                 throw new LocalizedException(__('Data Pack is required'));
             }
-            
+
             $operationConditions = $this->setAdvancedConditions($params['advanced_conditions']);
 
             if ($this->unzipFile($fileInfo)) {
               ///schedule import
                 $operation = [];
-                $operation['fileSource']=$this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR).'/'.basename($fileInfo['name'],'.zip');
+                $operation['fileSource']=$this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR).'/'
+                //phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
+                .basename($fileInfo['name'], '.zip');
                 $operation['packFile']=$fileInfo['name'];
                 $operation['load']=$operationConditions['load'];
                 $operation['fileOrder']=$operationConditions['files'];
@@ -88,9 +106,9 @@ class Save extends \Magento\Backend\App\Action
                 $this->messageManager->addErrorMessage(__('Data Pack could not be unzipped. Please check file format'));
                 return $this->_redirect('*/*/upload');
             }
-    
+
             $this->messageManager->addSuccessMessage(__('Data Pack uploaded successfully and Scheduled for Import'));
-    
+
             return $this->_redirect('*/*/upload');
         } catch (LocalizedException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());
@@ -103,15 +121,19 @@ class Save extends \Magento\Backend\App\Action
         }
     }
 
-    protected function setAdvancedConditions($conditions){
+    /**
+     * @param $conditions
+     * @return array
+     */
+    protected function setAdvancedConditions($conditions)
+    {
         $settings = ["reload"=>0,"load"=>"", "files"=>"", "host"=>""];
-       // $conditions='--files="b2b_approval_rules.csv" -r --host=subdomain --load=store';
-        $commands = explode(" ",$conditions);
-        foreach($commands as $command){
-            $element = explode("=",trim($command));
+        $commands = explode(" ", $conditions);
+        foreach ($commands as $command) {
+            $element = explode("=", trim($command));
             switch ($element[0]) {
                 case "--files":
-                    $settings["files"]=explode(",",trim($element[1],'"'));
+                    $settings["files"]=explode(",", trim($element[1], '"'));
                     break;
                 case "-r":
                     $settings["reload"]=1;
@@ -121,16 +143,21 @@ class Save extends \Magento\Backend\App\Action
                     break;
                 case "--load":
                     $settings["load"]=$element[1];
-                    break;    
+                    break;
             }
         }
         return $settings;
     }
 
+    /**
+     * @param $fileInfo
+     * @return bool
+     * @throws \Magento\Framework\Exception\FileSystemException
+     */
     protected function unzipFile($fileInfo)
     {
         $zip = new \ZipArchive;
-  
+
       // Zip File Name
         if ($zip->open($fileInfo["path"]."/".$fileInfo["file"]) === true) {
             // Unzip Path

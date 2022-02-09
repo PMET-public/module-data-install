@@ -4,6 +4,8 @@
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\SharedCatalog\Api\CompanyManagementInterface;
 use Magento\SharedCatalog\Api\Data\SharedCatalogInterfaceFactory;
 use Magento\SharedCatalog\Api\Data\SharedCatalogInterface;
@@ -67,8 +69,8 @@ class SharedCatalogs
      * @param array $row
      * @param array $settings
      * @return bool
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws CouldNotSaveException
+     * @throws LocalizedException
      */
     public function install(array $row, array $settings)
     {
@@ -82,7 +84,6 @@ class SharedCatalogs
             $row['companies'] = '';
         }
         //check for existing shared catalog to update
-        /** @var SharedCatalogInterface $sharedCatalog */
         $sharedCatalog = $this->getSharedCatalogByName($row['name']);
 
         if (!$sharedCatalog) {
@@ -126,7 +127,7 @@ class SharedCatalogs
     /**
      * @param $sharedCatalogName
      * @return SharedCatalogInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     private function getSharedCatalogByName($sharedCatalogName)
     {

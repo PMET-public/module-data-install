@@ -14,7 +14,8 @@ use Magento\Framework\Bulk\OperationInterface;
 use MagentoEse\DataInstall\Model\Process;
 use Psr\Log\LoggerInterface;
 use Magento\Framework\Serialize\SerializerInterface;
-use Magento\Framework\Bulk\OperationManagementInterface;
+use Magento\Framework\Filesystem\Driver\File;
+use Magento\Framework\Filesystem\DriverInterface;
 
 /**
  * Consumer for export message.
@@ -22,43 +23,47 @@ use Magento\Framework\Bulk\OperationManagementInterface;
  */
 class Consumer
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    /** @var LoggerInterface */
+    protected $logger;
+
+    /** @var SerializerInterface */
+    protected $serializer;
+
+    /** @var EntityManager */
+    protected $entityManager;
+
+    /** @var Process */
+    protected $process;
+
+    /** @var File */
+    protected $fileSystem;
+
+    /** @var DriverInterface */
+    protected $driverInterface;
 
     /**
-     * @var SerializerInterface
+     * Consumer constructor.
+     * @param LoggerInterface $logger
+     * @param SerializerInterface $serializer
+     * @param EntityManager $entityManager
+     * @param Process $process
+     * @param File $fileSystem
+     * @param DriverInterface $driverInterface
      */
-    private $serializer;
-
-    /**
-     * @var OperationManagementInterface
-     */
-    private $operationManagement;
-
-    /**
-     * @var EntityManager
-     */
-    private $entityManager;
-
-    /**
-     * @var Process
-     */
-    private $process;
-   
     public function __construct(
-        OperationManagementInterface $operationManagement,
         LoggerInterface $logger,
         SerializerInterface $serializer,
         EntityManager $entityManager,
-        Process $process
+        Process $process,
+        File $fileSystem,
+        DriverInterface $driverInterface
     ) {
         $this->logger = $logger;
         $this->serializer = $serializer;
-        $this->operationManagement = $operationManagement;
         $this->entityManager = $entityManager;
         $this->process = $process;
+        $this->fileSystem = $fileSystem;
+        $this->driverInterface = $driverInterface;
     }
 
     /**
@@ -132,5 +137,9 @@ class Consumer
         $data['fileorder'] = ['msi_inventory.csv'];
         $data['reload'] = 1;
         $this->process->loadFiles($data);
+        //delete source files
+        $this->fileSystem->deleteDirectory($data['filesource']);
+        //delete the archive that is from a mac compress process
+        $this->fileSystem->deleteDirectory($this->driverInterface->getParentDirectory($data['filesource'])."/__MACOSX");
     }
 }

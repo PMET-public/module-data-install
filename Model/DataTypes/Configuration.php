@@ -175,7 +175,7 @@ class Configuration
 
     /**
      * @param string $path
-     * @param string $scope
+     * @param string $scopeType
      * @param string $scopeCode
      * @return mixed
      */

@@ -1,7 +1,10 @@
 <?php
+/** Copyright © Adobe  All rights reserved */
 namespace MagentoEse\DataInstall\Model\Logger;
 
-class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
+use Magento\Ui\DataProvider\AbstractDataProvider;
+
+class DataProvider extends AbstractDataProvider
 {
     /**
      * @param string $name
@@ -10,18 +13,17 @@ class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
      * @param array $meta
      * @param array $data
      */
+    // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
     public function __construct(
         $name,
         $primaryFieldName,
         $requestFieldName,
-        //CollectionFactory $employeeCollectionFactory,
         array $meta = [],
         array $data = []
     ) {
-        //$this->collection = $employeeCollectionFactory->create();
         parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
     }
- 
+
     /**
      * Get data
      *
@@ -31,6 +33,11 @@ class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
     {
         return [];
     }
+
+    /**
+     * @param \Magento\Framework\Api\Filter $filter
+     * @return mixed|void|null
+     */
     public function addFilter(\Magento\Framework\Api\Filter $filter)
     {
         return null;

@@ -5,6 +5,8 @@
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Magento\Framework\Api\ExtensibleDataInterface;
+use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\RequisitionList\Api\Data\RequisitionListInterfaceFactory;
 use Magento\RequisitionList\Api\Data\RequisitionListInterface;
 use Magento\RequisitionList\Api\Data\RequisitionListItemInterfaceFactory;
@@ -34,9 +36,19 @@ class RequisitionLists
     /** @var RequisitionListItemInterfaceFactory */
     protected $requisitionListItemFactory;
 
-     /** @var Stores */
-     protected $stores;
-    
+    /** @var Stores */
+    protected $stores;
+
+    /**
+     * RequisitionLists constructor.
+     * @param Helper $helper
+     * @param RequisitionListInterfaceFactory $requisitionListFactory
+     * @param RequisitionListRepositoryInterface $requisitionListRepository
+     * @param CustomerRepositoryInterface $customerRepository
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param RequisitionListItemInterfaceFactory $requisitionListItemFactory
+     * @param Stores $stores
+     */
     public function __construct(
         Helper $helper,
         RequisitionListInterfaceFactory $requisitionListFactory,
@@ -59,7 +71,7 @@ class RequisitionLists
      * @param array $row
      * @param array $settings
      * @return bool
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws CouldNotSaveException
      */
     public function install(array $row, array $settings)
     {
@@ -118,7 +130,7 @@ class RequisitionLists
             }
             $requisitionList->setItems($listItems);
         }
-        
+
         $this->requisitionListRepository->save($requisitionList);
 
         return true;
@@ -127,7 +139,7 @@ class RequisitionLists
     /**
      * @param $listName
      * @param $customerId
-     * @return \Magento\Framework\Api\ExtensibleDataInterface
+     * @return ExtensibleDataInterface
      */
     private function getRequisitionListByName($listName, $customerId)
     {

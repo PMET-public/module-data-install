@@ -1,4 +1,5 @@
 <?php
+/** Copyright © Adobe  All rights reserved */
 namespace MagentoEse\DataInstall\Model\Queue;
 
 use Magento\Framework\Bulk\BulkManagementInterface;
@@ -44,12 +45,12 @@ class ScheduleBulk
 
     /**
      * ScheduleBulk constructor.
-     *
      * @param BulkManagementInterface $bulkManagement
      * @param OperationInterfaceFactory $operationFactory
      * @param IdentityGeneratorInterface $identityService
      * @param UserContextInterface $userContextInterface
      * @param UrlInterface $urlBuilder
+     * @param \Magento\Framework\Json\Helper\Data $jsonHelper
      */
     public function __construct(
         BulkManagementInterface $bulkManagement,
@@ -80,7 +81,8 @@ class ScheduleBulk
         $operationCount = count($operationData);
         if ($operationCount > 0) {
             $bulkUuid = $this->identityService->generateId();
-            $bulkDescription = 'Data Pack Import - '.basename($operationData[0]['packFile'],'.zip');
+            //phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
+            $bulkDescription = 'Data Pack Import - '.basename($operationData[0]['packFile'], '.zip');
 
             $operations = [];
             foreach ($operationData as $operation) {

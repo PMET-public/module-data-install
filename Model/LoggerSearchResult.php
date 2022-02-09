@@ -1,5 +1,5 @@
 <?php
-
+/** Copyright © Adobe  All rights reserved */
 namespace MagentoEse\DataInstall\Model;
 
 use Magento\Framework\Api\SearchResults;

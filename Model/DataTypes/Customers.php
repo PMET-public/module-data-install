@@ -100,7 +100,6 @@ class Customers
      * @param Helper $helper
      * @param CustomerRepositoryInterface $customerRepositoryInterface
      * @param AddressRepositoryInterface $addressRepositoryInterface
-     * @param AddressRepositoryInterface $addressRepositoryInterface
      * @param RewardFactory $rewardFactory
      */
      public function __construct(
@@ -170,10 +169,10 @@ class Customers
              $importMethod = 'customer';
          }
          $this->import($cleanCustomerArray, $productValidationStrategy, $importMethod);
-        
+
          //add rewards points
          $this->addRewardsPoints($customerArray);
-    
+
          $startingElement = 1;
          foreach ($cleanCustomerArray as $row) {
              try {
@@ -181,7 +180,7 @@ class Customers
                      $row['email'],
                      $this->stores->getWebsiteId($row['_website'])
                  );
-            
+
                  if (!empty($row['store_view_code'])) {
                      $customer->setCreatedIn($this->stores->getViewName($row['store_view_code']));
                  } else {
@@ -194,7 +193,7 @@ class Customers
                  );
 
             // $this->customerRepositoryInterface->save($customer);
-            
+
              ///set addresses as default
                  $addresses = $customer->getAddresses();
                  $addressesToKeep=[];
@@ -210,7 +209,7 @@ class Customers
                                 //  doesnt occur after the original load, the reload can fail deleting an address.
                                  $leftEmpty=0;
                              }
-                        
+
                              $removed = true;
                              break;
                          }
@@ -234,10 +233,15 @@ class Customers
 
          return true;
      }
-    
+
+    /**
+     * @param $customerArray
+     * @return array
+     * @throws LocalizedException
+     */
      private function cleanDataForImport($customerArray)
      {
-        
+
          $newCustomerArray=[];
          foreach ($customerArray as $customer) {
              //change website column if incorrect
@@ -261,7 +265,7 @@ class Customers
              if (empty($customer['_store'])) {
                  $customer['_store']=$this->settings['store_view_code'];
              }
-           
+
              //add group_id column if it doesnt exist
              if (empty($customer['group_id'])) {
                  $customer['group_id']=1;
@@ -270,7 +274,7 @@ class Customers
              if (!empty($customer['group'])) {
                  $customer['group_id']=$this->customerGroups->getCustomerGroupId($customer['group']);
              }
-            
+
              //if it is a composite file these fields need to be populated
              //if its not a composite file, adding these fields will generate an error
 
@@ -287,7 +291,7 @@ class Customers
                      }
                  }
              }
-            
+
              //remove columns used for other purposes, but throw errors on import
              foreach ($this->importUnsafeColumns as $column) {
                  unset($customer[$column]);
@@ -297,6 +301,11 @@ class Customers
          return $newCustomerArray;
      }
 
+    /**
+     * @param $customerArray
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
      private function addRewardsPoints($customerArray)
      {
          foreach ($customerArray as $rewardCustomer) {
@@ -328,6 +337,11 @@ class Customers
          }
      }
 
+    /**
+     * @param $customerArray
+     * @param $productValidationStrategy
+     * @param $importMethod
+     */
      private function import($customerArray, $productValidationStrategy, $importMethod)
      {
          $importerModel = $this->importer->create();
@@ -346,10 +360,10 @@ class Customers
          }
 
          $this->helper->logMessage($importerModel->getLogTrace());
-         if($importerModel->getErrorMessages()!=""){
-            $this->helper->logMessage($importerModel->getErrorMessages(),"warning");
-        }
-        unset($importerModel);
+         if ($importerModel->getErrorMessages()!="") {
+             $this->helper->logMessage($importerModel->getErrorMessages(), "warning");
+         }
+         unset($importerModel);
      }
 
     /**

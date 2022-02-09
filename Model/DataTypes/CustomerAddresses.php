@@ -3,7 +3,6 @@
  * Copyright © Adobe. All rights reserved.
  */
 
-
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use FireGento\FastSimpleImport\Model\ImporterFactory as Importer;
@@ -18,8 +17,8 @@ class CustomerAddresses
     protected $importer;
 
      /** @var Helper  */
-     protected $helper;
-   
+    protected $helper;
+
      protected $importUnsafeColumns=[''];
 
     /**
@@ -60,13 +59,17 @@ class CustomerAddresses
         }
         $cleanCustomerArray = $this->cleanDataForImport($customerArray);
         $this->import($cleanCustomerArray, $productValidationStrategy, 'customer_address');
-        
+
         return true;
     }
 
+    /**
+     * @param $customerArray
+     * @return array
+     */
     private function cleanDataForImport($customerArray)
     {
-        
+
         $newCustomerArray=[];
         foreach ($customerArray as $customer) {
             //change website column if incorrect
@@ -84,7 +87,7 @@ class CustomerAddresses
             }
             //_entity_id is a required column, but if its populated it may cause unexpected errors.
             $customer['_entity_id'] = '';
-                      
+
             //remove columns used for other purposes, but throw errors on import
             foreach ($this->importUnsafeColumns as $column) {
                 unset($customer[$column]);
@@ -94,6 +97,11 @@ class CustomerAddresses
         return $newCustomerArray;
     }
 
+    /**
+     * @param $customerArray
+     * @param $productValidationStrategy
+     * @param $importMethod
+     */
     private function import($customerArray, $productValidationStrategy, $importMethod)
     {
         $importerModel = $this->importer->create();

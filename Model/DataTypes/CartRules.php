@@ -1,4 +1,5 @@
 <?php
+/** Copyright © Adobe  All rights reserved */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\SalesRule\Model\Data\Rule;
@@ -24,6 +25,9 @@ class CartRules
 
     /** @var Stores */
     protected $stores;
+
+    /** @var ConditionInterfaceFactory */
+    protected $conditionInterfaceFactory;
 
     /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
@@ -73,6 +77,12 @@ class CartRules
         $this->helper = $helper;
     }
 
+    /**
+     * @param array $row
+     * @param array $settings
+     * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function install(array $row, array $settings)
     {
         //required name
@@ -92,7 +102,7 @@ class CartRules
                 return true;
             }
         }
-        
+
         //if websites not defined, use default
         if (empty($row['site_code'])) {
             $row['site_code'] = $settings['site_code'];
@@ -125,7 +135,7 @@ class CartRules
                 return true;
             }
         }
-       
+
         if (empty($row['is_active'])) {
             $row['is_active']=1;
         }
@@ -134,7 +144,7 @@ class CartRules
         } elseif ($row['is_active']== 'N') {
             $row['is_active']=0;
         }
-        
+
         //get existing rule
         $rule = $this->getCartRuleByName($row['name']);
 

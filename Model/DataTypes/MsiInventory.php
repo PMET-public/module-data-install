@@ -54,7 +54,6 @@ class MsiInventory
 
     /**
      * @param $productsArray
-     * @param $imgDir
      * @param $productValidationStrategy
      */
     private function import($productsArray, $productValidationStrategy)

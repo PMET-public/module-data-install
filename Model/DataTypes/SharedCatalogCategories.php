@@ -5,6 +5,7 @@
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\SharedCatalog\Api\SharedCatalogRepositoryInterface;
 use Magento\SharedCatalog\Api\Data\SharedCatalogInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
@@ -61,6 +62,7 @@ class SharedCatalogCategories
      * @param SharedCatalogAssignment $sharedCatalogAssignment
      * @param CatalogPermissionManagement $catalogPermissionManagement
      * @param ScheduleBulk $scheduleBulk
+     * @param State $appState
      * @param Helper $helper
      */
     public function __construct(
@@ -92,8 +94,8 @@ class SharedCatalogCategories
      * @param array $header
      * @param string $modulePath
      * @param array $settings
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @return bool
+     * @throws LocalizedException
      */
     public function install(array $rows, array $header, string $modulePath, array $settings)
     {
@@ -106,7 +108,7 @@ class SharedCatalogCategories
             $this->helper->logMessage("b2b_shared_catalog_categories requires a category column.", "warning");
             return true;
         }
-        
+
         foreach ($rows as $row) {
             $categoryRowArray[] = array_combine($header, $row);
         }
@@ -133,7 +135,7 @@ class SharedCatalogCategories
                 $catIds = $this->categoryManagementInterface->getCategories($catalogId);
                 if (count($catIds) > 0) {
                     $categories = $this->categoryCollection->create();
-                    
+
                     // add a filter to get the IDs you need
                     $categories->addFieldToFilter(
                         'entity_id',
@@ -149,7 +151,7 @@ class SharedCatalogCategories
                         [$catalogId, $catlist]
                     );
                 }
-                
+
                 //get ids of added categories by path
                 $newCategories = $this->getCategoriesByPath($categoryArray, $settings);
                 //add new categories
@@ -161,7 +163,7 @@ class SharedCatalogCategories
                     $this->helper->logMessage($e->getMessage(), "warning");
                     return true;
                 }
-                
+
                 //add products in categories
                 $catgoryIds = $this->getCategoryIds($newCategories);
                 $this->sharedCatalogAssignment->assignProductsForCategories($catalogId, $catgoryIds);
@@ -198,7 +200,7 @@ class SharedCatalogCategories
     /**
      * @param $sharedCatalogName
      * @return SharedCatalogInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     private function getSharedCatalogByName($sharedCatalogName)
     {
@@ -216,7 +218,7 @@ class SharedCatalogCategories
      * @param $categories
      * @param $settings
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     private function getCategoriesByPath($categories, $settings)
     {
@@ -235,7 +237,6 @@ class SharedCatalogCategories
     /**
      * @param $settings
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     private function getAllCategories($settings)
     {

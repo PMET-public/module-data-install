@@ -102,7 +102,7 @@ class DynamicBlocks
         }
         //remove spaces from type
         $row['type'] = str_replace(' ', '', $row['type']);
-        
+
         if (empty($row['store_code'])) {
             //backwards compatibility
             if (!empty($row['store'])) {

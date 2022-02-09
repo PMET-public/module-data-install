@@ -1,4 +1,5 @@
 <?php
+/** Copyright © Adobe  All rights reserved */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use MagentoEse\DataInstall\Helper\Helper;
@@ -29,12 +30,13 @@ class RewardExchangeRate
     protected $rateResourceModel;
 
     /**
+     * RewardExchangeRate constructor.
      * @param CustomerGroups $customerGroups
      * @param Stores $stores
      * @param Helper $helper
-     * @param RateModel $rateModel
+     * @param RateModelFactory $rateModel
      * @param RateResourceModel $rateResourceModel
-     * @param CollectionFactory $collectionFactory
+     * @param CollectionFactory $collectionFactory\
      */
     public function __construct(
         CustomerGroups $customerGroups,
@@ -52,6 +54,13 @@ class RewardExchangeRate
         $this->collectionFactory = $collectionFactory;
     }
 
+    /**
+     * @param array $row
+     * @param array $settings
+     * @return bool
+     * @throws AlreadyExistsException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function install(array $row, array $settings)
     {
         //required points and currency_amount
@@ -99,7 +108,7 @@ class RewardExchangeRate
         if (!$rate) {
             $rate = $this->rateModel->create();
         }
-               
+
         $rate->setWebsiteId($websiteId);
         $rate->setCustomerGroupId($groupId);
         $rate->setDirection($direction);

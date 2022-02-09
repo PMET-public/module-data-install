@@ -91,7 +91,7 @@ class AdvancedPricing
                     $product['tier_price_website'] = implode(",", $websiteArray);
                 }
             }
-            
+
             $products[$i] = $product;
             $i++;
         }

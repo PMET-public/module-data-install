@@ -1,6 +1,8 @@
 <?php
+/** Copyright © Adobe  All rights reserved */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Exception;
 use Magento\Widget\Model\Widget\InstanceFactory;
 use Magento\Widget\Model\Widget\Instance;
 use MagentoEse\DataInstall\Model\Converter;
@@ -60,6 +62,12 @@ class Widgets
         $this->collectionFactory = $collectionFactory;
     }
 
+    /**
+     * @param array $row
+     * @param array $settings
+     * @return bool
+     * @throws Exception
+     */
     public function install(array $row, array $settings)
     {
     //type, theme, title, store is required
@@ -129,20 +137,12 @@ class Widgets
         $pageGroup[$row['page_group']]['layout_handle']=$row['layout_handle'];
         $pageGroup[$row['page_group']]['template']=$row['page_template'];
         $pageGroup[$row['page_group']]['page_id']=0;
-    
+
         $widget->setPageGroups([$pageGroup]);
 
         $this->appState->emulateAreaCode(
             'frontend',
             [$widget, 'save']
         );
-
-    //LAYOUT UPDATES
-    //instance_id = widget id
-    //page_group = Display on
-    //block_reference = container
-    //page_for = all or specific (pages, categories, products)
-    //entities = if the page_for is specific, which id(s)
-    //$q=$w;
     }
 }

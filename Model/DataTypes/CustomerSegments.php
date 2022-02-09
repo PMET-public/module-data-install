@@ -6,6 +6,7 @@
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Exception\LocalizedException;
 use MagentoEse\DataInstall\Helper\Helper;
 //No APIs in CustomerSegment
 use Magento\CustomerSegment\Model\Segment;
@@ -72,11 +73,11 @@ class CustomerSegments
      * @param array $row
      * @param array $settings
      * @return bool
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws LocalizedException
      */
     public function install(array $row, array $settings)
     {
-        
+
          //if there is no name, reject it
         if (empty($row['name'])) {
             $this->helper->logMessage("A row in the Customer Segments file does not have a value for name. ".
@@ -106,7 +107,7 @@ class CustomerSegments
         //set status as active if not defined properly
         $row['is_active']??='Y';
         $row['is_active'] = 'Y' ? 1:0;
-        
+
         //applyto set default at both visitors and registered users
         if (empty($row['apply_to'])) {
             $row['apply_to']=0;
@@ -116,7 +117,7 @@ class CustomerSegments
             $row['conditions_serialized'] = $this->converter->convertContent($row['conditions_serialized']);
 
             //check json format of conditions_serialized
-        
+
             $jsonValidate = json_decode($row['conditions_serialized'], true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $this->helper->logMessage("A row in the Customer Segments file has invalid Json data for ".
@@ -124,25 +125,25 @@ class CustomerSegments
                 return true;
             }
         }
-        
+
         //load existing segment by name
         /** @var Segment $segment */
         $segment = $this->collection->create()->addFieldToFilter('name', ['eq' => $row['name']])->getFirstItem();
         if (!$segment->getName()) {
             $segment = $this->customerSegment->create();
         }
-        
+
         $segment->setName($row['name']);
         if (!empty($row['description'])) {
             $segment->setDescription($row['description']);
         }
-        
+
         $segment->setIsActive($row['is_active']);
 
         if (!empty($row['conditions_serialized'])) {
             $segment->setConditionsSerialized($row['conditions_serialized']);
         }
-        
+
         $segment->setApplyTo($row['apply_to']);
         //add new websites to exiting websites for segment;
         $segment->addData(['website_ids'=>array_merge($siteIds, $segment->getWebsiteIds())]);
@@ -151,7 +152,7 @@ class CustomerSegments
             [$this->segmentResourceModel, 'save'],
             [$segment]
         );
-        
+
         //$this->segmentResourceModel->save($segment);
         //schedule bulk operation
         $this->segmentMatchPublisher->execute($segment);

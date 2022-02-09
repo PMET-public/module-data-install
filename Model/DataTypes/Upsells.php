@@ -5,6 +5,7 @@
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Exception;
 use Magento\TargetRule\Model\RuleFactory as RuleFactory;
 use Magento\TargetRule\Model\Rule;
 use Magento\TargetRule\Model\ResourceModel\Rule as ResourceModel;
@@ -70,7 +71,7 @@ class Upsells
      * @param array $row
      * @param array $settings
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function install(array $row, array $settings)
     {
@@ -99,7 +100,7 @@ class Upsells
         if (empty($row['is_active'])) {
             $row['is_active'] == 'Y';
         }
-                
+
         $upsellModel = $this->ruleCollection->create()
             ->addFieldToFilter('name', ['eq' => $row['name']])->getFirstItem();
         if (!$upsellModel) {

@@ -38,7 +38,7 @@ class Install extends Command
     const FILES = 'files';
     const HOST = 'host';
     const RELOAD_FLAG = 'reload';
-    
+
     /** @var ObjectManagerInterface  */
     protected $objectManagerInterface;
 
@@ -50,14 +50,14 @@ class Install extends Command
 
     /**
      * Install constructor.
-     * @param Process $process
+     * @param ObjectManagerInterface $objectManagerInterface
+     * @param State $appState
      */
     public function __construct(ObjectManagerInterface $objectManagerInterface, State $appState)
     {
         parent::__construct();
         $this->objectManagerInterface = $objectManagerInterface;
         $this->appState = $appState;
-        
     }
 
     protected function configure()
@@ -95,7 +95,7 @@ class Install extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return $this|int
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -109,14 +109,15 @@ class Install extends Command
         } else {
             $fileArray = explode(",", $files);
         }
-        if($reload===null){
+        if ($reload===null) {
              $reload=1;
         }
         $jobSettings = ['filesource'=>$module,'load'=>$load,'reload'=>$reload,'fileorder'=>$fileArray,'host'=>$host];
 
         $process = $this->appState->emulateAreaCode(
             AppArea::AREA_ADMINHTML,
-            [$this->objectManagerInterface, 'create'],[Process::class]
+            [$this->objectManagerInterface, 'create'],
+            [Process::class]
         );
         //$process = $this->objectManagerInterface->create(Process::class);
         if ($process->loadFiles($jobSettings)==0) {

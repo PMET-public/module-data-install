@@ -1,8 +1,5 @@
 <?php
-/**
- * Copyright © 2016 Magento. All rights reserved.
- * See COPYING.txt for license details.
- */
+/** Copyright © Adobe  All rights reserved */
 
 use \Magento\Framework\Component\ComponentRegistrar;
 

@@ -54,6 +54,8 @@ class Products
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param Importer $importer
      * @param State $appState
+     * @param DirectoryList $directoryList
+     * @param Filesystem $fileSystem
      */
     public function __construct(
         Helper $helper,
@@ -128,7 +130,7 @@ class Products
         }
         $productsArray = $this->replaceBaseWebsiteCodes($productsArray, $settings);
         $this->helper->logMessage("Importing products", "info");
-        
+
         $this->import($productsArray, $imgDir, $productValidationStrategy);
 
         /// Restrict products from other stores
@@ -192,10 +194,10 @@ class Products
         }
 
         $this->helper->logMessage($importerModel->getLogTrace());
-        if($importerModel->getErrorMessages()!=""){
-            $this->helper->logMessage($importerModel->getErrorMessages(),"warning");
+        if ($importerModel->getErrorMessages()!="") {
+            $this->helper->logMessage($importerModel->getErrorMessages(), "warning");
         }
-  
+
         unset($importerModel);
     }
 
@@ -331,7 +333,7 @@ class Products
         }
         return $products;
     }
-     
+
     /**
      * @param array $products
      * @param array $settings
@@ -352,7 +354,7 @@ class Products
                     $product['product_websites'] = implode(",", $websiteArray);
                 }
             }
-            
+
             $products[$i] = $product;
             $i++;
         }

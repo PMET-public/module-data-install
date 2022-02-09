@@ -135,14 +135,8 @@ class InstallerRepository implements InstallerRepositoryInterface
         $collection = $this->installerCollectionFactory->create();
         $this->collectionProcessor->process($searchCriteria, $collection);
         $searchResults = $this->searchResultFactory->create();
-
         $searchResults->setSearchCriteria($searchCriteria);
         $searchResults->setItems($collection->getItems());
-
-        //echo "</br>";
-        //echo $collection->getSelect()->__toString();
-        //echo "</br>";
-
         return $searchResults;
     }
 }

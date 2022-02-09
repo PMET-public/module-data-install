@@ -49,7 +49,7 @@ class Block extends Action implements HttpPostActionInterface
     protected $directoryList;
 
     /**
-     * Index constructor.
+     * Block constructor.
      * @param Context $context
      * @param Filter $filter
      * @param CollectionFactory $collectionFactory
@@ -73,11 +73,11 @@ class Block extends Action implements HttpPostActionInterface
         parent::__construct($context);
     }
 
-    /**
-     * @return ResponseInterface|ResultInterface
-     * @throws FileSystemException
-     * @throws LocalizedException
-     */
+     /**
+      * @return ResponseInterface|ResultInterface
+      * @throws FileSystemException
+      * @throws LocalizedException
+      */
     public function execute()
     {
         $fileName = 'blocks.csv';

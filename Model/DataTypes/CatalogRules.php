@@ -94,7 +94,16 @@ class CatalogRules
         $this->bannerFactory = $bannerFactory;
         $this->helper = $helper;
     }
+
     //requires customer groups, product attributes, dynamic blocks
+
+    /**
+     * @param array $row
+     * @param array $settings
+     * @return bool
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     public function install(array $row, array $settings)
     {
         //if there is no name, reject it

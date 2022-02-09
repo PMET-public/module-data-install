@@ -4,6 +4,7 @@
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\PageBuilder\Api\Data\TemplateInterface;
 use Magento\PageBuilder\Model\TemplateFactory;
 use Magento\PageBuilder\Model\ResourceModel\Template\CollectionFactory as TemplateCollection;
@@ -58,7 +59,7 @@ class Templates
      * @param array $row
      * @param array $settings
      * @return bool
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function install(array $row, array $settings)
     {
@@ -69,7 +70,7 @@ class Templates
         if (empty($row['created_for'])) {
             $row['created_for'] = 'any';
         }
-        
+
         $template = $this->templateCollection->create()
             ->addFieldToFilter(TemplateInterface::KEY_NAME, ['eq' => $row['name']])->getFirstItem();
         if (!$template) {

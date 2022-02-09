@@ -16,7 +16,7 @@ interface LoggerInterface extends ExtensibleDataInterface
 
     /** @var string  */
     const LEVEL = 'level';
-    
+
     /** @var string  */
     const DATAPACK = 'datapack';
 
@@ -57,8 +57,8 @@ interface LoggerInterface extends ExtensibleDataInterface
     public function setMessage($message);
 
    /**
-     * @return string
-     */
+    * @return string
+    */
     public function getLevel();
 
     /**

@@ -15,6 +15,9 @@ use Magento\Company\Api\Data\StructureInterface;
 use Magento\Company\Api\Data\TeamInterface;
 use Magento\Company\Model\StructureRepository;
 use Magento\Framework\Api\SearchCriteriaInterface;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\StateException;
 use MagentoEse\DataInstall\Helper\Helper;
 use Magento\Framework\Exception\NoSuchEntityException;
 
@@ -96,8 +99,8 @@ class Teams
      * @param $header
      * @return bool
      * @throws NoSuchEntityException
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\StateException
+     * @throws LocalizedException
+     * @throws StateException
      */
     public function install($row, $settings)
     {
@@ -125,7 +128,7 @@ class Teams
         $websiteId = $this->stores->getWebsiteId($row['site_code']);
         //create array from members addresses
         $data['members'] = explode(",", $row['members']);
-        
+
         //get existing team
         $existingTeam = $this->getExistingTeam($row['name'], $adminUserId);
         // Delete existing team if needed
@@ -178,11 +181,13 @@ class Teams
         }
         return true;
     }
-    
+
     /**
-     * @param string $teamName
-     * @param int $adminUserId
-     * @return \Magento\Company\Api\Data\TeamInterface;
+     * @param $teamName
+     * @param $adminUserId
+     * @return false|TeamInterface
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     private function getExistingTeam($teamName, $adminUserId)
     {
@@ -213,12 +218,13 @@ class Teams
         }
     }
 
-     /**
-      * @param int $userId
-      * @param int $parentId
-      * @param string $path
-      * @return \Magento\Company\Model\Structure
-      */
+    /**
+     * @param $userId
+     * @param $parentId
+     * @param $path
+     * @return mixed
+     * @throws CouldNotSaveException
+     */
     private function addUserToTeamTree($userId, $parentId, $path)
     {
         $newStruct = $this->structureFactory->create();
@@ -235,7 +241,7 @@ class Teams
       /**
        * @param $entityId
        * @param $entityType
-       * @return \Magento\Company\Api\Data\StructureInterface|mixed
+       * @return StructureInterface|mixed
        */
     private function getStructureByEntity($entityId, $entityType)
     {
@@ -249,7 +255,7 @@ class Teams
     /**
      * @param $name
      * @return int
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     private function getCompanyAdminIdByName($name)
     {
@@ -262,7 +268,6 @@ class Teams
         if (!$company) {
             $this->helper->logMessage("The company ". $name ." requested in b2b_teams.csv does not exist", "warning");
         } else {
-            /** @var CompanyInterface $company */
             return $company->getSuperUserId();
         }
     }
@@ -270,7 +275,7 @@ class Teams
     /**
      * @param $name
      * @return int
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     private function getCompanyIdByName($name)
     {
@@ -290,7 +295,7 @@ class Teams
 
     /**
      * @param $teamId
-     * @return \Magento\Company\Api\Data\StructureInterface
+     * @return StructureInterface
      */
     private function getTeamStruct($teamId)
     {
@@ -305,7 +310,7 @@ class Teams
     /**
      * @param $teamId
      * @param $parentId
-     * @return \Magento\Company\Api\Data\StructureInterface
+     * @return StructureInterface
      */
     private function addTeamToTree($teamId, $parentId)
     {

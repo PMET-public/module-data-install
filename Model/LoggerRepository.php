@@ -135,7 +135,7 @@ class LoggerRepository implements LoggerRepositoryInterface
             $this->LoggerResource->delete($Logger);
         } catch (\Exception $exception) {
              throw new CouldNotDeleteException(
-                __('Could not delete the entry: %1', $exception->getMessage())
+                 __('Could not delete the entry: %1', $exception->getMessage())
              );
         }
 
@@ -156,12 +156,6 @@ class LoggerRepository implements LoggerRepositoryInterface
         $searchResults->setSearchCriteria($searchCriteria);
         $searchResults->setItems($collection->getItems());
 
-        //echo "</br>";
-        //echo $collection->getSelect()->__toString();
-        //echo "</br>";
-
         return $searchResults;
     }
-
-
 }

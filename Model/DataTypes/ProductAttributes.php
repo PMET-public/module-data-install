@@ -21,7 +21,7 @@ use Magento\Catalog\Model\ResourceModel\Eav\Attribute as eavAttribute;
 class ProductAttributes
 {
     const DEFAULT_ATTRIBUTE_SET = 'Default';
-    
+
     //input types not supported swatch_visual,swatch_text,media_image
     const VALID_INPUT_TYPES = ['text','textarea','textedit','pagebuilder','date','datetime',
     'boolean','multiselect','select','price','weee'];
@@ -93,14 +93,14 @@ class ProductAttributes
             );
             return true;
         }
-        
+
         if (!empty($row['store_view_code'])) {
             $storeViewId = $this->stores->getViewId($row['store_view_code']);
         } else {
             $storeViewId = 0;
             $row['store_view_code'] = 'admin';
         }
-        
+
         //validate frontend_input values
         if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
             $this->helper->logMessage(
@@ -144,7 +144,7 @@ class ProductAttributes
                 );
                 return true;
             }
-            
+
             $attribute = $this->attributeFactory->create();
         } elseif (!empty($row['only_update_sets']) && $row['only_update_sets']=='Y') {
             //facilitate adding existing attributes to set without changes.  Most likely used for system attributes
@@ -152,10 +152,10 @@ class ProductAttributes
             $this->eavConfig->clear();
             return true;
         }
-        
+
         if (!empty($row['frontend_label'])) {
             $existingLabels = $attribute->getFrontendLabels();
-            
+
             $frontEndLabels = [];
             /** @var FrontendLabel $label */
             foreach ($existingLabels as $label) {
@@ -169,7 +169,7 @@ class ProductAttributes
                 $frontEndLabels[$storeViewId] = $row['frontend_label'];
                 $frontEndLabels[0] = $attribute->getDefaultFrontendLabel();
             }
-           
+
             $row['frontend_label'] = $frontEndLabels;
         }
         if (!empty($row['option'])) {
@@ -181,22 +181,22 @@ class ProductAttributes
             $row['backend_model'] = $this->productHelper->getAttributeBackendModelByInputType($row['frontend_input']);
             $row['backend_type'] = $attribute->getBackendTypeByInput($row['frontend_input']);
         }
-        
+
         $row += ['is_filterable' => 0, 'is_filterable_in_search' => 0];
-        
+
         //remove empty array keys
         $row = $this->removeEmptyColumns($row);
         $attribute->addData($row);
         $attribute->setIsUserDefined(1);
 
         $attribute->setEntityTypeId($this->getEntityTypeId());
-        
+
         $attribute->save();
         //$attributeId = $attribute->getId();
         $this->setAttributeSets($row, $attribute);
 
         $this->eavConfig->clear();
-      
+
         //are there watches to be set
         if (!empty($row['additional_data'])) {
             //validate the correct information in additional_data column
@@ -207,6 +207,10 @@ class ProductAttributes
         return true;
     }
 
+    /**
+     * @param $attribute
+     * @param $row
+     */
     protected function setSwatches($attribute, $row)
     {
         //load current option values
@@ -263,6 +267,10 @@ class ProductAttributes
         return $optionSwatch;
     }
 
+    /**
+     * @param $swatchData
+     * @return array
+     */
     private function getSwatchArray($swatchData)
     {
         $swatchArray = [];
@@ -346,6 +354,11 @@ class ProductAttributes
     }
 
     //return swatch type based on information in additional_data column
+
+    /**
+     * @param $additionalData
+     * @return false|mixed
+     */
     protected function isSwatchType($additionalData)
     {
         // phpcs:ignore Squiz.PHP.CommentedOutCode.Found
@@ -358,6 +371,10 @@ class ProductAttributes
         }
     }
 
+    /**
+     * @param $frontendInput
+     * @return bool
+     */
     protected function validateFrontendInputs($frontendInput)
     {
         // phpcs:ignore Magento2.PHP.ReturnValueCheck.ImproperValueTesting
@@ -389,7 +406,7 @@ class ProductAttributes
             } else {
                 $optionValue = $value;
             }
-            
+
             if (!$options->getItemByColumnValue('value', $optionValue)) {
                 $result[] = $optionValue;
             }
@@ -508,6 +525,10 @@ class ProductAttributes
         }
     }
 
+    /**
+     * @param $row
+     * @return mixed
+     */
     private function removeEmptyColumns($row)
     {
         foreach ($row as $key => $value) {

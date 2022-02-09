@@ -14,7 +14,6 @@ class Logger extends AbstractExtensibleModel implements LoggerInterface
     {
         $this->_init(ResourceModel\Logger::class);
     }
-
     /**
      * @inheritDoc
      */

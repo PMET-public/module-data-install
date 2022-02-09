@@ -10,9 +10,7 @@ use MagentoEse\DataInstall\Model\ResourceModel\Installer;
 class Collection extends AbstractCollection
 {
     /**
-     * Define resource model
-     *
-     * @return void
+     * Collection constructor.
      */
     protected function __construct()
     {

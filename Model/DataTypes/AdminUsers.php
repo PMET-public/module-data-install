@@ -84,7 +84,7 @@ class AdminUsers
             }
             return true;
         }
-          
+
         $this->addUserToRole($user, $row);
 
         return true;

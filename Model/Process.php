@@ -45,7 +45,7 @@ class Process
 
     /** @var Conf  */
     protected $conf;
-    
+
     /** @var DataTypes\Stores  */
     protected $storeInstall;
 
@@ -106,9 +106,9 @@ class Process
         $reload = $jobSettings['reload'];
         $host = $jobSettings['host'];
         $jobId = $jobSettings['jobid'];
-        
+
         $fixtureDirectory = self::FIXTURE_DIRECTORY;
-        
+
         //if there is no load value, check for .default flag
         $filePath = $this->getDataPath($fileSource);
         if ($load=='') {
@@ -119,11 +119,11 @@ class Process
             }
         }
         $fixtureDirectory = 'data/'.$load;
-        
+
         $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
         $this->settings['job_settings'] = $jobSettings;
         $this->helper->setSettings($this->settings);
-        
+
         //bypass if data is already installed
         $fileSource .="/".$fixtureDirectory;
         if ($this->isModuleInstalled($fileSource)==1 && $reload===0) {
@@ -138,17 +138,16 @@ class Process
         } else {
             $this->registerModule($fileSource);
         }
-        
+
         $fileCount = 0;
         if (count($fileOrder)==0) {
             $fileOrder=$this->conf->getProcessConfiguration();
         }
-        
-        
+
         $this->helper->logMessage("Copying Media", "info");
-        
+
         $this->copyMedia->moveFiles($filePath);
-        
+
         foreach ($fileOrder as $nextFile) {
             //get processing instructions based on filename
             //returns ['filename','process','class','label'];
@@ -205,28 +204,37 @@ class Process
         }
     }
 
-    private function setDefaults($jobSettings){
-
-        if(empty($jobSettings['filesource'])){
+    /**
+     * @param $jobSettings
+     * @return mixed
+     */
+    private function setDefaults(array $jobSettings)
+    {
+        if (empty($jobSettings['filesource'])) {
             $jobSettings['filesource'] = '';
         }
-        if(empty($jobSettings['load'])){
+        if (empty($jobSettings['load'])) {
             $jobSettings['load'] ='';
         }
-        if(empty($jobSettings['fileorder'])){
+        if (empty($jobSettings['fileorder'])) {
             $jobSettings['fileorder'] =[];
         }
-        if(empty($jobSettings['reload'])){
+        if (empty($jobSettings['reload'])) {
             $jobSettings['reload']=0;
         }
-        if(empty($jobSettings['host'])){
+        if (empty($jobSettings['host'])) {
             $jobSettings['host'] = null;
         }
-        if(empty($jobSettings['jobid'])){
+        if (empty($jobSettings['jobid'])) {
             $jobSettings['jobid']='';
         }
         return $jobSettings;
     }
+
+    /**
+     * @param $file
+     * @return array|false
+     */
     private function getProcessInstructions($file)
     {
         //Is there processing information passed on with the filename?
@@ -558,7 +566,7 @@ class Process
         }
     }
 
-        /**
+    /**
      * @return mixed
      */
     private function getCallingClass()

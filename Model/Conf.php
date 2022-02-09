@@ -1,4 +1,5 @@
 <?php
+/** Copyright © Adobe  All rights reserved */
 namespace MagentoEse\DataInstall\Model;
 
 class Conf
@@ -8,85 +9,85 @@ class Conf
 
      /** @var DataTypes\ProductAttributes  */
      protected $productAttributesInstall;
- 
+
      /** @var DataTypes\Categories  */
      protected $categoryInstall;
- 
+
      /** @var DataTypes\Products  */
      protected $productInstall;
 
      /** @var DataTypes\GiftCards  */
      protected $giftCardsInstall;
- 
+
      /** @var DataTypes\DirectoryList  */
      protected $directoryList;
- 
+
      /** @var DataTypes\Pages  */
      protected $pageInstall;
- 
+
      /** @var DataTypes\Blocks  */
      protected $blockInstall;
- 
+
      /** @var DataTypes\DynamicBlocks  */
      protected $dynamicBlockInstall;
- 
+
      /** @var DataTypes\Widgets  */
      protected $widgetInstall;
- 
+
      /** @var DataTypes\Configuration  */
      protected $configurationInstall;
- 
+
      /** @var DataTypes\CustomerGroups  */
      protected $customerGroupInstall;
- 
+
      /** @var DataTypes\CustomerAttributes  */
      protected $customerAttributeInstall;
- 
+
       /** @var DataTypes\RewardExchangeRate  */
       protected $rewardExchangeRateInstall;
- 
+
      /** @var DataTypes\Customers  */
      protected $customerInstall;
- 
+
      /** @var DataTypes\CustomerAddresses  */
      protected $customerAddressesInstall;
- 
+
      /** @var DataTypes\Reviews  */
      protected $reviewsInstall;
- 
+
      /** @var Validate */
      protected $validate;
- 
+
      /** @var DataTypes\Templates  */
      protected $templatesInstall;
- 
+
      /** @var DataTypes\Upsells */
      protected $upsellsInstall;
- 
+
      /** @var CopyMedia */
      protected $copyMedia;
- 
+
      /** @var DataTypes\MsiStock */
      protected $msiStockInstall;
- 
+
      /** @var DataTypes\MsiSource */
      protected $msiSourceInstall;
- 
+
      /** @var DataTypes\MsiInventory */
      protected $msiInventoryInstall;
- 
+
      /** @var DataTypes\AdminUsers  */
      protected $adminUsersInstall;
- 
+
      /** @var DataTypes\AdminRoles  */
      protected $adminRolesInstall;
- 
+
      /** @var DriverInterface */
      protected $driverInterface;
- 
+
      /** @var DataTypes\AdvancedPricing */
      protected $advancedPricingInstall;
- 
+
      /** @var DataTypes\Orders */
      protected $orderInstall;
 
@@ -123,6 +124,7 @@ class Conf
     /** @var Datatypes\ApprovalRules */
     protected $approvalRulesInstall;
 
+    /** @var string[]  */
     const ALL_FILES = ['stores.csv',
     'config_default.json',
     'config_default.csv',
@@ -165,28 +167,32 @@ class Conf
     'advanced_pricing.csv',
     'orders.csv'];
 
+    /** @var string[]  */
     const STORE_FILES = ['stores.csv'];
 
+    /** @var string[]  */
     const STAGE1 = ['config_default.json','config_default.csv','config_vertical.json',
     'config_vertical.csv','config_secret.json','config_secret.csv','config.json','config.csv',
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv',
     'customers.csv','customer_addresses.csv','product_attributes.csv',
     'customer_segments.csv','blocks.csv','categories.csv'];
 
+    /** @var string[]  */
     const STAGE2 = ['products.csv','msi_source.csv','msi_stock.csv','msi_inventory.csv','upsells.csv','blocks.csv',
     'dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv',
     'advanced_pricing.csv','orders.csv'];
 
+    /** @var string[]  */
     const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv',
     'b2b_sales_reps.csv','b2b_teams.csv'];
-
+    /** @var string[]  */
     const SETTINGS = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
         'root_category' => 'Default Category', 'root_category_id' => '2'];
 
     /**
-     * Process constructor.
+     * Conf constructor.
      * @param DataTypes\AdminUsers $adminUsers
      * @param DataTypes\AdminRoles $adminRoles
      * @param DataTypes\AdvancedPricing $advancedPricing
@@ -203,13 +209,13 @@ class Conf
      * @param DataTypes\CustomerAttributes $customerAttributes
      * @param DataTypes\RewardExchangeRate $rewardExchangeRate
      * @param DataTypes\Customers $customers
-     * @param DataTypes\CustomersAddresses $customerAddresses
+     * @param DataTypes\CustomerAddresses $customerAddresses
      * @param DataTypes\CustomerSegments $customerSegments
      * @param DataTypes\DynamicBlocks $dynamicBlocks
      * @param DataTypes\Widgets $widgets
-     * @param DataTypes\MsiInventory $msiInventory
      * @param DataTypes\MsiStock $msiStock
      * @param DataTypes\MsiSource $msiSource
+     * @param DataTypes\MsiInventory $msiInventory
      * @param DataTypes\Orders $orders
      * @param DataTypes\Pages $pages
      * @param DataTypes\ProductAttributes $productAttributes
@@ -300,6 +306,9 @@ class Conf
         $this->companyTeamsInstall = $teams;
     }
 
+    /**
+     * @return \array[][]
+     */
     public function getProcessConfiguration()
     {
         return[

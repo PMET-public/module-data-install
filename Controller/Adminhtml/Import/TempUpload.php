@@ -1,4 +1,7 @@
 <?php
+/**
+ * Copyright © Adobe  All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Controller\Adminhtml\Import;
 
 use Magento\Backend\App\Action\Context;
@@ -10,14 +13,22 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 
 class TempUpload extends \Magento\Backend\App\Action
 {
-
+    /** @var string  */
     const UPLOAD_DIR='datapacks/upload';
 
     /** @var UploaderFactory */
     protected $uploaderFactory;
-    
+
+    /** @var Filesystem\Directory\WriteInterface  */
     protected $tmpDirectory;
 
+    /**
+     * TempUpload constructor.
+     * @param Context $context
+     * @param UploaderFactory $uploaderFactory
+     * @param Filesystem $filesystem
+     * @throws \Magento\Framework\Exception\FileSystemException
+     */
     public function __construct(
         Context $context,
         UploaderFactory $uploaderFactory,
@@ -28,6 +39,9 @@ class TempUpload extends \Magento\Backend\App\Action
         $this->tmpDirectory = $filesystem->getDirectoryWrite(DirectoryList::TMP);
     }
 
+    /**
+     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
+     */
     public function execute()
     {
         $jsonResult = $this->resultFactory->create(ResultFactory::TYPE_JSON);

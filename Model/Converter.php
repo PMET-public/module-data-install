@@ -132,7 +132,7 @@ class Converter
 
     /**
      * @param string $content
-     * @return string
+     * @return string|string
      */
     public function convertContent(string $content)
     {
@@ -142,11 +142,9 @@ class Converter
     }
 
     /**
-     * Get formatted array value
-     *
-     * @param mixed $value
+     * @param $value
      * @param string $separator
-     * @return array
+     * @return array|false|string[]
      */
     protected function getArrayValue($value, $separator = "/")
     {
@@ -223,7 +221,7 @@ class Converter
             $matchesProductId[1]
         )];
         $value=[];
-        
+
         return [
             'type' => array_merge(
                 $matchesCategoryUrl[1],
@@ -239,7 +237,7 @@ class Converter
                 $matchesProductUrl[1],
                 $matchesProductId[1]
             ),
-            
+
             'value' => array_merge(
                 $matchesCategoryUrl[2],
                 $matchesCategoryId[2],
@@ -542,7 +540,6 @@ class Converter
     /**  ******************   */
     /**  CUSTOMER ATTRIBUTES  */
     /**  ****************   */
-    //TODO:do we need to worry about non select attribute types
     /**
      * @param string $matchValue
      * @return array
@@ -636,7 +633,6 @@ class Converter
     /**  ******************   */
     /**  PRODUCT ATTRIBUTES  */
     /**  ****************   */
-    //TODO:do we need to worry about non select attribute types
     /**
      * @param string $matchValue
      * @return array

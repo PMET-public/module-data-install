@@ -67,7 +67,7 @@ class Blocks
      */
     public function install(array $row, array $settings)
     {
-        
+
         if (empty($row['identifier']) || empty($row['title'])) {
             $this->helper->logMessage("Block missing identifier or title, row skipped", "warning");
             return true;
@@ -89,7 +89,7 @@ class Blocks
         if (!$viewId) {
             $viewId=0;
         }
-        
+
         try {
             /** @var BlockInterface $cmsBlock */
             $cmsBlock = $this->getBlockByIdentifier->execute($row['identifier'], $viewId);

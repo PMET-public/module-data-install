@@ -6,6 +6,8 @@
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\DataObject;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Review\Model\Review;
 use Magento\Review\Model\ReviewFactory;
@@ -152,7 +154,7 @@ class Reviews
         } else {
             $storeId = $this->stores->getViewId(trim($settings['store_view_code']));
         }
-        
+
         $review = $this->prepareReview($row, $storeId);
         $this->createRating($row['rating_code'], $storeId);
         $productId = $this->getProductIdBySku($row['sku']);
@@ -231,13 +233,13 @@ class Reviews
 
     /**
      * @param $rating
-     * @return \Magento\Framework\DataObject|mixed
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return DataObject|mixed
+     * @throws LocalizedException
      */
     protected function getRating($rating, $storeId)
     {
         $ratingCollection = $this->ratingCollectionFactory->create();
-        
+
         $ratingId = $ratingCollection->addFieldToFilter('rating_code', $rating)->getFirstItem()->getId();
         $rating = $this->ratingFactory->create()->load($ratingId);
         $ratingStores = $rating->getStores();
@@ -254,7 +256,7 @@ class Reviews
     /**
      * @param Review $review
      * @param $row
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function setReviewRating(Review $review, $row, $storeId)
     {
@@ -274,7 +276,7 @@ class Reviews
     /**
      * @param $ratingCode
      * @param $storeId
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function createRating($ratingCode, $storeId)
     {
@@ -317,7 +319,7 @@ class Reviews
     /**
      * @param $customerEmail
      * @return int|null
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     protected function getCustomerIdByEmail($customerEmail)
     {

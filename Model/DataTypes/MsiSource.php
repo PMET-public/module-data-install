@@ -5,9 +5,10 @@
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Validation\ValidationException;
 use MagentoEse\DataInstall\Helper\Helper;
 use Magento\InventoryApi\Api\Data\StockInterfaceFactory;
-use Magento\InventoryApi\Api\Data\StockInterface;
 use Magento\InventoryApi\Api\StockRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\InventoryApi\Api\SourceRepositoryInterface;
@@ -66,13 +67,11 @@ class MsiSource
     }
 
     /**
-     * install
-     *
-     * @param  mixed $rows
-     * @param  mixed $header
-     * @param  mixed $modulePath
-     * @param  mixed $settings
-     * @return void
+     * @param array $row
+     * @param array $settings
+     * @return bool
+     * @throws CouldNotSaveException
+     * @throws ValidationException
      */
     public function install(array $row, array $settings)
     {
@@ -149,7 +148,7 @@ class MsiSource
         } else {
             $row['enabled']=true;
         }
-                
+
         try {
             $source = $this->sourceRepository->get($row['source_code']);
         } catch (NoSuchEntityException $e) {
@@ -188,16 +187,16 @@ class MsiSource
         if (!empty($row['fax'])) {
             $source->setFax($row['fax']);
         }
-  
+
         //add in store pickup attributes
         $extensionAttributes = $source->getExtensionAttributes();
         $extensionAttributes->setIsPickupLocationActive($row['is_pickup_location_active']);
         $extensionAttributes->setFrontendDescription($row['frontend_description']);
         $extensionAttributes->setFrontendName($row['frontend_name']);
         $source->setExtensionAttributes($extensionAttributes);
-        
+
         $this->sourceRepository->save($source);
-      
+
         return true;
     }
 }

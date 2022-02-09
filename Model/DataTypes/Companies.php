@@ -3,9 +3,9 @@
  * Copyright © Adobe. All rights reserved.
  */
 
- namespace MagentoEse\DataInstall\Model\DataTypes;
+namespace MagentoEse\DataInstall\Model\DataTypes;
 
- use Magento\Company\Api\Data\StructureInterfaceFactory;
+use Magento\Company\Api\Data\StructureInterfaceFactory;
  use Magento\Company\Model\StructureRepository;
  use Magento\Company\Model\Customer\Company as CompanyCustomer;
  use Magento\Company\Model\ResourceModel\Customer;
@@ -84,6 +84,7 @@ class Companies
      * @param StructureRepository $structureRepository
      * @param CompanyRepositoryInterface $companyRepositoryInterface
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param State $appState
      * @param Stores $stores
      * @param Helper $helper
      */
@@ -139,7 +140,7 @@ class Companies
             $this->helper->logMessage("Company missing name, row skipped", "warning");
             return true;
         }
-        
+
         if (empty($row['street'])) {
             $this->helper->logMessage("Company ".$row['company_name'].
             " missing street, row skipped", "warning");
@@ -169,7 +170,7 @@ class Companies
             "  missing country_id, row skipped", "warning");
             return true;
         }
-        
+
         $region = $this->region->create();
         $row['region_id'] = $region->loadByCode($row['region'], $row['country_id'])->getId();
         if (empty($row['region_id'])) {
@@ -194,7 +195,7 @@ class Companies
             $row['site_code'] = $settings['site_code'];
         }
         $websiteId = $this->stores->getWebsiteId($row['site_code']);
-        
+
         try {
             $adminCustomer = $this->customer->get($row['company_admin'], $websiteId);
         } catch (NoSuchEntityException $e) {
@@ -208,7 +209,7 @@ class Companies
             $row['sales_rep'] = 'admin';
         }
         $salesRep = $this->userFactory->create();
-        
+
         $salesRep->load($row['sales_rep']);
 
         //if company email isn't defined, use the admin email
@@ -283,7 +284,7 @@ class Companies
         $structures = $this->structureRepository->getList($builder->create())->getItems();
         return reset($structures);
     }
-  
+
     /**
      * @param $newCompany
      * @param $companyCustomer

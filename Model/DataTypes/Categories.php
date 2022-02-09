@@ -58,6 +58,7 @@ class Categories
      * @param StoreInterfaceFactory $storeFactory
      * @param BlockInterfaceFactory $blockFactory
      * @param Configuration $configuration
+     * @param Converter $converter
      * @param Helper $helper
      * @param Stores $stores
      * @param ThemeCollection $themeCollection
@@ -93,9 +94,6 @@ class Categories
      */
     public function install(array $row, array $settings)
     {
-        //TODO:Support for non default settings
-        //TODO:Content block additions to categories
-
         if (empty($row['name'])) {
             $this->helper->logMessage("A value for name is required in categories.csv", "warning");
             return true;
@@ -158,12 +156,16 @@ class Categories
                 } else {
                     $attributeData = [$categoryAttribute => $this->converter->convertContent($row[$categoryAttribute])];
                 }
-       
+
                 $category->addData($attributeData);
             }
         }
     }
 
+    /**
+     * @param $theme
+     * @return int|string
+     */
     protected function getThemeId($theme)
     {
         $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $theme)->getThemeId();
@@ -252,11 +254,6 @@ class Categories
 
         return $this->categoryTree;
     }
-
-    /**
-     * @param array $row
-     * @return void
-     */
 
     /**
      * @param string $blockName

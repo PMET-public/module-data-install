@@ -131,7 +131,7 @@ class Pages
                         //is the exiting page a store zero && are we requesting a different store/stores
                         if ($updatePage->getStores()[0]==0 && $this->getStoreIds($row['store_view_code'])[0] !=0) {
                             //Save the exiting page under all other stores
-                           
+
                             $storeIds = $this->getAllStoreIds();
                             if (($key = array_search($this->getStoreIds(
                                 $row['store_view_code']

@@ -88,13 +88,17 @@ class CompanyRoles
                 $this->createCompanyRole($companyName, $companyRoles);
             }
         }
-        
+
         return true;
     }
 
     /**
      * @param $companyName
      * @param $companyRoles
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     * @throws \Magento\Framework\Exception\InputException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     private function createCompanyRole($companyName, $companyRoles)
     {

@@ -46,8 +46,9 @@ class GiftCards
     }
 
     /**
-     * @param array $rows
+     * @param array $row
      * @param array $settings
+     * @return bool
      */
     public function install(array $row, array $settings)
     {

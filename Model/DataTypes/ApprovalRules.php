@@ -16,12 +16,15 @@ use MagentoEse\DataInstall\Helper\Helper;
 class ApprovalRules
 {
     const RULE_TYPES = ['grand_total', 'shipping_incl_tax', 'number_of_skus'];
-    
+
     /** @var RuleInterfaceFactory */
     protected $ruleFactory;
 
     /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
+
+    /** @var RoleManagementInterface */
+    protected $roleManagement;
 
     /** @var ConditionBuilderFactory */
     protected $conditionBuilderFactory;
@@ -37,7 +40,7 @@ class ApprovalRules
 
     /** @var CompanyUserRoles */
     protected $companyUserRoles;
-    
+
     /** @var Helper */
     protected $helper;
 
@@ -49,6 +52,8 @@ class ApprovalRules
      * @param ConditionBuilderFactory $conditionBuilderFactory
      * @param RuleConditionPool $ruleConditionPool
      * @param RuleRepositoryInterface $ruleRepository
+     * @param Companies $companies
+     * @param CompanyUserRoles $companyUserRoles
      * @param Helper $helper
      */
     public function __construct(
@@ -191,7 +196,7 @@ class ApprovalRules
         } else {
             $approvedRoles=[];
         }
-          
+
         $allRoles = $this->roleManagement->getRolesByCompanyId($companyId, true);
         foreach ($allRoles as $role) {
             //a role like Company Administrator is nested, so it is skipped

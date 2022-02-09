@@ -8,6 +8,7 @@ namespace MagentoEse\DataInstall\Model\DataTypes;
 use Magento\Customer\Api\Data\GroupInterfaceFactory;
 use Magento\Customer\Api\GroupRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Exception\LocalizedException;
 use MagentoEse\DataInstall\Helper\Helper;
 
 class CustomerGroups
@@ -46,7 +47,7 @@ class CustomerGroups
     }
 
     /**
-     * @param array $data
+     * @param array $row
      * @return bool
      */
     public function install(array $row)
@@ -55,7 +56,7 @@ class CustomerGroups
             $this->helper->logMessage("Customer group missing name, row skipped", "warning");
             return true;
         }
-        
+
         $group = $this->groupInterfaceFactory->create();
         $group->setCode($row['name'])->setTaxClassId(3);
         try {
@@ -72,7 +73,7 @@ class CustomerGroups
     /**
      * @param string $customerGroupCode
      * @return int|null
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function getCustomerGroupId(string $customerGroupCode)
     {
@@ -86,7 +87,7 @@ class CustomerGroups
 
     /**
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function getAllCustomerGroupIds()
     {

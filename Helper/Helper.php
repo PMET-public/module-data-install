@@ -109,7 +109,8 @@ class Helper extends AbstractHelper
     /**
      * @param array $settings
      */
-    public function setSettings(array $settings){
+    public function setSettings(array $settings)
+    {
         $this->settings = $settings;
     }
 
@@ -153,7 +154,6 @@ class Helper extends AbstractHelper
     /**
      * @param $string
      * @param null $foreground_color
-     * @param null $background_color
      */
     public function printMessage($string, $foreground_color = null)
     {
@@ -163,10 +163,9 @@ class Helper extends AbstractHelper
 
     /**
      * @param $string
-     * @param $messageType
-     * @param array $info
+     * @param string $messageType
      */
-    public function logMessage($string, $messageType='info')
+    public function logMessage($string, $messageType = 'info')
     {
         //print to terminal
         $this->printMessage($string, $messageType);
@@ -174,11 +173,15 @@ class Helper extends AbstractHelper
         $foreground_color = ($foreground_color='header')?'info':$foreground_color;
         $this->logger->$foreground_color($string);
         //write to db
-        $this->setDbLog($string,$messageType);
-        
+        $this->setDbLog($string, $messageType);
     }
 
-    private function setDbLog($message,$messageType)
+    /**
+     * @param $message
+     * @param $messageType
+     * @throws \Magento\Framework\Exception\CouldNotSaveException
+     */
+    private function setDbLog($message, $messageType)
     {
         $logger = $this->loggerInterface->create();
         $logger->setjobId($this->settings['job_settings']['jobid']);

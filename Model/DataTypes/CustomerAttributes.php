@@ -9,6 +9,8 @@ use Magento\Customer\Api\CustomerMetadataInterface;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Eav\Model\Config;
 use Magento\Customer\Model\Customer;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use MagentoEse\DataInstall\Helper\Helper;
 
 class CustomerAttributes
@@ -48,8 +50,8 @@ class CustomerAttributes
     /**
      * @param array $data
      * @return bool
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Zend_Validate_Exception
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function install(array $data)
     {
@@ -93,7 +95,7 @@ class CustomerAttributes
         } else {
             $useInForms = explode(",", $data["use_in_forms"]);
         }
-        
+
         // phpcs:ignore Magento2.PHP.LiteralNamespaces.LiteralClassUsage
         $mainSettings = [
             'type'         => 'varchar',
@@ -140,7 +142,7 @@ class CustomerAttributes
         }
 
         //TODO:default - need to get options if its multi or select
-        
+
         return true;
     }
 
@@ -148,15 +150,15 @@ class CustomerAttributes
      * @param $store
      * @param $attributeCode
      * @param array $options
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     private function addOptions($store, $attributeCode, array $options)
     {
         $attribute = $this->attributeRepository->get(Customer::ENTITY, $attributeCode);
 
         $removeOptions = $attribute->getOptions();
-            
+
         $optionsToRemove = [];
         foreach ($removeOptions as $removeOption) {
             if ($removeOption['value']) {
@@ -175,6 +177,10 @@ class CustomerAttributes
         $eavSetup->addAttributeOption($option);
     }
 
+    /**
+     * @param string $code
+     * @return string|string[]|null
+     */
     private function validateCode(string $code)
     {
         /*Code may only contain letters (a-z), numbers (0-9) or underscore (_), and

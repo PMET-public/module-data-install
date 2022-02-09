@@ -5,6 +5,9 @@
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Magento\Framework\Exception\CouldNotDeleteException;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Validation\ValidationException;
 use MagentoEse\DataInstall\Helper\Helper;
 use Magento\InventoryApi\Api\Data\StockInterfaceFactory;
 use Magento\InventoryApi\Api\Data\StockInterface;
@@ -103,13 +106,11 @@ class MsiStock
     }
 
     /**
-     * install
-     *
-     * @param  mixed $rows
-     * @param  mixed $header
-     * @param  mixed $modulePath
-     * @param  mixed $settings
-     * @return void
+     * @param array $row
+     * @param array $settings
+     * @return bool
+     * @throws CouldNotSaveException
+     * @throws ValidationException
      */
     public function install(array $row, array $settings)
     {
@@ -133,7 +134,7 @@ class MsiStock
                 );
             }
         }
-        
+
         $search = $this->searchCriteria->addFilter(StockInterface::NAME, $row['stock_name'], 'eq')
         ->create()->setPageSize(1)->setCurrentPage(1);
         $stock = $this->stockRepository->getList($search)->getItems();
@@ -143,7 +144,7 @@ class MsiStock
         } else {
             $stock = $stock[0];
         }
-        
+
         $stock->setName($row['stock_name']);
         $this->stockRepository->save($stock);
         //set sales channel on stock
@@ -167,6 +168,13 @@ class MsiStock
         return true;
     }
 
+    /**
+     * @param $sourceCodes
+     * @param $stockId
+     * @throws CouldNotSaveException
+     * @throws ValidationException
+     * @throws CouldNotDeleteException
+     */
     private function setStockSource($sourceCodes, $stockId)
     {
         //get current links assigned to stock
@@ -176,7 +184,7 @@ class MsiStock
         if (!empty($stockLinks)) {
             $this->stockSourceLinksDeleteInterface->execute($stockLinks);
         }
-        
+
         //assign source to stock
          $sourceLinks=[];
          $priority = 1;

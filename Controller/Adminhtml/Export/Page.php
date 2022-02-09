@@ -53,7 +53,7 @@ class Page extends Action implements HttpPostActionInterface
     protected $directoryList;
 
     /**
-     * Index constructor.
+     * Page constructor.
      * @param Context $context
      * @param Filter $filter
      * @param CollectionFactory $collectionFactory

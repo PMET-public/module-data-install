@@ -101,17 +101,17 @@ class ProductAttributes
             $row['store_view_code'] = 'admin';
         }
 
-        //validate frontend_input values
-        if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
+        //frontend_input required
+        if (empty($row['frontend_input'])) {
             $this->helper->logMessage(
-                "frontend_input value in product_attributes.csv is invalid. Row skipped",
+                "frontend_input value in product_attributes.csv is missing. Row skipped",
                 "warning"
             );
             return true;
         }
 
         //validate frontend_input values
-        if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
+        if (!$this->validateFrontendInputs($row['frontend_input'])) {
             $this->helper->logMessage(
                 "frontend_input value in product_attributes.csv is invalid. ".$row['attribute_code']. " row skipped",
                 "warning"
@@ -174,7 +174,7 @@ class ProductAttributes
         }
         if (!empty($row['option'])) {
             $row['swatches'] = $row['option'];
-            $row['option'] = $this->getOption($attribute, $row);
+            $row['option'] = $this->getOption($attribute, $row, $storeViewId);
         }
         if (!empty($row['frontend_input'])) {
             $row['source_model'] = $this->productHelper->getAttributeSourceModelByInputType($row['frontend_input']);
@@ -388,9 +388,10 @@ class ProductAttributes
     /**
      * @param Attribute $attribute
      * @param array $row
+     * @param int $storeViewId
      * @return array
      */
-    protected function getOption(Attribute $attribute, array $row)
+    protected function getOption(Attribute $attribute, array $row, int $storeViewId)
     {
         $result = [];
         $row['option'] = explode("\n", $row['option']);
@@ -403,31 +404,72 @@ class ProductAttributes
             //if the option is formatted as a swatch (Green|#32faaa), remove the swatch
             if (strpos($value, "|")!==false) {
                 $optionValue = substr($value, 0, strpos($value, "|"));
-            } else {
-                $optionValue = $value;
+                $result[$optionValue]['storeValue'] ='';
+            } 
+            elseif (strpos($value, "~")!==false) {
+                $optionValue = substr($value, 0, strpos($value, "~"));
+                $result[$optionValue]['storeValue'] = substr($value, strpos($value, "~")+1, strpos($value, "~"));
             }
-
-            if (!$options->getItemByColumnValue('value', $optionValue)) {
-                $result[] = $optionValue;
+            else {
+                $optionValue = $value;
+                $result[$optionValue]['storeValue'] ='';
+            }
+            $f = $options->getItemByColumnValue('value', $optionValue);
+            if ($options->getItemByColumnValue('value', $optionValue)) {
+                $result[$optionValue]['existing'] = $options->getItemByColumnValue('value', $optionValue)->getOptionId();
+            } else {
+                $result[$optionValue]['existing'] = 'N';
             }
         }
 
-        return $result ? $this->convertOption($result) : $result;
+        //return $result ? $this->convertOption($result,$row) : $result;
+        return $this->convertOption($result,$row,$storeViewId,$options);
     }
 
     /**
      * Converting attribute options from csv to correct sql values
      *
      * @param array $values
+     * @param array $row
+     * @param int $storeViewId
+     * @param $options
      * @return array
      */
-    protected function convertOption(array $values)
+    protected function convertOption(array $values, array $row, int $storeViewId, $options)
     {
         $result = ['order' => [], 'value' => []];
         $i = 0;
-        foreach ($values as $value) {
-            $result['order']['option_' . $i] = (string)$i;
-            $result['value']['option_' . $i] = [0 => $value, 1 => ''];
+        foreach ($values as $key=>$value) {
+            if($value['existing']!=='N'){
+                $result['order'][$value['existing']] = (string)$value['existing'];
+            }else{
+                $result['order']['option_' . $i] = (string)$i;
+            }
+            if($value['existing']!=='N'){
+                if($storeViewId==0){
+                    $result['value'][$value['existing']] = [0 => $key];
+                }else{
+                    $result['value'][$value['existing']] = [0 => $key, $storeViewId => $value['storeValue']];
+                }
+            }else{
+                if($storeViewId==0){
+                    $result['value']['option_' . $i] = [0 => $key];
+                }else{
+                    $result['value']['option_' . $i] = [0 => $key, $storeViewId => $value['storeValue']];
+                }
+            }
+
+
+            //$result['value']['option_' . $i] = [0 => $value, $storeViewId => $row['option'][$i]];
+            // if($value['existing']=='Y'&& $storeViewId!==0){
+            //     $result['value']['option_' . $i] = [0 => $key,$storeViewId => $value['storeValue']];
+            // }elseif($value['existing']=='N'){
+            //     $result['value']['option_' . $i] = [0 => $key, 1=>$key,$storeViewId => $value['storeValue']];
+            // }
+            // }else{
+            //     $result['value']['option_' . $i] = [0 => $key, 1=>$key];
+            // }
+            
             $i++;
         }
 

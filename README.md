@@ -94,9 +94,9 @@ Each element of potential sample data is encapsulated in its own file:
 
 [**Configuration files**](#Configuration) - **config_default.json, config_default.csv, config_vertical.json, config_vertical.csv, config_secret.json, config_secret.csv, config.json, config.csv**. - These files contain settings that would mostly be set in Stores->Configuration: Payment methods, store information, admin settings, etc.  See the [**Configuration files**](#Configuration) section for details on their usage.
 
-[**admin\_roles.csv**](#admin-roles) - Creates customer groups
+[**admin\_roles.csv**](#admin-roles) - Creates roles for Admin users
 
-[**admin\_users.csv**](#admin-users) - Creates customer groups
+[**admin\_users.csv**](#admin-users) - Creates Admin users
 
 [**customer\_groups.csv**](#customer-groups) - Creates customer groups
 
@@ -627,19 +627,19 @@ where op.attribute_id in (select attribute_id from eav_attribute where attribute
 and ov.store_id = 0
 order by op.option_id`
 
-> Out of Scope: Store level label settings. Image based swatches
+> Out of Scope: Image based swatches
 
 *Columns*
 
 **attribute\_code** - Always required. If the attribute\_code exists it will update the attribute with the provided information.  If it is a new code, it will create a new attribute. Attribute code may only contain letters (a-z), numbers (0-9) or underscore (\_), and the first character must be a letter.  Code will be fixed automatically if needed
 
-**frontend\_label** - Required when creating a new attribute.
+**frontend\_label** - Required when creating a new attribute or adding a label translation
 
-**frontend\_input** - Required when creating a new attribute. Catalog Input Type for Store Owner. Allowed values are text, textarea, texteditor, date, boolean, multiselect, select, price
+**frontend\_input** - Required. Catalog Input Type for Store Owner. Allowed values are text, textarea, texteditor, date, boolean, multiselect, select, price
 
 **is\_required** - Optional: Values = Y/N. Default = N
 
-**option** - Required when input is Multi or Select or Swatch. Values to show, carriage return delimited. In the case of color swatches a pipe delimited value of label|color is used (`Green|#32faaa`). For text swatches if the value and description are different, a pipe delimited value of value|description is used (`SM|Small`). If the description is not needed, the single value of `Small` can be used.
+**option** - Required when input is Multi or Select or Swatch. Values to show, carriage return delimited. In the case of color swatches a pipe delimited value of label|color is used (`Green|#32faaa`). For text swatches if the value and description are different, a pipe delimited value of value|description is used (`SM|Small`). If the description is not needed, the single value of `Small` can be used. See below notes on adding store specific labels
 
 **additional\_data** - Required if attribute is using swatches. This is what will determine if swatches are used. It is recommended to use the db extract. The json data is simple though and is used to configure swatches - example `{"swatch_input_type":"visual","update_product_preview_image":"0","use_product_image_for_swatch":"0"}`
 
@@ -650,13 +650,19 @@ order by op.option_id`
 **only\_update\_sets** - Optional Value=Y. Only requires attribute\_code. This would be flagged in the case where the only action is to add an attribute to a set.  Most likely usage would be for assigning default system attributes to a set.
 
 *Translating Front End Labels*
-After the attributes are created, the translation of front end labels for additional stores can be added with a simpler file. Only one store code per front end label is allowed per file at this point
+After the attributes are created (usually in the admin scope), the translation of front end labels for additional stores can be added with a simpler file.
 
-**store\_view\_code** - Optional, will set the default label if not defined
+frontend_label,store_view_code,option,attribute_code,frontend_input
+
+**store\_view\_code** - Required otherwise will set the admin label
 
 **attribute\_code** - Required
 
 **frontend\_label** - Required
+
+**frontend\_input** - Required. This should match what the attribute was created as
+
+**option** - Required for select type attributes.  Values should be carriage return delimited with tilde delimited key~value pairs for the translations. (e.g Luggage~Equipaje). The key should match the option value set during the creation of the attribute.
 
 ### Upsells
 

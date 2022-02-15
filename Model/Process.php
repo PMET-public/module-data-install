@@ -190,6 +190,9 @@ class Process
                         $this->processJson($fileContent, $fileInfo['class'], $host);
                     } elseif ($fileInfo['process']=='b2b') {
                         $this->processB2B($filePath, $fixtureDirectory, $fileInfo['class']);
+                    } elseif ($fileInfo['process']=='graphql') {
+                        $fileData = $this->convertGraphQlJson($fileContent);
+                        $this->processRows($fileData['rows'], $fileData['header'], $fileInfo['class'], $host);
                     } else {
                         $this->processRows($rows, $header, $fileInfo['class'], $host);
                     }
@@ -308,6 +311,29 @@ class Process
     private function processFile(array $rows, array $header, object $process, string $modulePath, $host): void
     {
         $process->install($rows, $header, $modulePath, $this->settings, $host);
+    }
+
+     /**
+     * @param string $json
+     * @return array
+     * Converts result of a GraphQl query into format that can be used by processFile
+     */
+    public function convertGraphQlJson(string $json)
+    {
+        //TODO: Validate json
+        try {
+            //convert to array of objects. Remove the parent query name node
+            $fileData = current(json_decode($json)->data);
+        } catch (\Exception $e) {
+            $this->helper->logMessage("The JSON in your configuration file is invalid", "error");
+            return true;
+        }
+        ///this only works for single row data now
+        foreach ($fileData as $key => $item) {
+            $header[]=$key;
+            $row[0][]=$item;
+        }
+        return ['header'=>$header,'rows'=>$row];
     }
 
     private function collectRedos($success, $row, $header, $process)

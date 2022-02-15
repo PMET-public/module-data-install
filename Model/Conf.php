@@ -314,6 +314,8 @@ class Conf
         return[
             ['stores.csv'=>['process'=>'rows','class'=>$this->storeInstall,
             'label'=>'Loading Sites, Stores and Views']],
+            ['stores.json'=>['process'=>'graphql','class'=>$this->storeInstall,
+            'label'=>'Loading Sites, Stores and Views']],
             ['config_default.json'=>['process'=>'json','class'=>$this->configurationInstall,
             'label'=>'Loading config_default.json']],
             ['config_default.csv'=>['process'=>'rows','class'=>$this->configurationInstall,

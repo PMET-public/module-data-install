@@ -71,7 +71,6 @@ class Configuration
      */
     public function install(array $row, array $settings)
     {
-        //TODO: handle encrypt flag for value
         if (!empty($row['path'])) {
             $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
             $scopeId = "0";

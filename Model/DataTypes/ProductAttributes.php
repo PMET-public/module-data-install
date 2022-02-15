@@ -101,24 +101,23 @@ class ProductAttributes
             $row['store_view_code'] = 'admin';
         }
 
-        //frontend_input required
-        if (empty($row['frontend_input'])) {
-            $this->helper->logMessage(
-                "frontend_input value in product_attributes.csv is missing. Row skipped",
+        //validate frontend_input values
+        if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
+            $this->helper->printMessage(
+                "frontend_input value in product_attributes.csv is invalid. Row skipped",
                 "warning"
             );
             return true;
         }
 
         //validate frontend_input values
-        if (!$this->validateFrontendInputs($row['frontend_input'])) {
-            $this->helper->logMessage(
+        if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
+            $this->helper->printMessage(
                 "frontend_input value in product_attributes.csv is invalid. ".$row['attribute_code']. " row skipped",
                 "warning"
             );
             return true;
         }
-
         //add/update colums if type is textedit or pagebuilder
         switch ($row['frontend_input']) {
             case "texteditor":
@@ -458,17 +457,6 @@ class ProductAttributes
                     $result['value']['option_' . $i] = [0 => $key, $storeViewId => $value['storeValue']];
                 }
             }
-
-
-            //$result['value']['option_' . $i] = [0 => $value, $storeViewId => $row['option'][$i]];
-            // if($value['existing']=='Y'&& $storeViewId!==0){
-            //     $result['value']['option_' . $i] = [0 => $key,$storeViewId => $value['storeValue']];
-            // }elseif($value['existing']=='N'){
-            //     $result['value']['option_' . $i] = [0 => $key, 1=>$key,$storeViewId => $value['storeValue']];
-            // }
-            // }else{
-            //     $result['value']['option_' . $i] = [0 => $key, 1=>$key];
-            // }
             
             $i++;
         }

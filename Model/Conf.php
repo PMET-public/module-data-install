@@ -352,6 +352,8 @@ class Conf
             'label'=>'Loading Blocks']],
             ['categories.csv'=>['process'=>'rows','class'=>$this->categoryInstall,
             'label'=>'Loading Categories']],
+            ['categories.json'=>['process'=>'graphql','class'=>$this->categoryInstall,
+            'label'=>'Loading Categories']],
             ['customer_segments.csv'=>['process'=>'rows','class'=>$this->customerSegmentsInstall,
             'label'=>'Loading Customer Segments']],
             ['msi_source.csv'=>['process'=>'rows','class'=>$this->msiSourceInstall,

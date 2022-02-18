@@ -404,25 +404,24 @@ class ProductAttributes
             if (strpos($value, "|")!==false) {
                 $optionValue = substr($value, 0, strpos($value, "|"));
                 $result[$optionValue]['storeValue'] ='';
-            } 
-            elseif (strpos($value, "~")!==false) {
+            } elseif (strpos($value, "~")!==false) {
                 $optionValue = substr($value, 0, strpos($value, "~"));
                 $result[$optionValue]['storeValue'] = substr($value, strpos($value, "~")+1, strpos($value, "~"));
-            }
-            else {
+            } else {
                 $optionValue = $value;
                 $result[$optionValue]['storeValue'] ='';
             }
             $f = $options->getItemByColumnValue('value', $optionValue);
             if ($options->getItemByColumnValue('value', $optionValue)) {
-                $result[$optionValue]['existing'] = $options->getItemByColumnValue('value', $optionValue)->getOptionId();
+                $result[$optionValue]['existing'] = $options->
+                getItemByColumnValue('value', $optionValue)->getOptionId();
             } else {
                 $result[$optionValue]['existing'] = 'N';
             }
         }
 
         //return $result ? $this->convertOption($result,$row) : $result;
-        return $this->convertOption($result,$row,$storeViewId,$options);
+        return $this->convertOption($result, $row, $storeViewId, $options);
     }
 
     /**
@@ -438,22 +437,22 @@ class ProductAttributes
     {
         $result = ['order' => [], 'value' => []];
         $i = 0;
-        foreach ($values as $key=>$value) {
-            if($value['existing']!=='N'){
+        foreach ($values as $key => $value) {
+            if ($value['existing']!=='N') {
                 $result['order'][$value['existing']] = (string)$value['existing'];
-            }else{
+            } else {
                 $result['order']['option_' . $i] = (string)$i;
             }
-            if($value['existing']!=='N'){
-                if($storeViewId==0){
+            if ($value['existing']!=='N') {
+                if ($storeViewId==0) {
                     $result['value'][$value['existing']] = [0 => $key];
-                }else{
+                } else {
                     $result['value'][$value['existing']] = [0 => $key, $storeViewId => $value['storeValue']];
                 }
-            }else{
-                if($storeViewId==0){
+            } else {
+                if ($storeViewId==0) {
                     $result['value']['option_' . $i] = [0 => $key];
-                }else{
+                } else {
                     $result['value']['option_' . $i] = [0 => $key, $storeViewId => $value['storeValue']];
                 }
             }

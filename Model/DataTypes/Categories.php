@@ -5,12 +5,13 @@
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\Catalog\Api\Data\CategoryInterfaceFactory;
+use Magento\Catalog\Api\CategoryListInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\ResourceModel\Category\TreeFactory;
 use Magento\Cms\Api\Data\BlockInterfaceFactory;
 use Magento\Framework\Data\Tree\Node;
-use Magento\Store\Api\Data\StoreInterfaceFactory;
-use Magento\Store\Model\StoreManagerInterface;
+use Magento\Store\Api\StoreRepositoryInterface;
 use MagentoEse\DataInstall\Helper\Helper;
 use MagentoEse\DataInstall\Model\Converter;
 use Magento\Theme\Model\ResourceModel\Theme\Collection as ThemeCollection;
@@ -20,17 +21,20 @@ class Categories
     /** @var CategoryInterfaceFactory  */
     protected $categoryFactory;
 
-    /** @var StoreManagerInterface  */
-    protected $storeManager;
+     /** @var CategoryListInterface  */
+     protected $categoryList;
+
+      /** @var SearchCriteriaBuilder  */
+    protected $searchCriteria;
+
+    /** @var StoreRepositoryInterface  */
+    protected $storeRepository;
 
     /** @var TreeFactory  */
     protected $resourceCategoryTreeFactory;
 
     /** @var Node */
     protected $categoryTree;
-
-    /** @var StoreInterfaceFactory  */
-    protected $storeFactory;
 
     /** @var BlockInterfaceFactory  */
     protected $blockFactory;
@@ -53,9 +57,10 @@ class Categories
     /**
      * Categories constructor.
      * @param CategoryInterfaceFactory $categoryFactory
+     * @param CategoryListInterface $categoryList
+     * @param SearchCriteriaBuilder $searchCriteria
      * @param TreeFactory $resourceCategoryTreeFactory
-     * @param StoreManagerInterface $storeManager
-     * @param StoreInterfaceFactory $storeFactory
+     * @param StoreRepositoryInterface $storeRepository
      * @param BlockInterfaceFactory $blockFactory
      * @param Configuration $configuration
      * @param Converter $converter
@@ -65,9 +70,10 @@ class Categories
      */
     public function __construct(
         CategoryInterfaceFactory $categoryFactory,
+        CategoryListInterface $categoryList,
+        SearchCriteriaBuilder $searchCriteria,
         TreeFactory $resourceCategoryTreeFactory,
-        StoreManagerInterface $storeManager,
-        StoreInterfaceFactory $storeFactory,
+        StoreRepositoryInterface $storeRepository,
         BlockInterfaceFactory $blockFactory,
         Configuration $configuration,
         Converter $converter,
@@ -76,9 +82,10 @@ class Categories
         ThemeCollection $themeCollection
     ) {
         $this->categoryFactory = $categoryFactory;
+        $this->categoryList = $categoryList;
+        $this->searchCriteria = $searchCriteria;
         $this->resourceCategoryTreeFactory = $resourceCategoryTreeFactory;
-        $this->storeManager = $storeManager;
-        $this->storeFactory = $storeFactory;
+        $this->storeRepository = $storeRepository;
         $this->blockFactory = $blockFactory;
         $this->configuration = $configuration;
         $this->converter = $converter;
@@ -95,11 +102,28 @@ class Categories
     public function install(array $row, array $settings)
     {
         if (empty($row['name'])) {
-            $this->helper->logMessage("A value for name is required in categories.csv", "warning");
+            $this->helper->logMessage("A value for name is required in your categories file", "warning");
             return true;
         }
+        if (empty($row['is_active'])) {
+            //for backwards compatibility
+            if (!empty($row['active'])) {
+                $row['is_active'] = $row['active'];
+            } else {
+                $row['is_active'] = 1;
+            }
+        }
+        if (empty($row['is_anchor'])) {
+            $row['is_anchor'] = 1;
+        }
+        if (empty($row['include_in_menu'])) {
+            $row['include_in_menu'] = 1;
+        }
 
-        $row['store_view_code'] = $settings['store_view_code'];
+        if (empty($row['store_view_code'])) {
+            $row['store_view_code'] = $settings['store_view_code'];
+        }
+        $storeViewId = $this->storeRepository->get($row['store_view_code'])->getId();
 
         $category = $this->getCategoryByPath($row['path'] . '/' . $row['name'], $row['store_view_code']);
         if (!$category) {
@@ -108,11 +132,11 @@ class Categories
                 $data = [
                     'parent_id' => $parentCategory->getId(),
                     'name' => str_replace('\/', '/', $row['name']),
-                    'is_active' => $row['active'] ?? 1,
+                    'is_active' => $row['is_active'] ?? 1,
                     'is_anchor' => $row['is_anchor'] ?? 1,
                     'include_in_menu' => $row['include_in_menu'] ?? 1,
                     'url_key' => $row['url_key'] ?? '',
-                    'store_id' => 0
+                    'store_id' => $storeViewId
                 ];
                 $category = $this->categoryFactory->create();
                 $category->setData($data)
@@ -189,9 +213,7 @@ class Categories
         //if the first element in the path is a root category, use that root id and drop from array
         //else, use the root category for the default store
         //$store = $this->stores->getView(['store_view_code'=>$storeViewCode]);
-        $store = $this->storeFactory->create();
-        $store->load($storeViewCode);
-        $rootCatId = $store->getGroup()->getDefaultStore()->getRootCategoryId();
+        $rootCatId = $this->storeRepository->get($storeViewCode)->getGroup()->getDefaultStore()->getRootCategoryId();
 
         $tree = $this->getTree($rootCatId);
         foreach ($names as $name) {

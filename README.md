@@ -479,7 +479,7 @@ This file is used to create categories. Categories are also created during produ
 
 Parent categories need to be in the file before the child categories
 
-**active** - Optional: Values = 1/0. Default = 1
+**is_active** - Optional: Values = 1/0. Default = 1
 
 **is\_anchor** - Optional: Values = 1/0. Default = 1
 

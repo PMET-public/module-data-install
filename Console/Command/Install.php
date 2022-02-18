@@ -30,6 +30,7 @@ use MagentoEse\DataInstall\Model\Process;
 use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\App\State;
 use Magento\Framework\App\Area as AppArea;
+
 class Install extends Command
 {
     const DATAPACK = 'datapack';

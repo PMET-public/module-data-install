@@ -314,10 +314,10 @@ class Process
     }
 
      /**
-     * @param string $json
-     * @return array
-     * Converts result of a GraphQl query into format that can be used by processFile
-     */
+      * @param string $json
+      * @return array
+      * Converts result of a GraphQl query into format that can be used by processFile
+      */
     public function convertGraphQlJson(string $json)
     {
         //TODO: Validate json
@@ -328,11 +328,34 @@ class Process
             $this->helper->logMessage("The JSON in your configuration file is invalid", "error");
             return true;
         }
-        ///this only works for single row data now
-        foreach ($fileData as $key => $item) {
-            $header[]=$key;
-            $row[0][]=$item;
+        
+        $header=[];
+        //if items exists it is a multi value file
+        if (property_exists($fileData, 'items')) {
+            $fileData = $fileData->items;
+            $i=0;
+            foreach ($fileData as $element) {
+                //if there is an id column we want to use this as the array key for each row
+                if (property_exists($element, 'id')) {
+                     $i = $element->id;
+                }
+                foreach ($element as $key => $item) {
+                    if (!in_array($key, $header)) {
+                        $header[]=$key;
+                    }
+                    $row[$i][]=$item;
+                }
+                $i ++;
+            }
+        } else {
+            ///single row file
+            foreach ($fileData as $key => $item) {
+                $header[]=$key;
+                $row[0][]=$item;
+            }
         }
+        ///sort array by keys for cases then order is important
+        ksort($row);
         return ['header'=>$header,'rows'=>$row];
     }
 

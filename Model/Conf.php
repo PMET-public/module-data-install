@@ -350,6 +350,8 @@ class Conf
             'label'=>'Loading Product Attributes']],
             ['blocks.csv'=>['process'=>'rows','class'=>$this->blockInstall,
             'label'=>'Loading Blocks']],
+            ['blocks.json'=>['process'=>'graphql','class'=>$this->blockInstall,
+            'label'=>'Loading Blocks']],
             ['categories.csv'=>['process'=>'rows','class'=>$this->categoryInstall,
             'label'=>'Loading Categories']],
             ['categories.json'=>['process'=>'graphql','class'=>$this->categoryInstall,

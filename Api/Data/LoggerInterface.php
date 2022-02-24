@@ -23,6 +23,9 @@ interface LoggerInterface extends ExtensibleDataInterface
     /** @var string  */
     const JOBID = 'job_id';
 
+    /** @var string  */
+    const ADDDATE = 'add_date';
+
     /**
      * @return int
      */
@@ -77,4 +80,9 @@ interface LoggerInterface extends ExtensibleDataInterface
      * @return string
      */
     public function setDataPack($dataPack);
+
+     /**
+      * @return string
+      */
+    public function getAddDate();
 }

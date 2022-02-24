@@ -93,4 +93,12 @@ class Logger extends AbstractExtensibleModel implements LoggerInterface
     {
         return $this->setData(self::DATAPACK, $dataPack);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAddDate()
+    {
+        return parent::getData(self::ADDDATE);
+    }
 }

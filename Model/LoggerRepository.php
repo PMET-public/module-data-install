@@ -92,9 +92,10 @@ class LoggerRepository implements LoggerRepositoryInterface
         $tableName = $connection->getTableName(self::LOGGER_TABLE);
         $select = $connection->select()
         ->from($tableName)
-        ->where('module_name = ?', $dataPack);
-        $moduleId = $connection->fetchOne($select);
-        return $this->getById($moduleId);
+        ->where('instr(datapack,?)', $dataPack)
+        ->order('id', 'asc');
+        $logs = $connection->fetchAll($select);
+        return $logs;
     }
 
     /**
@@ -108,9 +109,10 @@ class LoggerRepository implements LoggerRepositoryInterface
         $tableName = $connection->getTableName(self::LOGGER_TABLE);
         $select = $connection->select()
         ->from($tableName)
-        ->where('job_id = ?', $jobId);
-        $moduleId = $connection->fetchOne($select);
-        return $this->getById($moduleId);
+        ->where('job_id = ?', $jobId)
+        ->order('id', 'asc');
+        $logs = $connection->fetchAll($select);
+        return $logs;
     }
 
     /**

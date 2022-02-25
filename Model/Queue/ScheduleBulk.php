@@ -112,8 +112,6 @@ class ScheduleBulk
                 $operation = $this->operationFactory->create($data);
                 $operations[] = $operation;
             }
-            //TODO:Remove
-            //$userId = $this->userContext->getUserId();
             $userId = 1;
             $result = $this->bulkManagement->scheduleBulk($bulkUuid, $operations, $bulkDescription, $userId);
             if (!$result) {
@@ -121,6 +119,7 @@ class ScheduleBulk
                     __('Something went wrong while processing the request.')
                 );
             }
+            return $bulkUuid;
         }
     }
 }

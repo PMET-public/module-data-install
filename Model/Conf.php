@@ -404,6 +404,8 @@ class Conf
             'label'=>'Loading B2B Approval Rules']],
             ['cart_rules.csv'=>['process'=>'rows','class'=>$this->cartRulesInstall,
             'label'=>'Loading Cart Rules']],
+            ['cart_rules.json'=>['process'=>'graphql','class'=>$this->cartRulesInstall,
+            'label'=>'Loading Cart Rules']],
             ['advanced_pricing.csv'=>['process'=>'file','class'=>$this->advancedPricingInstall,
             'label'=>'Loading Advanced Pricing']],
             ['orders.csv'=>['process'=>'rows','class'=>$this->ordersInstall,

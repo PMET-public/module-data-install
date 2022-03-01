@@ -772,6 +772,7 @@ This file is used to add or update blocks.  Updates are made by using the key of
 Most information can be extracted from the Magento Admin UI from the Blocks grid by selecting the required blocks and selecting the *Export Content* Action
 
 *Columns*
+
 **store_view_code** - Optional. Comma delimited list of Store View Codes the block should be assigned to. If none is provided, the code of the view defined in settings.csv, or the global default of *default* is used.
 > If you want a page to be available across all All Store Views, use the value of **admin** as the store_view_code
 
@@ -873,7 +874,7 @@ Most information can be extracted from the Magento Admin UI from the Pages grid 
 
 **meta\_keywords** - Optional
 
-**meta\title** - Optional
+**meta\_title** - Optional
 
 **meta\_description** - Optional
 

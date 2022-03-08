@@ -340,6 +340,20 @@ class Process
                      $i = $element->id;
                 }
                 foreach ($element as $key => $item) {
+                    //special case for attribute options
+                    if ($key=='attribute_options') {
+                        $header[]='option';
+                        $row[$i][] = $this->getAttributeOptions($item);
+                    }
+                    //if item is an object like attibute settings, flatten it
+                    if (is_object($item)) {
+                        foreach ($item as $subKey => $subItem) {
+                            if (!in_array($subKey, $header)) {
+                                $header[]=$subKey;
+                            }
+                            $row[$i][]=$subItem;
+                        }
+                    }
                     if (!in_array($key, $header)) {
                         $header[]=$key;
                     }
@@ -357,6 +371,19 @@ class Process
         ///sort array by keys for cases then order is important
         ksort($row);
         return ['header'=>$header,'rows'=>$row];
+    }
+
+    /**
+     * @param $attributeOptions
+     * @return string
+     */
+    private function getAttributeOptions($attributeOptions)
+    {
+        $attributeString = '';
+        foreach ($attributeOptions as $option => $value) {
+            $attributeString .=$value->label."\n";
+        }
+        return trim($attributeString);
     }
 
     private function collectRedos($success, $row, $header, $process)

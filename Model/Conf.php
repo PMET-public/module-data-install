@@ -382,6 +382,8 @@ class Conf
             'label'=>'Loading MSI Inventory']],
             ['upsells.csv'=>['process'=>'rows','class'=>$this->upsellsInstall,
             'label'=>'Loading Upsells']],
+            ['upsells.json'=>['process'=>'graphql','class'=>$this->upsellsInstall,
+            'label'=>'Loading Upsells']],
             ['blocks.csv'=>['process'=>'rows','class'=>$this->blockInstall,
             'label'=>'Loading Blocks']],
             ['dynamic_blocks.csv'=>['process'=>'rows','class'=>$this->dynamicBlockInstall,

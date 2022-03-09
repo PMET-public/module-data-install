@@ -689,6 +689,8 @@ from magento_targetrule where name in '...'`
 
 **sort_order** - Numeric
 
+**customer_segments** - Optional, defaults to all. Comma delimited list of Customer Segment names to apply the rule to
+
 ### Catalog Rules
 
 *File Name* - catalog\_rules.csv

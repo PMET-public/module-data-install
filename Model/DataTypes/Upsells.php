@@ -6,6 +6,7 @@
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Exception;
+use Magento\CustomerSegment\Model\ResourceModel\Segment\CollectionFactory as SegmentCollection;
 use Magento\TargetRule\Model\RuleFactory as RuleFactory;
 use Magento\TargetRule\Model\Rule;
 use Magento\TargetRule\Model\ResourceModel\Rule as ResourceModel;
@@ -18,8 +19,11 @@ use MagentoEse\DataInstall\Helper\Helper;
 
 class Upsells
 {
-    /** @var RuleFactory\ */
+    /** @var RuleFactory */
     protected $ruleFactory;
+
+    /** @var SegmentCollection */
+    protected $segmentCollection;
 
     /** @var Converter */
     protected $converter;
@@ -41,6 +45,7 @@ class Upsells
 
     /**
      * Upsells constructor.
+     * @param SegmentCollection $segmentCollection
      * @param RuleFactory $ruleFactory
      * @param Converter $converter
      * @param ResourceModel $resourceModel
@@ -50,6 +55,7 @@ class Upsells
      * @param Helper $helper
      */
     public function __construct(
+        SegmentCollection $segmentCollection,
         RuleFactory $ruleFactory,
         Converter $converter,
         ResourceModel $resourceModel,
@@ -58,6 +64,7 @@ class Upsells
         RuleCollection $ruleCollection,
         Helper $helper
     ) {
+        $this->segmentCollection = $segmentCollection;
         $this->ruleFactory = $ruleFactory;
         $this->converter = $converter;
         $this->resourceModel = $resourceModel;
@@ -98,7 +105,13 @@ class Upsells
             return;
         }
         if (empty($row['is_active'])) {
-            $row['is_active'] == 'Y';
+            $row['is_active'] = 'Y';
+        }
+
+        if (empty($row['customer_segments'])) {
+            $segmentIds = [];
+        } else {
+            $segmentIds = $this->getCustomerSegmentIds($row['customer_segments']);
         }
 
         $upsellModel = $this->ruleCollection->create()
@@ -113,6 +126,10 @@ class Upsells
         $upsellModel->setPositionsLimit($row['positions_limit']??1);
         $upsellModel->setApplyTo($applyTo);
         $upsellModel->setSortOrder($row['sort_order']??1);
+        if (!empty($segmentIds)) {
+            $upsellModel->setUseCustomerSegment(1);
+        }
+        $upsellModel->setCustomerSegmentIds($segmentIds);
         $this->appState->emulateAreaCode(
             Area::AREA_ADMINHTML,
             [$this->resourceModel, 'save'],
@@ -120,5 +137,19 @@ class Upsells
         );
 
         return true;
+    }
+
+    private function getCustomerSegmentIds($segmentNames)
+    {
+        $segmentIds = [];
+        $segmentArray = explode(",", $segmentNames);
+        foreach ($segmentArray as $segmentName) {
+            $segment = $this->segmentCollection->create()->addFieldToFilter('name', ['eq' => $segmentName])
+            ->getFirstItem();
+            if ($segment) {
+                $segmentIds[]=$segment->getId();
+            }
+        }
+        return $segmentIds;
     }
 }

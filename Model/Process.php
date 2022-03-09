@@ -318,6 +318,7 @@ class Process
       * @return array
       * Converts result of a GraphQl query into format that can be used by processFile
       */
+    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh  
     public function convertGraphQlJson(string $json)
     {
         //TODO: Validate json

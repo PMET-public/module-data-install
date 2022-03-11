@@ -394,6 +394,8 @@ class Conf
             'label'=>'Loading Wigets']],
             ['catalog_rules.csv'=>['process'=>'rows','class'=>$this->catalogRulesInstall,
             'label'=>'Loading Catalog Rules']],
+            ['catalog_rules.json'=>['process'=>'graphql','class'=>$this->catalogRulesInstall,
+            'label'=>'Loading Catalog Rules']],
             ['pages.csv'=>['process'=>'rows','class'=>$this->pageInstall,
             'label'=>'Loading Pages']],
             ['pages.json'=>['process'=>'graphql','class'=>$this->pageInstall,

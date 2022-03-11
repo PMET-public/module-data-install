@@ -94,11 +94,15 @@ class Widgets
                 $themeId = 1;
             }
         }
-    //if store is not given, default to all (0)
-        if (empty($row['store_view_codes'])) {
+        //backwards compatibility switch to store_view_code
+        if (!empty($row['store_view_codes'])) {
+            $row['store_view_code'] = $row['store_view_codes'];
+        }
+        //if store is not given, default to all (0)
+        if (empty($row['store_view_code'])) {
             $storeIds[] = 0;
         } else {
-            $storeIds = explode(",", $this->stores->getViewIdsFromCodeList($row['store_view_codes']));
+            $storeIds = explode(",", $this->stores->getViewIdsFromCodeList($row['store_view_code']));
         }
     //get widget if exists
     /** @var Collection $widgetCollection */

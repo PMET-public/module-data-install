@@ -390,6 +390,8 @@ class Conf
             'label'=>'Loading Dynamic blocks']],
             ['widgets.csv'=>['process'=>'rows','class'=>$this->widgetInstall,
             'label'=>'Loading Wigets']],
+            ['widgets.json'=>['process'=>'graphql','class'=>$this->widgetInstall,
+            'label'=>'Loading Wigets']],
             ['catalog_rules.csv'=>['process'=>'rows','class'=>$this->catalogRulesInstall,
             'label'=>'Loading Catalog Rules']],
             ['pages.csv'=>['process'=>'rows','class'=>$this->pageInstall,

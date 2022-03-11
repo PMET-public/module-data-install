@@ -821,7 +821,7 @@ You may to then update `store_view_code`,`segments` and `banner_content`
 This file is used to add or update widgets.  Updates are made by using the key of title
 
 Because widgets have a complex data structure, it is recommended that they be created in an existing magento instance and exported via DB query:
-`select wi.title, wi.instance_type,t.theme_path as 'theme', wi.store_ids as 'store_view_codes', wi.widget_parameters,wi.sort_order,wp.page_group,wp.
+`select wi.title, wi.instance_type,t.theme_path as 'theme', wi.store_ids as 'store_view_code', wi.widget_parameters,wi.sort_order,wp.page_group,wp.
 layout_handle,wp.block_reference,wp.page_for,wp.entities,wp.page_template
 from widget_instance_page wp, widget_instance wi, theme t
 where wp.instance_id = wi.instance_id
@@ -833,7 +833,8 @@ The result will need a few edits to work properly: The ids in `store_view_codes`
 
 *Columns*
 **title** - Required - Same as Widget Title in the UI
-**store_view_codes** - Optional.  Will default to `admin` (all stores). Can be a comma delimited list for applying to multiple views
+
+**store_view_code** - Optional.  Will default to `admin` (all stores). Can be a comma delimited list for applying to multiple views
 
 **instance_type** - Required. Type as defined in the UI, which is the class name
 

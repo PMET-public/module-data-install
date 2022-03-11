@@ -104,7 +104,7 @@ class ProductAttributes
         //validate frontend_input values
         if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
             $this->helper->printMessage(
-                "frontend_input value in product_attributes.csv is invalid. Row skipped",
+                "frontend_input value in product_attributes.csv is invalid. ".$row['attribute_code']. " Row skipped",
                 "warning"
             );
             return true;
@@ -113,7 +113,7 @@ class ProductAttributes
         //validate frontend_input values
         if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
             $this->helper->printMessage(
-                "frontend_input value in product_attributes.csv is invalid. ".$row['attribute_code']. " row skipped",
+                "frontend_input value in product_attributes.csv is invalid. ".$row['attribute_code']. " Row skipped",
                 "warning"
             );
             return true;

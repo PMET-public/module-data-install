@@ -186,8 +186,11 @@ class ProductAttributes
         //remove empty array keys
         $row = $this->removeEmptyColumns($row);
         $attribute->addData($row);
-        $attribute->setIsUserDefined(1);
-
+        //check to allow updating of system attributes
+        if(is_null($attribute->getIsUserDefined())){
+            $attribute->setIsUserDefined(1);
+        }
+        
         $attribute->setEntityTypeId($this->getEntityTypeId());
 
         $attribute->save();

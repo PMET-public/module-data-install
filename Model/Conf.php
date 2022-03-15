@@ -338,6 +338,8 @@ class Conf
             'label'=>'Loading Admin Roles']],
             ['admin_users.csv'=>['process'=>'rows','class'=>$this->adminUsersInstall,
             'label'=>'Loading Admin Users']],
+            ['admin_users.json'=>['process'=>'graphqlrows','class'=>$this->adminUsersInstall,
+            'label'=>'Loading Admin Users']],
             ['customer_groups.csv'=>['process'=>'rows','class'=>$this->customerGroupInstall,
             'label'=>'Loading Customer Groups']],
             ['customer_groups.json'=>['process'=>'graphqlrows','class'=>$this->customerGroupInstall,

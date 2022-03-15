@@ -190,9 +190,18 @@ class Process
                         $this->processJson($fileContent, $fileInfo['class'], $host);
                     } elseif ($fileInfo['process']=='b2b') {
                         $this->processB2B($filePath, $fixtureDirectory, $fileInfo['class']);
-                    } elseif ($fileInfo['process']=='graphql') {
+                    } elseif ($fileInfo['process']=='graphqlrows') {
                         $fileData = $this->convertGraphQlJson($fileContent);
                         $this->processRows($fileData['rows'], $fileData['header'], $fileInfo['class'], $host);
+                    } elseif ($fileInfo['process']=='graphqlfile') {
+                        $fileData = $this->convertGraphQlJson($fileContent);
+                        $this->processFile(
+                            $fileData['rows'],
+                            $fileData['header'],
+                            $fileInfo['class'],
+                            $modulePath,
+                            $host
+                        );
                     } else {
                         $this->processRows($rows, $header, $fileInfo['class'], $host);
                     }

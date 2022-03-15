@@ -187,14 +187,14 @@ class ProductAttributes
         $row = $this->removeEmptyColumns($row);
         $attribute->addData($row);
         //check to allow updating of system attributes
-        if(is_null($attribute->getIsUserDefined())){
+        if ($attribute->getIsUserDefined()===null) {
             $attribute->setIsUserDefined(1);
         }
         
         $attribute->setEntityTypeId($this->getEntityTypeId());
 
         $attribute->save();
-        //$attributeId = $attribute->getId();
+
         $this->setAttributeSets($row, $attribute);
 
         $this->eavConfig->clear();

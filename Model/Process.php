@@ -482,6 +482,22 @@ class Process
                     $setupArray[$setupRow[0]] = $setupRow[1];
                 }
             }
+        } else {
+            //check for .json version
+            try {
+                $settingsJson = $this->driverInterface->fileGetContents($filePath.$fixtureDirectory.'/settings.json');
+                $settings = $this->convertGraphQlJson($settingsJson);
+                $i=0;
+                foreach ($settings['header'] as $header) {
+                    if (!empty($settings['rows'][0][$i])) {
+                        $setupArray[$header] = $settings['rows'][0][$i];
+                    }
+                    $i++;
+                }
+            // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock.DetectedCatch  
+            } catch (FileSystemException $fe) {
+                 //ignore if file does not exist
+            }
         }
         //if website requested is "base" get the default website code in case it has changed
         //the is mostly to get around changed webside codes for livesearch environments

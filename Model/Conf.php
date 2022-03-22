@@ -382,6 +382,8 @@ class Conf
             'label'=>'Loading Products']],
             ['gift_cards.csv'=>['process'=>'rows','class'=>$this->giftCardsInstall,
             'label'=>'Updating Gift Cards']],
+            ['gift_cards.json'=>['process'=>'graphqlrows','class'=>$this->giftCardsInstall,
+            'label'=>'Updating Gift Cards']],
             ['msi_inventory.csv'=>['process'=>'file','class'=>$this->msiInventoryInstall,
             'label'=>'Loading MSI Inventory']],
             ['upsells.csv'=>['process'=>'rows','class'=>$this->upsellsInstall,

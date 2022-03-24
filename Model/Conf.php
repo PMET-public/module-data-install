@@ -394,6 +394,8 @@ class Conf
             'label'=>'Loading Blocks']],
             ['dynamic_blocks.csv'=>['process'=>'rows','class'=>$this->dynamicBlockInstall,
             'label'=>'Loading Dynamic blocks']],
+            ['dynamic_blocks.json'=>['process'=>'graphqlrows','class'=>$this->dynamicBlockInstall,
+            'label'=>'Loading Dynamic blocks']],
             ['widgets.csv'=>['process'=>'rows','class'=>$this->widgetInstall,
             'label'=>'Loading Wigets']],
             ['widgets.json'=>['process'=>'graphqlrows','class'=>$this->widgetInstall,

@@ -4,6 +4,7 @@
  */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Exception;
 use Magento\Catalog\Helper\Product;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Catalog\Model\ResourceModel\Eav\AttributeFactory;
@@ -17,17 +18,21 @@ use Magento\Framework\Model\AbstractModel;
 use MagentoEse\DataInstall\Model\DataTypes\Stores;
 use MagentoEse\DataInstall\Helper\Helper;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute as eavAttribute;
+use Magento\Catalog\Api\ProductAttributeRepositoryInterface;
 
 class ProductAttributes
 {
     const DEFAULT_ATTRIBUTE_SET = 'Default';
 
-    //input types not supported swatch_visual,swatch_text,media_image
+    //input types not supported swatch_visual,media_image
     const VALID_INPUT_TYPES = ['text','textarea','textedit','pagebuilder','date','datetime',
     'boolean','multiselect','select','price','weee'];
 
     /** @var AttributeFactory  */
     protected $attributeFactory;
+
+    /** @var ProductAttributeRepositoryInterface  */
+    protected $productAttributeRepository;
 
     /** @var SetFactory  */
     protected $attributeSetFactory;
@@ -53,6 +58,7 @@ class ProductAttributes
     /**
      * ProductAttributes constructor.
      * @param AttributeFactory $attributeFactory
+     * @param ProductAttributeRepositoryInterface $productAttributeRepository
      * @param SetFactory $attributeSetFactory
      * @param OptionCollectionFactory $attrOptionCollectionFactory
      * @param Product $productHelper
@@ -62,6 +68,7 @@ class ProductAttributes
      */
     public function __construct(
         AttributeFactory $attributeFactory,
+        ProductAttributeRepositoryInterface $productAttributeRepository,
         SetFactory $attributeSetFactory,
         OptionCollectionFactory $attrOptionCollectionFactory,
         Product $productHelper,
@@ -70,6 +77,7 @@ class ProductAttributes
         Helper $helper
     ) {
         $this->attributeFactory = $attributeFactory;
+        $this->productAttributeRepository = $productAttributeRepository;
         $this->attributeSetFactory = $attributeSetFactory;
         $this->attrOptionCollectionFactory = $attrOptionCollectionFactory;
         $this->productHelper = $productHelper;
@@ -110,14 +118,11 @@ class ProductAttributes
             return true;
         }
 
-        //validate frontend_input values
-        if (!empty($row['frontend_input']) && !$this->validateFrontendInputs($row['frontend_input'])) {
-            $this->helper->printMessage(
-                "frontend_input value in product_attributes.csv is invalid. ".$row['attribute_code']. " Row skipped",
-                "warning"
-            );
-            return true;
+        //flatten values coming in from json file attribute_options to option
+        if(!empty($row['attribute_options'])){
+            $row = $this->flattenOptions($row,$row['attribute_options']);
         }
+
         //add/update colums if type is textedit or pagebuilder
         switch ($row['frontend_input']) {
             case "texteditor":
@@ -131,6 +136,8 @@ class ProductAttributes
                 $row['is_pagebuilder_enabled']='1';
                 break;
         }
+
+
         /** @var Attribute $attribute */
         $attribute = $this->eavConfig->getAttribute('catalog_product', $this->validateCode($row['attribute_code']));
         if (!$attribute->getId()) {
@@ -167,6 +174,10 @@ class ProductAttributes
                 $existingLabels = $attribute->getFrontendLabels();
                 $frontEndLabels[$storeViewId] = $row['frontend_label'];
                 $frontEndLabels[0] = $attribute->getDefaultFrontendLabel();
+                ///if there is no default, set it to the value in the data
+                if(empty($frontEndLabels[0])){
+                    $frontEndLabels[0] = $row['frontend_label'];
+                }
             }
 
             $row['frontend_label'] = $frontEndLabels;
@@ -193,13 +204,32 @@ class ProductAttributes
         
         $attribute->setEntityTypeId($this->getEntityTypeId());
 
-        $attribute->save();
+        //are there swatches to be set
+        // if (!empty($row['additional_data'])) {
+        //     //validate the correct information in additional_data column
+        //     if ($this->isSwatchType($row['additional_data'])) {
+        //         $swatches = $row['swatches'];
+        //         $option = $row['option'];
+        //         unset($row['swatches']);
+        //         unset($row['option']);
+        //         $attribute->addData($row);
+        //         $this->productAttributeRepository->save($attribute);
+        //         $row['swatches'] = $swatches;
+        //         $row['option'] = $option;
+        //         $attribute->addData($row);
+        //     }else{
+        //         $this->productAttributeRepository->save($attribute);
+        //     }
+        // }
+
+        $this->productAttributeRepository->save($attribute);
+        //$attribute->save();
 
         $this->setAttributeSets($row, $attribute);
 
         $this->eavConfig->clear();
 
-        //are there watches to be set
+        //are there swatches to be set
         if (!empty($row['additional_data'])) {
             //validate the correct information in additional_data column
             if ($this->isSwatchType($row['additional_data'])) {
@@ -230,14 +260,21 @@ class ProductAttributes
             //assign swatch value to option
             $attributeData['swatchvisual'] = $this->getOptionSwatchVisual($attributeData, $row['swatches']);
             $attribute->addData($attributeData);
-            $attribute->save();
+            $this->productAttributeRepository->save($attribute);
+           // $attribute->save();
         } elseif ($swatchInfo['swatch_input_type']=='text') {
             $attributeData['swatchtext'] = $this->getOptionSwatch($attributeData);
             //get first swatch value and set as default - disabled
             //$attributeData['defaulttext'] = $this->getOptionDefaultText($attributeData, $row['swatches']);
             $attributeData['optiontext'] = $this->getOptionSwatchText($attributeData, $row['swatches']);
+            //remove invalid options
+            foreach($attributeData['optiontext']['value'] as $key => $arrayValue){
+                $newOption[$key] = $attributeData['option'][$key];
+            }
+            $attributeData['option'] = $newOption;
             $attribute->addData($attributeData);
-            $attribute->save();
+            $this->productAttributeRepository->save($attribute);
+           // $attribute->save();
         }
     }
 
@@ -264,7 +301,14 @@ class ProductAttributes
         $optionSwatch = ['value' => []];
         $optionMap =  $this->getSwatchArray($swatches);
         foreach ($attributeData['option'] as $optionKey => $optionValue) {
-            $optionSwatch['value'][$optionKey] = [$optionMap[$optionValue], ''];
+            try{
+                 $optionSwatch['value'][$optionKey] = [$optionMap[$optionValue], ''];
+            }catch(Exception $e)
+            {
+                //skip in the case of an update
+                $t=null;
+            }
+           
         }
         return $optionSwatch;
     }
@@ -547,12 +591,18 @@ class ProductAttributes
                 $attributeGroupId = $attributeSet->getDefaultGroupId();
 
                 $attribute = $this->attributeFactory->create()->load($attribute->getId());
-                $attribute
-                    ->setAttributeGroupId($attributeGroupId)
-                    ->setAttributeSetId($attributeSet->getId())
-                    ->setEntityTypeId($this->getEntityTypeId())
-                    ->setSortOrder(!empty($row['position']) ? $row['position'] : 999)
-                    ->save();
+                // $attribute
+                //     ->setAttributeGroupId($attributeGroupId)
+                //     ->setAttributeSetId($attributeSet->getId())
+                //     ->setEntityTypeId($this->getEntityTypeId())
+                //     ->setSortOrder(!empty($row['position']) ? $row['position'] : 999)
+                //     ->save();
+                $attribute->setAttributeGroupId($attributeGroupId);
+                $attribute->setAttributeSetId($attributeSet->getId());
+                $attribute->setEntityTypeId($this->getEntityTypeId());
+                $attribute->setSortOrder(!empty($row['position']) ? $row['position'] : 999);
+                $this->productAttributeRepository->save($attribute);
+                //$attribute->save();
             }
         }
     }
@@ -568,6 +618,30 @@ class ProductAttributes
                 unset($row[$key]);
             }
         }
+        return $row;
+    }
+
+    /**
+     * @param array $row
+     * @param array $options
+     * @return array
+     */
+    private function flattenOptions($row,$options)
+    {
+        //determine what type of swatch it is
+        $additionalData = json_decode($row['additional_data']);
+        $optionArray = [];
+        foreach ($options as $key => $value) {
+            if($value->swatch_value&&$additionalData->swatch_input_type=='visual'){
+                $optionArray[] = $value->label."|".$value->swatch_value;
+            }    
+            elseif($value->swatch_value&&$additionalData->swatch_input_type=='text'){
+                $optionArray[] = $value->swatch_value."|".$value->label;
+            } else {
+                $optionArray[] = $value->label;
+            }
+        }
+        $row['option'] = implode("\n",$optionArray);
         return $row;
     }
 }

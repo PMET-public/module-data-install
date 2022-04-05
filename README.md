@@ -595,6 +595,8 @@ The standard Magento Advanced Pricing import file is used. If you export from an
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
 Product attribute configurations can be complex. The columns examples below are a bare minimum needed if you were createing the file manually.  It's recommended to do a database extract.All settings are supported using database column names and values.
 
+*Note: There is a very specific known bug. If you re-load a product attribute file with an attribute type of text swatch, the option values will be duplicated. You will then need to remove the duplicate options*
+
 Query to extract attributes
 `select '' as attribute_set, eav.attribute_code, eav.frontend_input, eav.frontend_label,
 ca.is_visible,ca.is_searchable,ca.is_filterable,ca.is_comparable,ca.is_visible_on_front,ca.is_html_allowed_on_front,ca.is_used_for_price_rules,

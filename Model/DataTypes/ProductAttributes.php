@@ -119,8 +119,8 @@ class ProductAttributes
         }
 
         //flatten values coming in from json file attribute_options to option
-        if(!empty($row['attribute_options'])){
-            $row = $this->flattenOptions($row,$row['attribute_options']);
+        if (!empty($row['attribute_options'])) {
+            $row = $this->flattenOptions($row, $row['attribute_options']);
         }
 
         //add/update colums if type is textedit or pagebuilder
@@ -136,7 +136,6 @@ class ProductAttributes
                 $row['is_pagebuilder_enabled']='1';
                 break;
         }
-
 
         /** @var Attribute $attribute */
         $attribute = $this->eavConfig->getAttribute('catalog_product', $this->validateCode($row['attribute_code']));
@@ -175,7 +174,7 @@ class ProductAttributes
                 $frontEndLabels[$storeViewId] = $row['frontend_label'];
                 $frontEndLabels[0] = $attribute->getDefaultFrontendLabel();
                 ///if there is no default, set it to the value in the data
-                if(empty($frontEndLabels[0])){
+                if (empty($frontEndLabels[0])) {
                     $frontEndLabels[0] = $row['frontend_label'];
                 }
             }
@@ -204,26 +203,7 @@ class ProductAttributes
         
         $attribute->setEntityTypeId($this->getEntityTypeId());
 
-        //are there swatches to be set
-        // if (!empty($row['additional_data'])) {
-        //     //validate the correct information in additional_data column
-        //     if ($this->isSwatchType($row['additional_data'])) {
-        //         $swatches = $row['swatches'];
-        //         $option = $row['option'];
-        //         unset($row['swatches']);
-        //         unset($row['option']);
-        //         $attribute->addData($row);
-        //         $this->productAttributeRepository->save($attribute);
-        //         $row['swatches'] = $swatches;
-        //         $row['option'] = $option;
-        //         $attribute->addData($row);
-        //     }else{
-        //         $this->productAttributeRepository->save($attribute);
-        //     }
-        // }
-
         $this->productAttributeRepository->save($attribute);
-        //$attribute->save();
 
         $this->setAttributeSets($row, $attribute);
 
@@ -261,20 +241,18 @@ class ProductAttributes
             $attributeData['swatchvisual'] = $this->getOptionSwatchVisual($attributeData, $row['swatches']);
             $attribute->addData($attributeData);
             $this->productAttributeRepository->save($attribute);
-           // $attribute->save();
         } elseif ($swatchInfo['swatch_input_type']=='text') {
             $attributeData['swatchtext'] = $this->getOptionSwatch($attributeData);
             //get first swatch value and set as default - disabled
             //$attributeData['defaulttext'] = $this->getOptionDefaultText($attributeData, $row['swatches']);
             $attributeData['optiontext'] = $this->getOptionSwatchText($attributeData, $row['swatches']);
             //remove invalid options
-            foreach($attributeData['optiontext']['value'] as $key => $arrayValue){
+            foreach ($attributeData['optiontext']['value'] as $key => $arrayValue) {
                 $newOption[$key] = $attributeData['option'][$key];
             }
             $attributeData['option'] = $newOption;
             $attribute->addData($attributeData);
             $this->productAttributeRepository->save($attribute);
-           // $attribute->save();
         }
     }
 
@@ -301,14 +279,12 @@ class ProductAttributes
         $optionSwatch = ['value' => []];
         $optionMap =  $this->getSwatchArray($swatches);
         foreach ($attributeData['option'] as $optionKey => $optionValue) {
-            try{
+            try {
                  $optionSwatch['value'][$optionKey] = [$optionMap[$optionValue], ''];
-            }catch(Exception $e)
-            {
+            } catch (Exception $e) {
                 //skip in the case of an update
                 $t=null;
             }
-           
         }
         return $optionSwatch;
     }
@@ -589,20 +565,12 @@ class ProductAttributes
                 $setName = trim($setName);
                 $attributeSet = $this->processAttributeSet($setName);
                 $attributeGroupId = $attributeSet->getDefaultGroupId();
-
                 $attribute = $this->attributeFactory->create()->load($attribute->getId());
-                // $attribute
-                //     ->setAttributeGroupId($attributeGroupId)
-                //     ->setAttributeSetId($attributeSet->getId())
-                //     ->setEntityTypeId($this->getEntityTypeId())
-                //     ->setSortOrder(!empty($row['position']) ? $row['position'] : 999)
-                //     ->save();
                 $attribute->setAttributeGroupId($attributeGroupId);
                 $attribute->setAttributeSetId($attributeSet->getId());
                 $attribute->setEntityTypeId($this->getEntityTypeId());
                 $attribute->setSortOrder(!empty($row['position']) ? $row['position'] : 999);
                 $this->productAttributeRepository->save($attribute);
-                //$attribute->save();
             }
         }
     }
@@ -626,22 +594,21 @@ class ProductAttributes
      * @param array $options
      * @return array
      */
-    private function flattenOptions($row,$options)
+    private function flattenOptions($row, $options)
     {
         //determine what type of swatch it is
         $additionalData = json_decode($row['additional_data']);
         $optionArray = [];
         foreach ($options as $key => $value) {
-            if($value->swatch_value&&$additionalData->swatch_input_type=='visual'){
+            if ($value->swatch_value && $additionalData->swatch_input_type=='visual') {
                 $optionArray[] = $value->label."|".$value->swatch_value;
-            }    
-            elseif($value->swatch_value&&$additionalData->swatch_input_type=='text'){
+            } elseif ($value->swatch_value && $additionalData->swatch_input_type=='text') {
                 $optionArray[] = $value->swatch_value."|".$value->label;
             } else {
                 $optionArray[] = $value->label;
             }
         }
-        $row['option'] = implode("\n",$optionArray);
+        $row['option'] = implode("\n", $optionArray);
         return $row;
     }
 }

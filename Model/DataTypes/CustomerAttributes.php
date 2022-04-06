@@ -70,6 +70,12 @@ class CustomerAttributes
             $data["attribute_code"]." is required. Row Skipped", "warning");
             return true;
         }
+
+        //flatten values coming in from json file attribute_options to option
+        if (!empty($data['attribute_options'])) {
+            $data = $this->flattenOptions($data, $data['attribute_options']);
+        }
+
         ///set defaults if not included
 
         if (empty($data["is_used_in_grid"])) {
@@ -193,5 +199,20 @@ class CustomerAttributes
         }
 
         return $code;
+    }
+
+    /**
+     * @param array $row
+     * @param array $options
+     * @return array
+     */
+    private function flattenOptions($row, $options)
+    {
+        $optionArray = [];
+        foreach ($options as $key => $value) {
+            $optionArray[] = $value->label;
+        }
+        $row['options'] = implode("\n", $optionArray);
+        return $row;
     }
 }

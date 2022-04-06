@@ -346,6 +346,8 @@ class Conf
             'label'=>'Loading Customer Groups']],
             ['customer_attributes.csv'=>['process'=>'rows','class'=>$this->customerAttributeInstall,
             'label'=>'Loading Customer Attributes']],
+            ['customer_attributes.json'=>['process'=>'graphqlrows','class'=>$this->customerAttributeInstall,
+            'label'=>'Loading Customer Attributes']],
             ['reward_exchange_rate.csv'=>['process'=>'rows','class'=>$this->rewardExchangeRateInstall,
             'label'=>'Loading Rewards Exchange Rate']],
             ['reward_exchange_rate.json'=>['process'=>'graphqlrows','class'=>$this->rewardExchangeRateInstall,

@@ -414,6 +414,8 @@ class Conf
             'label'=>'Loading Templates']],
             ['reviews.csv'=>['process'=>'rows','class'=>$this->reviewsInstall,
             'label'=>'Loading Reviews']],
+            ['reviews.json'=>['process'=>'graphqlrows','class'=>$this->reviewsInstall,
+            'label'=>'Loading Reviews']],
             ['b2b_companies.csv'=>['process'=>'b2b',
             'class'=>['customerInstall'=>$this->customerInstall,'adminUsersInstall'=>$this->adminUsersInstall,
             'companiesInstall'=>$this->companiesInstall,'companyRolesInstall'=>$this->companyRolesInstall,

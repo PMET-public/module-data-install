@@ -139,8 +139,39 @@ class Reviews
      * @param array $settings
      * @return bool
      * @throws \Exception
+     *
+     * This function differs in the other data types in that a graphql export contains
+     * all the reviews for a product. Those will need to be expanded so there is a "row"
+     * for each review to pass to the installReview function
      */
     public function install(array $row, array $settings)
+    {
+        if (!empty($row['items'])) {
+            foreach ($row['items'] as $review) {
+                //get the default configuration
+                //$newRow = $this->getDefaultReview();
+                $newRow['sku'] = $row['sku'];
+                $newRow['store_view_code'] = $row['store_view_code'];
+                $newRow['rating_code'] = $review->ratings_breakdown[0]->name;
+                $newRow['rating_value'] = $review->ratings_breakdown[0]->value;
+                $newRow['summary'] = $review->summary;
+                $newRow['review'] =  $review->text;
+                $newRow['reviewer'] = $review->nickname;
+                $this->installReview($newRow, $settings);
+            }
+        } else {
+            $this->installReview($row, $settings);
+        }
+        return true;
+    }
+ 
+    /**
+     * @param array $row
+     * @param array $settings
+     * @return bool
+     * @throws \Exception
+     */
+    public function installReview(array $row, array $settings)
     {
         //check for required columns
         if (empty($row['sku']) || empty($row['reviewer']) || empty($row['summary'])
@@ -361,5 +392,21 @@ class Reviews
             );
         }
         return $this->reviewProductEntityId;
+    }
+
+    /**
+     * @return array
+     */
+    private function getDefaultReview()
+    {
+        $review = [];
+        $review['store_view_code'] = '';
+        $review['sku'] = '';
+        $review['rating_code'] = '';
+        $review['rating_value'] = '';
+        $review['summary'] = '';
+        $review['review'] = '';
+        $review['reviewer'] = '';
+        return $review;
     }
 }

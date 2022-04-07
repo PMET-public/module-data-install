@@ -412,6 +412,8 @@ class Conf
             'label'=>'Loading Pages']],
             ['templates.csv'=>['process'=>'rows','class'=>$this->templatesInstall,
             'label'=>'Loading Templates']],
+            ['templates.json'=>['process'=>'graphqlrows','class'=>$this->templatesInstall,
+            'label'=>'Loading Templates']],
             ['reviews.csv'=>['process'=>'rows','class'=>$this->reviewsInstall,
             'label'=>'Loading Reviews']],
             ['reviews.json'=>['process'=>'graphqlrows','class'=>$this->reviewsInstall,

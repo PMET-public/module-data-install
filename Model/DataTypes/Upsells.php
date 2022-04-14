@@ -123,6 +123,8 @@ class Upsells
         $upsellModel->setIsActive($row['is_active'] =='Y' ? 1 : 0);
         $upsellModel->setConditionsSerialized($this->converter->convertContent($row['conditions_serialized']??''));
         $upsellModel->setActionsSerialized($this->converter->convertContent($row['actions_serialized']??''));
+        $cs=$this->converter->convertContent($row['conditions_serialized']??'');
+        $as=$this->converter->convertContent($row['actions_serialized']??'');
         $upsellModel->setPositionsLimit($row['positions_limit']??1);
         $upsellModel->setApplyTo($applyTo);
         $upsellModel->setSortOrder($row['sort_order']??1);

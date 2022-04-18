@@ -190,6 +190,20 @@ class ProductAttributes
             $row['backend_model'] = $this->productHelper->getAttributeBackendModelByInputType($row['frontend_input']);
             $row['backend_type'] = $attribute->getBackendTypeByInput($row['frontend_input']);
         }
+        ///set is_filterable for json input
+        switch($row['is_filterable']){
+            case 'NO':
+                $row['is_filterable'] = 0;
+                break;
+            case 'FILTERABLE_WITH_RESULTS':
+                $row['is_filterable'] = 1;
+                break;
+            case 'FILTERABLE_NO_RESULT':
+                $row['is_filterable'] = 2;
+                break;
+            default:
+                $row['is_filterable'] = 0;
+        }
 
         $row += ['is_filterable' => 0, 'is_filterable_in_search' => 0];
 

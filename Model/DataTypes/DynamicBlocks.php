@@ -92,7 +92,7 @@ class DynamicBlocks
             return true;
         }
         if (empty($row['is_enabled'])) {
-            $row['is_enabled']='Y';
+            $row['is_enabled']=1;
         }
         if (empty($row['type'])) {
             $row['type']='';

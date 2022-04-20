@@ -191,7 +191,7 @@ class ProductAttributes
             $row['backend_type'] = $attribute->getBackendTypeByInput($row['frontend_input']);
         }
         ///set is_filterable for json input
-        switch($row['is_filterable']){
+        switch ($row['is_filterable']) {
             case 'NO':
                 $row['is_filterable'] = 0;
                 break;
@@ -614,10 +614,10 @@ class ProductAttributes
         $additionalData = json_decode($row['additional_data']);
         $optionArray = [];
         foreach ($options as $key => $value) {
-            if(!empty($additionalData)){
+            if (!empty($additionalData)) {
                 if ($value->swatch_value && $additionalData->swatch_input_type=='visual') {
-                $optionArray[] = $value->label."|".$value->swatch_value;
-                } elseif ($value->swatch_value && $additionalData  && $additionalData->swatch_input_type=='text') {
+                    $optionArray[] = $value->label."|".$value->swatch_value;
+                } elseif ($value->swatch_value && $additionalData && $additionalData->swatch_input_type=='text') {
                     $optionArray[] = $value->swatch_value."|".$value->label;
                 } else {
                     $optionArray[] = $value->label;
@@ -625,7 +625,6 @@ class ProductAttributes
             } else {
                 $optionArray[] = $value->label;
             }
-            
         }
         $row['option'] = implode("\n", $optionArray);
         return $row;

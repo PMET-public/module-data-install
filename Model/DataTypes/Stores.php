@@ -435,7 +435,7 @@ class Stores
                 if (!empty($data['view_name'])) {
                     $view->setName($data['view_name']);
                     $view->setCode($data['store_view_code']);
-                    if(empty($data['view_is_active'])){
+                    if (empty($data['view_is_active'])) {
                         $data['view_is_active']='Y';
                     }
                     $view->setIsActive($data['view_is_active']=='Y' ? 1 : 0);

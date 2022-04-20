@@ -107,12 +107,12 @@ class CustomerAttributes
             'type'         => 'varchar',
             'label'        => $data["frontend_label"],
             'input'        => $data["frontend_input"],
-            'required'     => $data["is_required"]=='Y' ? 1 : 0,
+            'required'     => $this->convertYandN($data["is_required"]),
             'visible'      => 1,
-            'is_used_in_grid' => $data["is_used_in_grid"]=='Y' ? 1 : 0,
-            'is_filterable_in_grid' => $data["is_filterable_in_grid"]=='Y' ? 1 : 0,
-            'is_visible_in_grid' => $data["is_used_in_grid"]=='Y' ? 1 : 0,
-            'is_searchable_in_grid' => $data["is_searchable_in_grid"]=='Y' ? 1 : 0,
+            'is_used_in_grid' => $this->convertYandN($data["is_used_in_grid"]),
+            'is_filterable_in_grid' => $this->convertYandN($data["is_filterable_in_grid"]),
+            'is_visible_in_grid' => $this->convertYandN($data["is_used_in_grid"]),
+            'is_searchable_in_grid' => $this->convertYandN($data["is_searchable_in_grid"]),
             'user_defined' => 1,
             'position'     => (empty($data["position"])) ? 100 : $data["position"],
             'system'       => 0,
@@ -128,7 +128,10 @@ class CustomerAttributes
             $data["attribute_code"]
         );
         $newAttribute->setData('used_in_forms', $useInForms);
-        $newAttribute->setData('is_used_for_customer_segment', $data["is_used_for_customer_segment"]=='Y' ? 1 : 0);
+        $newAttribute->setData(
+            'is_used_for_customer_segment',
+            $this->convertYandN($data["is_used_for_customer_segment"])
+        );
         $newAttribute->save($newAttribute);
         $eavSetup = $this->eavSetupFactory->create();
         $eavSetup->addAttribute(
@@ -214,5 +217,22 @@ class CustomerAttributes
         }
         $row['options'] = implode("\n", $optionArray);
         return $row;
+    }
+
+     /**
+      * @param mixed $value
+      * @return mixed
+      */
+    private function convertYandN($value)
+    {
+        switch ($value) {
+            case 'Y':
+                $value =  1;
+                break;
+            case 'N':
+                $value =  0;
+                break;
+        }
+        return $value;
     }
 }

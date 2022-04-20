@@ -120,7 +120,7 @@ class CustomerSegments
 
             $jsonValidate = json_decode($row['conditions_serialized'], true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->helper->logMessage("A row in the Customer Segments file has invalid Json data for ".
+                $this->helper->logMessage("Customer Segment ".$row['name']." has invalid Json data for ".
                 "conditions_serialized. Row is skipped", "warning");
                 return true;
             }

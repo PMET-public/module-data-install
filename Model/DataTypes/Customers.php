@@ -173,7 +173,14 @@ class Customers
          //add rewards points
          $this->addRewardsPoints($customerArray);
 
+        //add to autofill
          $startingElement = 1;
+         foreach ($customerArray as $autoFillCustomer) {
+             if (!empty($autoFillCustomer['add_to_autofill']) && $autoFillCustomer['add_to_autofill'] == 'Y') {
+                 $startingElement = $this->addToAutofill($autoFillCustomer, $startingElement);
+             }
+         }
+      
          foreach ($cleanCustomerArray as $row) {
              try {
                  $customer = $this->customerRepositoryInterface->get(
@@ -220,11 +227,6 @@ class Customers
                          $this->addressRespository->save($address);
                          $addressesToKeep[]=$address;
                      }
-                 }
-
-             //add to autofille
-                 if (!empty($row['add_to_autofill']) && $row['add_to_autofill'] == 'Y') {
-                     $startingElement = $this->addToAutofill($row, $startingElement);
                  }
              } catch (NoSuchEntityException $e) {
                  $this->helper->logMessage("Customer ". $row['email']." wasn't imported", "error");

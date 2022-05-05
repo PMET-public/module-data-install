@@ -68,7 +68,7 @@ class Process
     public function __construct(
         CopyMedia $copyMedia,
         DirectoryList $directoryList,
-        DriverInterface $driverInterface,
+        \Magento\Framework\Filesystem\Driver\File $driverInterface,
         Helper $helper,
         InstallerInterfaceFactory $dataInstallerInterface,
         InstallerRepositoryInterface $dataInstallerRepository,

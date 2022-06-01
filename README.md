@@ -82,7 +82,11 @@ If the data that is being installed calls for a `base` website, and that site do
 
 Of course you can always specify any site code where appropriate in the data.
 
-------------
+### Events and Observers
+
+There are two events generated at the start and end of the installation process that can be used by other modules
+`magentoese_datainstall_install_start` and `magentoese_datainstall_install_finish`
+This module includes usage examples in the `Observer` directory
 
 ## Data Files
 

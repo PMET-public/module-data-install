@@ -20,6 +20,7 @@ use Magento\Framework\Filesystem\DriverInterface;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 use MagentoEse\DataInstall\Model\Conf;
+use Magento\Framework\Event\ManagerInterface as EventManager;
 
 class Process
 {
@@ -52,6 +53,9 @@ class Process
     /** @var Queue\ScheduleBulk */
     protected $scheduleBulk;
 
+    /** @var EventManager */
+    protected $eventManager;
+
     /**
      * Process constructor.
      * @param CopyMedia $copyMedia
@@ -64,6 +68,7 @@ class Process
      * @param Validate $validate
      * @param Conf $conf
      * @param DataTypes\Stores $stores
+     * @param EventManager $eventManager
      **/
     public function __construct(
         CopyMedia $copyMedia,
@@ -76,7 +81,8 @@ class Process
         Validate $validate,
         Queue\ScheduleBulk $scheduleBulk,
         Conf $conf,
-        DataTypes\Stores $stores
+        DataTypes\Stores $stores,
+        EventManager $eventManager
     ) {
         $this->copyMedia = $copyMedia;
         $this->helper = $helper;
@@ -90,6 +96,7 @@ class Process
         $this->scheduleBulk = $scheduleBulk;
         $this->conf = $conf;
         $this->storeInstall = $stores;
+        $this->eventManager = $eventManager;
     }
     /**
      * @param $jobSettings
@@ -123,6 +130,8 @@ class Process
         $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
         $this->settings['job_settings'] = $jobSettings;
         $this->helper->setSettings($this->settings);
+        //dispatch start event
+        $this->eventManager->dispatch('magentoese_datainstall_install_start',['eventData' => $this->settings]);
 
         //bypass if data is already installed
         $fileSource .="/".$fixtureDirectory;
@@ -208,6 +217,7 @@ class Process
                 }
             }
         }
+        $this->eventManager->dispatch('magentoese_datainstall_install_finish');
         if ($fileCount==0) {
             return false;
         } else {

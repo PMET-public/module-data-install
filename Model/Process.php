@@ -217,7 +217,7 @@ class Process
                 }
             }
         }
-        $this->eventManager->dispatch('magentoese_datainstall_install_finish');
+        $this->eventManager->dispatch('magentoese_datainstall_install_end',['eventData' => $this->settings]);
         if ($fileCount==0) {
             return false;
         } else {

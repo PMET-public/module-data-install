@@ -3,7 +3,7 @@
     <event name="magentoese_datainstall_install_start">
         <observer name="MagentoEse_DataInstall_Start_Observer" instance="MagentoEse\DataInstall\Observer\ProcessStart" />
     </event>
-    <event name="magentoese_datainstall_install_finish">
+    <event name="magentoese_datainstall_install_end">
         <observer name="MagentoEse_DataInstall_End_Observer" instance="MagentoEse\DataInstall\Observer\ProcessEnd" />
     </event>
 </config>

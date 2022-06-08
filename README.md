@@ -82,11 +82,12 @@ If the data that is being installed calls for a `base` website, and that site do
 
 Of course you can always specify any site code where appropriate in the data.
 
-### Events and Observers
+### Events, Observers and Webhooks
 
 There are two events generated at the start and end of the installation process that can be used by other modules
-`magentoese_datainstall_install_start` and `magentoese_datainstall_install_finish`
-This module includes usage examples in the `Observer` directory
+`magentoese_datainstall_install_start` and `magentoese_datainstall_install_end`
+
+Plugins and observers have been created to integrate with the `mageplaza/module-webhook` extension, which is required in `composer.json`. This will allow webhooks to be configured based on the start and end events.
 
 ## Data Files
 

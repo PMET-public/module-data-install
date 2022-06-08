@@ -22,7 +22,7 @@ class ProcessStart implements \Magento\Framework\Event\ObserverInterface
      * @param Helper $helper
      * @param WebhookHelperData $webhookHelper
      */
-    public function __construct(Helper $helper,WebhookHelperData $webhookHelper)
+    public function __construct(Helper $helper, WebhookHelperData $webhookHelper)
     {
         $this->helper = $helper;
         $this->webhookHelper = $webhookHelper;
@@ -31,14 +31,15 @@ class ProcessStart implements \Magento\Framework\Event\ObserverInterface
     public function execute(Observer $observer)
     {
         $this->helper->setSettings = $observer->getData('eventData');
-        $this->helper->logMessage("Start Data Installer process",
+        $this->helper->logMessage(
+            "Start Data Installer process",
             "warning"
         );
         //TODO: Will need to set data based on what will be required for the payload
         $itemData = $observer->getData()['eventData']['job_settings'];
         $item = $observer;
-        $item->setData('filesource',$itemData['filesource']);
-        $item->setData('jobid',$itemData['jobid']);
+        $item->setData('filesource', $itemData['filesource']);
+        $item->setData('jobid', $itemData['jobid']);
         $this->webhookHelper->send($item, $this->hookType);
     }
 }

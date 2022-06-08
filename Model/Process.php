@@ -131,7 +131,7 @@ class Process
         $this->settings['job_settings'] = $jobSettings;
         $this->helper->setSettings($this->settings);
         //dispatch start event
-        $this->eventManager->dispatch('magentoese_datainstall_install_start',['eventData' => $this->settings]);
+        $this->eventManager->dispatch('magentoese_datainstall_install_start', ['eventData' => $this->settings]);
 
         //bypass if data is already installed
         $fileSource .="/".$fixtureDirectory;
@@ -217,7 +217,7 @@ class Process
                 }
             }
         }
-        $this->eventManager->dispatch('magentoese_datainstall_install_end',['eventData' => $this->settings]);
+        $this->eventManager->dispatch('magentoese_datainstall_install_end', ['eventData' => $this->settings]);
         if ($fileCount==0) {
             return false;
         } else {

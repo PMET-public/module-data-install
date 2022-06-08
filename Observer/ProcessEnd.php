@@ -22,7 +22,7 @@ class ProcessEnd implements \Magento\Framework\Event\ObserverInterface
      * @param Helper $helper
      * @param WebhookHelperData $webhookHelper
      */
-    public function __construct(Helper $helper,WebhookHelperData $webhookHelper)
+    public function __construct(Helper $helper, WebhookHelperData $webhookHelper)
     {
         $this->helper = $helper;
         $this->webhookHelper = $webhookHelper;
@@ -31,7 +31,8 @@ class ProcessEnd implements \Magento\Framework\Event\ObserverInterface
     public function execute(Observer $observer)
     {
         $this->helper->setSettings = $observer->getData('eventData');
-        $this->helper->logMessage("End Data Installer process",
+        $this->helper->logMessage(
+            "End Data Installer process",
             "warning"
         );
         //TODO: will need to copy section from ProcessStart assuming the payload is going to be the same

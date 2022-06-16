@@ -211,6 +211,15 @@ class Process
                             $modulePath,
                             $host
                         );
+                    } elseif ($fileInfo['process']=='b2bgraphql') {
+                        $fileData = $this->processB2BGraphql($fileContent);
+                        $this->processFile(
+                            $fileData['rows'],
+                            $fileData['header'],
+                            $fileInfo['class'],
+                            $modulePath,
+                            $host
+                        );
                     } else {
                         $this->processRows($rows, $header, $fileInfo['class'], $host);
                     }
@@ -345,7 +354,7 @@ class Process
             //convert to array of objects. Remove the parent query name node
             $fileData = current(json_decode($json)->data);
         } catch (\Exception $e) {
-            $this->helper->logMessage("The JSON in your configuration file is invalid", "error");
+            $this->helper->logMessage("The JSON in your data file is invalid", "error");
             return true;
         }
         
@@ -515,6 +524,101 @@ class Process
         $setupArray['fixture_directory'] = $fixtureDirectory;
         $setupArray['file_path'] = $filePath;
         return $setupArray;
+    }
+    /**
+     * Thoughts on processing b2b
+     * have pre-processing that converts to arrays, whether csv or json
+     * $b2bData array contains key of filename with rows/header array
+     */
+
+    private function processB2BGraphql($json)
+    {
+        try {
+            //convert to array of objects. Remove the parent query name node
+            $fileData = json_decode($json, true);
+        } catch (\Exception $e) {
+            $this->helper->logMessage("The JSON in your b2b file is invalid", "error");
+            return true;
+        }
+        $b2bData=[];
+        $b2bData['b2b_companies.csv'] = $this->parseB2BCompanyGraphql($fileData);
+    }
+
+    /**
+     * @param array $fileData
+     * @return array
+     */
+    private function parseB2BCompanyGraphql($fileData)
+    {
+        $header = [];
+        $setHeader = true;
+        $rowCount = 0;
+        $inputData = $fileData['data']['companies']['items'];
+        foreach ($inputData as $company) {
+            if (!empty($header)) {
+                $setHeader = false;
+            }
+            foreach ($company as $key => $value) {
+                if (in_array($key, Conf::B2B_COMPANY_COLUMNS)) {
+                    if ($key == 'address') {
+                        $address = $this->parseGraphqlAddress($value);
+                        if ($setHeader) {
+                            // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
+                            $header = array_merge($header, $address['header']);
+                        }
+                        // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
+                        $rows[$rowCount] = array_merge($rows[$rowCount], $address['rows']);
+                    } elseif ($key=='credit_limit') {
+                        if ($setHeader) {
+                            $header[] = 'credit_limit';
+                        }
+                        $rows[$rowCount][]=$value['credit_limit']['value'];
+                    } elseif ($key=='company_admin') {
+                        if ($setHeader) {
+                            $header[] = 'company_admin';
+                        }
+                        $rows[$rowCount][]=$value['email'];
+                    } else {
+                        if ($setHeader) {
+                            $header[] = $key;
+                        }
+                        $rows[$rowCount][]=$value;
+                    }
+                }
+            }
+            $rowCount ++;
+        }
+        $val['header'] = $header;
+        $val['rows'] = $rows;
+        return $val;
+    }
+
+    /**
+     * @param array $fileData
+     * @return array
+     */
+    private function parseGraphqlAddress($address)
+    {
+        foreach ($address as $key => $value) {
+            switch ($key) {
+                case 'street':
+                    $header[] = $key;
+                    $rows[] = $address['street'][0];
+                    break;
+                case 'region':
+                    foreach ($value as $regionKey => $regionValue) {
+                        $header[ ]= $regionKey;
+                        $rows[] = $regionValue;
+                    }
+                    break;
+                default:
+                    $header[]=$key;
+                    $rows[] = $value;
+            }
+        }
+        $val['header'] = $header;
+        $val['rows'] = $rows;
+        return $val;
     }
 
     /**

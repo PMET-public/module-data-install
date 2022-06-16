@@ -188,6 +188,10 @@ class Conf
     const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv',
     'b2b_sales_reps.csv','b2b_teams.csv'];
     /** @var string[]  */
+
+    const B2B_COMPANY_COLUMNS = ['site_code','legal_name','company_name','company_email','street','city','country_id',
+    'region','postcode','telephone','credit_limit','reseller_id','vat_tax_id','company_admin','address'];
+
     const SETTINGS = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
         'root_category' => 'Default Category', 'root_category_id' => '2'];
 
@@ -421,6 +425,12 @@ class Conf
             ['reviews.json'=>['process'=>'graphqlrows','class'=>$this->reviewsInstall,
             'label'=>'Loading Reviews']],
             ['b2b_companies.csv'=>['process'=>'b2b',
+            'class'=>['customerInstall'=>$this->customerInstall,'adminUsersInstall'=>$this->adminUsersInstall,
+            'companiesInstall'=>$this->companiesInstall,'companyRolesInstall'=>$this->companyRolesInstall,
+            'companyUserRolesInstall'=>$this->companyUserRolesInstall,
+            'companyTeamsInstall'=>$this->companyTeamsInstall],
+            'label'=>'Loading B2B Data']],
+            ['b2b_companies.json'=>['process'=>'b2bgraphql',
             'class'=>['customerInstall'=>$this->customerInstall,'adminUsersInstall'=>$this->adminUsersInstall,
             'companiesInstall'=>$this->companiesInstall,'companyRolesInstall'=>$this->companyRolesInstall,
             'companyUserRolesInstall'=>$this->companyUserRolesInstall,

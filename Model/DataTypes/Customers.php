@@ -82,7 +82,7 @@ class Customers
     protected $rewardFactory;
 
      protected $importUnsafeColumns=['company_admin', 'role', 'add_to_autofill','group',
-     'reward_points','store_credit'];
+     'reward_points','store_credit','company','website'];
 
     /**
      * Customers constructor.
@@ -554,6 +554,8 @@ class Customers
                  return $x + 1;
              }
          }
+         //if autofill slots are full, return the max value
+         return $elementCount;
      }
 
     /**

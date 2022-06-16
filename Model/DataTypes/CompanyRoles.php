@@ -74,10 +74,41 @@ class CompanyRoles
      */
     public function install($rows, $header)
     {
+        
+        if (!in_array('company_name', $header)) {
+            //look for company in header and convert if exists
+            if (array_search('company', $header)!==false) {
+                $header[array_search('company', $header)] = 'company_name';
+            } else {
+                $this->helper->logMessage(
+                    "company_name column is required in b2b_company_roles. File skipped.",
+                    "warning"
+                );
+                return true;
+            }
+        }
+
+        if (!in_array('role', $header)) {
+            $this->helper->logMessage(
+                "role column is required in b2b_company_roles. File skipped.",
+                "warning"
+            );
+            return true;
+        }
+
+        if (!in_array('resource_id', $header)) {
+            $this->helper->logMessage(
+                "resource_id column is required in b2b_company_roles. File skipped.",
+                "warning"
+            );
+            return true;
+        }
+        
         $rolesData = [];
         foreach ($rows as $row) {
             $rolesArray[] = array_combine($header, $row);
         }
+       
         if (!empty($rolesArray)) {
             //convert into company->role->permission structure
             foreach ($rolesArray as $roleRow) {
@@ -125,7 +156,7 @@ class CompanyRoles
         $company = current($companyList->getItems());
         if (!$company) {
             $this->helper->logMessage("The company ". $companyName .
-            " requested in b2b_customers.csv does not exist", "warning");
+            " requested in b2b_customer_roles does not exist", "warning");
             return false;
         } else {
             return $company->getId();

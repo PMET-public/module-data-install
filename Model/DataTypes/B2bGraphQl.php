@@ -1,0 +1,270 @@
+<?php
+namespace MagentoEse\DataInstall\Model\DataTypes;
+
+use MagentoEse\DataInstall\Helper\Helper;
+use MagentoEse\DataInstall\Model\Conf;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+
+class B2bGraphQl
+{
+    /** @var Helper */
+    protected $helper;
+
+     /** @var ScopeConfigInterface */
+     protected $scopeConfig;
+
+    /**
+     * @param Helper $helper
+     * @param ScopeConfigInterface $scopeConfig
+     */
+    public function __construct(
+        Helper $helper,
+        ScopeConfigInterface $scopeConfig
+    ) {
+        $this->helper = $helper;
+        $this->scopeConfig = $scopeConfig;
+    }
+
+    /**
+     * Thoughts on processing b2b
+     * have pre-processing that converts to arrays, whether csv or json
+     * $b2bData array contains key of filename with rows/header array
+     */
+
+    /**
+     * @param string $json
+     * @return array
+     */
+    public function processB2BGraphql($json)
+    {
+        try {
+            //convert to array of objects. Remove the parent query name node
+            $fileData = json_decode($json, true);
+        } catch (\Exception $e) {
+            $this->helper->logMessage("The JSON in your b2b file is invalid", "error");
+            return true;
+        }
+        $b2bData=[];
+        $b2bData['b2b_companies.csv'] = $this->parseB2BCompanyGraphql($fileData);
+        $b2bData['b2b_sales_reps.csv'] = $this->parseB2BSalesRepGraphql($fileData);
+        $b2bData['b2b_customers.csv'] = $this->parseB2BCompanyCustomers($fileData);
+        return $b2bData;
+    }
+
+    /**
+     * @param array $fileData
+     * @return array
+     */
+    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh
+    private function parseB2BCompanyGraphql($fileData)
+    {
+        $rows = [];
+        $header = [];
+        $setHeader = true;
+        $rowCount = 0;
+        $inputData = $fileData['data']['companies']['items'];
+        foreach ($inputData as $company) {
+            if (!empty($header)) {
+                $setHeader = false;
+            }
+            foreach ($company as $key => $value) {
+                if (in_array($key, Conf::B2B_COMPANY_COLUMNS)) {
+                    switch ($key) {
+                        case 'address':
+                            $address = $this->parseGraphqlAddress($value);
+                            if ($setHeader) {
+                                // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
+                                $header = array_merge($header, $address['header']);
+                            }
+                            // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
+                            $rows[$rowCount] = array_merge($rows[$rowCount], $address['rows']);
+                            break;
+
+                        case 'credit_limit':
+                            if ($setHeader) {
+                                $header[] = 'credit_limit';
+                            }
+                            $rows[$rowCount][] = $value['credit_limit']['value'];
+                            break;
+
+                        case 'company_admin':
+                            if ($setHeader) {
+                                $header[] = 'company_admin';
+                            }
+                            $rows[$rowCount][] = $value['email'];
+                            break;
+
+                        default:
+                            if ($setHeader) {
+                                $header[] = $key;
+                            }
+                            $rows[$rowCount][] = $value;
+                    }
+                }
+            }
+            $rowCount++;
+        }
+        $val['header'] = $header;
+        $val['rows'] = $rows;
+        return $val;
+    }
+
+    /**
+     * @param array $fileData
+     * @return array
+     */
+    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh
+    private function parseB2BCompanyCustomers($fileData)
+    {
+        $rows = [];
+        $header = [];
+        $setHeader = true;
+        $rowCount = 0;
+        $inputData = $fileData['data']['companies']['items'];
+        foreach ($inputData as $company) {
+            foreach ($company['users_export']['items'] as $user) {
+                if (!empty($header)) {
+                    $setHeader = false;
+                }
+                foreach ($user as $key => $value) {
+                    switch ($key) {
+                        case 'addresses':
+                            $address = $this->parseGraphqlAddress($value[0]);
+                            if ($setHeader) {
+                                // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
+                                $header = array_merge($header, $address['header']);
+                            }
+                            // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
+                            $rows[$rowCount] = array_merge($rows[$rowCount], $address['rows']);
+                            break;
+
+                        case 'role':
+                            if ($setHeader) {
+                                $header[] = 'role';
+                            }
+                            if (!empty($value['name'])) {
+                                $rows[$rowCount][]=$value['name'];
+                            } else {
+                                $rows[$rowCount][]= '';
+                            }
+                            break;
+                            
+                        case 'team':
+                            if ($setHeader) {
+                                $header[] = 'team';
+                            }
+                            if (!empty($value['name'])) {
+                                $rows[$rowCount][]=$value['name'];
+                            } else {
+                                $rows[$rowCount][]= '';
+                            }
+                            break;
+
+                        default:
+                            if ($setHeader) {
+                                $header[] = $key;
+                            }
+                            $rows[$rowCount][]=$value;
+                    }
+                }
+                //add columns and data not directly tied query results
+                //company,company_admin,website,add_to_autofill
+                if ($setHeader) {
+                    array_push($header, 'company', 'website', 'company_admin', 'add_to_autofill');
+                }
+                //company
+                $rows[$rowCount][]=$company['company_name'];
+                //website
+                $rows[$rowCount][]=$company['site_code'];
+                //company_admin
+                if ($company['company_admin']['email']==$user['email']) {
+                    $rows[$rowCount][]='Y';
+                } else {
+                    $rows[$rowCount][]='N';
+                }
+                //add_to_autofill
+                $rows[$rowCount][] = $this->getAutofillSetting($user['email']);
+                $rowCount ++;
+            }
+        }
+        $val['header'] = $header;
+        $val['rows'] = $rows;
+        return $val;
+    }
+
+    /**
+     * @param array $fileData
+     * @return array
+     */
+    private function parseB2BSalesRepGraphql($fileData)
+    {
+        $rows = [];
+        $header = [];
+        $setHeader = true;
+        $rowCount = 0;
+        $inputData = $fileData['data']['companies']['items'];
+        foreach ($inputData as $company) {
+            if (!empty($header)) {
+                $setHeader = false;
+            }
+            foreach ($company['sales_representative'] as $key => $value) {
+                if ($setHeader) {
+                    $header[] = $key;
+                }
+                $rows[$rowCount][]=$value;
+            }
+            if ($setHeader) {
+                $header[]='company';
+            }
+            $rows[$rowCount][]=$company['company_name'];
+            $rowCount ++;
+        }
+        $val['header'] = $header;
+        $val['rows'] = $rows;
+        return $val;
+    }
+
+    /**
+     * @param array $address
+     * @return array
+     */
+    private function parseGraphqlAddress($address)
+    {
+        foreach ($address as $key => $value) {
+            switch ($key) {
+                case 'street':
+                    $header[] = $key;
+                    $rows[] = $address['street'][0];
+                    break;
+                case 'region':
+                    foreach ($value as $regionKey => $regionValue) {
+                        $header[ ]= $regionKey;
+                        $rows[] = $regionValue;
+                    }
+                    break;
+                default:
+                    $header[]=$key;
+                    $rows[] = $value;
+            }
+        }
+        $val['header'] = $header;
+        $val['rows'] = $rows;
+        return $val;
+    }
+
+    /**
+     * @param array $address
+     * @return array
+     */
+    private function getAutofillSetting($email)
+    {
+        $autofill = 'N';
+        for ($x = 0; $x <= 17; $x++) {
+            if ($this->scopeConfig->getValue('magentoese_autofill/persona_'.$x.'/email_value', 'default')==$email) {
+                $autofill = 'Y';
+                break;
+            }
+        }
+        return $autofill;
+    }
+}

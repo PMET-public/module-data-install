@@ -205,7 +205,12 @@ class Process
                     } elseif ($fileInfo['process']=='json') {
                         $this->processJson($fileContent, $fileInfo['class'], $host);
                     } elseif ($fileInfo['process']=='b2b') {
-                        $this->processB2B($filePath, $fixtureDirectory, $fileInfo['class']);
+                        $fileData = $this->processB2BFiles($filePath, $fixtureDirectory, $fileInfo['class']);
+                        if (empty($fileData)) {
+                            return true;
+                        } else {
+                            $this->processB2B($fileData, $fileInfo['class']);
+                        }
                     } elseif ($fileInfo['process']=='graphqlrows') {
                         $fileData = $this->convertGraphQlJson($fileContent);
                         $this->processRows($fileData['rows'], $fileData['header'], $fileInfo['class'], $host);
@@ -220,13 +225,7 @@ class Process
                         );
                     } elseif ($fileInfo['process']=='b2bgraphql') {
                         $fileData = $this->b2bGraphQl->processB2BGraphql($fileContent);
-                        $this->processFile(
-                            $fileData['rows'],
-                            $fileData['header'],
-                            $fileInfo['class'],
-                            $modulePath,
-                            $host
-                        );
+                        $this->processB2B($fileData, $fileInfo['class']);
                     } else {
                         $this->processRows($rows, $header, $fileInfo['class'], $host);
                     }
@@ -534,11 +533,13 @@ class Process
     }
     
     /**
-     * @param $filePath
-     * @param $fixtureDirectory
+     * @param string $filePath
+     * @param string $fixtureDirectory
+     * @param mixed $classes
      * @throws \Exception
+     * @return array
      */
-    private function processB2B($filePath, $fixtureDirectory, $classes)
+    private function processB2BFiles($filePath, $fixtureDirectory, $classes)
     {
         $b2bData = [];
         $stopFlag = 0;
@@ -555,78 +556,85 @@ class Process
                 if (!$this->validate->validateCsvFile($header, $rows)) {
                     $this->helper->logMessage($nextFile." is invalid. The number of columns in the header does not ".
                     "match the number of column of data in one or more rows", "error");
-                    $stopFlag = 1;
-                    break;
+                    return [];
                 }
                 $b2bData[$nextFile] = ['header'=>$header,'rows'=>$rows];
             } else {
                 $this->helper->logMessage("You are missing the required B2B file - ".$nextFile.
                 ". B2B setup did not complete", "error");
-                $stopFlag = 1;
-                break;
+                return[];
             }
         }
-        if ($stopFlag == 0) {
-            //validate referential integrity of the data
-            if (!$this->validate->validateB2bData($b2bData)) {
-                $this->helper->logMessage("Bad Data", "error");
-                    ///probably need to throw an error to roll back everything
-            }
-            $salesReps = $this->buildB2bDataArrays($b2bData['b2b_sales_reps.csv']);
-            $companies = $this->buildB2bDataArrays($b2bData['b2b_companies.csv']);
-            $customers = $this->buildB2bDataArrays($b2bData['b2b_customers.csv']);
-
-            //load customers (normal process)
-            $this->helper->logMessage("Loading B2B Customers", "info");
-            $this->processFile(
-                $b2bData['b2b_customers.csv']['rows'],
-                $b2bData['b2b_customers.csv']['header'],
-                $classes['customerInstall'],
-                '',
-                ''
-            );
-            //load sales reps (admin user process)
-            $this->helper->logMessage("Loading B2B Sales Reps", "info");
-            $this->processRows(
-                $b2bData['b2b_sales_reps.csv']['rows'],
-                $b2bData['b2b_sales_reps.csv']['header'],
-                $classes['adminUsersInstall'],
-                ''
-            );
-            //create company (add on company admin from customers, and sales rep);
-
-            $companiesData = $this->mergeCompanyData($companies, $customers, $salesReps);
-            $this->helper->logMessage("Loading B2B Companies", "info");
-
-            foreach ($companiesData as $companyData) {
-                $classes['companiesInstall']->install($companyData, $this->settings);
-            }
-
-            //add company roles
-            $this->helper->logMessage("Loading B2B Company Roles", "info");
-            $this->processFile(
-                $b2bData['b2b_company_roles.csv']['rows'],
-                $b2bData['b2b_company_roles.csv']['header'],
-                $classes['companyRolesInstall'],
-                '',
-                ''
-            );
-            //assign roles to customers
-            $this->processRows(
-                $b2bData['b2b_customers.csv']['rows'],
-                $b2bData['b2b_customers.csv']['header'],
-                $classes['companyUserRolesInstall'],
-                ''
-            );
-            $this->helper->logMessage("Loading B2B Teams and Company Structure", "info");
-            //create company structure
-            $this->processRows(
-                $b2bData['b2b_teams.csv']['rows'],
-                $b2bData['b2b_teams.csv']['header'],
-                $classes['companyTeamsInstall'],
-                ''
-            );
+        return $b2bData;
+    }
+    
+    /**
+     * @param array $b2bData
+     * @param array $classes
+     * @throws \Exception
+     */
+    private function processB2B($b2bData, $classes)
+    {
+        
+        //validate referential integrity of the data
+        if (!$this->validate->validateB2bData($b2bData)) {
+            $this->helper->logMessage("Bad Data", "error");
+                ///probably need to throw an error to roll back everything
         }
+        $salesReps = $this->buildB2bDataArrays($b2bData['b2b_sales_reps.csv']);
+        $companies = $this->buildB2bDataArrays($b2bData['b2b_companies.csv']);
+        $customers = $this->buildB2bDataArrays($b2bData['b2b_customers.csv']);
+
+        //load customers (normal process)
+        $this->helper->logMessage("Loading B2B Customers", "info");
+        $this->processFile(
+            $b2bData['b2b_customers.csv']['rows'],
+            $b2bData['b2b_customers.csv']['header'],
+            $classes['customerInstall'],
+            '',
+            ''
+        );
+        //load sales reps (admin user process)
+        $this->helper->logMessage("Loading B2B Sales Reps", "info");
+        $this->processRows(
+            $b2bData['b2b_sales_reps.csv']['rows'],
+            $b2bData['b2b_sales_reps.csv']['header'],
+            $classes['adminUsersInstall'],
+            ''
+        );
+        //create company (add on company admin from customers, and sales rep);
+
+        $companiesData = $this->mergeCompanyData($companies, $customers, $salesReps);
+        $this->helper->logMessage("Loading B2B Companies", "info");
+
+        foreach ($companiesData as $companyData) {
+            $classes['companiesInstall']->install($companyData, $this->settings);
+        }
+
+        //add company roles
+        $this->helper->logMessage("Loading B2B Company Roles", "info");
+        $this->processFile(
+            $b2bData['b2b_company_roles.csv']['rows'],
+            $b2bData['b2b_company_roles.csv']['header'],
+            $classes['companyRolesInstall'],
+            '',
+            ''
+        );
+        //assign roles to customers
+        $this->processRows(
+            $b2bData['b2b_customers.csv']['rows'],
+            $b2bData['b2b_customers.csv']['header'],
+            $classes['companyUserRolesInstall'],
+            ''
+        );
+        $this->helper->logMessage("Loading B2B Teams and Company Structure", "info");
+        //create company structure
+        $this->processRows(
+            $b2bData['b2b_teams.csv']['rows'],
+            $b2bData['b2b_teams.csv']['header'],
+            $classes['companyTeamsInstall'],
+            ''
+        );
     }
     /**
      * @param $companies

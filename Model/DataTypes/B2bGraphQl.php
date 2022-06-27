@@ -3,26 +3,19 @@ namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use MagentoEse\DataInstall\Helper\Helper;
 use MagentoEse\DataInstall\Model\Conf;
-use Magento\Framework\App\Config\ScopeConfigInterface;
 
 class B2bGraphQl
 {
     /** @var Helper */
     protected $helper;
 
-     /** @var ScopeConfigInterface */
-     protected $scopeConfig;
-
     /**
      * @param Helper $helper
-     * @param ScopeConfigInterface $scopeConfig
      */
     public function __construct(
-        Helper $helper,
-        ScopeConfigInterface $scopeConfig
+        Helper $helper
     ) {
         $this->helper = $helper;
-        $this->scopeConfig = $scopeConfig;
     }
 
     /**
@@ -48,6 +41,8 @@ class B2bGraphQl
         $b2bData['b2b_companies.csv'] = $this->parseB2BCompanyGraphql($fileData);
         $b2bData['b2b_sales_reps.csv'] = $this->parseB2BSalesRepGraphql($fileData);
         $b2bData['b2b_customers.csv'] = $this->parseB2BCompanyCustomers($fileData);
+        $b2bData['b2b_company_roles.csv'] = $this->parseB2BCompanyRoles($fileData);
+        $b2bData['b2b_teams.csv'] = $this->parseB2BTeams($fileData);
         return $b2bData;
     }
 
@@ -150,14 +145,7 @@ class B2bGraphQl
                             break;
                             
                         case 'team':
-                            if ($setHeader) {
-                                $header[] = 'team';
-                            }
-                            if (!empty($value['name'])) {
-                                $rows[$rowCount][]=$value['name'];
-                            } else {
-                                $rows[$rowCount][]= '';
-                            }
+                            //skip
                             break;
 
                         default:
@@ -170,7 +158,7 @@ class B2bGraphQl
                 //add columns and data not directly tied query results
                 //company,company_admin,website,add_to_autofill
                 if ($setHeader) {
-                    array_push($header, 'company', 'website', 'company_admin', 'add_to_autofill');
+                    array_push($header, 'company', 'site_code', 'company_admin');
                 }
                 //company
                 $rows[$rowCount][]=$company['company_name'];
@@ -182,8 +170,7 @@ class B2bGraphQl
                 } else {
                     $rows[$rowCount][]='N';
                 }
-                //add_to_autofill
-                $rows[$rowCount][] = $this->getAutofillSetting($user['email']);
+               
                 $rowCount ++;
             }
         }
@@ -225,6 +212,76 @@ class B2bGraphQl
     }
 
     /**
+     * @param array $fileData
+     * @return array
+     */
+    private function parseB2BCompanyRoles($fileData)
+    {
+        $this->companyRoles = [];
+        $header = ['company_name','role','resource_id'];
+        $inputData = $fileData['data']['companies']['items'];
+        foreach ($inputData as $company) {
+            foreach ($company['roles_export']['items'] as $role) {
+                array_walk_recursive(
+                    $role,
+                    [$this,'companyRoleCallback'],
+                    ['company'=>$company['company_name'],'role'=>$role['name']]
+                );
+            }
+        }
+        $val['header'] = $header;
+        $val['rows'] = $this->companyRoles;
+        return $val;
+    }
+
+    /**
+     * @param string $item
+     * @param string $key
+     * @param array $args
+     */
+    public function companyRoleCallback($item, $key, $args)
+    {
+        if ($key=='id') {
+            array_push($this->companyRoles, [$args['company'],$args['role'],$item]);
+        }
+    }
+
+    /**
+     * @param array $fileData
+     * @return array
+     */
+    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh
+    private function parseB2BTeams($fileData)
+    {
+        $rows = [];
+        $companyArray = [];
+        $header = ['site_code','company_name','name','members'];
+        $rowCount = 0;
+        $inputData = $fileData['data']['companies']['items'];
+        foreach ($inputData as $company) {
+            foreach ($company['users_export']['items'] as $user) {
+                //create nexted array for company/team/users
+                if (!empty($user['team'])) {
+                    $companyArray[$company['company_name']][$user['team']['name']][] = $user['email'];
+                }
+            }
+        }
+        //pivot array into row
+        foreach ($companyArray as $companyName => $team) {
+            foreach ($team as $teamName => $members) {
+                $rows[$rowCount][]=$company['site_code'];
+                $rows[$rowCount][]=$companyName;
+                $rows[$rowCount][]=$teamName;
+                $rows[$rowCount][]=implode(',', $members);
+                $rowCount ++;
+            }
+        }
+        $val['header'] = $header;
+        $val['rows'] = $rows;
+        return $val;
+    }
+    
+    /**
      * @param array $address
      * @return array
      */
@@ -250,21 +307,5 @@ class B2bGraphQl
         $val['header'] = $header;
         $val['rows'] = $rows;
         return $val;
-    }
-
-    /**
-     * @param array $address
-     * @return array
-     */
-    private function getAutofillSetting($email)
-    {
-        $autofill = 'N';
-        for ($x = 0; $x <= 17; $x++) {
-            if ($this->scopeConfig->getValue('magentoese_autofill/persona_'.$x.'/email_value', 'default')==$email) {
-                $autofill = 'Y';
-                break;
-            }
-        }
-        return $autofill;
     }
 }

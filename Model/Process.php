@@ -635,6 +635,17 @@ class Process
             $classes['companyTeamsInstall'],
             ''
         );
+
+        //if requisition lists are part of the structure (coming from graphql), process them now
+        if (!empty($b2bData['b2b_requisition_lists.csv'])) {
+            $this->helper->logMessage("Loading B2B Requisition Lists", "info");
+             $this->processRows(
+                 $b2bData['b2b_requisition_lists.csv']['rows'],
+                 $b2bData['b2b_requisition_lists.csv']['header'],
+                 $classes['requisitionListsInstall'],
+                 ''
+             );
+        }
     }
     /**
      * @param $companies

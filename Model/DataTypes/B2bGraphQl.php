@@ -43,6 +43,7 @@ class B2bGraphQl
         $b2bData['b2b_customers.csv'] = $this->parseB2BCompanyCustomers($fileData);
         $b2bData['b2b_company_roles.csv'] = $this->parseB2BCompanyRoles($fileData);
         $b2bData['b2b_teams.csv'] = $this->parseB2BTeams($fileData);
+        $b2bData['b2b_requisition_lists.csv'] = $this->parseB2BRequisitionLists($fileData);
         return $b2bData;
     }
 
@@ -250,7 +251,6 @@ class B2bGraphQl
      * @param array $fileData
      * @return array
      */
-    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh
     private function parseB2BTeams($fileData)
     {
         $rows = [];
@@ -280,7 +280,54 @@ class B2bGraphQl
         $val['rows'] = $rows;
         return $val;
     }
-    
+
+    /**
+     * @param array $fileData
+     * @return array
+     */
+    private function parseB2BRequisitionLists($fileData)
+    {
+        $rows = [];
+        $reqLists = [];
+        $header = ['name','site_code','customer_email','description','skus'];
+        $rowCount = 0;
+        $inputData = $fileData['data']['companies']['items'];
+        foreach ($inputData as $company) {
+            foreach ($company['users_export']['items'] as $user) {
+                //create nexted array for company/team/users
+                if (!empty($user['requisition_lists_export'])) {
+                    foreach ($user['requisition_lists_export'] as $allLists) {
+                        foreach ($allLists as $list) {
+                            $rows[$rowCount][] = $list['name'];
+                            $rows[$rowCount][]=$company['site_code'];
+                            $rows[$rowCount][]=$user['email'];
+                            $rows[$rowCount][] = $list['description'];
+                            $rows[$rowCount][] = $this->getRequisitionListSkus($list['items']['items']);
+                            $rowCount ++;
+                        }
+                    }
+                }
+            }
+        }
+        $val['header'] = $header;
+        $val['rows'] = $rows;
+        return $val;
+    }
+
+    /**
+     * @param array $items
+     * @return string
+     */
+
+    private function getRequisitionListSkus($items)
+    {
+        $products = [];
+        foreach ($items as $item) {
+            $products[] = $item['product']['sku'].'|'.$item['quantity'];
+        }
+        return implode(",", $products);
+    }
+
     /**
      * @param array $address
      * @return array

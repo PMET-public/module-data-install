@@ -434,6 +434,7 @@ class Conf
             'class'=>['customerInstall'=>$this->customerInstall,'adminUsersInstall'=>$this->adminUsersInstall,
             'companiesInstall'=>$this->companiesInstall,'companyRolesInstall'=>$this->companyRolesInstall,
             'companyUserRolesInstall'=>$this->companyUserRolesInstall,
+            'requisitionListsInstall'=>$this->requisitionListsInstall,
             'companyTeamsInstall'=>$this->companyTeamsInstall],
             'label'=>'Loading B2B Data']],
             ['b2b_shared_catalogs.csv'=>['process'=>'rows','class'=>$this->sharedCatalogsInstall,

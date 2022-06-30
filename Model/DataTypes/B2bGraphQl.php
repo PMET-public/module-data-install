@@ -148,6 +148,10 @@ class B2bGraphQl
                         case 'team':
                             //skip
                             break;
+                        
+                        case 'requisition_lists_export':
+                            //skip
+                            break;    
 
                         default:
                             if ($setHeader) {

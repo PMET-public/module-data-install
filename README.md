@@ -941,15 +941,25 @@ Quality, Price and Value rating codes are installed by default but the visibilit
 This file is used to add and update B2B Approval Rules. `company_name` and `name` are keys and are used for updates. Currently the ability to use Approval Rules needs to be set manually per company in the Admin.
 
 *Columns*
+
 **company_name** - Required
+
 **name** - Required
+
 **description** - Optional
+
 **is_active** - Optional (values Y/N), defaults to Y
+
 **apply_to_roles** - Required. Comma delimited list of roles to apply the rule to. This includes any custom company roles created, along with `Default User`
+
 **rule_type** - Required. Value is one of `grand_total`, `shipping_incl_tax`, `number_of_skus`
+
 **rule** - Required. Value is one of `>`,`<`,`>=`,`<=`
+
 **amount_value** - Required
+
 **currency_code** - Optional, defaults to `USD`. Needs to be a valid currency code
+
 **approval_from** - Required. Comma delimited list of approval roles. This includes any custom company roles created, along with `Default User`,`Company Administrator` and `Purchaser's Manager` 
 ### B2b Companies
 
@@ -958,17 +968,29 @@ This file is used to add and update B2B Approval Rules. `company_name` and `name
 This file is used to add companies. Updates are made by using `company_name` as key
 
 *Columns*
+
 **company_name** - Required
+
 **site_code** - Optional. Will default to the `site_code` defined in `settings.csv`
+
 **street** - Required
+
 **city** - Required
+
 **country_id** - Required
+
 **region** - Required
+
 **postcode** - Required
+
 **telephone** - Required
+
 **status** - Optional (Values Y/N), Defaults to Y
+
 **credit_limit** - Optional
+
 **company_email** - Optional, will default to `company_admin`
+
 **company_admin** - Email Address of Company Admin as defined in `b2b_customers.csv`
 ### B2B Company Roles
 
@@ -983,8 +1005,11 @@ and cr.role_name in ('Buyer')
 and cp.permission = 'allow'`
 
 *Columns*
+
 **company_name** - Required
+
 **role** - Required. Name of role to create
+
 **resource_id** - Required. Valid Magento ACL resource. Example - `Magento_Company::index`
 
 ### B2B Customers
@@ -994,8 +1019,11 @@ and cp.permission = 'allow'`
 This file is used to add the customers within a company. A regular customer file format can be used as outlined in [**customers.csv**](#customers)
 
 There are a few required columns that will need to be added
+
 **company_name** - As defined in `b2b_companies.csv`
+
 **company_admin** - (Y/N) Sets this customer as the company admin. Only one admin per company is allowed
+
 **role** - Customer role as defined in `b2b_company_roles.csv`
 
 ### B2B Requisition Lists
@@ -1005,10 +1033,15 @@ There are a few required columns that will need to be added
 This file is used to add Requisition Lists to Customers. Updates are done by using `name` and `customer_email` as key.
 
 *Columns*
+
 **customer_email** - Required. Should be an email defined in `b2b_customers.csv`
+
 **site_code** - Optional.  Will default to value in `settings.csv`. HOWEVER it needs to match the website that `customer_email` was created in
+
 **name** - Required
+
 **description** - Optional
+
 **skus** - Optional. A comma and pipe delimited list of sku|quantity. *Example* - `24-MB01|5,10061|2 `. If no quantity is given it will be set to 1. If the sku is invalid the product will still be added, but will show as invalid in the requisition list
 
 ### B2B Sales Reps
@@ -1018,12 +1051,19 @@ This file is used to add Requisition Lists to Customers. Updates are done by usi
 This file is used to add company sales reps. These are different in that they aren't company users, but have access to the Magento admin to process orders and quotes, build catalogs, etc. Update key is `username`.
 
 *Columns*
+
 **email** - Required
+
 **username** - Required
+
 **firstname** - Required
+
 **lastname** - Required
+
 **password** - Required
+
 **company** - Required. Should match company in `b2b_companies.csv`
+
 **role** - Required. Should match role in `admin_roles.csv`
 
 ### B2B Shared Catalogs
@@ -1033,9 +1073,13 @@ This file is used to add company sales reps. These are different in that they ar
 This file is used to add and update Shared Catalogs. Update is done using `name` as key
 
 *Columns*
+
 **name** - Required
+
 **companies** - Optional. Comma delimited list of companies defined in `b2b_companies.csv` to tie to the catalog
+
 **type** - Optional. Values `Custom` or `Public`. Defaults to `Custom`. Remember you are only allowed one `Public` catalog
+
 **description** - Optional
 
 ### B2B Shared Catalog Categories
@@ -1045,7 +1089,9 @@ This file is used to add and update Shared Catalogs. Update is done using `name`
 This file assigns the category and its contained products to a shared catalog. One row per category added.On an update the data is reset to the incoming values. 
 
 *Columns*
+
 **shared_catalog** - Required. Catalog as defined in `b2b_shared_catalogs`
+
 **category** - Required. Full path of category to add *Example*:`B2B Root Category/Gear/Bags/Duffel`
 
 
@@ -1057,8 +1103,11 @@ This file is used to set up company structure, add teams and assign users to the
 
 *Columns*
 **site_code** - Optional. Will default to value in `settings.csv`. This code needs to match the website that the `members` were created in
+
 **name** - Required
+
 **company_name** - Required. Company defined in `b2b_companies.csv`
+
 **members** - Optional. Comma delimited list of email addresses defined in `b2b_customers.csv`
 # Content substitution
 

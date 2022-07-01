@@ -646,6 +646,17 @@ class Process
                  ''
              );
         }
+
+        //if requisition lists are part of the structure (coming from graphql), process them now
+        if (!empty($b2bData['b2b_shared_catalogs.csv'])) {
+            $this->helper->logMessage("Loading B2B Shared Catalogs", "info");
+             $this->processRows(
+                 $b2bData['b2b_shared_catalogs.csv']['rows'],
+                 $b2bData['b2b_shared_catalogs.csv']['header'],
+                 $classes['sharedCatalogInstall'],
+                 ''
+             );
+        }
     }
     /**
      * @param $companies

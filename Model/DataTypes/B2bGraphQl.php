@@ -44,6 +44,10 @@ class B2bGraphQl
         $b2bData['b2b_company_roles.csv'] = $this->parseB2BCompanyRoles($fileData);
         $b2bData['b2b_teams.csv'] = $this->parseB2BTeams($fileData);
         $b2bData['b2b_requisition_lists.csv'] = $this->parseB2BRequisitionLists($fileData);
+        $b2bData['b2b_shared_catalogs.csv'] = $this->parseB2BSharedCatalogs($fileData);
+        $b2bData['b2b_shared_catalog_categories.csv'] = $this->parseB2BparseB2BSharedCatalogCategories($fileData);
+        //$b2bData['b2b_approval_rules.csv'] = $this->parseB2BApprovalRules($fileData);
+        
         return $b2bData;
     }
 
@@ -151,7 +155,7 @@ class B2bGraphQl
                         
                         case 'requisition_lists_export':
                             //skip
-                            break;    
+                            break;
 
                         default:
                             if ($setHeader) {
@@ -330,6 +334,49 @@ class B2bGraphQl
             $products[] = $item['product']['sku'].'|'.$item['quantity'];
         }
         return implode(",", $products);
+    }
+
+    /**
+     * @param array $fileData
+     * @return array
+     */
+    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh
+    private function parseB2BSharedCatalogs($fileData)
+    {
+        $tempArray = [];
+        $rows = [];
+        $header = ['name','companies','type','description'];
+        $inputData = $fileData['data']['companies']['items'];
+        //create associative arrays of all company catalog assignments
+        //public catalog
+        $tempArray[] = ['name'=>$fileData['data']['publicSharedCatalog']['name'],
+        'companies'=>[],'type'=>'Public','description'=>$fileData['data']['publicSharedCatalog']['description']];
+        //get info from company
+        foreach ($inputData as $company) {
+            //if catalog is already defined, add to company array. else add element
+            $foundCompany = 0;
+            foreach ($tempArray as $key => $currentCatalog) {
+                if ($currentCatalog['name'] == $company['shared_catalog']['name']) {
+                    $tempArray[$key]['companies'][]=$company['company_name'];
+                    $foundCompany = 1;
+                    break;
+                }
+            }
+            if ($foundCompany==0) {
+                $tempArray[] = ['name'=>$company['shared_catalog']['name'],
+                'companies'=>[$company['company_name']],'type'=>$company['shared_catalog']['type'],
+                'description'=>$company['shared_catalog']['description']];
+            }
+        }
+        //convert to rows
+        foreach ($tempArray as $catalog) {
+            $rows[] = [$catalog['name'],
+            implode(',', $catalog['companies']),$catalog['type'],
+            $catalog['description']];
+        }
+        $val['header'] = $header;
+        $val['rows'] = $rows;
+        return $val;
     }
 
     /**

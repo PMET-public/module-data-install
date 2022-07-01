@@ -93,7 +93,6 @@ class SharedCatalogs
         }
 
         $sharedCatalog->setName($row['name']);
-        $sharedCatalog->setCustomerGroupId($this->customerGroups->getCustomerGroupId($row['name']));
         $sharedCatalog->setCreatedBy(1);
         $sharedCatalog->setTaxClassId(3);
         if (!empty($row['description'])) {
@@ -101,6 +100,7 @@ class SharedCatalogs
         }
         if (empty($row['type']) || $row['type']=='Custom') {
             $sharedCatalog->setType(SharedCatalogInterface::TYPE_CUSTOM);
+            $sharedCatalog->setCustomerGroupId($this->customerGroups->getCustomerGroupId($row['name']));
         } else {
             $sharedCatalog->setType(SharedCatalogInterface::TYPE_PUBLIC);
         }

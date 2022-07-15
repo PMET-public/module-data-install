@@ -45,7 +45,7 @@ class B2bGraphQl
         $b2bData['b2b_teams.csv'] = $this->parseB2BTeams($fileData);
         $b2bData['b2b_requisition_lists.csv'] = $this->parseB2BRequisitionLists($fileData);
         $b2bData['b2b_shared_catalogs.csv'] = $this->parseB2BSharedCatalogs($fileData);
-        $b2bData['b2b_shared_catalog_categories.csv'] = $this->parseB2BparseB2BSharedCatalogCategories($fileData);
+        $b2bData['b2b_shared_catalog_categories.csv'] = $this->parseB2BSharedCatalogCategories($fileData);
         //$b2bData['b2b_approval_rules.csv'] = $this->parseB2BApprovalRules($fileData);
         
         return $b2bData;
@@ -373,6 +373,30 @@ class B2bGraphQl
             $rows[] = [$catalog['name'],
             implode(',', $catalog['companies']),$catalog['type'],
             $catalog['description']];
+        }
+        $val['header'] = $header;
+        $val['rows'] = $rows;
+        return $val;
+    }
+
+    /**
+     * @param array $fileData
+     * @return array
+     */
+    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh
+    private function parseB2BSharedCatalogCategories($fileData)
+    {
+        //shared_catalog,category
+        $rows = [];
+        $header = ['shared_catalog','category'];
+        $inputData = $fileData['data']['companies']['items'];
+        foreach ($inputData as $company) {
+            //if catalog is already defined, add to company array. else add element
+            $sharedCatalogName = $company['shared_catalog']['name'];
+            $catalogCategories = $company['shared_catalog']['categories'];
+            foreach ($catalogCategories as $category) {
+                $rows[] = [$sharedCatalogName,$category['path']];
+            }
         }
         $val['header'] = $header;
         $val['rows'] = $rows;

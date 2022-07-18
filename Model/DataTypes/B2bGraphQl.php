@@ -46,7 +46,7 @@ class B2bGraphQl
         $b2bData['b2b_requisition_lists.csv'] = $this->parseB2BRequisitionLists($fileData);
         $b2bData['b2b_shared_catalogs.csv'] = $this->parseB2BSharedCatalogs($fileData);
         $b2bData['b2b_shared_catalog_categories.csv'] = $this->parseB2BSharedCatalogCategories($fileData);
-        //$b2bData['b2b_approval_rules.csv'] = $this->parseB2BApprovalRules($fileData);
+        $b2bData['b2b_approval_rules.csv'] = $this->parseB2BApprovalRules($fileData);
         
         return $b2bData;
     }
@@ -296,7 +296,6 @@ class B2bGraphQl
     private function parseB2BRequisitionLists($fileData)
     {
         $rows = [];
-        $reqLists = [];
         $header = ['name','site_code','customer_email','description','skus'];
         $rowCount = 0;
         $inputData = $fileData['data']['companies']['items'];
@@ -396,6 +395,43 @@ class B2bGraphQl
             $catalogCategories = $company['shared_catalog']['categories'];
             foreach ($catalogCategories as $category) {
                 $rows[] = [$sharedCatalogName,$category['path']];
+            }
+        }
+        $val['header'] = $header;
+        $val['rows'] = $rows;
+        return $val;
+    }
+
+    /**
+     * @param array $fileData
+     * @return array
+     */
+    private function parseB2BApprovalRules($fileData)
+    {
+        $rows = [];
+        $header = [];
+        $setHeader = true;
+        $rowCount = 0;
+        $inputData = $fileData['data']['companies']['items'];
+        foreach ($inputData as $company) {
+            if (!empty($header)) {
+                $setHeader = false;
+            }
+            if (!empty($company['approval_rules']['items'])) {
+                foreach ($company['approval_rules']['items'] as $rule) {
+                    foreach ($rule as $key => $value) {
+                        if ($setHeader) {
+                            $header[] = $key;
+                        }
+                        $rows[$rowCount][]=$value;
+                    }
+                    if ($setHeader) {
+                        $header[]='company_name';
+                        $setHeader = false;
+                    }
+                    $rows[$rowCount][]=$company['company_name'];
+                    $rowCount ++;
+                }
             }
         }
         $val['header'] = $header;

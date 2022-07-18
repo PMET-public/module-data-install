@@ -100,58 +100,81 @@ class ApprovalRules
             " does not exist, row skipped", "warning");
             return true;
         }
-        if (empty($row['apply_to_roles'])) {
-            $this->helper->logMessage("Approval rule ".$row['name'].
-            " missing apply_to_roles, row skipped", "warning");
-            return true;
+        // if (empty($row['apply_to_roles'])) {
+        //     $this->helper->logMessage("Approval rule ".$row['name'].
+        //     " missing apply_to_roles, row skipped", "warning");
+        //     return true;
+        // }
+        if (!empty($row['apply_to_roles'])) {
+            $row['apply_to_roles'] = explode(",", $row['apply_to_roles']);
+        
+            if (!$this->validateRoles(
+                $row['apply_to_roles'],
+                $this->companies->getCompanyByName($row['company_name'])->getId()
+            )) {
+                $this->helper->logMessage("Approval rule ".$row['name'].
+                " has invalid apply_to_roles value, row skipped", "warning");
+                return true;
+            }
         }
-        $row['apply_to_roles'] = explode(",", $row['apply_to_roles']);
-        if (!$this->validateRoles(
-            $row['apply_to_roles'],
-            $this->companies->getCompanyByName($row['company_name'])->getId()
-        )) {
-            $this->helper->logMessage("Approval rule ".$row['name'].
-            " has invalid apply_to_roles value, row skipped", "warning");
-            return true;
+
+        // if (empty($row['approval_from'])) {
+        //     $this->helper->
+        //     logMessage("Approval rule ".$row['name']." missing approval_from, row skipped", "warning");
+        //     return true;
+        // }
+        if (!empty($row['approval_from'])) {
+            $row['approval_from'] = explode(",", $row['approval_from']);
+            if (!$this->validateRoles(
+                $row['approval_from'],
+                $this->companies->getCompanyByName($row['company_name'])->getId(),
+                'approval_from'
+            )) {
+                $this->helper->logMessage("Approval rule ".$row['name'].
+                " has invalid approval_from value, row skipped", "warning");
+                return true;
+            }
         }
-        if (empty($row['rule_type'])) {
-            $this->helper->logMessage("Approval rule ".$row['name']." missing rule_type, row skipped", "warning");
-            return true;
-        } elseif (!in_array(trim($row['rule_type']), self::RULE_TYPES)) {
-            $this->helper->logMessage("Approval rule ".$row['name']." rule_type is invalid, row skipped", "warning");
-            return true;
-        }
-        if (empty($row['rule'])) {
-            $this->helper->logMessage("Approval rule ".$row['name']." missing rule, row skipped", "warning");
-            return true;
-        } elseif (!in_array(trim($row['rule']), ['>','<','>=','<='])) {
-            $this->helper->logMessage("Approval rule ".$row['name'].
-            " rule value must be one of: >,<,>= or<=, row skipped", "warning");
-            return true;
-        }
-        if (empty($row['amount_value'])) {
-            $this->helper->logMessage("Approval rule ".$row['name']." missing amount_value, row skipped", "warning");
-            return true;
-        }
-        if (empty($row['approval_from'])) {
-            $this->helper->logMessage("Approval rule ".$row['name']." missing approval_from, row skipped", "warning");
-            return true;
-        }
-        $row['approval_from'] = explode(",", $row['approval_from']);
-        if (!$this->validateRoles(
-            $row['approval_from'],
-            $this->companies->getCompanyByName($row['company_name'])->getId(),
-            'approval_from'
-        )) {
-            $this->helper->logMessage("Approval rule ".$row['name'].
-            " has invalid approval_from value, row skipped", "warning");
-            return true;
+
+        //not applicable if using graphql import
+        if (empty($row['conditions_serialized'])) {
+            if (empty($row['rule_type'])) {
+                $this->helper->logMessage("Approval rule ".$row['name']." missing rule_type, row skipped", "warning");
+                return true;
+            } elseif (!in_array(trim($row['rule_type']), self::RULE_TYPES)) {
+                $this->helper->
+                logMessage("Approval rule ".$row['name']." rule_type is invalid, row skipped", "warning");
+                return true;
+            }
+            if (empty($row['rule'])) {
+                $this->helper->logMessage("Approval rule ".$row['name']." missing rule, row skipped", "warning");
+                return true;
+            } elseif (!in_array(trim($row['rule']), ['>','<','>=','<='])) {
+                $this->helper->logMessage("Approval rule ".$row['name'].
+                " rule value must be one of: >,<,>= or<=, row skipped", "warning");
+                return true;
+            }
+            if (empty($row['amount_value'])) {
+                $this->helper->
+                logMessage("Approval rule ".$row['name']." missing amount_value, row skipped", "warning");
+                return true;
+            }
         }
         if (empty($row['description'])) {
             $row['description']='';
         }
-        //convert data row to usable values
-        $ruleData = $this->convertRow($row);
+        if (empty($row['is_active'])) {
+            $row['is_active']=true;
+        }
+        //convert data row to usable values if csv
+        if (empty($row['conditions_serialized'])) {
+            $ruleData = $this->convertRow($row);
+        } else {
+            $ruleData = $row;
+            $ruleData['company_id'] = $this->companies->getCompanyByName($row['company_name'])->getId();
+            $ruleData['apply_to_roles'] = $this->convertRoleNamesToIds($ruleData['company_id'], $row['apply_to_roles']);
+            $ruleData['approval_from'] = $this->convertRoleNamesToIds($ruleData['company_id'], $row['approval_from']);
+        }
         //get rule if exists to update
         $ruleSearch =  $this->searchCriteriaBuilder
         ->addFilter(RuleInterface::KEY_COMPANY_ID, $ruleData['company_id'], 'eq')
@@ -164,17 +187,22 @@ class ApprovalRules
             /** @var StructureInterface $teamStruct */
             $rule = current($ruleList->getItems());
         }
-            $rule->setName($ruleData['name']);
+     
+        $rule->setName($ruleData['name']);
         $rule->setDescription($ruleData['description']);
-        $this->setRuleApprovers($rule, $ruleData['approval_roles']);
-        if ($ruleData['applies_to_all'] === '1') {
+        $this->setRuleApprovers($rule, $ruleData['approval_from']);
+
+        if ($ruleData['applies_to_all'] === true) {
             $rule->setAppliesToAll(true);
         } else {
             $rule->setAppliesToAll(false);
             $rule->setAppliesToRoleIds($ruleData['apply_to_roles']);
         }
         $rule->setIsActive($ruleData['is_active']);
-        $rule->setConditionsSerialized($this->buildSerializedCondition([$ruleData['conditions']]));
+        if (empty($row['conditions_serialized'])) {
+            $row['conditions_serialized'] = $this->buildSerializedCondition([$ruleData['conditions']]);
+        }
+        $rule->setConditionsSerialized($row['conditions_serialized']);
         $rule->setCompanyId($ruleData['company_id']);
         $rule->setCreatedBy((int) $this->companies->getCompanyByName($ruleData['company_name'])->getSuperUserId());
         $rule->setAdminApprovalRequired($ruleData['requires_admin_approval']);
@@ -250,9 +278,9 @@ class ApprovalRules
         //convert app_to_roles to list of roles
         if ($row['apply_to_roles']=='all') {
             $row['apply_to_roles']=='';
-            $row['applies_to_all'] = 1;
+            $row['applies_to_all'] = true;
         } else {
-            $row['applies_to_all'] = 0;
+            $row['applies_to_all'] = false;
             $row['apply_to_roles'] = $this->convertRoleNamesToIds($row['company_id'], $row['apply_to_roles']);
         }
 
@@ -264,7 +292,7 @@ class ApprovalRules
         $row['conditions'] = ['attribute'=>$row['rule_type'],'operator'=>$row['rule'],
         'value'=>$row['amount_value'],'currency_code'=>$row['currency_code']];
         //convert approval_roles to list of roles
-        $row['approval_roles'] = $this->convertRoleNamesToIds($row['company_id'], $row['approval_from']);
+        $row['approval_from'] = $this->convertRoleNamesToIds($row['company_id'], $row['approval_from']);
         if (in_array("Company Administrator", $row['approval_from'])) {
             $row['requires_admin_approval']=true;
         } else {
@@ -289,14 +317,19 @@ class ApprovalRules
         $roleIds = [];
         //get roles for company
         $companyRoles = $this->roleManagement->getRolesByCompanyId($companyId);
-        foreach ($roleNames as $roleName) {
-            foreach ($companyRoles as $companyRole) {
-                if ($companyRole->getRoleName()==$roleName) {
-                    $roleIds[]=$companyRole->getId();
-                    break;
+        if (!empty($roleNames)) {
+            foreach ($roleNames as $roleName) {
+                foreach ($companyRoles as $companyRole) {
+                    if ($companyRole->getRoleName()==$roleName) {
+                        $roleIds[]=$companyRole->getId();
+                        break;
+                    }
                 }
             }
+        } else {
+            $roleIds = [];
         }
+        
         return $roleIds;
     }
 

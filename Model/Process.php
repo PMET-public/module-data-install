@@ -664,8 +664,21 @@ class Process
                  $b2bData['b2b_shared_catalog_categories.csv']['rows'],
                  $b2bData['b2b_shared_catalog_categories.csv']['header'],
                  $classes['sharedCatalogCategoriesInstall'],
-                 '',$this->settings,''
+                 '',
+                 $this->settings,
+                 ''
              );
+        }
+
+         //if approval rules are part of the structure (coming from graphql), process them now
+        if (!empty($b2bData['b2b_approval_rules.csv'])) {
+            $this->helper->logMessage("Loading B2B Approval Rules", "info");
+            $this->processRows(
+                $b2bData['b2b_approval_rules.csv']['rows'],
+                $b2bData['b2b_approval_rules.csv']['header'],
+                $classes['approvalRulesInstall'],
+                ''
+            );
         }
     }
     /**

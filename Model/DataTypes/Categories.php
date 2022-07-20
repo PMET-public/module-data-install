@@ -105,7 +105,7 @@ class Categories
             $this->helper->logMessage("A value for name is required in your categories file", "warning");
             return true;
         }
-        if (empty($row['is_active'])) {
+        if (empty($row['is_active']) && $row['is_active']!=0) {
             //for backwards compatibility
             if (!empty($row['active'])) {
                 $row['is_active'] = $row['active'];
@@ -113,10 +113,10 @@ class Categories
                 $row['is_active'] = 1;
             }
         }
-        if (empty($row['is_anchor'])) {
+        if (empty($row['is_anchor']) && $row['is_anchor']!=0) {
             $row['is_anchor'] = 1;
         }
-        if (empty($row['include_in_menu'])) {
+        if (empty($row['include_in_menu']) && $row['include_in_menu']!=0) {
             $row['include_in_menu'] = 1;
         }
 
@@ -132,9 +132,9 @@ class Categories
                 $data = [
                     'parent_id' => $parentCategory->getId(),
                     'name' => str_replace('\/', '/', $row['name']),
-                    'is_active' => $row['is_active'] ?? 1,
-                    'is_anchor' => $row['is_anchor'] ?? 1,
-                    'include_in_menu' => $row['include_in_menu'] ?? 1,
+                    'is_active' => $row['is_active'],
+                    'is_anchor' => $row['is_anchor'],
+                    'include_in_menu' => $row['include_in_menu'],
                     'url_key' => $row['url_key'] ?? '',
                     'store_id' => $storeViewId
                 ];

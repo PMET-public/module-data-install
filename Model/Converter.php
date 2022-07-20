@@ -310,6 +310,7 @@ class Converter
     public function matcherCustomergroup($matchValue)
     {
         //* use _customerGroup_name as token */
+        $replaceData = [];
         $search = $this->searchCriteriaBuilder
             ->addFilter(GroupInterface::CODE, $matchValue, 'eq')->create();
         $groupList = $this->groupRepository->getList($search)->getItems();

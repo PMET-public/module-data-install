@@ -356,14 +356,15 @@ class Process
     public function convertGraphQlJson(string $json)
     {
         //TODO: Validate json
-        try {
+        //try {
             //convert to array of objects. Remove the parent query name node
-            $fileData = current(json_decode($json)->data);
-        } catch (\Exception $e) {
-            $this->helper->logMessage("The JSON in your data file is invalid", "error");
-            return true;
-        }
-        
+            $currentKey=key(get_object_vars(json_decode($json)->data));
+            $fileData = json_decode($json)->data->$currentKey;
+        // } catch (\Exception $e) {
+        //     $this->helper->logMessage("The JSON in your data file may be invalid", "error");
+        //     return true;
+        // }
+        //$e=$g;
         $header=[];
         //if items exists it is a multi value file
         if (property_exists($fileData, 'items')) {

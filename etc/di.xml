@@ -32,7 +32,7 @@
         </arguments>
     </type>
     <!-- Plugin for webhook -->
-    <type name="Mageplaza\Webhook\Model\Config\Source\HookType">
+    <!-- <type name="Mageplaza\Webhook\Model\Config\Source\HookType">
           <plugin name="MagentoEse_DataInstall_Webhook_AddType" type="MagentoEse\DataInstall\Plugin\AddWebhookType" sortOrder="1" disabled="false" />
-    </type>
+    </type> -->
 </config>

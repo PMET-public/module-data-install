@@ -611,10 +611,10 @@ class ProductAttributes
     private function flattenOptions($row, $options)
     {
         //determine what type of swatch it is
-        $additionalData = json_decode($row['additional_data']);
         $optionArray = [];
         foreach ($options as $key => $value) {
-            if (!empty($additionalData)) {
+            if (!empty($row['additional_data'])) {
+                $additionalData = json_decode($row['additional_data']);
                 if ($value->swatch_value && $additionalData->swatch_input_type=='visual') {
                     $optionArray[] = $value->label."|".$value->swatch_value;
                 } elseif ($value->swatch_value && $additionalData && $additionalData->swatch_input_type=='text') {

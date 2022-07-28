@@ -4,7 +4,7 @@ namespace MagentoEse\DataInstall\Observer;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use MagentoEse\DataInstall\Helper\Helper;
-use Mageplaza\Webhook\Helper\Data as WebhookHelperData;
+//use Mageplaza\Webhook\Helper\Data as WebhookHelperData;
 
 class ProcessStart implements \Magento\Framework\Event\ObserverInterface
 {
@@ -16,16 +16,18 @@ class ProcessStart implements \Magento\Framework\Event\ObserverInterface
     protected $helper;
 
     /** @var WebhookHelperData */
-    protected $webhookHelper;
+    //protected $webhookHelper;
     
     /**
      * @param Helper $helper
      * @param WebhookHelperData $webhookHelper
      */
-    public function __construct(Helper $helper, WebhookHelperData $webhookHelper)
+    public function __construct(Helper $helper, 
+    //WebhookHelperData $webhookHelper
+    )
     {
         $this->helper = $helper;
-        $this->webhookHelper = $webhookHelper;
+        //$this->webhookHelper = $webhookHelper;
     }
 
     public function execute(Observer $observer)
@@ -40,6 +42,6 @@ class ProcessStart implements \Magento\Framework\Event\ObserverInterface
         $item = $observer;
         $item->setData('filesource', $itemData['filesource']);
         $item->setData('jobid', $itemData['jobid']);
-        $this->webhookHelper->send($item, $this->hookType);
+        ///$this->webhookHelper->send($item, $this->hookType);
     }
 }

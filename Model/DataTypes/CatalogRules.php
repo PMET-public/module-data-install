@@ -20,7 +20,7 @@ use MagentoEse\DataInstall\Helper\Helper;
 class CatalogRules
 {
 
-    const SIMPLE_ACTIONS = ['by_percent','by_fixed','to_percent','to_fixed'];
+    protected const SIMPLE_ACTIONS = ['by_percent','by_fixed','to_percent','to_fixed'];
 
     /** @var CatalogRuleRepositoryInterface */
     protected $ruleRepository;
@@ -56,7 +56,8 @@ class CatalogRules
     protected $helper;
 
     /**
-     * CatalogRules constructor.
+     * CatalogRules constructor
+     *
      * @param RuleInterfaceFactory $ruleInterfaceFactory
      * @param CatalogRuleRepositoryInterface $catalogRuleRepositoryInterface
      * @param GroupRepositoryInterface $groupRepositoryInterface
@@ -98,6 +99,8 @@ class CatalogRules
     //requires customer groups, product attributes, dynamic blocks
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool
@@ -234,7 +237,7 @@ class CatalogRules
     }
 
     /**
-     * validateSimpleAction
+     * ValidateSimpleAction
      *
      * @param  string $simpleAction
      * @return bool

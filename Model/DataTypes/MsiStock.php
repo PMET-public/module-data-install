@@ -63,7 +63,8 @@ class MsiStock
     protected $sourceInterfaceFactory;
 
     /**
-     * constructor.
+     * MsiStock constructor
+     *
      * @param Helper $helper
      * @param StockInterfaceFactory $stockInterfaceFactory
      * @param StockRepositoryInterface $stockRepositoryInterface
@@ -86,10 +87,10 @@ class MsiStock
         SalesChannelInterfaceFactory $salesChannelInterfaceFactory,
         StockSourceLinkInterfaceFactory $stockSourceLinkInterfaceFactory,
         StockSourceLinksSaveInterface $stockSourceLinksSaveInterface,
-        SourceRepositoryInterface $sourceRepository,
-        SourceInterfaceFactory $sourceInterfaceFactory,
         StockSourceLinksDeleteInterface $stockSourceLinksDeleteInterface,
-        GetStockSourceLinksInterface $getStockSourceLinksInterface
+        GetStockSourceLinksInterface $getStockSourceLinksInterface,
+        SourceRepositoryInterface $sourceRepository,
+        SourceInterfaceFactory $sourceInterfaceFactory
     ) {
         $this->helper = $helper;
         $this->stockInterfaceFactory = $stockInterfaceFactory;
@@ -106,6 +107,8 @@ class MsiStock
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool
@@ -169,8 +172,10 @@ class MsiStock
     }
 
     /**
-     * @param $sourceCodes
-     * @param $stockId
+     * Set stock source
+     *
+     * @param array $sourceCodes
+     * @param int $stockId
      * @throws CouldNotSaveException
      * @throws ValidationException
      * @throws CouldNotDeleteException

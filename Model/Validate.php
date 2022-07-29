@@ -11,9 +11,9 @@ class Validate
     protected $stores;
 
     /**
-     * __construct
+     * Validate constructor
      *
-     * @param  Stores $stores
+     * @param Stores $stores
      * @return void
      */
     public function __construct(Datatypes\Stores $stores)
@@ -22,9 +22,9 @@ class Validate
     }
 
     /**
-     * validateB2bData
+     * ValidateB2bData
      *
-     * @param  array $data
+     * @param array $data
      * @return void
      */
     public function validateB2bData($data)
@@ -47,6 +47,13 @@ class Validate
         return true;
     }
 
+    /**
+     * Validate file
+     *
+     * @param array $header
+     * @param array $rows
+     * @return boolean
+     */
     public function validateCsvFile($header, $rows)
     {
         //size of header array vs. size of each row $rows[0]
@@ -58,6 +65,12 @@ class Validate
         return true;
     }
 
+    /**
+     * Validate website code
+     *
+     * @param array $websiteCode
+     * @return boolean
+     */
     public function validateWebsiteCode($websiteCode)
     {
         if ($this->stores->getWebsiteId($websiteCode)) {
@@ -67,6 +80,12 @@ class Validate
         }
     }
 
+    /**
+     * Validate file
+     *
+     * @param string $storeCode
+     * @return boolean
+     */
     public function validateStoreCode($storeCode)
     {
         if ($this->stores->getStoreId($storeCode)) {
@@ -76,6 +95,12 @@ class Validate
         }
     }
 
+    /**
+     * Validate file
+     *
+     * @param string $storeViewCode
+     * @return boolean
+     */
     public function validateStoreViewCode($storeViewCode)
     {
         if ($this->stores->getViewId($storeViewCode)) {

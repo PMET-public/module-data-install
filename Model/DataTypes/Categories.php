@@ -55,7 +55,8 @@ class Categories
     protected $themeCollection;
 
     /**
-     * Categories constructor.
+     * Categories constructor
+     *
      * @param CategoryInterfaceFactory $categoryFactory
      * @param CategoryListInterface $categoryList
      * @param SearchCriteriaBuilder $searchCriteria
@@ -95,6 +96,8 @@ class Categories
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool
@@ -155,6 +158,8 @@ class Categories
     }
 
     /**
+     * Get additional data for category
+     *
      * @param array $row
      * @param Category $category
      * @return void
@@ -187,7 +192,9 @@ class Categories
     }
 
     /**
-     * @param $theme
+     * Get themeid by path
+     *
+     * @param string $theme
      * @return int|string
      */
     protected function getThemeId($theme)
@@ -203,6 +210,7 @@ class Categories
      * Get category name by path
      *
      * @param string $path
+     * @param string $storeViewCode
      * @return Node
      */
     protected function getCategoryByPath(string $path, $storeViewCode)
@@ -278,6 +286,8 @@ class Categories
     }
 
     /**
+     * Get block id by name
+     *
      * @param string $blockName
      * @return int
      */
@@ -289,6 +299,8 @@ class Categories
     }
 
     /**
+     * Set landing page for category
+     *
      * @param int $blockId
      * @param int $categoryId
      */

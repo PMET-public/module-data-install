@@ -7,17 +7,19 @@ namespace MagentoEse\DataInstall\Model;
 use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Exception\CouldNotDeleteException;
-use Magento\Framework\Exception\NoSuchEntityException;
 use MagentoEse\DataInstall\Api\Data\LoggerInterface;
 use MagentoEse\DataInstall\Api\Data\LoggerSearchResultInterfaceFactory;
+use MagentoEse\DataInstall\Api\Data\LoggerSearchResultInterface;
 use MagentoEse\DataInstall\Api\LoggerRepositoryInterface;
 use MagentoEse\DataInstall\Model\ResourceModel\Logger;
 use MagentoEse\DataInstall\Model\ResourceModel\Logger\CollectionFactory;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Exception\LocalizedException;
 
 class LoggerRepository implements LoggerRepositoryInterface
 {
 
-    const LOGGER_TABLE = 'magentoese_data_installer_log';
+    private const LOGGER_TABLE = 'magentoese_data_installer_log';
 
     /**
      * @var LoggerFactory
@@ -44,7 +46,8 @@ class LoggerRepository implements LoggerRepositoryInterface
     private $collectionProcessor;
 
     /**
-     * LoggerRepository constructor.
+     * LoggerRepository constructor
+     *
      * @param LoggerFactory $LoggerFactory
      * @param Logger $LoggerResource
      * @param CollectionFactory $LoggerCollectionFactory
@@ -66,9 +69,11 @@ class LoggerRepository implements LoggerRepositoryInterface
     }
 
     /**
+     * Get log by id
+     *
      * @param int $id
-     * @return \MagentoEse\DataInstall\Api\Data\LoggerInterface
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @return LoggerInterface
+     * @throws NoSuchEntityException
      */
     public function getById($id)
     {
@@ -82,9 +87,11 @@ class LoggerRepository implements LoggerRepositoryInterface
     }
 
     /**
+     * Get log by data pack
+     *
      * @param string $dataPack
-     * @return \MagentoEse\DataInstall\Api\Data\LoggerInterface
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @return LoggerInterface
+     * @throws NoSuchEntityException
      */
     public function getByDataPack($dataPack)
     {
@@ -99,9 +106,11 @@ class LoggerRepository implements LoggerRepositoryInterface
     }
 
     /**
+     * Get log by job id
+     *
      * @param string $jobId
-     * @return \MagentoEse\DataInstall\Api\Data\LoggerInterface
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @return LoggerInterface
+     * @throws NoSuchEntityException
      */
     public function getByJobId($jobId)
     {
@@ -116,9 +125,11 @@ class LoggerRepository implements LoggerRepositoryInterface
     }
 
     /**
-     * @param \MagentoEse\DataInstall\Api\Data\LoggerInterface $Logger
-     * @return \MagentoEse\DataInstall\Api\Data\LoggerInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * Save log entry
+     *
+     * @param LoggerInterface $Logger
+     * @return LoggerInterface
+     * @throws LocalizedException
      */
     public function save(LoggerInterface $Logger)
     {
@@ -127,9 +138,11 @@ class LoggerRepository implements LoggerRepositoryInterface
     }
 
     /**
-     * @param \MagentoEse\DataInstall\Api\Data\LoggerInterface $Logger
+     * Delete log entry
+     *
+     * @param LoggerInterface $Logger
      * @return bool true on success
-     * @throws \Magento\Framework\Exception\CouldNotDeleteException
+     * @throws CouldNotDeleteException
      */
     public function delete(LoggerInterface $Logger)
     {
@@ -145,9 +158,11 @@ class LoggerRepository implements LoggerRepositoryInterface
     }
 
     /**
-     * @param \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
-     * @return \MagentoEse\DataInstall\Api\Data\LoggerSearchResultInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * Get list of log records
+     *
+     * @param SearchCriteriaInterface $searchCriteria
+     * @return LoggerSearchResultInterface
+     * @throws LocalizedException
      */
     public function getList(SearchCriteriaInterface $searchCriteria)
     {

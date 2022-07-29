@@ -22,10 +22,14 @@ use Magento\Framework\Setup\SampleData\FixtureManager;
 use MagentoEse\DataInstall\Model\Conf;
 use Magento\Framework\Event\ManagerInterface as EventManager;
 use MagentoEse\DataInstall\Model\DataTypes\B2bGraphQl;
+use Magento\Framework\Filesystem\Driver\File;
+use Magento\Framework\Exception\CouldNotDeleteException;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 class Process
 {
-    const FIXTURE_DIRECTORY = 'data';
+    protected const FIXTURE_DIRECTORY = 'data';
 
     /** @var array */
     protected $settings;
@@ -61,15 +65,17 @@ class Process
      protected $b2bGraphQl;
 
     /**
-     * Process constructor.
+     * Process constructor
+     *
      * @param CopyMedia $copyMedia
      * @param DirectoryList $directoryList
-     * @param DriverInterface $driverInterface
+     * @param File $driverInterface
      * @param Helper $helper
      * @param InstallerInterfaceFactory $dataInstallerInterface
      * @param InstallerRepositoryInterface $dataInstallerRepository
      * @param SampleDataContext $sampleDataContext
      * @param Validate $validate
+     * @param Queue\ScheduleBulk $scheduleBulk
      * @param Conf $conf
      * @param DataTypes\Stores $stores
      * @param EventManager $eventManager
@@ -78,7 +84,7 @@ class Process
     public function __construct(
         CopyMedia $copyMedia,
         DirectoryList $directoryList,
-        \Magento\Framework\Filesystem\Driver\File $driverInterface,
+        File $driverInterface,
         Helper $helper,
         InstallerInterfaceFactory $dataInstallerInterface,
         InstallerRepositoryInterface $dataInstallerRepository,
@@ -106,7 +112,9 @@ class Process
         $this->b2bGraphQl = $b2bGraphQl;
     }
     /**
-     * @param $jobSettings
+     * Load files
+     *
+     * @param array $jobSettings
      * @return bool
      * @throws LocalizedException
      * @throws FileSystemException
@@ -242,7 +250,9 @@ class Process
     }
 
     /**
-     * @param $jobSettings
+     * Set defaults
+     *
+     * @param arrray $jobSettings
      * @return mixed
      */
     private function setDefaults(array $jobSettings)
@@ -269,7 +279,9 @@ class Process
     }
 
     /**
-     * @param $file
+     * Get process instructions
+     *
+     * @param string $file
      * @return array|false
      */
     private function getProcessInstructions($file)
@@ -311,9 +323,12 @@ class Process
     }
 
     /**
+     * Process rows
+     *
      * @param array $rows
      * @param array $header
      * @param object $process
+     * @param string $host
      */
     private function processRows(array $rows, array $header, object $process, $host): void
     {
@@ -328,8 +343,11 @@ class Process
     }
 
     /**
+     * Process json
+     *
      * @param string $fileContent
      * @param object $process
+     * @param string $host
      */
     private function processJson(string $fileContent, object $process, $host): void
     {
@@ -337,10 +355,13 @@ class Process
     }
 
     /**
+     * Process by file
+     *
      * @param array $rows
      * @param array $header
      * @param object $process
      * @param string $modulePath
+     * @param string $host
      */
     private function processFile(array $rows, array $header, object $process, string $modulePath, $host): void
     {
@@ -348,23 +369,23 @@ class Process
     }
 
      /**
+      * Converts result of a GraphQl query into format that can be used by processFile
+      *
       * @param string $json
       * @return array
-      * Converts result of a GraphQl query into format that can be used by processFile
       */
-    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh  
+    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh,Magento2.Annotation.MethodArguments.NoCommentBlock
     public function convertGraphQlJson(string $json)
     {
         //TODO: Validate json
-        //try {
+        try {
             //convert to array of objects. Remove the parent query name node
             $currentKey=key(get_object_vars(json_decode($json)->data));
             $fileData = json_decode($json)->data->$currentKey;
-        // } catch (\Exception $e) {
-        //     $this->helper->logMessage("The JSON in your data file may be invalid", "error");
-        //     return true;
-        // }
-        //$e=$g;
+        } catch (\Exception $e) {
+            $this->helper->logMessage("The JSON in your data file may be invalid", "error");
+            return true;
+        }
         $header=[];
         //if items exists it is a multi value file
         if (property_exists($fileData, 'items')) {
@@ -410,7 +431,9 @@ class Process
     }
 
     /**
-     * @param $attributeOptions
+     * Get options for attribute
+     *
+     * @param array $attributeOptions
      * @return string
      */
     private function getAttributeOptions($attributeOptions)
@@ -422,6 +445,14 @@ class Process
         return trim($attributeString);
     }
 
+    /**
+     * Collect redos (deprecated)
+     *
+     * @param string $success
+     * @param array $row
+     * @param array $header
+     * @param string $process
+     */
     private function collectRedos($success, $row, $header, $process)
     {
         if (!$success) {
@@ -434,7 +465,7 @@ class Process
     }
 
     /**
-     *
+     * Process redos (deprecated)
      */
     private function processRedos()
     {
@@ -458,7 +489,9 @@ class Process
     }
 
     /**
-     * @param $className
+     * Get name of class from string
+     *
+     * @param string $className
      * @return false|int|string
      */
     private function getClassName($className)
@@ -471,6 +504,8 @@ class Process
     }
 
     /**
+     * Is it a recurring data function (deprecated)
+     *
      * @return bool
      */
     private function isRecurring()
@@ -486,6 +521,8 @@ class Process
     }
 
     /**
+     * Get Configuration
+     *
      * @param string $filePath
      * @param string $fixtureDirectory
      * @return array
@@ -534,6 +571,8 @@ class Process
     }
     
     /**
+     * Process B2B files
+     *
      * @param string $filePath
      * @param string $fixtureDirectory
      * @param mixed $classes
@@ -570,6 +609,8 @@ class Process
     }
     
     /**
+     * Process all b2b data, make sure cross file data matches
+     *
      * @param array $b2bData
      * @param array $classes
      * @throws \Exception
@@ -683,12 +724,13 @@ class Process
         }
     }
     /**
-     * @param $companies
-     * @param $customers
-     * @param $salesReps
+     * Copy data that may be needed from one array into another
+     *
+     * @param array $companies
+     * @param array $customers
+     * @param array $salesReps
      * @return array
      */
-    //copy data that may be needed from one array into another
     private function mergeCompanyData($companies, $customers, $salesReps)
     {
         $revisedCompany = [];
@@ -716,7 +758,9 @@ class Process
     }
 
     /**
-     * @param $rowData
+     * Build array with B2B data
+     *
+     * @param array $rowData
      * @return array
      */
     private function buildB2bDataArrays($rowData)
@@ -733,10 +777,12 @@ class Process
     }
 
     /**
-     * @param $array
-     * @param $keyToFind
-     * @param $valueToFind
-     * @param $keyToReturn
+     * Match by key/value
+     *
+     * @param array $array
+     * @param string $keyToFind
+     * @param string $valueToFind
+     * @param string $keyToReturn
      * @return array
      */
     private function matchKeyValue($array, $keyToFind, $valueToFind, $keyToReturn)
@@ -749,6 +795,8 @@ class Process
     }
 
     /**
+     * Get calling class
+     *
      * @return mixed
      */
     private function getCallingClass()
@@ -771,11 +819,13 @@ class Process
     }
 
     /**
-     * @param $moduleName
+     * Register module as installed
+     *
+     * @param string $moduleName
      * @return int
-     * @throws \Magento\Framework\Exception\CouldNotDeleteException
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws CouldNotDeleteException
+     * @throws CouldNotSaveException
+     * @throws NoSuchEntityException
      */
     private function registerModule($moduleName)
     {
@@ -792,9 +842,11 @@ class Process
     }
 
     /**
-     * @param $moduleName
+     * Is module installed
+     *
+     * @param string $moduleName
      * @return string
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     private function isModuleInstalled($moduleName)
     {
@@ -804,9 +856,11 @@ class Process
     }
 
     /**
-     * @param $moduleName
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * Set module as installed
+     *
+     * @param string $moduleName
+     * @throws CouldNotSaveException
+     * @throws NoSuchEntityException
      */
     private function setModuleInstalled($moduleName)
     {
@@ -817,7 +871,9 @@ class Process
     }
 
     /**
-     * @param $fileLocation
+     * Get data path for file
+     *
+     * @param string $fileLocation
      * @return string
      * @throws LocalizedException
      */
@@ -839,6 +895,8 @@ class Process
     }
 
     /**
+     * Is it called from CLI
+     *
      * @return bool
      */
     public function isCli()

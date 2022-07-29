@@ -9,6 +9,8 @@ use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;
 class UploadButton implements ButtonProviderInterface
 {
     /**
+     * Get Button Data
+     *
      * @return array
      */
     public function getButtonData()

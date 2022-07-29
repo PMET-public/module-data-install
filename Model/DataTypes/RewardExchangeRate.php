@@ -30,13 +30,14 @@ class RewardExchangeRate
     protected $rateResourceModel;
 
     /**
-     * RewardExchangeRate constructor.
+     * RewardExchangeRate constructor
+     *
      * @param CustomerGroups $customerGroups
      * @param Stores $stores
      * @param Helper $helper
      * @param RateModelFactory $rateModel
      * @param RateResourceModel $rateResourceModel
-     * @param CollectionFactory $collectionFactory\
+     * @param CollectionFactory $collectionFactory
      */
     public function __construct(
         CustomerGroups $customerGroups,
@@ -55,6 +56,8 @@ class RewardExchangeRate
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool

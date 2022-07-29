@@ -41,10 +41,14 @@ class ScheduleBulk
      */
     private $jsonHelper;
 
+    /**
+     * @var int
+     */
     private $bulkSize;
 
     /**
-     * ScheduleBulk constructor.
+     * ScheduleBulk constructor
+     *
      * @param BulkManagementInterface $bulkManagement
      * @param OperationInterfaceFactory $operationFactory
      * @param IdentityGeneratorInterface $identityService

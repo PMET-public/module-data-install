@@ -44,7 +44,8 @@ class Upsells
     protected $helper;
 
     /**
-     * Upsells constructor.
+     * Upsells constructor
+     *
      * @param SegmentCollection $segmentCollection
      * @param RuleFactory $ruleFactory
      * @param Converter $converter
@@ -75,6 +76,8 @@ class Upsells
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool
@@ -141,6 +144,11 @@ class Upsells
         return true;
     }
 
+    /**
+     * Get Customer Segment Ids
+     *
+     * @param string $segmentNames
+     */
     private function getCustomerSegmentIds($segmentNames)
     {
         $segmentIds = [];

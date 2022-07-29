@@ -61,7 +61,10 @@ class Blocks
     }
 
     /**
+     * Install
+     *
      * @param array $row
+     * @param array $settings
      * @return bool
      * @throws LocalizedException
      */

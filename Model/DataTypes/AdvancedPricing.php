@@ -11,10 +11,10 @@ use MagentoEse\DataInstall\Helper\Helper;
 class AdvancedPricing
 {
     /** @var string  */
-    const DEFAULT_WEBSITE = 'All Websites [USD]';
+    protected const DEFAULT_WEBSITE = 'All Websites [USD]';
 
     /** @var string  */
-    const DEFAULT_CUSTOMER_GROUP = 'ALL GROUPS';
+    protected const DEFAULT_CUSTOMER_GROUP = 'ALL GROUPS';
 
     /** @var Helper */
     protected $helper;
@@ -23,7 +23,8 @@ class AdvancedPricing
     protected $importer;
 
     /**
-     * AdvancedPricing constructor.
+     * AdvancedPricing constructor
+     *
      * @param Helper $helper
      * @param Importer $importer
      */
@@ -36,6 +37,8 @@ class AdvancedPricing
     }
 
     /**
+     * Install
+     *
      * @param array $rows
      * @param array $header
      * @param string $modulePath
@@ -73,6 +76,8 @@ class AdvancedPricing
     }
 
      /**
+      * Replace website codes with ids
+      *
       * @param array $products
       * @param array $settings
       * @return array
@@ -99,9 +104,10 @@ class AdvancedPricing
     }
 
     /**
-     * @param $productsArray
-     * @param $imgDir
-     * @param $productValidationStrategy
+     * Call Importer
+     *
+     * @param array $productsArray
+     * @param string $productValidationStrategy
      */
     private function import($productsArray, $productValidationStrategy)
     {

@@ -21,7 +21,6 @@ use MagentoEse\DataInstall\Helper\Helper;
 class SharedCatalogCategories
 {
 
-    //TODO: Set Default Catalog
     /** @var SharedCatalogRepositoryInterface */
     protected $sharedCatalogRepository;
 
@@ -53,7 +52,8 @@ class SharedCatalogCategories
     protected $helper;
 
     /**
-     * SharedCatalogCategories constructor.
+     * SharedCatalogCategories constructor
+     *
      * @param SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param CategoryManagementInterface $categoryManagementInterface
@@ -90,6 +90,8 @@ class SharedCatalogCategories
     }
 
     /**
+     * Install
+     *
      * @param array $rows
      * @param array $header
      * @param string $modulePath
@@ -185,7 +187,9 @@ class SharedCatalogCategories
     }
 
     /**
-     * @param $categoryArray
+     * Get Category ids from array of categories
+     *
+     * @param array $categoryArray
      * @return array
      */
     private function getCategoryIds($categoryArray)
@@ -198,7 +202,9 @@ class SharedCatalogCategories
     }
 
     /**
-     * @param $sharedCatalogName
+     * Get Shared Catalog by name
+     *
+     * @param string $sharedCatalogName
      * @return SharedCatalogInterface
      * @throws LocalizedException
      */
@@ -215,8 +221,10 @@ class SharedCatalogCategories
     }
 
     /**
-     * @param $categories
-     * @param $settings
+     * Get categories based on path
+     *
+     * @param array $categories
+     * @param array $settings
      * @return array
      * @throws LocalizedException
      */
@@ -235,7 +243,9 @@ class SharedCatalogCategories
     }
 
     /**
-     * @param $settings
+     * Get all categories for store
+     *
+     * @param array $settings
      * @return array
      */
     private function getAllCategories($settings)

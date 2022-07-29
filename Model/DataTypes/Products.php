@@ -21,8 +21,8 @@ class Products
     /** @var Helper */
     protected $helper;
 
-    const DEFAULT_IMAGE_PATH = '/media/catalog/product';
-    const APP_DEFAULT_IMAGE_PATH = 'var';
+    protected const DEFAULT_IMAGE_PATH = '/media/catalog/product';
+    protected const APP_DEFAULT_IMAGE_PATH = 'var';
     //TODO: flexibility for other than default category
 
     /** @var Stores */
@@ -47,7 +47,8 @@ class Products
     protected $fileSystem;
 
     /**
-     * Products constructor.
+     * Products constructor
+     *
      * @param Helper $helper
      * @param Stores $stores
      * @param ProductRepositoryInterface $productRepository
@@ -77,6 +78,8 @@ class Products
     }
 
     /**
+     * Install
+     *
      * @param array $rows
      * @param array $header
      * @param string $modulePath
@@ -152,7 +155,9 @@ class Products
     }
 
     /**
-     * @param $restrictProducts
+     * Restrict products from other stores
+     *
+     * @param array $restrictProducts
      * @throws \Magento\Framework\Exception\CouldNotSaveException
      * @throws \Magento\Framework\Exception\InputException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
@@ -169,9 +174,11 @@ class Products
     }
 
     /**
-     * @param $productsArray
-     * @param $imgDir
-     * @param $productValidationStrategy
+     * Call importer
+     *
+     * @param array $productsArray
+     * @param string $imgDir
+     * @param string $productValidationStrategy
      */
     private function import($productsArray, $imgDir, $productValidationStrategy)
     {
@@ -202,7 +209,10 @@ class Products
     }
 
     /**
+     * Restrict products from current store
+     *
      * @param array $products
+     * @param string $storeViewCode
      * @return array
      */
     private function restrictExistingProducts(array $products, $storeViewCode)
@@ -220,8 +230,10 @@ class Products
     }
 
     /**
+     * Restrict new products from existing stores
+     *
      * @param array $newProducts
-     * @param $storeViewCode
+     * @param string $storeViewCode
      * @return array
      */
     private function restrictNewProductsFromOtherStoreViews(array $newProducts, $storeViewCode)
@@ -249,6 +261,8 @@ class Products
     }
 
     /**
+     * Get new skus that are unique
+     *
      * @param array $newProducts
      * @param array $allProductSkus
      * @return array
@@ -260,7 +274,9 @@ class Products
     }
 
     /**
-     * @param $products
+     * Get skus from products
+     *
+     * @param array $products
      * @return array
      */
     private function productDataToSkus($products)
@@ -273,6 +289,8 @@ class Products
     }
 
     /**
+     * Get all products
+     *
      * @return ProductInterface[]
      */
     private function getAllProducts()
@@ -286,6 +304,8 @@ class Products
     }
 
     /**
+     * Get all visible products
+     *
      * @return ProductInterface[]
      */
     private function getVisibleProducts()
@@ -299,6 +319,8 @@ class Products
     }
 
     /**
+     * Get visible products skus
+     *
      * @return array
      */
     private function getVisibleProductSkus()
@@ -313,6 +335,8 @@ class Products
     }
 
     /**
+     * Add codes to import file
+     *
      * @param array $products
      * @param array $settings
      * @return array
@@ -335,6 +359,8 @@ class Products
     }
 
     /**
+     * Replace site codes with ids
+     *
      * @param array $products
      * @param array $settings
      * @return array

@@ -43,7 +43,8 @@ class CompanyRoles
     protected $helper;
 
     /**
-     * CompanyRoles constructor.
+     * CompanyRoles constructor
+     *
      * @param RoleFactory $roleFactory
      * @param RoleRepositoryInterface $roleRepositoryInterface
      * @param PermissionFactory $permissionFactory
@@ -68,8 +69,10 @@ class CompanyRoles
     }
 
     /**
-     * @param $rows
-     * @param $header
+     * Install
+     *
+     * @param array $rows
+     * @param array $header
      * @return bool
      */
     public function install($rows, $header)
@@ -124,8 +127,10 @@ class CompanyRoles
     }
 
     /**
-     * @param $companyName
-     * @param $companyRoles
+     * Create company role
+     *
+     * @param string $companyName
+     * @param array $companyRoles
      * @throws \Magento\Framework\Exception\CouldNotSaveException
      * @throws \Magento\Framework\Exception\InputException
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -142,7 +147,9 @@ class CompanyRoles
     }
 
     /**
-     * @param $companyName
+     * Get company id by name
+     *
+     * @param string $companyName
      * @return false|int|null
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -164,9 +171,11 @@ class CompanyRoles
     }
 
     /**
-     * @param $companyId
-     * @param $roleName
-     * @param $rolePermissions
+     * Save Company Role
+     *
+     * @param int $companyId
+     * @param string $roleName
+     * @param array $rolePermissions
      * @throws \Magento\Framework\Exception\CouldNotSaveException
      * @throws \Magento\Framework\Exception\InputException
      * @throws \Magento\Framework\Exception\LocalizedException

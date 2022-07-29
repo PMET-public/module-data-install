@@ -9,13 +9,16 @@ use MagentoEse\DataInstall\Api\Data\LoggerInterface;
 
 class Logger extends AbstractExtensibleModel implements LoggerInterface
 {
-    //phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+    /**
+     * Logger constructor
+     */
+    //phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore,Magento2.Annotation.MethodArguments.NoCommentBlock
     protected function _construct()
     {
         $this->_init(ResourceModel\Logger::class);
     }
     /**
-     * @inheritDoc
+     * Get Id
      */
     public function getId()
     {
@@ -23,7 +26,9 @@ class Logger extends AbstractExtensibleModel implements LoggerInterface
     }
 
     /**
-     * @inheritDoc
+     * Set id
+     *
+     * @param int $id
      */
     public function setId($id)
     {
@@ -31,7 +36,7 @@ class Logger extends AbstractExtensibleModel implements LoggerInterface
     }
 
     /**
-     * @inheritDoc
+     * Get Job Id
      */
     public function getJobId()
     {
@@ -39,7 +44,9 @@ class Logger extends AbstractExtensibleModel implements LoggerInterface
     }
 
     /**
-     * @inheritDoc
+     * Set job id
+     *
+     * @param int $jobId
      */
     public function setJobId($jobId)
     {
@@ -47,7 +54,7 @@ class Logger extends AbstractExtensibleModel implements LoggerInterface
     }
 
     /**
-     * @inheritDoc
+     * Get messate
      */
     public function getMessage()
     {
@@ -55,7 +62,9 @@ class Logger extends AbstractExtensibleModel implements LoggerInterface
     }
 
     /**
-     * @inheritDoc
+     * Set message
+     *
+     * @param string $moduleName
      */
     public function setMessage($moduleName)
     {
@@ -63,7 +72,7 @@ class Logger extends AbstractExtensibleModel implements LoggerInterface
     }
 
     /**
-     * @inheritDoc
+     * Get message level
      */
     public function getLevel()
     {
@@ -71,7 +80,9 @@ class Logger extends AbstractExtensibleModel implements LoggerInterface
     }
 
     /**
-     * @inheritDoc
+     * Set message level
+     *
+     * @param string $level
      */
     public function setLevel($level)
     {
@@ -79,7 +90,7 @@ class Logger extends AbstractExtensibleModel implements LoggerInterface
     }
 
     /**
-     * @inheritDoc
+     * Get data pack
      */
     public function getDataPack()
     {
@@ -87,15 +98,18 @@ class Logger extends AbstractExtensibleModel implements LoggerInterface
     }
 
     /**
-     * @inheritDoc
+     * Set data pack
+     *
+     * @param string $dataPack
      */
+
     public function setDataPack($dataPack)
     {
         return $this->setData(self::DATAPACK, $dataPack);
     }
 
     /**
-     * @inheritDoc
+     * Get Add Date
      */
     public function getAddDate()
     {

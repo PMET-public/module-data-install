@@ -22,6 +22,7 @@ use Magento\Company\Api\Data\StructureInterfaceFactory;
  use Magento\Framework\Exception\NoSuchEntityException;
  use MagentoEse\DataInstall\Helper\Helper;
  use Magento\Company\Api\Data\StructureInterface;
+use Magento\CompanyCredit\Model\CreditLimitRepository;
 
 class Companies
 {
@@ -72,7 +73,8 @@ class Companies
     protected $helper;
 
     /**
-     * Companies constructor.
+     * Companies constructor
+     *
      * @param CompanyCustomer $companyCustomer
      * @param CustomerRepositoryInterface $customer
      * @param Customer $customerResource
@@ -121,6 +123,8 @@ class Companies
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool
@@ -272,8 +276,10 @@ class Companies
         return true;
     }
     /**
-     * @param $entityId
-     * @param $entityType
+     * Get company structure
+     *
+     * @param int $entityId
+     * @param string $entityType
      * @return \Magento\Company\Api\Data\StructureInterface|mixed
      */
     private function getStructureByEntity($entityId, $entityType)
@@ -286,8 +292,10 @@ class Companies
     }
 
     /**
-     * @param $newCompany
-     * @param $companyCustomer
+     * Add customer to company
+     *
+     * @param Company $newCompany
+     * @param CompanyCustomer $companyCustomer
      * @throws \Magento\Framework\Exception\CouldNotSaveException
      * @throws \Magento\Framework\Exception\InputException
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -307,8 +315,10 @@ class Companies
     }
 
     /**
-     * @param $customerId
-     * @param $parentId
+     * Add customer to company structure
+     *
+     * @param int $customerId
+     * @param int $parentId
      * @throws \Magento\Framework\Exception\CouldNotSaveException
      */
     private function addToTree($customerId, $parentId)
@@ -324,7 +334,9 @@ class Companies
     }
 
     /**
-     * @param $companyName
+     * Get company by name
+     *
+     * @param string $companyName
      * @return CompanyInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */

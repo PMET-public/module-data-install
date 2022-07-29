@@ -1,4 +1,6 @@
 <?php
+///function deprecated
+//phpcs:disable
 /**
  * Copyright © Adobe. All rights reserved.
  */

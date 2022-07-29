@@ -49,7 +49,8 @@ class CompanyUserRoles
     protected $stores;
 
     /**
-     * CompanyUserRoles constructor.
+     * CompanyUserRoles constructor
+     *
      * @param Helper $helper
      * @param RoleFactory $roleFactory
      * @param RoleRepositoryInterface $roleRepositoryInterface
@@ -83,8 +84,10 @@ class CompanyUserRoles
     }
 
     /**
-     * @param $row
-     * @param $settings
+     * Install
+     *
+     * @param array $row
+     * @param array $settings
      * @return bool
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
@@ -121,8 +124,10 @@ class CompanyUserRoles
     }
 
     /**
-     * @param $companyName
-     * @param $role
+     * Get company role by name
+     *
+     * @param string $companyName
+     * @param string $role
      * @return RoleInterface
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -141,7 +146,9 @@ class CompanyUserRoles
     }
 
     /**
-     * @param $companyName
+     * Get company id by name
+     *
+     * @param string $companyName
      * @return false|int|null
      * @throws \Magento\Framework\Exception\LocalizedException
      */
@@ -163,9 +170,11 @@ class CompanyUserRoles
     }
 
     /**
-     * @param $companyId
-     * @param $roleName
-     * @param $rolePermissions
+     * Set company role
+     *
+     * @param id $companyId
+     * @param string $roleName
+     * @param array $rolePermissions
      * @throws \Magento\Framework\Exception\CouldNotSaveException
      * @throws \Magento\Framework\Exception\InputException
      * @throws \Magento\Framework\Exception\NoSuchEntityException

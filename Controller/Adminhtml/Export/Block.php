@@ -25,7 +25,7 @@ class Block extends Action implements HttpPostActionInterface
      *
      * @see _isAllowed()
      */
-    const ADMIN_RESOURCE = 'Magento_Cms::block';
+    public const ADMIN_RESOURCE = 'Magento_Cms::block';
 
     /** @var Filter  */
     protected $filter;
@@ -50,6 +50,7 @@ class Block extends Action implements HttpPostActionInterface
 
     /**
      * Block constructor.
+     *
      * @param Context $context
      * @param Filter $filter
      * @param CollectionFactory $collectionFactory
@@ -74,6 +75,8 @@ class Block extends Action implements HttpPostActionInterface
     }
 
      /**
+      * Execute
+      *
       * @return ResponseInterface|ResultInterface
       * @throws FileSystemException
       * @throws LocalizedException
@@ -109,6 +112,8 @@ class Block extends Action implements HttpPostActionInterface
     }
 
     /**
+     * Generate Data
+     *
      * @param AbstractDb $collection
      * @return array
      */

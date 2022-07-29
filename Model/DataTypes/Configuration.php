@@ -37,7 +37,8 @@ class Configuration
     protected $encryptor;
 
     /**
-     * Configuration constructor.
+     * Configuration constructor
+     *
      * @param Helper $helper
      * @param ResourceConfig $resourceConfig
      * @param Stores $stores
@@ -65,6 +66,8 @@ class Configuration
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool
@@ -96,6 +99,8 @@ class Configuration
     }
 
     /**
+     * Install Json
+     *
      * @param string $json
      * @param array $settings
      * @return bool
@@ -120,7 +125,9 @@ class Configuration
     }
 
     /**
-     * @param $item
+     * Get confibg by value and path
+     *
+     * @param object $item
      * @param string $key
      * @param string $path
      */
@@ -154,10 +161,12 @@ class Configuration
     }
 
     /**
+     * Save config
+     *
      * @param string $path
      * @param string $value
      * @param string $scope
-     * @param $scopeId
+     * @param int $scopeId
      */
     public function saveConfig(string $path, string $value, string $scope, $scopeId)
     {
@@ -173,6 +182,8 @@ class Configuration
     }
 
     /**
+     * Get config
+     *
      * @param string $path
      * @param string $scopeType
      * @param string $scopeCode
@@ -184,6 +195,8 @@ class Configuration
     }
 
     /**
+     * Set theme
+     *
      * @param string $themePath
      * @param string $storeCode
      */
@@ -197,6 +210,8 @@ class Configuration
     }
 
     /**
+     * Encrypt value
+     *
      * @param string $value
      * @return string
      */

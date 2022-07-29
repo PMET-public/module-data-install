@@ -6,6 +6,7 @@ namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Exception;
 use Magento\User\Api\Data\UserInterfaceFactory;
+use Magento\User\Api\Data\UserInterface;
 use Magento\Authorization\Model\RoleFactory;
 use Magento\Authorization\Model\ResourceModel\Role\CollectionFactory as RoleCollection;
 use Magento\Authorization\Model\Acl\Role\Group as RoleGroup;
@@ -31,7 +32,8 @@ class AdminUsers
     protected $helper;
 
     /**
-     * AdminUsers constructor.
+     * AdminUsers constructor
+     *
      * @param Helper $helper
      * @param UserInterfaceFactory $userFactory
      * @param RoleFactory $roleFactory
@@ -53,6 +55,8 @@ class AdminUsers
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool
@@ -91,8 +95,10 @@ class AdminUsers
     }
 
     /**
-     * @param $user
-     * @param $row
+     * Add user to admin role
+     *
+     * @param UserInterface $user
+     * @param array $row
      * @throws \Exception
      */
     private function addUserToRole($user, $row)
@@ -130,6 +136,8 @@ class AdminUsers
     }
 
     /**
+     * Create Sales Rep Role
+     *
      * @return \Magento\Authorization\Model\Role
      */
     private function createSalesRepRole()

@@ -40,7 +40,8 @@ class RequisitionLists
     protected $stores;
 
     /**
-     * RequisitionLists constructor.
+     * RequisitionLists constructor
+     *
      * @param Helper $helper
      * @param RequisitionListInterfaceFactory $requisitionListFactory
      * @param RequisitionListRepositoryInterface $requisitionListRepository
@@ -68,6 +69,8 @@ class RequisitionLists
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool
@@ -137,8 +140,10 @@ class RequisitionLists
     }
 
     /**
-     * @param $listName
-     * @param $customerId
+     * Get list by name
+     *
+     * @param string $listName
+     * @param int $customerId
      * @return ExtensibleDataInterface
      */
     private function getRequisitionListByName($listName, $customerId)

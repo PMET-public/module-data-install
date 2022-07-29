@@ -63,6 +63,8 @@ class Widgets
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool

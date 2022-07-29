@@ -39,7 +39,8 @@ class MsiSource
     protected $sourceInterfaceFactory;
 
     /**
-     * constructor.
+     * MsiSource constructor
+     *
      * @param Helper $helper
      * @param StockInterfaceFactory $stockInterfaceFactory
      * @param StockRepositoryInterface $stockRepositoryInterface
@@ -67,6 +68,8 @@ class MsiSource
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool

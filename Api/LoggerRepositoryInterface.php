@@ -8,6 +8,8 @@ namespace MagentoEse\DataInstall\Api;
 interface LoggerRepositoryInterface
 {
     /**
+     * Get Log By Id
+     *
      * @param int $id
      * @return \MagentoEse\DataInstall\Api\Data\LoggerInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
@@ -15,6 +17,8 @@ interface LoggerRepositoryInterface
     public function getById($id);
 
     /**
+     * Get Log By Job Id
+     *
      * @param string $jobId
      * @return \MagentoEse\DataInstall\Api\Data\LoggerInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
@@ -22,6 +26,8 @@ interface LoggerRepositoryInterface
     public function getByJobId($jobId);
 
      /**
+      * Get Log by Data Pack Name
+      *
       * @param string $dataPack
       * @return \MagentoEse\DataInstall\Api\Data\LoggerInterface
       * @throws \Magento\Framework\Exception\NoSuchEntityException
@@ -29,6 +35,8 @@ interface LoggerRepositoryInterface
     public function getByDataPack($dataPack);
 
     /**
+     * Save Log entry
+     *
      * @param \MagentoEse\DataInstall\Api\Data\LoggerInterface $logger
      * @return \MagentoEse\DataInstall\Api\Data\LoggerInterface
      * @throws \Magento\Framework\Exception\CouldNotSaveException
@@ -36,6 +44,8 @@ interface LoggerRepositoryInterface
     public function save(\MagentoEse\DataInstall\Api\Data\LoggerInterface $logger);
 
     /**
+     * Delete Log Entry
+     *
      * @param \MagentoEse\DataInstall\Api\Data\LoggerInterface $logger
      * @return bool true on success
      * @throws \Magento\Framework\Exception\CouldNotDeleteException
@@ -43,6 +53,8 @@ interface LoggerRepositoryInterface
     public function delete(\MagentoEse\DataInstall\Api\Data\LoggerInterface $logger);
 
     /**
+     * Get list of Log Entries
+     *
      * @param \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
      * @return \MagentoEse\DataInstall\Api\Data\LoggerSearchResultInterface
      * @throws \Magento\Framework\Exception\LocalizedException

@@ -58,7 +58,8 @@ class Pages
     protected $helper;
 
     /**
-     * Pages constructor.
+     * Pages constructor
+     *
      * @param SampleDataContext $sampleDataContext
      * @param PageInterfaceFactory $pageInterfaceFactory
      * @param Converter $converter
@@ -96,11 +97,13 @@ class Pages
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @return bool
      * @throws LocalizedException
      */
-    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh
+    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh,Magento2.Annotation.MethodArguments.NoCommentBlock
     public function install(array $row, array $settings)
     {
         //TODO: Set default layout of a page cms-full-width *check if necessary
@@ -197,6 +200,8 @@ class Pages
     }
 
     /**
+     * Remove rewrite for store
+     *
      * @param string $identifier
      * @param array $storeId
      * @throws Exception
@@ -211,6 +216,8 @@ class Pages
     }
 
     /**
+     * Get store ids from codes
+     *
      * @param string $storeCodes
      * @return array
      */
@@ -236,6 +243,8 @@ class Pages
     }
 
     /**
+     * Get all store ids
+     *
      * @return array
      */
     private function getAllStoreIds()

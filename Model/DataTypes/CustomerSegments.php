@@ -47,6 +47,19 @@ class CustomerSegments
      /** @var State */
      protected $appState;
 
+    /**
+     * CustomerSegment constructor
+     *
+     * @param Helper $helper
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param  SegmentFactory $customerSegment
+     * @param SegmentResourceModel $segmentResourceModel
+     * @param  Converter $converter
+     * @param Stores $stores
+     * @param  Collection $collection
+     * @param SegmentMatchPublisher $segmentMatchPublisher
+     * @param State $appState
+     */
     public function __construct(
         Helper $helper,
         SearchCriteriaBuilder $searchCriteriaBuilder,
@@ -70,6 +83,8 @@ class CustomerSegments
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool

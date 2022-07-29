@@ -15,7 +15,7 @@ use MagentoEse\DataInstall\Helper\Helper;
 
 class ApprovalRules
 {
-    const RULE_TYPES = ['grand_total', 'shipping_incl_tax', 'number_of_skus'];
+    protected const RULE_TYPES = ['grand_total', 'shipping_incl_tax', 'number_of_skus'];
 
     /** @var RuleInterfaceFactory */
     protected $ruleFactory;
@@ -45,7 +45,8 @@ class ApprovalRules
     protected $helper;
 
     /**
-     * ApprovalRules constructor.
+     * ApprovalRules constructor
+     *
      * @param RuleInterfaceFactory $ruleFactory
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param RoleManagementInterface $roleManagement
@@ -56,6 +57,7 @@ class ApprovalRules
      * @param CompanyUserRoles $companyUserRoles
      * @param Helper $helper
      */
+
     public function __construct(
         RuleInterfaceFactory $ruleFactory,
         SearchCriteriaBuilder $searchCriteriaBuilder,
@@ -79,7 +81,10 @@ class ApprovalRules
     }
 
     /**
+     * Install
+     *
      * @param array $row
+     * @param array $settings
      * @return bool
      * @throws LocalizedException
      */
@@ -100,11 +105,7 @@ class ApprovalRules
             " does not exist, row skipped", "warning");
             return true;
         }
-        // if (empty($row['apply_to_roles'])) {
-        //     $this->helper->logMessage("Approval rule ".$row['name'].
-        //     " missing apply_to_roles, row skipped", "warning");
-        //     return true;
-        // }
+
         if (!empty($row['apply_to_roles'])) {
             $row['apply_to_roles'] = explode(",", $row['apply_to_roles']);
         
@@ -118,11 +119,6 @@ class ApprovalRules
             }
         }
 
-        // if (empty($row['approval_from'])) {
-        //     $this->helper->
-        //     logMessage("Approval rule ".$row['name']." missing approval_from, row skipped", "warning");
-        //     return true;
-        // }
         if (!empty($row['approval_from'])) {
             $row['approval_from'] = explode(",", $row['approval_from']);
             if (!$this->validateRoles(
@@ -211,6 +207,8 @@ class ApprovalRules
         return true;
     }
 /**
+ * Validate user roles
+ *
  * @param array $rolesToValidate
  * @param int $companyId
  * @param string $approvalType
@@ -265,6 +263,8 @@ class ApprovalRules
     }
 
     /**
+     * Convert row data to conditions array
+     *
      * @param array $row
      * @return array
      * @throws LocalizedException
@@ -308,8 +308,10 @@ class ApprovalRules
     }
 
     /**
-     * @param $companyId
-     * @param $roles
+     * Convert role names to ids
+     *
+     * @param int $companyId
+     * @param array $roleNames
      * @return array
      */
     private function convertRoleNamesToIds($companyId, $roleNames)

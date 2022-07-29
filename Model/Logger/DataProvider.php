@@ -7,13 +7,14 @@ use Magento\Ui\DataProvider\AbstractDataProvider;
 class DataProvider extends AbstractDataProvider
 {
     /**
+     * Data Provider Constructor
      * @param string $name
      * @param string $primaryFieldName
      * @param string $requestFieldName
      * @param array $meta
      * @param array $data
      */
-    // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
+    //phpcs:ignore Magento2.Annotation.MethodArguments.NoCommentBlock,Generic.CodeAnalysis.UselessOverridingMethod.Found
     public function __construct(
         $name,
         $primaryFieldName,
@@ -35,6 +36,8 @@ class DataProvider extends AbstractDataProvider
     }
 
     /**
+     * Add Filter
+     *
      * @param \Magento\Framework\Api\Filter $filter
      * @return mixed|void|null
      */

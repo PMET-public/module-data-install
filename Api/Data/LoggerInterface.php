@@ -9,79 +9,101 @@ use Magento\Framework\Api\ExtensibleDataInterface;
 interface LoggerInterface extends ExtensibleDataInterface
 {
     /** @var string  */
-    const ID = 'id';
+    public const ID = 'id';
 
     /** @var string  */
-    const MESSAGE = 'message';
+    public const MESSAGE = 'message';
 
     /** @var string  */
-    const LEVEL = 'level';
+    public const LEVEL = 'level';
 
     /** @var string  */
-    const DATAPACK = 'datapack';
+    public const DATAPACK = 'datapack';
 
     /** @var string  */
-    const JOBID = 'job_id';
+    public const JOBID = 'job_id';
 
     /** @var string  */
-    const ADDDATE = 'add_date';
+    public const ADDDATE = 'add_date';
 
     /**
+     * Get Id
+     *
      * @return int
      */
     public function getId();
 
     /**
-     * @param $id
+     * Set Id
+     *
+     * @param int $id
      * @return int
      */
     public function setId($id);
 
     /**
+     * Get Scheduled Job Id
+     *
      * @return string
      */
     public function getJobId();
 
     /**
-     * @param $jobId
+     * Set Scheduled Job Id
+     *
+     * @param string $jobId
      * @return string
      */
     public function setJobId($jobId);
 
     /**
+     * Get Status Message
+     *
      * @return string
      */
     public function getMessage();
 
     /**
-     * @param $message
+     * Set status message
+     *
+     * @param string $message
      * @return string
      */
     public function setMessage($message);
 
    /**
+    * Get Error Level
+    *
     * @return string
     */
     public function getLevel();
 
     /**
-     * @param $level
+     * Set Error Level
+     *
+     * @param string $level
      * @return string
      */
     public function setLevel($level);
 
     /**
+     * Get Data Pack
+     *
      * @return string
      */
     public function getDataPack();
 
     /**
-     * @param $dataPack
+     * Set Data Pack
+     *
+     * @param string $dataPack
      * @return string
      */
     public function setDataPack($dataPack);
 
      /**
+      * Get Add Date
+      *
       * @return string
       */
     public function getAddDate();

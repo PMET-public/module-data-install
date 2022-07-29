@@ -49,7 +49,8 @@ class Helper extends AbstractHelper
     protected $loggerRepository;
 
     /**
-     * Helper constructor.
+     * Helper constructor
+     *
      * @param Context $context
      * @param Pool $cacheFrontendPool
      * @param TypeListInterface $cacheTypeList
@@ -107,6 +108,8 @@ class Helper extends AbstractHelper
     }
 
     /**
+     * Set default settings
+     *
      * @param array $settings
      */
     public function setSettings(array $settings)
@@ -114,6 +117,9 @@ class Helper extends AbstractHelper
         $this->settings = $settings;
     }
 
+    /**
+     * Reindex
+     */
     public function reindex()
     {
         $indexes = $this->indexCollection->getAllIds();
@@ -126,6 +132,9 @@ class Helper extends AbstractHelper
         }
     }
 
+    /**
+     * Flush Cache
+     */
     public function flushCache()
     {
         $_types = [
@@ -152,8 +161,10 @@ class Helper extends AbstractHelper
     }
 
     /**
-     * @param $string
-     * @param null $foreground_color
+     * Print message to console
+     *
+     * @param string $string
+     * @param string $foreground_color
      */
     public function printMessage($string, $foreground_color = null)
     {
@@ -162,7 +173,9 @@ class Helper extends AbstractHelper
     }
 
     /**
-     * @param $string
+     * Log Message
+     *
+     * @param string $string
      * @param string $messageType
      */
     public function logMessage($string, $messageType = 'info')
@@ -177,8 +190,10 @@ class Helper extends AbstractHelper
     }
 
     /**
-     * @param $message
-     * @param $messageType
+     * Log in DB
+     *
+     * @param string $message
+     * @param string $messageType
      * @throws \Magento\Framework\Exception\CouldNotSaveException
      */
     private function setDbLog($message, $messageType)
@@ -192,9 +207,11 @@ class Helper extends AbstractHelper
     }
 
     /**
-     * @param $string
-     * @param null $foreground_color
-     * @param null $background_color
+     * Get color based on message level
+     *
+     * @param string $string
+     * @param string $foreground_color
+     * @param string $background_color
      * @return string
      */
     public function getColoredString($string, $foreground_color = null, $background_color = null)
@@ -230,18 +247,20 @@ class Helper extends AbstractHelper
         return $colored_string;
     }
     /**
+     * Returns all foreground color names
+     *
      * @return array
      */
-    // Returns all foreground color names
     public function getForegroundColors()
     {
         return array_keys($this->foreground_colors);
     }
 
     /**
+     * Returns all background color names
+     *
      * @return array
      */
-    // Returns all background color names
     public function getBackgroundColors()
     {
         return array_keys($this->background_colors);

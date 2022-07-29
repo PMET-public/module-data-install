@@ -58,7 +58,8 @@ class Teams
     protected $stores;
 
     /**
-     * Teams constructor.
+     * Teams constructor
+     *
      * @param Helper $helper
      * @param TeamInterfaceFactory $teamFactory
      * @param CompanyRepositoryInterface $companyRepository
@@ -95,8 +96,10 @@ class Teams
     }
 
     /**
-     * @param $row
-     * @param $header
+     * Install
+     *
+     * @param array $row
+     * @param array $settings
      * @return bool
      * @throws NoSuchEntityException
      * @throws LocalizedException
@@ -183,8 +186,10 @@ class Teams
     }
 
     /**
-     * @param $teamName
-     * @param $adminUserId
+     * Get Existing Team
+     *
+     * @param string $teamName
+     * @param int $adminUserId
      * @return false|TeamInterface
      * @throws LocalizedException
      * @throws NoSuchEntityException
@@ -219,9 +224,11 @@ class Teams
     }
 
     /**
-     * @param $userId
-     * @param $parentId
-     * @param $path
+     * Add User To Team Tree
+     *
+     * @param int $userId
+     * @param int $parentId
+     * @param string $path
      * @return mixed
      * @throws CouldNotSaveException
      */
@@ -239,8 +246,10 @@ class Teams
     }
 
       /**
-       * @param $entityId
-       * @param $entityType
+       * Get Structure
+       *
+       * @param int $entityId
+       * @param string $entityType
        * @return StructureInterface|mixed
        */
     private function getStructureByEntity($entityId, $entityType)
@@ -253,7 +262,9 @@ class Teams
     }
 
     /**
-     * @param $name
+     * Get Company Admin Id
+     *
+     * @param string $name
      * @return int
      * @throws LocalizedException
      */
@@ -273,7 +284,9 @@ class Teams
     }
 
     /**
-     * @param $name
+     * Get Company Id
+     *
+     * @param string $name
      * @return int
      * @throws LocalizedException
      */
@@ -294,7 +307,9 @@ class Teams
     }
 
     /**
-     * @param $teamId
+     * Get Team Structure
+     *
+     * @param int $teamId
      * @return StructureInterface
      */
     private function getTeamStruct($teamId)
@@ -308,8 +323,10 @@ class Teams
     }
 
     /**
-     * @param $teamId
-     * @param $parentId
+     * Add Team To Tree
+     *
+     * @param int $teamId
+     * @param int $parentId
      * @return StructureInterface
      */
     private function addTeamToTree($teamId, $parentId)

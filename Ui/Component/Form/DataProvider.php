@@ -7,7 +7,8 @@ use Magento\Framework\Registry;
 class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
 {
     /**
-     * DataProvider constructor.
+     * DataProvider constructor
+     *
      * @param string $name
      * @param string $primaryFieldName
      * @param string $requestFieldName
@@ -28,6 +29,8 @@ class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
     }
 
     /**
+     * Get Data
+     *
      * @return array
      */
     public function getData()
@@ -36,6 +39,8 @@ class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
     }
 
     /**
+     * Add filter
+     *
      * @param \Magento\Framework\Api\Filter $filter
      * @return mixed|void|null
      */

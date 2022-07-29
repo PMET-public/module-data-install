@@ -14,7 +14,8 @@ class BackButton implements ButtonProviderInterface
     protected $urlInterface;
 
     /**
-     * BackButton constructor.
+     * BackButton constructor
+     *
      * @param UrlInterface $urlInterface
      */
     public function __construct(
@@ -24,6 +25,8 @@ class BackButton implements ButtonProviderInterface
     }
 
     /**
+     * Get Button Data
+     *
      * @return array
      */
     public function getButtonData()
@@ -37,6 +40,8 @@ class BackButton implements ButtonProviderInterface
     }
 
     /**
+     * Get Back Url
+     *
      * @return string
      */
     public function getBackUrl()

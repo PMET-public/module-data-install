@@ -33,11 +33,11 @@ use Magento\Framework\App\Area as AppArea;
 
 class Install extends Command
 {
-    const DATAPACK = 'datapack';
-    const LOAD = 'load';
-    const FILES = 'files';
-    const HOST = 'host';
-    const RELOAD_FLAG = 'reload';
+    public const DATAPACK = 'datapack';
+    public const LOAD = 'load';
+    public const FILES = 'files';
+    public const HOST = 'host';
+    public const RELOAD_FLAG = 'reload';
 
     /** @var ObjectManagerInterface  */
     protected $objectManagerInterface;
@@ -49,10 +49,12 @@ class Install extends Command
      protected $appState;
 
     /**
-     * Install constructor.
+     * Install constructor
+     *
      * @param ObjectManagerInterface $objectManagerInterface
      * @param State $appState
      */
+
     public function __construct(ObjectManagerInterface $objectManagerInterface, State $appState)
     {
         parent::__construct();
@@ -60,6 +62,9 @@ class Install extends Command
         $this->appState = $appState;
     }
 
+    /**
+     * Configure cli menu
+     */
     protected function configure()
     {
         $options = [
@@ -90,13 +95,16 @@ class Install extends Command
 
         parent::configure();
     }
-
+    
     /**
+     * Execute
+     *
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return $this|int
      * @throws \Exception
      */
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $module = $input->getArgument(self::DATAPACK);

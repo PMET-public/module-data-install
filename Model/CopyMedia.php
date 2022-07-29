@@ -72,7 +72,8 @@ class CopyMedia
     protected $fileMime;
 
     /**
-     * CopyMedia constructor.
+     * CopyMedia constructor
+     *
      * @param Helper $helper
      * @param SampleDataContext $sampleDataContext
      * @param Filesystem $fileSystem
@@ -97,7 +98,9 @@ class CopyMedia
     }
 
     /**
-     * @param $filePath
+     * Move files
+     *
+     * @param string $filePath
      */
     public function moveFiles($filePath)
     {
@@ -109,9 +112,11 @@ class CopyMedia
     }
 
     /**
-     * @param $fromPath
-     * @param $toPath
-     * @param $fileType
+     * Copy files
+     *
+     * @param string $fromPath
+     * @param string $toPath
+     * @param string $fileType
      */
     protected function copyFilesFromTo($fromPath, $toPath, $fileType)
     {
@@ -140,8 +145,10 @@ class CopyMedia
     }
 
     /**
-     * @param $file
-     * @param $fileType
+     * Validate file
+     *
+     * @param string $file
+     * @param string $fileType
      * @return bool
      * @throws FileSystemException
      */
@@ -179,6 +186,8 @@ class CopyMedia
     }
 
     /**
+     * Get file extension
+     *
      * @param string $file
      * @return string
      */

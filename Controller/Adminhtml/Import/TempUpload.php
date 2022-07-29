@@ -14,7 +14,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 class TempUpload extends \Magento\Backend\App\Action
 {
     /** @var string  */
-    const UPLOAD_DIR='datapacks/upload';
+    public const UPLOAD_DIR='datapacks/upload';
 
     /** @var UploaderFactory */
     protected $uploaderFactory;
@@ -23,7 +23,8 @@ class TempUpload extends \Magento\Backend\App\Action
     protected $tmpDirectory;
 
     /**
-     * TempUpload constructor.
+     * TempUpload constructor
+     *
      * @param Context $context
      * @param UploaderFactory $uploaderFactory
      * @param Filesystem $filesystem
@@ -40,6 +41,8 @@ class TempUpload extends \Magento\Backend\App\Action
     }
 
     /**
+     * Execute File upload
+     *
      * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
      */
     public function execute()

@@ -95,7 +95,8 @@ class Reviews
     protected $stores;
 
     /**
-     * Reviews constructor.
+     * Reviews constructor
+     *
      * @param Helper $helper
      * @param ReviewFactory $reviewFactory
      * @param ReviewCollectionFactory $reviewCollectionFactory
@@ -135,6 +136,8 @@ class Reviews
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool
@@ -166,6 +169,8 @@ class Reviews
     }
  
     /**
+     * Install review
+     *
      * @param array $row
      * @param array $settings
      * @return bool
@@ -234,7 +239,10 @@ class Reviews
     }
 
     /**
+     * Create review
+     *
      * @param array $row
+     * @param array $storeId
      * @return Review
      */
     protected function prepareReview($row, $storeId)
@@ -263,7 +271,10 @@ class Reviews
     }
 
     /**
-     * @param $rating
+     * Get Rating
+     *
+     * @param string $rating
+     * @param int $storeId
      * @return DataObject|mixed
      * @throws LocalizedException
      */
@@ -285,8 +296,11 @@ class Reviews
     }
 
     /**
+     * Set review rating
+     *
      * @param Review $review
-     * @param $row
+     * @param array $row
+     * @param int $storeId
      * @throws LocalizedException
      */
     protected function setReviewRating(Review $review, $row, $storeId)
@@ -305,8 +319,10 @@ class Reviews
     }
 
     /**
-     * @param $ratingCode
-     * @param $storeId
+     * Create rating
+     *
+     * @param string $ratingCode
+     * @param int $storeId
      * @throws LocalizedException
      */
     protected function createRating($ratingCode, $storeId)
@@ -348,7 +364,9 @@ class Reviews
     }
 
     /**
-     * @param $customerEmail
+     * Get customer id
+     *
+     * @param string $customerEmail
      * @return int|null
      * @throws LocalizedException
      */
@@ -366,6 +384,8 @@ class Reviews
     }
 
     /**
+     * Get rating entity id
+     *
      * @return int
      */
     protected function getRatingEntityId()
@@ -380,6 +400,8 @@ class Reviews
     }
 
     /**
+     * Get review entity id
+     *
      * @return int
      */
     protected function getReviewEntityId()
@@ -395,6 +417,8 @@ class Reviews
     }
 
     /**
+     * Get review structure
+     *
      * @return array
      */
     private function getDefaultReview()

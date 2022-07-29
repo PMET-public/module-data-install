@@ -13,6 +13,8 @@ use MagentoEse\DataInstall\Helper\Helper;
 
 class CustomerGroups
 {
+    
+    /** @var string */
     protected $defaultCustomerGroup = 'General';
 
     /** @var GroupInterfaceFactory  */
@@ -28,7 +30,8 @@ class CustomerGroups
     protected $helper;
 
     /**
-     * CustomerGroups constructor.
+     * CustomerGroups constructor
+     *
      * @param Helper $helper
      * @param GroupInterfaceFactory $groupInterfaceFactory
      * @param GroupRepositoryInterface $groupRepository
@@ -47,6 +50,8 @@ class CustomerGroups
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @return bool
      */
@@ -71,6 +76,8 @@ class CustomerGroups
     }
 
     /**
+     * Get customer group id by code
+     *
      * @param string $customerGroupCode
      * @return int|null
      * @throws LocalizedException
@@ -86,6 +93,8 @@ class CustomerGroups
     }
 
     /**
+     * Get all customer group ids
+     *
      * @return array
      * @throws LocalizedException
      */
@@ -102,6 +111,8 @@ class CustomerGroups
     }
 
     /**
+     * Get default customer group
+     *
      * @return string
      */
     public function getDefaultCustomerGroup()

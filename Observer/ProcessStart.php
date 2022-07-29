@@ -4,6 +4,7 @@ namespace MagentoEse\DataInstall\Observer;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use MagentoEse\DataInstall\Helper\Helper;
+
 //use Mageplaza\Webhook\Helper\Data as WebhookHelperData;
 
 class ProcessStart implements \Magento\Framework\Event\ObserverInterface
@@ -19,17 +20,20 @@ class ProcessStart implements \Magento\Framework\Event\ObserverInterface
     //protected $webhookHelper;
     
     /**
+     * Process Start Constructor
+     *
      * @param Helper $helper
-     * @param WebhookHelperData $webhookHelper
      */
-    public function __construct(Helper $helper, 
-    //WebhookHelperData $webhookHelper
-    )
+    public function __construct(Helper $helper)//,WebhookHelperData $webhookHelper)
     {
         $this->helper = $helper;
         //$this->webhookHelper = $webhookHelper;
     }
-
+    /**
+     * Observer function
+     *
+     * @param Observer $observer
+     */
     public function execute(Observer $observer)
     {
         $this->helper->setSettings = $observer->getData('eventData');

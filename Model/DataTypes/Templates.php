@@ -15,7 +15,7 @@ use MagentoEse\DataInstall\Helper\Helper;
 class Templates
 {
 
-    const TEMPLATE_DIR = ".template-manager/";
+    protected const TEMPLATE_DIR = ".template-manager/";
 
     /** @var TemplateFactory */
     protected $templateFactory;
@@ -33,7 +33,8 @@ class Templates
     protected $helper;
 
     /**
-     * Templates constructor.
+     * Templates constructor
+     *
      * @param TemplateFactory $templateFactory
      * @param TemplateCollection $templateCollection
      * @param Converter $converter
@@ -56,6 +57,8 @@ class Templates
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool

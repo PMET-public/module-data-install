@@ -27,7 +27,8 @@ class GiftCards
     protected $appState;
 
     /**
-     * Products constructor.
+     * Products constructor
+     *
      * @param Helper $helper
      * @param ProductRepositoryInterface $productRepository
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
@@ -46,6 +47,8 @@ class GiftCards
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool

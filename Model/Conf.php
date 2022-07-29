@@ -125,7 +125,7 @@ class Conf
     protected $approvalRulesInstall;
 
     /** @var string[]  */
-    const ALL_FILES = ['stores.csv',
+    public const ALL_FILES = ['stores.csv',
     'config_default.json',
     'config_default.csv',
     'config_vertical.json',
@@ -168,35 +168,38 @@ class Conf
     'orders.csv'];
 
     /** @var string[]  */
-    const STORE_FILES = ['stores.csv'];
+    public const STORE_FILES = ['stores.csv'];
 
     /** @var string[]  */
-    const STAGE1 = ['config_default.json','config_default.csv','config_vertical.json',
+    public const STAGE1 = ['config_default.json','config_default.csv','config_vertical.json',
     'config_vertical.csv','config_secret.json','config_secret.csv','config.json','config.csv',
     'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv',
     'customers.csv','customer_addresses.csv','product_attributes.csv',
     'customer_segments.csv','blocks.csv','categories.csv'];
 
     /** @var string[]  */
-    const STAGE2 = ['products.csv','msi_source.csv','msi_stock.csv','msi_inventory.csv','upsells.csv','blocks.csv',
-    'dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
+    public const STAGE2 = ['products.csv','msi_source.csv','msi_stock.csv','msi_inventory.csv','upsells.csv',
+    'blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
     'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
     'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv',
     'advanced_pricing.csv','orders.csv'];
 
     /** @var string[]  */
-    const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv',
+    public const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv',
     'b2b_sales_reps.csv','b2b_teams.csv'];
     /** @var string[]  */
 
-    const B2B_COMPANY_COLUMNS = ['site_code','legal_name','company_name','company_email','street','city','country_id',
-    'region','postcode','telephone','credit_limit','reseller_id','vat_tax_id','company_admin','address'];
+    /** @var string[]  */
+    public const B2B_COMPANY_COLUMNS = ['site_code','legal_name','company_name','company_email','street','city',
+    'country_id','region','postcode','telephone','credit_limit','reseller_id','vat_tax_id','company_admin','address'];
 
-    const SETTINGS = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
+    /** @var string[]  */
+    public const SETTINGS = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
         'root_category' => 'Default Category', 'root_category_id' => '2'];
 
     /**
-     * Conf constructor.
+     * Conf constructor
+     *
      * @param DataTypes\AdminUsers $adminUsers
      * @param DataTypes\AdminRoles $adminRoles
      * @param DataTypes\AdvancedPricing $advancedPricing
@@ -311,6 +314,8 @@ class Conf
     }
 
     /**
+     * Get configuration for process class
+     *
      * @return \array[][]
      */
     public function getProcessConfiguration()

@@ -1,4 +1,7 @@
 <?php
+/**
+ * Copyright © Adobe. All rights reserved.
+ */
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use MagentoEse\DataInstall\Helper\Helper;
@@ -10,6 +13,8 @@ class B2bGraphQl
     protected $helper;
 
     /**
+     * B2BGraphQl Constructor
+     *
      * @param Helper $helper
      */
     public function __construct(
@@ -19,12 +24,8 @@ class B2bGraphQl
     }
 
     /**
-     * Thoughts on processing b2b
-     * have pre-processing that converts to arrays, whether csv or json
-     * $b2bData array contains key of filename with rows/header array
-     */
-
-    /**
+     * Convert company json to arrays matched to csv files
+     *
      * @param string $json
      * @return array
      */
@@ -52,10 +53,12 @@ class B2bGraphQl
     }
 
     /**
+     * Parse company information from json
+     *
      * @param array $fileData
      * @return array
      */
-    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh
+    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh,Magento2.Annotation.MethodArguments.NoCommentBlock
     private function parseB2BCompanyGraphql($fileData)
     {
         $rows = [];
@@ -110,10 +113,12 @@ class B2bGraphQl
     }
 
     /**
+     * Parse company customers from json
+     *
      * @param array $fileData
      * @return array
      */
-    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh
+    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh,Magento2.Annotation.MethodArguments.NoCommentBlock
     private function parseB2BCompanyCustomers($fileData)
     {
         $rows = [];
@@ -189,6 +194,8 @@ class B2bGraphQl
     }
 
     /**
+     * Parse sales reps from json
+     *
      * @param array $fileData
      * @return array
      */
@@ -221,6 +228,8 @@ class B2bGraphQl
     }
 
     /**
+     * Parse roles from json
+     *
      * @param array $fileData
      * @return array
      */
@@ -244,6 +253,8 @@ class B2bGraphQl
     }
 
     /**
+     * Callback for company role recursion
+     *
      * @param string $item
      * @param string $key
      * @param array $args
@@ -256,6 +267,8 @@ class B2bGraphQl
     }
 
     /**
+     * Parse teams from json
+     *
      * @param array $fileData
      * @return array
      */
@@ -290,6 +303,8 @@ class B2bGraphQl
     }
 
     /**
+     * Parse Requisition Lists from json
+     *
      * @param array $fileData
      * @return array
      */
@@ -322,6 +337,8 @@ class B2bGraphQl
     }
 
     /**
+     * Get product information from requisition list
+     *
      * @param array $items
      * @return string
      */
@@ -336,10 +353,12 @@ class B2bGraphQl
     }
 
     /**
+     * Parse shared catalogs from json
+     *
      * @param array $fileData
      * @return array
      */
-    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh
+
     private function parseB2BSharedCatalogs($fileData)
     {
         $tempArray = [];
@@ -379,10 +398,12 @@ class B2bGraphQl
     }
 
     /**
+     * Parse shared catalog categories from json
+     *
      * @param array $fileData
      * @return array
      */
-    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh
+
     private function parseB2BSharedCatalogCategories($fileData)
     {
         //shared_catalog,category
@@ -403,6 +424,8 @@ class B2bGraphQl
     }
 
     /**
+     * Parse approval rules from json
+     *
      * @param array $fileData
      * @return array
      */
@@ -440,6 +463,8 @@ class B2bGraphQl
     }
 
     /**
+     * Parse addresses from json
+     *
      * @param array $address
      * @return array
      */

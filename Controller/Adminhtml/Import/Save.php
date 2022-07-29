@@ -16,8 +16,8 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 class Save extends \Magento\Backend\App\Action
 {
 
-    const ZIPPED_DIR = 'datapacks/zipfiles';
-    const UNZIPPED_DIR = 'datapacks/unzipped';
+    public const ZIPPED_DIR = 'datapacks/zipfiles';
+    public const UNZIPPED_DIR = 'datapacks/unzipped';
     /** @var UploaderFactory */
     protected $uploaderFactory;
 
@@ -32,6 +32,7 @@ class Save extends \Magento\Backend\App\Action
 
     /**
      * Save constructor.
+     *
      * @param Context $context
      * @param UploaderFactory $uploaderFactory
      * @param Filesystem $filesystem
@@ -54,6 +55,8 @@ class Save extends \Magento\Backend\App\Action
     }
 
     /**
+     * Execute
+     *
      * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
      */
     public function execute()
@@ -122,7 +125,9 @@ class Save extends \Magento\Backend\App\Action
     }
 
     /**
-     * @param $conditions
+     * Set the advanced conditions of the job
+     *
+     * @param string $conditions
      * @return array
      */
     protected function setAdvancedConditions($conditions)
@@ -150,7 +155,9 @@ class Save extends \Magento\Backend\App\Action
     }
 
     /**
-     * @param $fileInfo
+     * Unzip data pack file
+     *
+     * @param string $fileInfo
      * @return bool
      * @throws \Magento\Framework\Exception\FileSystemException
      */

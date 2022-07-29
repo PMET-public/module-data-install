@@ -17,9 +17,10 @@ class MsiInventory
     protected $helper;
 
     /**
-     * MsiInventory constructor.
+     * MsiInventory constructor
+     *
      * @param Helper $helper
-     * @param ObjectManagerInterface $objectManager
+     * @param Importer $importer
      */
     public function __construct(
         Helper $helper,
@@ -30,7 +31,7 @@ class MsiInventory
     }
 
     /**
-     * install
+     * Install
      *
      * @param  mixed $rows
      * @param  mixed $header
@@ -53,8 +54,10 @@ class MsiInventory
     }
 
     /**
-     * @param $productsArray
-     * @param $productValidationStrategy
+     * Import inventory
+     *
+     * @param array $productsArray
+     * @param string $productValidationStrategy
      */
     private function import($productsArray, $productValidationStrategy)
     {

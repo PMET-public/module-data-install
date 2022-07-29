@@ -29,7 +29,8 @@ class CustomerAttributes
     private $helper;
 
     /**
-     * CustomerAttributes constructor.
+     * CustomerAttributes constructor
+     *
      * @param EavSetupFactory $eavSetupFactory
      * @param Config $eavConfig
      * @param AttributeRepositoryInterface $attributeRepository
@@ -48,6 +49,8 @@ class CustomerAttributes
     }
 
     /**
+     * Install
+     *
      * @param array $data
      * @return bool
      * @throws LocalizedException
@@ -156,8 +159,10 @@ class CustomerAttributes
     }
 
     /**
-     * @param $store
-     * @param $attributeCode
+     * Add attribute options
+     *
+     * @param string $store
+     * @param string $attributeCode
      * @param array $options
      * @throws LocalizedException
      * @throws NoSuchEntityException
@@ -187,6 +192,8 @@ class CustomerAttributes
     }
 
     /**
+     * Validate attribute code
+     *
      * @param string $code
      * @return string|string[]|null
      */
@@ -205,6 +212,8 @@ class CustomerAttributes
     }
 
     /**
+     * Flatten attribute options
+     *
      * @param array $row
      * @param array $options
      * @return array
@@ -220,6 +229,8 @@ class CustomerAttributes
     }
 
      /**
+      * Convert Y and N to 1 and 0
+      *
       * @param mixed $value
       * @return mixed
       */

@@ -45,8 +45,10 @@ class CartRules
     protected $helper;
 
     /**
+     * CartRules constructor
+     *
      * @param RuleFactory $ruleFactory
-     * @param RuleCollection $RuleCollection
+     * @param RuleCollection $ruleCollection
      * @param CustomerGroups $customerGroups
      * @param Stores $stores
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
@@ -78,6 +80,8 @@ class CartRules
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool
@@ -173,6 +177,8 @@ class CartRules
         return true;
     }
     /**
+     * Get cart rule by name
+     *
      * @param string $ruleName
      * @return Rule
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -188,6 +194,8 @@ class CartRules
     }
 
     /**
+     * Is there another rule that shares a coupon code
+     *
      * @param string $ruleName
      * @param string $couponCode
      * @return boolean

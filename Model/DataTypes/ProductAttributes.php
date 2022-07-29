@@ -17,15 +17,15 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 use MagentoEse\DataInstall\Model\DataTypes\Stores;
 use MagentoEse\DataInstall\Helper\Helper;
-use Magento\Catalog\Model\ResourceModel\Eav\Attribute as eavAttribute;
+use Magento\Catalog\Model\ResourceModel\Eav\Attribute as EavAttribute;
 use Magento\Catalog\Api\ProductAttributeRepositoryInterface;
 
 class ProductAttributes
 {
-    const DEFAULT_ATTRIBUTE_SET = 'Default';
+    protected const DEFAULT_ATTRIBUTE_SET = 'Default';
 
     //input types not supported swatch_visual,media_image
-    const VALID_INPUT_TYPES = ['text','textarea','textedit','pagebuilder','date','datetime',
+    protected const VALID_INPUT_TYPES = ['text','textarea','textedit','pagebuilder','date','datetime',
     'boolean','multiselect','select','price','weee'];
 
     /** @var AttributeFactory  */
@@ -46,7 +46,7 @@ class ProductAttributes
     /** @var EavConfig  */
     protected $eavConfig;
 
-    /** @var  */
+    /** @var  int */
     protected $entityTypeId;
 
     /** @var Stores  */
@@ -56,7 +56,8 @@ class ProductAttributes
      protected $helper;
 
     /**
-     * ProductAttributes constructor.
+     * ProductAttributes constructor
+     *
      * @param AttributeFactory $attributeFactory
      * @param ProductAttributeRepositoryInterface $productAttributeRepository
      * @param SetFactory $attributeSetFactory
@@ -87,6 +88,8 @@ class ProductAttributes
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @return bool
      * @throws LocalizedException
@@ -234,8 +237,10 @@ class ProductAttributes
     }
 
     /**
-     * @param $attribute
-     * @param $row
+     * Set Swatches
+     *
+     * @param EavAttribute $attribute
+     * @param array $row
      */
     protected function setSwatches($attribute, $row)
     {
@@ -270,8 +275,11 @@ class ProductAttributes
         }
     }
 
-    /** Map swatch values to option value id keys
+    /**
+     * Map swatch values to option value id keys
+     *
      * @param array $attributeData
+     * @param string $swatches
      * @return array
      */
     private function getOptionSwatchVisual(array $attributeData, $swatches)
@@ -285,7 +293,10 @@ class ProductAttributes
     }
 
     /**
+     * Map swatch values to option value id keys
+     *
      * @param array $attributeData
+     * @param string $swatches
      * @return array
      */
     private function getOptionSwatchText(array $attributeData, $swatches)
@@ -304,7 +315,9 @@ class ProductAttributes
     }
 
     /**
-     * @param $swatchData
+     * Get Swatch Array
+     *
+     * @param string $swatchData
      * @return array
      */
     private function getSwatchArray($swatchData)
@@ -322,8 +335,11 @@ class ProductAttributes
         return $swatchArray;
     }
 
-    /** get the first defined option value to set as default
+    /**
+     * Get the first defined option value to set as default
+     *
      * @param array $attributeData
+     * @param string $swatchData
      * @return array
      */
     private function getOptionDefaultVisual(array $attributeData, $swatchData)
@@ -333,7 +349,10 @@ class ProductAttributes
     }
 
     /**
+     * Get the first defined option value to set as default
+     *
      * @param array $attributeData
+     * @param string $swatchData
      * @return array
      */
     private function getOptionDefaultText(array $attributeData, $swatchData)
@@ -342,11 +361,13 @@ class ProductAttributes
         return [array_keys($optionSwatch['value'])[0]];
     }
 
-    /** return current options values with id as key
-     * @param eavAttribute $attribute
+    /**
+     * Return current options values with id as key
+     *
+     * @param EavAttribute $attribute
      * @return array
      */
-    private function getExistingOptions(eavAttribute $attribute)
+    private function getExistingOptions(EavAttribute $attribute)
     {
         $options = [];
         $attributeId = $attribute->getId();
@@ -361,7 +382,9 @@ class ProductAttributes
     }
 
     /**
-     * @param $attributeId
+     * Get all options for attribute
+     *
+     * @param int $attributeId
      * @return void
      */
     private function loadOptionCollection($attributeId)
@@ -373,7 +396,9 @@ class ProductAttributes
         return $optionCollection;
     }
 
-    /** set up data structure for swatch values
+    /**
+     * Set up data structure for swatch values
+     *
      * @param array $attributeData
      * @return array
      */
@@ -389,10 +414,10 @@ class ProductAttributes
         return $optionSwatch;
     }
 
-    //return swatch type based on information in additional_data column
-
     /**
-     * @param $additionalData
+     * Return swatch type based on information in additional_data column
+     *
+     * @param string $additionalData
      * @return false|mixed
      */
     protected function isSwatchType($additionalData)
@@ -408,7 +433,9 @@ class ProductAttributes
     }
 
     /**
-     * @param $frontendInput
+     * Are the attribute types valid
+     *
+     * @param array $frontendInput
      * @return bool
      */
     protected function validateFrontendInputs($frontendInput)
@@ -422,6 +449,8 @@ class ProductAttributes
     }
 
     /**
+     * Get option for Attribute
+     *
      * @param Attribute $attribute
      * @param array $row
      * @param int $storeViewId
@@ -458,7 +487,7 @@ class ProductAttributes
         }
 
         //return $result ? $this->convertOption($result,$row) : $result;
-        return $this->convertOption($result, $row, $storeViewId, $options);
+        return $this->convertOption($result, $row, $storeViewId);
     }
 
     /**
@@ -467,10 +496,9 @@ class ProductAttributes
      * @param array $values
      * @param array $row
      * @param int $storeViewId
-     * @param $options
      * @return array
      */
-    protected function convertOption(array $values, array $row, int $storeViewId, $options)
+    protected function convertOption(array $values, array $row, int $storeViewId)
     {
         $result = ['order' => [], 'value' => []];
         $i = 0;
@@ -501,6 +529,8 @@ class ProductAttributes
     }
 
     /**
+     * Get entity type id
+     *
      * @return mixed
      * @throws LocalizedException
      */
@@ -514,6 +544,8 @@ class ProductAttributes
     }
 
     /**
+     * Create attribute set
+     *
      * @param string $setName
      * @return bool|Set|AbstractModel
      * @throws LocalizedException
@@ -543,6 +575,8 @@ class ProductAttributes
     }
 
     /**
+     * Validate format of attribute code
+     *
      * @param string $code
      * @return string
      */
@@ -561,6 +595,8 @@ class ProductAttributes
     }
 
     /**
+     * Set attribute sets
+     *
      * @param array $row
      * @param Attribute $attribute
      * @throws LocalizedException
@@ -590,7 +626,9 @@ class ProductAttributes
     }
 
     /**
-     * @param $row
+     * Remove any empty columns in data row
+     *
+     * @param array $row
      * @return mixed
      */
     private function removeEmptyColumns($row)
@@ -604,6 +642,8 @@ class ProductAttributes
     }
 
     /**
+     * Covert attribute options to array
+     *
      * @param array $row
      * @param array $options
      * @return array

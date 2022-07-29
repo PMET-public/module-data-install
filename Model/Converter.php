@@ -82,7 +82,8 @@ class Converter
     protected $pageRepository;
 
     /**
-     * Converter constructor.
+     * Converter constructor
+     *
      * @param CategoryCollectionFactory $categoryFactory
      * @param Config $eavConfig
      * @param ProductAttributeCollectionFactory $productAttributeCollectionFactory
@@ -98,6 +99,7 @@ class Converter
      * @param StoreRepositoryInterface $storeRepository
      * @param PageRepositoryInterface $pageRepository
      */
+
     public function __construct(
         CategoryCollectionFactory $categoryFactory,
         Config $eavConfig,
@@ -131,6 +133,8 @@ class Converter
     }
 
     /**
+     * Replace tokens in content
+     *
      * @param string $content
      * @return string|string
      */
@@ -142,7 +146,9 @@ class Converter
     }
 
     /**
-     * @param $value
+     * Get array value
+     *
+     * @param mixed $value
      * @param string $separator
      * @return array|false|string[]
      */
@@ -160,6 +166,8 @@ class Converter
     }
 
     /**
+     * Replace content matches
+     *
      * @param string $content
      * @return string
      */
@@ -177,6 +185,8 @@ class Converter
     }
 
     /**
+     * Get match types
+     *
      * @param string $content
      * @return array
      */
@@ -256,6 +266,8 @@ class Converter
     }
 
     /**
+     * Get all replaces
+     *
      * @param array $matches
      * @return array
      */
@@ -276,6 +288,8 @@ class Converter
     }
 
     /**
+     * Get url filter
+     *
      * @param string $urlAttributes
      * @return string
      */
@@ -303,7 +317,9 @@ class Converter
     /**  *************   */
 
     /**
-     * @param $matchValue
+     * Match customer group replacements
+     *
+     * @param string $matchValue
      * @return mixed
      * @throws LocalizedException
      */
@@ -328,6 +344,8 @@ class Converter
     /**  *************   */
 
     /**
+     * Match attribute set replacements
+     *
      * @param string $matchValue
      * @return array
      */
@@ -352,6 +370,8 @@ class Converter
     /**  *******   */
 
     /**
+     * Match block replacements
+     *
      * @param string $matchValue
      * @return array
      * @throws LocalizedException
@@ -376,6 +396,8 @@ class Converter
     /**  *******   */
 
     /**
+     * Match page replacements
+     *
      * @param string $matchValue
      * @return array
      * @throws LocalizedException
@@ -400,6 +422,8 @@ class Converter
     /**  **************   */
 
     /**
+     * Match dynamic block replacements
+     *
      * @param string $matchValue
      * @return array
      * @throws LocalizedException
@@ -422,6 +446,8 @@ class Converter
     /**  ********   */
 
     /**
+     * Match segment replacements
+     *
      * @param string $matchValue
      * @return array
      */
@@ -443,6 +469,8 @@ class Converter
     /**  ********   */
 
     /**
+     * Match category replacements
+     *
      * @param string $matchValue
      * @return array
      * @throws LocalizedException
@@ -461,6 +489,8 @@ class Converter
     }
 
     /**
+     * Match category id replacements
+     *
      * @param string $matchValue
      * @return array
      * @throws LocalizedException
@@ -479,6 +509,8 @@ class Converter
     }
 
     /**
+     * Match category by key replacements
+     *
      * @param string $urlKey
      * @return DataObject
      * @throws LocalizedException
@@ -497,6 +529,8 @@ class Converter
     /**  *******   */
 
     /**
+     * Match product url replacements
+     *
      * @param string $matchValue
      * @return array
      */
@@ -518,6 +552,8 @@ class Converter
     }
 
     /**
+     * Match product id replacements
+     *
      * @param string $matchValue
      * @return array
      */
@@ -542,6 +578,8 @@ class Converter
     /**  CUSTOMER ATTRIBUTES  */
     /**  ****************   */
     /**
+     * Match customer attribute replacements
+     *
      * @param string $matchValue
      * @return array
      */
@@ -635,6 +673,8 @@ class Converter
     /**  PRODUCT ATTRIBUTES  */
     /**  ****************   */
     /**
+     * Match product attribute replacements
+     *
      * @param string $matchValue
      * @return array
      */
@@ -724,6 +764,8 @@ class Converter
     }
 
     /**
+     * Get store id by code
+     *
      * @param string $storeCode
      * @return int
      * @throws \Magento\Framework\Exception\NoSuchEntityException

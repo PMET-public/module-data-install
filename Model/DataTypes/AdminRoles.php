@@ -25,7 +25,8 @@ class AdminRoles
     protected $helper;
 
     /**
-     * AdminRoles constructor.
+     * AdminRoles constructor
+     *
      * @param RoleFactory $roleFactory
      * @param RoleCollection $roleCollection
      * @param RulesFactory $rulesFactory
@@ -44,8 +45,10 @@ class AdminRoles
     }
 
     /**
-     * @param $rows
-     * @param $header
+     * Install
+     *
+     * @param array $rows
+     * @param array $header
      * @return bool
      * @throws \Exception
      */

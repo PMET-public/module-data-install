@@ -16,7 +16,8 @@ class Upload extends Action
     protected $resultPageFactory;
 
     /**
-     * Upload constructor.
+     * Upload constructor
+     *
      * @param Context $context
      * @param PageFactory $resultPageFactory
      */
@@ -29,6 +30,8 @@ class Upload extends Action
     }
 
     /**
+     * Set menu
+     *
      * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|\Page
      */
     public function execute()

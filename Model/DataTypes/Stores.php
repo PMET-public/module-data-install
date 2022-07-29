@@ -15,7 +15,6 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\State;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\Data\GroupInterface;
 use Magento\Store\Api\Data\GroupInterfaceFactory;
 use Magento\Store\Api\Data\StoreInterface;
@@ -37,6 +36,7 @@ use MagentoEse\DataInstall\Helper\Helper;
 
 class Stores
 {
+    /** @var array */
     protected $settings;
 
     /** @var Helper */
@@ -103,7 +103,8 @@ class Stores
     protected $scopeConfig;
 
     /**
-     * Stores constructor.
+     * Stores constructor
+     *
      * @param Helper $helper
      * @param WebsiteInterfaceFactory $websiteInterfaceFactory
      * @param WebsiteResourceModel $websiteResourceModel
@@ -174,8 +175,11 @@ class Stores
     }
 
     /**
+     * Install
+     *
      * @param array $data
      * @param array $settings
+     * @param mixed $cliHost
      * @return bool
      * @throws AlreadyExistsException
      * @throws LocalizedException
@@ -239,6 +243,8 @@ class Stores
     //site requires name and code
 
     /**
+     * Set Website
+     *
      * @param array $data
      * @return WebsiteInterface|null
      * @throws AlreadyExistsException
@@ -292,8 +298,10 @@ class Stores
     //store requires site, name, code, and root category
     //Stores are referred to as groups in code
     /**
+     * Set Store (Group)
+     *
      * @param array $data
-     * @param $website
+     * @param Website $website
      * @return GroupInterface|null
      * @throws AlreadyExistsException
      */
@@ -372,8 +380,10 @@ class Stores
     //view requires store, name, code
     //Views are referred to as stores in code
     /**
+     * Set View (Store)
+     *
      * @param array $data
-     * @param $store
+     * @param Store $store
      * @throws AlreadyExistsException
      * @throws LocalizedException
      * @throws UrlAlreadyExistsException
@@ -489,6 +499,8 @@ class Stores
     }
 
     /**
+     * Generate Urls for store pages
+     *
      * @param int $storeId
      * @return array
      * @throws LocalizedException
@@ -513,6 +525,8 @@ class Stores
     }
 
     /**
+     * Get Website
+     *
      * @param array $data
      * @return mixed
      */
@@ -522,6 +536,8 @@ class Stores
     }
 
     /**
+     * Get code of default Website
+     *
      * @return string
      */
     public function getDefaultWebsiteCode()
@@ -531,6 +547,8 @@ class Stores
     }
 
     /**
+     * Get all defined website codes
+     *
      * @return array
      */
     public function getAllWebsiteCodes()
@@ -548,6 +566,9 @@ class Stores
     }
 
     /**
+     * Get the default website code if not base
+     *
+     * @param string $websiteCode
      * @return string
      * In the situations where the default website code may not be 'base'
      * get the value of the default website code
@@ -561,6 +582,8 @@ class Stores
     }
 
     /**
+     * Get Website id
+     *
      * @param string $websiteCode
      * @return mixed
      */
@@ -572,6 +595,8 @@ class Stores
     }
 
     /**
+     * Get Store (Group)
+     *
      * @param array $data
      * @return GroupInterface
      */
@@ -597,6 +622,8 @@ class Stores
     }
 
     /**
+     * Get Store id
+     *
      * @param string $storeCode
      * @return int
      */
@@ -608,6 +635,8 @@ class Stores
     }
 
     /**
+     * Get View id
+     *
      * @param array $data
      * @return StoreInterface
      */
@@ -625,6 +654,8 @@ class Stores
     }
 
     /**
+     * Get all view codes
+     *
      * @return array
      */
     public function getAllViewCodes()
@@ -642,6 +673,9 @@ class Stores
     }
 
     /**
+     * Get view codes from stores not associated with given view
+     *
+     * @param string $currentView
      * @return array
      */
     public function getViewCodesFromOtherStores($currentView)
@@ -660,6 +694,8 @@ class Stores
     }
 
     /**
+     * Get View id by code
+     *
      * @param string $viewCode
      * @return int
      */
@@ -671,7 +707,9 @@ class Stores
     }
 
      /**
-      * @param string $viewCode
+      * Get view ids from code list
+      *
+      * @param string $viewCodes
       * @return string
       */
     public function getViewIdsFromCodeList(string $viewCodes)
@@ -685,6 +723,8 @@ class Stores
     }
 
      /**
+      * Get View name
+      *
       * @param string $viewCode
       * @return int
       */
@@ -696,6 +736,8 @@ class Stores
     }
 
     /**
+     * Validate code format
+     *
      * @param string $code
      * @return string
      */
@@ -714,6 +756,8 @@ class Stores
     }
 
     /**
+     * Create catalog root category
+     *
      * @param array $data
      * @return int|null
      */
@@ -740,6 +784,8 @@ class Stores
     }
 
     /**
+     * Get root cateogry by name
+     *
      * @param array $data
      * @return mixed
      */
@@ -755,6 +801,8 @@ class Stores
     }
 
     /**
+     * Set base url for website
+     *
      * @param string $host
      * @param int $websiteId
      */
@@ -765,6 +813,8 @@ class Stores
     }
 
     /**
+     * Set media urls for website
+     *
      * @param string $host
      * @param int $websiteId
      */
@@ -797,6 +847,8 @@ class Stores
     }
 
     /**
+     * Get host of base url
+     *
      * @return string
      */
     private function getBaseUrlHost(): string
@@ -808,6 +860,8 @@ class Stores
     }
 
     /**
+     * Set theme for view
+     *
      * @param array $data
      * @param int $storeViewId
      */

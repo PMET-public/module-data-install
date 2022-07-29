@@ -38,7 +38,8 @@ class SharedCatalogs
     protected $helper;
 
     /**
-     * SharedCatalogs constructor.
+     * SharedCatalogs constructor
+     *
      * @param Helper $helper
      * @param SharedCatalogInterfaceFactory $sharedCatalogInterface
      * @param SharedCatalogRepositoryInterface $sharedCatalogRepositoryInterface
@@ -66,6 +67,8 @@ class SharedCatalogs
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @param array $settings
      * @return bool
@@ -125,7 +128,9 @@ class SharedCatalogs
     }
 
     /**
-     * @param $sharedCatalogName
+     * Get Shared Catalog by Name
+     *
+     * @param string $sharedCatalogName
      * @return SharedCatalogInterface
      * @throws LocalizedException
      */

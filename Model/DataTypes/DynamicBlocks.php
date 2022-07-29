@@ -44,7 +44,8 @@ class DynamicBlocks
     private $helper;
 
     /**
-     * Banner constructor.
+     * Banner constructor
+     *
      * @param BannerFactory $bannerFactory
      * @param BannerSegmentLink $bannerSegmentLink
      * @param Converter $converter
@@ -76,6 +77,8 @@ class DynamicBlocks
     }
 
     /**
+     * Install
+     *
      * @param array $row
      * @return bool
      * @throws AlreadyExistsException
@@ -161,6 +164,8 @@ class DynamicBlocks
     }
 
     /**
+     * Get segment id by name
+     *
      * @param string $segmentName
      * @return mixed
      */

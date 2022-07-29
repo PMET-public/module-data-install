@@ -16,13 +16,15 @@ class CustomerAddresses
     /** @var Importer  */
     protected $importer;
 
-     /** @var Helper  */
+    /** @var Helper  */
     protected $helper;
 
-     protected $importUnsafeColumns=[''];
+    /** @var array */
+    protected $importUnsafeColumns=[''];
 
     /**
-     * Customers constructor.
+     * Customers constructor
+     *
      * @param Stores $stores
      * @param Importer $importer
      * @param Helper $helper
@@ -38,6 +40,8 @@ class CustomerAddresses
     }
 
     /**
+     * Install
+     *
      * @param array $rows
      * @param array $header
      * @param string $modulePath
@@ -64,7 +68,9 @@ class CustomerAddresses
     }
 
     /**
-     * @param $customerArray
+     * Clean up data to make safe for import
+     *
+     * @param array $customerArray
      * @return array
      */
     private function cleanDataForImport($customerArray)
@@ -98,9 +104,11 @@ class CustomerAddresses
     }
 
     /**
-     * @param $customerArray
-     * @param $productValidationStrategy
-     * @param $importMethod
+     * Call Importer
+     *
+     * @param array $customerArray
+     * @param string $productValidationStrategy
+     * @param string $importMethod
      */
     private function import($customerArray, $productValidationStrategy, $importMethod)
     {

@@ -9,14 +9,17 @@ use MagentoEse\DataInstall\Api\Data\InstallerInterface;
 
 class Installer extends AbstractExtensibleModel implements InstallerInterface
 {
-    //phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
+    /**
+     * Installer constructor
+     */
+    //phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore,Magento2.Annotation.MethodArguments.NoCommentBlock
     protected function _construct()
     {
         $this->_init(ResourceModel\Installer::class);
     }
 
     /**
-     * @inheritDoc
+     * Get id
      */
     public function getId()
     {
@@ -24,7 +27,9 @@ class Installer extends AbstractExtensibleModel implements InstallerInterface
     }
 
     /**
-     * @inheritDoc
+     * Set id
+     *
+     * @param int $id
      */
     public function setId($id)
     {
@@ -32,7 +37,7 @@ class Installer extends AbstractExtensibleModel implements InstallerInterface
     }
 
     /**
-     * @inheritDoc
+     * Get module name
      */
     public function getModuleName()
     {
@@ -40,7 +45,9 @@ class Installer extends AbstractExtensibleModel implements InstallerInterface
     }
 
     /**
-     * @inheritDoc
+     * Set module name
+     *
+     * @param string $moduleName
      */
     public function setModuleName($moduleName)
     {
@@ -48,7 +55,7 @@ class Installer extends AbstractExtensibleModel implements InstallerInterface
     }
 
     /**
-     * @inheritDoc
+     * Is installed
      */
     public function isInstalled()
     {
@@ -56,7 +63,9 @@ class Installer extends AbstractExtensibleModel implements InstallerInterface
     }
 
     /**
-     * @inheritDoc
+     * Set is installed
+     *
+     * @param string $isInstalled
      */
     public function setIsInstalled($isInstalled)
     {

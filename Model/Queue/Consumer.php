@@ -19,6 +19,7 @@ use Magento\Framework\Filesystem\DriverInterface;
 
 /**
  * Consumer for export message.
+ *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Consumer
@@ -42,7 +43,8 @@ class Consumer
     protected $driverInterface;
 
     /**
-     * Consumer constructor.
+     * Consumer constructor
+     *
      * @param LoggerInterface $logger
      * @param SerializerInterface $serializer
      * @param EntityManager $entityManager
@@ -127,7 +129,6 @@ class Consumer
      * Execute
      *
      * @param array $data
-     *
      * @return void
      */
     private function execute($data): void

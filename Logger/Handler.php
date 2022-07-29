@@ -9,7 +9,9 @@ use Magento\Framework\Logger\Handler\Base;
 
 class Handler extends Base
 {
+    /** @var string */
     protected $loggerType = Logger::INFO;
 
+    /** @var string */
     protected $fileName = '/var/log/data_installer.log';
 }

@@ -42,7 +42,8 @@ class InstallerRepository implements InstallerRepositoryInterface
     private $collectionProcessor;
 
     /**
-     * InstallerRepository constructor.
+     * InstallerRepository constructor
+     *
      * @param InstallerFactory $installerFactory
      * @param Installer $installerResource
      * @param CollectionFactory $installerCollectionFactory
@@ -64,9 +65,11 @@ class InstallerRepository implements InstallerRepositoryInterface
     }
 
     /**
+     * Get by id
+     *
      * @param int $id
-     * @return \MagentoEse\DataInstall\Api\Data\InstallerInterface
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @return InstallerInterface
+     * @throws NoSuchEntityException
      */
     public function getById($id)
     {
@@ -80,9 +83,11 @@ class InstallerRepository implements InstallerRepositoryInterface
     }
 
     /**
+     * Get by module name
+     *
      * @param string $moduleName
-     * @return \MagentoEse\DataInstall\Api\Data\InstallerInterface
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @return InstallerInterface
+     * @throws NoSuchEntityException
      */
     public function getByModuleName($moduleName)
     {
@@ -97,9 +102,11 @@ class InstallerRepository implements InstallerRepositoryInterface
     }
 
     /**
-     * @param \MagentoEse\DataInstall\Api\Data\InstallerInterface $installer
-     * @return \MagentoEse\DataInstall\Api\Data\InstallerInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * Save installer
+     *
+     * @param InstallerInterface $installer
+     * @return InstallerInterface
+     * @throws LocalizedException
      */
     public function save(InstallerInterface $installer)
     {
@@ -108,9 +115,11 @@ class InstallerRepository implements InstallerRepositoryInterface
     }
 
     /**
-     * @param \MagentoEse\DataInstall\Api\Data\InstallerInterface $installer
+     * Delete installer
+     *
+     * @param InstallerInterface $installer
      * @return bool true on success
-     * @throws \Magento\Framework\Exception\CouldNotDeleteException
+     * @throws \CouldNotDeleteException
      */
     public function delete(InstallerInterface $installer)
     {
@@ -118,7 +127,7 @@ class InstallerRepository implements InstallerRepositoryInterface
             $this->installerResource->delete($installer);
         } catch (\Exception $exception) {
              throw new CouldNotDeleteException(
-                // __('Could not delete the entry: %1', $exception->getMessage())
+                 __('Could not delete the entry: %1', $exception->getMessage())
              );
         }
 
@@ -126,9 +135,11 @@ class InstallerRepository implements InstallerRepositoryInterface
     }
 
     /**
-     * @param \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
-     * @return \MagentoEse\DataInstall\Api\Data\InstallerSearchResultInterface
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * Get installer list
+     *
+     * @param SearchCriteriaInterface $searchCriteria
+     * @return InstallerSearchResultInterface
+     * @throws LocalizedException
      */
     public function getList(SearchCriteriaInterface $searchCriteria)
     {

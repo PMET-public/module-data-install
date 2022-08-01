@@ -91,37 +91,37 @@ class Conf
      /** @var DataTypes\Orders */
      protected $orderInstall;
 
-     /** @var Datatypes\CustomerSegments */
+     /** @var DataTypes\CustomerSegments */
     protected $customerSegmentsInstall;
 
-    /** @var Datatypes\CatalogRules */
+    /** @var DataTypes\CatalogRules */
     protected $catalogRulesInstall;
 
-    /** @var Datatypes\CartRules */
+    /** @var DataTypes\CartRules */
     protected $cartRulesInstall;
 
-    /** @var Datatypes\Companies */
+    /** @var DataTypes\Companies */
     protected $companiesInstall;
 
-    /** @var Datatypes\CompanyRoles */
+    /** @var DataTypes\CompanyRoles */
     protected $companyRolesInstall;
 
-    /** @var Datatypes\CompanyUserRoles */
+    /** @var DataTypes\CompanyUserRoles */
     protected $companyUserRolesInstall;
 
-    /** @var Datatypes\RequisitionLists */
+    /** @var DataTypes\RequisitionLists */
     protected $requisitionListsInstall;
 
-    /** @var Datatypes\SharedCatalogs */
+    /** @var DataTypes\SharedCatalogs */
     protected $sharedCatalogsInstall;
 
-    /** @var Datatypes\SharedCatalogCategories */
+    /** @var DataTypes\SharedCatalogCategories */
     protected $sharedCatalogCategoriesInstall;
 
-    /** @var Datatypes\Teams */
+    /** @var DataTypes\Teams */
     protected $companyTeamsInstall;
 
-    /** @var Datatypes\ApprovalRules */
+    /** @var DataTypes\ApprovalRules */
     protected $approvalRulesInstall;
 
     /** @var string[]  */
@@ -208,7 +208,7 @@ class Conf
      * @param DataTypes\CatalogRules $catalogRules
      * @param DataTypes\CartRules $cartRules
      * @param DataTypes\Categories $categories
-     * @param Datatypes\Companies $companies
+     * @param DataTypes\Companies $companies
      * @param DataTypes\CompanyRoles $companyRoles
      * @param DataTypes\CompanyUserRoles $companyUserRoles
      * @param DataTypes\Configuration $configuration
@@ -246,7 +246,7 @@ class Conf
         DataTypes\CatalogRules $catalogRules,
         DataTypes\CartRules $cartRules,
         DataTypes\Categories $categories,
-        Datatypes\Companies $companies,
+        DataTypes\Companies $companies,
         DataTypes\CompanyRoles $companyRoles,
         DataTypes\CompanyUserRoles $companyUserRoles,
         DataTypes\Configuration $configuration,

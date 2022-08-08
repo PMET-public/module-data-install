@@ -37,6 +37,10 @@ class SharedCatalogs
     /** @var Helper */
     protected $helper;
 
+    /** @var Stores */
+    protected $stores;
+
+
     /**
      * SharedCatalogs constructor
      *
@@ -47,6 +51,7 @@ class SharedCatalogs
      * @param CompanyManagementInterface $companyManagementInterface
      * @param Companies $companies
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param Stores $stores
      */
     public function __construct(
         Helper $helper,
@@ -55,7 +60,8 @@ class SharedCatalogs
         CustomerGroups $customerGroups,
         CompanyManagementInterface $companyManagementInterface,
         Companies $companies,
-        SearchCriteriaBuilder $searchCriteriaBuilder
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        Stores $stores
     ) {
         $this->helper = $helper;
         $this->sharedCatalogInterfaceFactory = $sharedCatalogInterface;
@@ -64,6 +70,7 @@ class SharedCatalogs
         $this->companyManagementInterface = $companyManagementInterface;
         $this->companies = $companies;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->stores = $stores;
     }
 
     /**
@@ -86,6 +93,10 @@ class SharedCatalogs
         if (empty($row['companies'])) {
             $row['companies'] = '';
         }
+
+        if (empty($row['store_code'])) {
+            $row['store_code'] = $settings['store_code'];
+        }
         //check for existing shared catalog to update
         $sharedCatalog = $this->getSharedCatalogByName($row['name']);
 
@@ -104,8 +115,10 @@ class SharedCatalogs
         if (empty($row['type']) || $row['type']=='Custom') {
             $sharedCatalog->setType(SharedCatalogInterface::TYPE_CUSTOM);
             $sharedCatalog->setCustomerGroupId($this->customerGroups->getCustomerGroupId($row['name']));
+            $sharedCatalog->setStoreId($this->stores->getStoreId($row['store_code']));
         } else {
             $sharedCatalog->setType(SharedCatalogInterface::TYPE_PUBLIC);
+            $sharedCatalog->setStoreId(0);
         }
         $this->sharedCatalogRepository->save($sharedCatalog);
 

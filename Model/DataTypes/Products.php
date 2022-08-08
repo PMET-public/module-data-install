@@ -18,12 +18,13 @@ use Magento\Framework\Filesystem;
 
 class Products
 {
-    /** @var Helper */
-    protected $helper;
-
+    //protected const IMPORT_ARRAY_SIZE = 2500;
     protected const DEFAULT_IMAGE_PATH = '/media/catalog/product';
     protected const APP_DEFAULT_IMAGE_PATH = 'var';
     //TODO: flexibility for other than default category
+
+    /** @var Helper */
+    protected $helper;
 
     /** @var Stores */
     protected $stores;
@@ -133,8 +134,18 @@ class Products
         }
         $productsArray = $this->replaceBaseWebsiteCodes($productsArray, $settings);
         $this->helper->logMessage("Importing products", "info");
-
-        $this->import($productsArray, $imgDir, $productValidationStrategy);
+        // for potential use if imports need to be done in smaller chunks
+        // for($i = 0; $i<=ceil(count($productsArray)/self::IMPORT_ARRAY_SIZE); $i++){
+        //     if($i==0){
+        //         $startPos = 0;
+        //         $endPos = self::IMPORT_ARRAY_SIZE;
+        //     }else{
+        //         $startPos = (self::IMPORT_ARRAY_SIZE*$i)+1;
+        //         $endPos = self::IMPORT_ARRAY_SIZE*($i+1);
+        //     }
+        //     $importChunk = array_slice($productsArray, $startPos, $endPos);
+        //     $this->import($importChunk, $imgDir, $productValidationStrategy);
+        // }
 
         /// Restrict products from other stores
         if ($restrictProductsFromViews=='Y') {

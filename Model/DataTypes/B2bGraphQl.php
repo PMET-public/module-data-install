@@ -363,7 +363,7 @@ class B2bGraphQl
     {
         $tempArray = [];
         $rows = [];
-        $header = ['name','companies','type','description'];
+        $header = ['name','companies','type','description','store_code'];
         $inputData = $fileData['data']['companies']['items'];
         //create associative arrays of all company catalog assignments
         //public catalog

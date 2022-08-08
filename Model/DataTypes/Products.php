@@ -146,7 +146,9 @@ class Products
         //     $importChunk = array_slice($productsArray, $startPos, $endPos);
         //     $this->import($importChunk, $imgDir, $productValidationStrategy);
         // }
-
+        
+        $this->import($productsArray, $imgDir, $productValidationStrategy);
+        
         /// Restrict products from other stores
         if ($restrictProductsFromViews=='Y') {
             $this->helper->logMessage("Restricting products from other store views", "info");

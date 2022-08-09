@@ -110,79 +110,79 @@ class SharedCatalogCategories
             $this->helper->logMessage("b2b_shared_catalog_categories requires a category column.", "warning");
             return true;
         }
-
-        foreach ($rows as $row) {
-            $categoryRowArray[] = array_combine($header, $row);
-        }
-        //create separate array for each shared catalog
-        foreach ($categoryRowArray as $categoryRow) {
-            $categoryArray[$categoryRow['shared_catalog']][]=$categoryRow['category'];
-        }
-        //if the default catalog is not defined, then add all categories and products to it
-        $allCategoryIds = $this->getCategoryIds($this->getAllCategories($settings));
-        if (!array_key_exists('Default (General)', $categoryArray)) {
-            $categoryArray['Default (General)'] = $allCategoryIds;
-        }
-        foreach ($categoryArray as $catalogName => $categoryArray) {
-            $groupIds = [];
-            //get id for shared catalog
-            /** @var SharedCatalogInterface $catalog */
-            $catalog = $this->getSharedCatalogByName($catalogName);
-
-            if ($catalog) {
-                $catalogId = $catalog->getId();
-                //remove current categories
-                ///this returns category ids, it should be categories.
-                // get an instance of CategoryCollection
-                $catIds = $this->categoryManagementInterface->getCategories($catalogId);
-                if (count($catIds) > 0) {
-                    $categories = $this->categoryCollection->create();
-
-                    // add a filter to get the IDs you need
-                    $categories->addFieldToFilter(
-                        'entity_id',
-                        $this->categoryManagementInterface->getCategories($catalogId)
-                    );
-                     $catlist=[];
-                    foreach ($categories as $cat) {
-                        $catlist[] = $cat;
-                    }
-                    $this->appState->emulateAreaCode(
-                        AppArea::AREA_ADMINHTML,
-                        [$this->categoryManagementInterface, 'unassignCategories'],
-                        [$catalogId, $catlist]
-                    );
-                }
-
-                //get ids of added categories by path
-                $newCategories = $this->getCategoriesByPath($categoryArray, $settings);
-                //add new categories
-                try {
-                    $this->categoryManagementInterface->assignCategories($catalogId, $newCategories);
-                } catch (\Exception $e) {
-                    $this->helper->logMessage("b2b_shared_catalog_categories generated an error. "
-                    ."This could be due to incorrect values in the file, or a category may be disabled", "warning");
-                    $this->helper->logMessage($e->getMessage(), "warning");
-                    return true;
-                }
-
-                //add products in categories
-                $catgoryIds = $this->getCategoryIds($newCategories);
-                $this->sharedCatalogAssignment->assignProductsForCategories($catalogId, $catgoryIds);
-
-                //set catalog permissions
-                $groupIds[] = $catalog->getCustomerGroupId();
-                $catalogType = $catalog->getType();
-                if ($catalogType == SharedCatalogInterface::TYPE_PUBLIC) {
-                    $groupIds[]=0;
-                }
-                $this->catalogPermissionManagement->setDenyPermissions(
-                    array_diff($allCategoryIds, $catgoryIds),
-                    $groupIds
-                );
-                $this->scheduleBulk->execute($allCategoryIds, $groupIds);
+        if (!empty($rows)) {
+            foreach ($rows as $row) {
+                $categoryRowArray[] = array_combine($header, $row);
             }
-            ;
+            //create separate array for each shared catalog
+            foreach ($categoryRowArray as $categoryRow) {
+                $categoryArray[$categoryRow['shared_catalog']][]=$categoryRow['category'];
+            }
+            //if the default catalog is not defined, then add all categories and products to it
+            $allCategoryIds = $this->getCategoryIds($this->getAllCategories($settings));
+            if (!array_key_exists('Default (General)', $categoryArray)) {
+                $categoryArray['Default (General)'] = $allCategoryIds;
+            }
+            foreach ($categoryArray as $catalogName => $categoryArray) {
+                $groupIds = [];
+                //get id for shared catalog
+                /** @var SharedCatalogInterface $catalog */
+                $catalog = $this->getSharedCatalogByName($catalogName);
+    
+                if ($catalog) {
+                    $catalogId = $catalog->getId();
+                    //remove current categories
+                    ///this returns category ids, it should be categories.
+                    // get an instance of CategoryCollection
+                    $catIds = $this->categoryManagementInterface->getCategories($catalogId);
+                    if (count($catIds) > 0) {
+                        $categories = $this->categoryCollection->create();
+    
+                        // add a filter to get the IDs you need
+                        $categories->addFieldToFilter(
+                            'entity_id',
+                            $this->categoryManagementInterface->getCategories($catalogId)
+                        );
+                         $catlist=[];
+                        foreach ($categories as $cat) {
+                            $catlist[] = $cat;
+                        }
+                        $this->appState->emulateAreaCode(
+                            AppArea::AREA_ADMINHTML,
+                            [$this->categoryManagementInterface, 'unassignCategories'],
+                            [$catalogId, $catlist]
+                        );
+                    }
+    
+                    //get ids of added categories by path
+                    $newCategories = $this->getCategoriesByPath($categoryArray, $settings);
+                    //add new categories
+                    try {
+                        $this->categoryManagementInterface->assignCategories($catalogId, $newCategories);
+                    } catch (\Exception $e) {
+                        $this->helper->logMessage("b2b_shared_catalog_categories generated an error. "
+                        ."This could be due to incorrect values in the file, or a category may be disabled", "warning");
+                        $this->helper->logMessage($e->getMessage(), "warning");
+                        return true;
+                    }
+    
+                    //add products in categories
+                    $catgoryIds = $this->getCategoryIds($newCategories);
+                    $this->sharedCatalogAssignment->assignProductsForCategories($catalogId, $catgoryIds);
+    
+                    //set catalog permissions
+                    $groupIds[] = $catalog->getCustomerGroupId();
+                    $catalogType = $catalog->getType();
+                    if ($catalogType == SharedCatalogInterface::TYPE_PUBLIC) {
+                        $groupIds[]=0;
+                    }
+                    $this->catalogPermissionManagement->setDenyPermissions(
+                        array_diff($allCategoryIds, $catgoryIds),
+                        $groupIds
+                    );
+                    $this->scheduleBulk->execute($allCategoryIds, $groupIds);
+                }
+            }
         }
     }
 

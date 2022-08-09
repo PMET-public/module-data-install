@@ -40,7 +40,6 @@ class SharedCatalogs
     /** @var Stores */
     protected $stores;
 
-
     /**
      * SharedCatalogs constructor
      *

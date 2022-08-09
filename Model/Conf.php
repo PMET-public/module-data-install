@@ -191,7 +191,7 @@ class Conf
 
     /** @var string[]  */
     public const B2B_COMPANY_COLUMNS = ['site_code','legal_name','company_name','company_email','street','city',
-    'country_id','region','postcode','telephone','credit_limit','reseller_id','vat_tax_id','company_admin','address'];
+    'country_id','region','postcode','telephone','credit_export','reseller_id','vat_tax_id','company_admin','address'];
 
     /** @var string[]  */
     public const SETTINGS = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',

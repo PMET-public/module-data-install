@@ -83,7 +83,7 @@ class B2bGraphQl
                             $rows[$rowCount] = array_merge($rows[$rowCount], $address['rows']);
                             break;
 
-                        case 'credit_limit':
+                        case 'credit_export':
                             if ($setHeader) {
                                 $header[] = 'credit_limit';
                             }
@@ -367,6 +367,9 @@ class B2bGraphQl
         $inputData = $fileData['data']['companies']['items'];
         //create associative arrays of all company catalog assignments
         //public catalog
+        if (empty($fileData['data']['publicSharedCatalog']['name'])) {
+            return [];
+        }
         $tempArray[] = ['name'=>$fileData['data']['publicSharedCatalog']['name'],
         'companies'=>[],'type'=>'Public','description'=>$fileData['data']['publicSharedCatalog']['description']];
         //get info from company
@@ -412,10 +415,12 @@ class B2bGraphQl
         $inputData = $fileData['data']['companies']['items'];
         foreach ($inputData as $company) {
             //if catalog is already defined, add to company array. else add element
-            $sharedCatalogName = $company['shared_catalog']['name'];
-            $catalogCategories = $company['shared_catalog']['categories'];
-            foreach ($catalogCategories as $category) {
-                $rows[] = [$sharedCatalogName,$category['path']];
+            if (!empty($fileData['data']['shared_catalog']['name'])) {
+                $sharedCatalogName = $company['shared_catalog']['name'];
+                $catalogCategories = $company['shared_catalog']['categories'];
+                foreach ($catalogCategories as $category) {
+                    $rows[] = [$sharedCatalogName,$category['path']];
+                }
             }
         }
         $val['header'] = $header;

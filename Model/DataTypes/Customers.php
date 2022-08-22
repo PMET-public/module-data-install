@@ -336,16 +336,23 @@ class Customers
                 if (empty($rewardCustomer['_website'])) {
                     $rewardCustomer['_website']=$this->settings['site_code'];
                 }
-                try{
-                   $customer = $this->customerRepositoryInterface->get(
-                    $rewardCustomer['email']);
-
-                } catch (NoSuchEntityException $e){
-                    $this->helper->logMessage("Rewards points cannot be added to customer: "
-                    .$e->getMessage(), "warning");
-                    continue;
+                //try to load with the given website id. Then fail back to null (website id 1)
+                //in case the customer was loaded outside of the current data load
+                try {
+                    $customer = $this->customerRepositoryInterface->get(
+                        $rewardCustomer['email'],
+                        $this->stores->getWebsiteId($rewardCustomer['_website'])
+                    );
+                } catch (NoSuchEntityException $e) {
+                    try {
+                        $customer = $this->customerRepositoryInterface->get($rewardCustomer['email']);
+                    } catch (NoSuchEntityException $e) {
+                        $this->helper->logMessage("Rewards points cannot be added to customer: "
+                        .$e->getMessage(), "warning");
+                        continue;
+                    }
                 }
-                
+                 
              /** @var Reward $reward */
                 $reward = $this->rewardFactory->create();
                 $reward->setWebsiteId($this->stores->getWebsiteId($rewardCustomer['_website']));

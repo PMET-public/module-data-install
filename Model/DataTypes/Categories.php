@@ -116,10 +116,9 @@ class Categories
                 $row['is_active'] = 1;
             }
         }
-        if($row['is_active']!=0){
+        if ($row['is_active']!=0) {
             $row['is_active'] = 1;
         }
-
 
         if (empty($row['is_anchor']) && $row['is_anchor']!=0) {
             $row['is_anchor'] = 1;

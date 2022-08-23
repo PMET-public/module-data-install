@@ -1,43 +1,19 @@
 # Magento 2 Data Install Module
 
-The Data Install module facilitates the loading of sample data by a series of generic .csv files. This allows for the easy creation/editing of data sets for particular scenerios. It also helps facilitate packaging of demos or verticals so they can be added to an existing site with demo data, or an empty site.
+The Data Install module facilitates the loading of sample data by a series of generic .csv files, or the .json results from GraphQL queries (see the [Data Installer GraphQL ](https://github.com/PMET-public/module-data-install-graphql)module ). This allows for the easy creation/editing of data sets for particular scenerios. It also helps facilitate packaging of demos or verticals so they can be added to an existing site with demo data, or an empty site.
 
 **As the Data Install supports B2B, at this time the B2B modules are required in Magento even if B2B features will not be used.**
 
 ## Installation Methods
 
-### CLI (Preferred Method)
+### CLI
 
-`bin/magento gxd:datainstall <module>`
+`bin/magento gxd:datainstall <module or path to data pack>`
 Optional arguments:
 `--load[=LOAD]  Data directory to load`
  `--files[=FILES] Comma delimited list of individual files to load`
  `-r, --reload[=RELOAD] Force Reload`
  `--host[=HOST] Override of host values in stores.csv file`
-
-Using the CLI has multiple advantages to the `setup:upgrade` method
-
-1. You don't need to use a Magento module unless you want to
-1. The module becomes very simple with no need for the Setup classes
-1. You can have a module included in the code or composer.json, but it will not add its data until you run the appropriate CLI command.  This allows you to have multiple data sets ready to go without having to load each one as they are needed.
-1. The Magento `setup:upgrade` process was not built with the idea of installing large amounts of data across many data types and multiple stores. This can lead to errors especially when trying to install multiple data packs at the same time.
-
-**If you are using the CLI method, your modules should not have the Setup classes.  This could lead to data conflicts and errors.**
-
-###### Datapack data format
-
-1. Each datapack needs to have a `data` subdirectory. This can contain the data to install, or it can contain one or more subdirectories with different installation options.  For example, in our Grocery data pack there are directories for a `standalone` or `store` installation. Those can be specified by using the `--load=` option.
-
-2. A `.default` file can be created under the `data` directory containing the name of the directory you want installed if none is specified with the `--load=` option.
-
-3. The `media` directory is used for images and other assets. Most items are copied to their correct destinations under `pub/media` with the exception of product assets which read by the importer. Supported sub-directories include:
-   * `catalog` - Mostly contains product images under the `product` subdirectory. From there any image path should follow what is expected in the product import file.
-   * `downloadable_products` - downloadable product assets to be assigned during product import
-   * `favicon` - As defined in the config files
-   * `logo` - As defined in the config files
-   * `template_manager` - Images used in `templates.csv`
-   * `wysiwyg` - CMS images. It is recommended that they be placed in a unique subdirectory to make it cleaner in the UI if multiple data packs are loaded. The path needs to match what is referenced in CMS items.
-   * `email` - email logo as defined in config files
 
 ###### Usage
 
@@ -59,24 +35,32 @@ Mostly used for testing.  You can pass a comma delimited list specific files you
 
 Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](https://github.com/PMET-public/module-storystore-sample "https://github.com/PMET-public/module-storystore-sample")
 
-### Setup:Upgrade (or install) -Deprecated
+### Upload Via UI
+A .zip file can be created with assetts that follow the Data Pack format. It is then uploaded via the Commerce UI at *System->Data Transfer->Import Data Pack*
+Additional command attiributes the same as used by the CLI can be added as needed. When uploaded a job is then created to import the data pack
 
-Although CLI is the preferred method, you can still create modules and install data during Magento installation or setup upgrade.  This method may not work when installing multiple data packs especially around multiple sites stores and views. We have separated the process out to require 3 different setup classes in order to optimize for success.
 
-Sample setup:upgrade compatible data pack
+### GraphQL Scheduled
+A GraphQL query can be used to mimic the same functionality that the CLI provides. Additional queries can also return job status and logging information. See the [Data Installer GraphQL ](https://github.com/PMET-public/module-data-install-graphql)module for information
 
-The installation is split into 3 Setup classes.
+## Datapack data format
 
-- `Setup/Patch/Data/InstallStores.php` - installs sites,stores & views
-- `Setup/Patch/Data/Install.php` - config, categories, customers, segments, blocks, attributes
-- `Setup/RecurringData.php` - remaning data points
-Even though `RecurringData.php` is used, its first run is logged so it only runs once.
+1. Each datapack needs to have a `data` subdirectory. This can contain the data to install, or it can contain one or more subdirectories with different installation options.  For example, in our Grocery data pack there are directories for a `standalone` or `store` installation. Those can be specified by using the `--load=` option.
 
-Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](https://github.com/PMET-public/module-storystore-sample "https://github.com/PMET-public/module-storystore-sample")
+2. A `.default` file can be created under the `data` directory containing the name of the directory you want installed if none is specified with the `--load=` option.
+
+3. The `media` directory is used for images and other assets. Most items are copied to their correct destinations under `pub/media` with the exception of product assets which read by the importer. Supported sub-directories include:
+   * `catalog` - Mostly contains product images under the `product` subdirectory. From there any image path should follow what is expected in the product import file.
+   * `downloadable_products` - downloadable product assets to be assigned during product import
+   * `favicon` - As defined in the config files
+   * `logo` - As defined in the config files
+   * `template_manager` - Images used in `templates.csv`
+   * `wysiwyg` - CMS images. It is recommended that they be placed in a unique subdirectory to make it cleaner in the UI if multiple data packs are loaded. The path needs to match what is referenced in CMS items.
+   * `email` - email logo as defined in config files
 
 ### Handling of the default `base` website
 
-When Magento installs, a default web site is created with a site code of `base`. In order to facilitate the ease of re-use of data packs, most are created assuming that the `base` web site exists. The data installer will make adjustments in the case that the `base` site code has been changed.
+When Adobe Commerce installs, a default web site is created with a site code of `base`. In order to facilitate the ease of re-use of data packs, most are created assuming that the `base` web site exists. The data installer will make adjustments in the case that the `base` site code has been changed.
 
 If the data that is being installed calls for a `base` website, and that site does not exist, the Data Installer will substitute `base` with the site code of the default web site.
 
@@ -87,11 +71,11 @@ Of course you can always specify any site code where appropriate in the data.
 There are two events generated at the start and end of the installation process that can be used by other modules
 `magentoese_datainstall_install_start` and `magentoese_datainstall_install_end`
 
-Plugins and observers have been created to integrate with the `mageplaza/module-webhook` extension, which is required in `composer.json`. This will allow webhooks to be configured based on the start and end events.
+Plugins and observers have been created to integrate with the `mageplaza/module-webhook` extension. As of this writing they are not included as the module is not yet php 8.1 compatible.  When updated, this will allow webhooks to be configured based on the start and end events.
 
 ## Data Files
 
-Each element of potential sample data is encapsulated in its own file:
+Each element of potential sample data is encapsulated in its own file. Below is the list of .csv files that are supported.  If you are using the results from the supported GraphQL queries, see the [Data Installer GraphQL ](https://github.com/PMET-public/module-data-install-graphql)module )
 
 [**settings.csv**](#Settings) - Optional file containing settings used by the install process.
 
@@ -1123,6 +1107,8 @@ The block included (Contact us info) in the current installation has an id of 3,
 
 If no correct replacement is found, the substitution will not occur.
 
+If you are using the GraphQL export, these substitutions will be made automatically
+
 Here is a list of all substitutions currently supported
 
 **Category Id** - `{{categoryid key="<url key of category>"}}`\
@@ -1161,5 +1147,10 @@ Here is a list of all substitutions currently supported
 **pages** - `{{pageid key="<page identifier>"}}`\
 *example* - `{{pageid key="new-home-page"}}`
 
-# Content export
-TBD
+## Troubleshooting
+The Data Installer should handle most problems by reporting back as much information as possible, while continuing on with other data types.  For example it may skip a file or specific row in a file if it encounters an issue.
+
+Information about skipped rows or files will be displayed in the terminal when using a CLI import. Also standard importer information will be available for products, customers, advanced pricing and msi. This will include imported rows, invalid rows, etc.
+
+For all methods, the same information is written in var/logs/data_installer.log. If it was a UI Upload or a GraphQL initiated import, the log information can be retreived via GraphQL query.
+

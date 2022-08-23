@@ -15,7 +15,7 @@ use MagentoEse\DataInstall\Model\Process;
 use Psr\Log\LoggerInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\Filesystem\Driver\File;
-use Magento\Framework\Filesystem\DriverInterface;
+use Exception;
 
 /**
  * Consumer for export message.
@@ -39,9 +39,6 @@ class Consumer
     /** @var File */
     protected $fileSystem;
 
-    /** @var DriverInterface */
-    protected $driverInterface;
-
     /**
      * Consumer constructor
      *
@@ -50,22 +47,19 @@ class Consumer
      * @param EntityManager $entityManager
      * @param Process $process
      * @param File $fileSystem
-     * @param DriverInterface $driverInterface
      */
     public function __construct(
         LoggerInterface $logger,
         SerializerInterface $serializer,
         EntityManager $entityManager,
         Process $process,
-        File $fileSystem,
-        DriverInterface $driverInterface
+        File $fileSystem
     ) {
         $this->logger = $logger;
         $this->serializer = $serializer;
         $this->entityManager = $entityManager;
         $this->process = $process;
         $this->fileSystem = $fileSystem;
-        $this->driverInterface = $driverInterface;
     }
 
     /**
@@ -133,7 +127,6 @@ class Consumer
      */
     private function execute($data): void
     {
-       //loadFiles($fileSource, $load = '', array $fileOrder = [], $reload = 0, $host = null)
         $this->process->loadFiles($data);
         $data['fileorder'] = ['msi_inventory.csv'];
         $data['reload'] = 1;
@@ -141,6 +134,9 @@ class Consumer
         //delete source files
         $this->fileSystem->deleteDirectory($data['filesource']);
         //delete the archive that is from a mac compress process
-        $this->fileSystem->deleteDirectory($this->driverInterface->getParentDirectory($data['filesource'])."/__MACOSX");
+        $macFile = $this->fileSystem->getParentDirectory($data['filesource'])."/__MACOSX";
+        if ($this->fileSystem->isExists($macFile)) {
+            $this->fileSystem->deleteDirectory($macFile);
+        }
     }
 }

@@ -131,12 +131,14 @@ class Consumer
         $data['fileorder'] = ['msi_inventory.csv'];
         $data['reload'] = 1;
         $this->process->loadFiles($data);
-        //delete source files
-        $this->fileSystem->deleteDirectory($data['filesource']);
-        //delete the archive that is from a mac compress process
-        $macFile = $this->fileSystem->getParentDirectory($data['filesource'])."/__MACOSX";
-        if ($this->fileSystem->isExists($macFile)) {
-            $this->fileSystem->deleteDirectory($macFile);
+        //delete source files if it's an uploaded package
+        if ($this->fileSystem->isExists($data['filesource'])) {
+            $this->fileSystem->deleteDirectory($data['filesource']);
+            //delete the archive that is from a mac compress process
+            $macFile = $this->fileSystem->getParentDirectory($data['filesource'])."/__MACOSX";
+            if ($this->fileSystem->isExists($macFile)) {
+                $this->fileSystem->deleteDirectory($macFile);
+            }
         }
     }
 }

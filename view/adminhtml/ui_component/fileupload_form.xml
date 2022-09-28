@@ -52,7 +52,7 @@
                 <item name="label" xsi:type="string" translate="true">Select File</item>
                 <item name="visible" xsi:type="boolean">true</item>
                 <item name="formElement" xsi:type="string">fileUploader</item>
-                <item name="required" xsi:type="boolean">true</item>
+                <item name="required" xsi:type="boolean">false</item>
                 <item name="notice" xsi:type="string" translate="true">.zip file required</item>
                 <item name="uploaderConfig" xsi:type="array">
                     <item name="url" xsi:type="url" path="datainstall/import/tempupload"/>
@@ -60,6 +60,18 @@
             </item>
         </argument>
     </field>
+    <field name="remote_source" sortOrder="100">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="dataType" xsi:type="string">string</item>
+                <item name="source" xsi:type="string">vertical</item>
+                <item name="label" xsi:type="string" translate="true">Or import remote .zip file</item>
+                <item name="visible" xsi:type="boolean">true</item>
+                <item name="formElement" xsi:type="string">input</item>
+                <item name="notice" xsi:type="string" translate="true">If using github, an access token needs to be saved</item>
+            </item>
+        </argument>
+    </field>   
     <field name="advanced_conditions" sortOrder="200">
         <argument name="data" xsi:type="array">
             <item name="config" xsi:type="array">

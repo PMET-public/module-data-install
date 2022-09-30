@@ -86,7 +86,7 @@ class ScheduleBulk
         if ($operationCount > 0) {
             $bulkUuid = $this->identityService->generateId();
             //phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
-            $bulkDescription = 'Data Pack Import - '.basename($operationData[0]['packFile'], '.zip');
+            $bulkDescription = 'Data Pack Import - '.basename($operationData[0]['fileSource'], '.zip');
 
             $operations = [];
             foreach ($operationData as $operation) {

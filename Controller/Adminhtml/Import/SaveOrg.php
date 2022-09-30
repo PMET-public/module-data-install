@@ -14,21 +14,13 @@ use MagentoEse\DataInstall\Model\Queue\ScheduleBulk;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\HTTP\Client\Curl;
-use MagentoEse\DataInstall\Api\Data\DataPackInterfaceFactory;
-use MagentoEse\DataInstall\Api\Data\DataPackInterface;
-use MagentoEse\DataInstall\Api\Data\InstallerJobInterfaceFactory;
-use MagentoEse\DataInstall\Api\Data\InstallerJobInterface;
 
-class Save extends \Magento\Backend\App\Action
+class SaveOrg extends \Magento\Backend\App\Action
 {
 
     public const ZIPPED_DIR = 'datapacks/zipfiles';
     public const UNZIPPED_DIR = 'datapacks/unzipped';
     public const UPLOAD_DIR = 'datapacks/upload';
-
-    /** @var DataPackInterfaceFactory */
-    protected $dataPack;
-    
     /** @var UploaderFactory */
     protected $uploaderFactory;
 
@@ -47,15 +39,10 @@ class Save extends \Magento\Backend\App\Action
     /** @var Curl */
     protected $curl;
 
-    /** @var InstallerJobInterfaceFactory */
-    protected $installerJobInterface;
-
     /**
      * Save constructor.
      *
      * @param Context $context
-     * @param DataPackInterfaceFactory $dataPack
-     * @param InstallerJobInterfaceFactory $installerJobInterface
      * @param UploaderFactory $uploaderFactory
      * @param Filesystem $filesystem
      * @param ScheduleBulk $scheduleBulk
@@ -66,8 +53,6 @@ class Save extends \Magento\Backend\App\Action
      */
     public function __construct(
         Context $context,
-        DataPackInterfaceFactory $dataPack,
-        InstallerJobInterfaceFactory $installerJobInterface,
         UploaderFactory $uploaderFactory,
         Filesystem $filesystem,
         ScheduleBulk $scheduleBulk,
@@ -76,8 +61,6 @@ class Save extends \Magento\Backend\App\Action
         Curl $curl
     ) {
         parent::__construct($context);
-        $this->dataPack = $dataPack;
-        $this->installerJobInterface = $installerJobInterface;
         $this->uploaderFactory = $uploaderFactory;
         $this->verticalDirectory = $filesystem->getDirectoryWrite(DirectoryList::TMP);
         $this->scheduleBulk = $scheduleBulk;
@@ -85,6 +68,7 @@ class Save extends \Magento\Backend\App\Action
         $this->scopeConfig = $scopeConfig;
         $this->curl = $curl;
     }
+
     /**
      * Execute
      *
@@ -92,7 +76,6 @@ class Save extends \Magento\Backend\App\Action
      */
     public function execute()
     {
-        $dataPack = $this->dataPack->create();
         try {
             if ($this->getRequest()->getMethod() !== 'POST' ||
             !$this->_formKeyValidator->validate($this->getRequest())) {
@@ -102,11 +85,9 @@ class Save extends \Magento\Backend\App\Action
             $params = $this->getRequest()->getParams();
             //params['vertical'] for upload params['remote_source'] for upload
             if ($params['remote_source']!='') {
-                $dataPack->setAuthToken("");
-                $dataPack->setDataPackLocation($dataPack->getRemoteDataPack(
-                    $params['remote_source'],
-                    $dataPack->getAuthToken()
-                ));
+                $accessToken = $this->getAuthentication($params);
+                $fileInfo = $this->getRemoteFile($params['remote_source'], $accessToken);
+                //$fileInfo = $fileUploader->save($this->verticalDirectory->getAbsolutePath(self::ZIPPED_DIR));
             } else {
                 try {
                     $verticalId = 'vertical';
@@ -124,8 +105,7 @@ class Save extends \Magento\Backend\App\Action
                     $fileUploader->setAllowCreateFolders(true);
                     $fileUploader->validateFile();
                 //upload file
-                    $dataPack->setDataPackLocation($fileUploader->save($this->verticalDirectory->
-                    getAbsolutePath(DataPackInterface::ZIPPED_DIR)));
+                    $fileInfo = $fileUploader->save($this->verticalDirectory->getAbsolutePath(self::ZIPPED_DIR));
                 } catch (ValidationException $e) {
                     throw new LocalizedException(__('File extension is not supported. Only extension allowed is .zip'));
                 } catch (\Exception $e) {
@@ -133,12 +113,19 @@ class Save extends \Magento\Backend\App\Action
                     throw new LocalizedException(__('Data Pack is required'));
                 }
             }
-            $dataPack->unZipDataPack();
-            $this->setAdvancedConditions($dataPack, $params['advanced_conditions']);
-            if ($dataPack->getDataPackLocation()) {
+            $operationConditions = $this->setAdvancedConditions($params['advanced_conditions']);
+            $directoryName = $this->unzipFile($fileInfo);
+            if ($directoryName) {
               ///schedule import
-                $installerJob = $this->installerJobInterface->create();
-                $installerJob->scheduleImport($dataPack);
+                $operation = [];
+                $operation['fileSource']=$this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR).'/'
+                .$directoryName;
+                $operation['packFile']=$directoryName;
+                $operation['load']=$operationConditions['load'];
+                $operation['fileOrder']=$operationConditions['files'];
+                $operation['reload']=$operationConditions['reload'];
+                $operation['host']=$operationConditions['host'];
+                $this->scheduleBulk->execute([$operation]);
             } else {
                 $this->messageManager->addErrorMessage(__('Data Pack could not be unzipped. Please check file format'));
                 return $this->_redirect('*/*/upload');
@@ -153,90 +140,12 @@ class Save extends \Magento\Backend\App\Action
         } catch (\Exception $e) {
             error_log($e->getMessage());
             error_log($e->getTraceAsString());
-            $this->messageManager->addErrorMessage(__('An error occurred, '.$e->getMessage()));
+            $this->messageManager->addErrorMessage(__('An error occurred, please try again later.'));
             return $this->_redirect('*/*/upload');
         }
     }
 
     /**
-     * Set the advanced conditions of the job
-     *
-     * @param string $conditions
-     * @param DataPackInterface $dataPack
-     * @return DataPackInterface
-     */
-    protected function setAdvancedConditions($dataPack, $conditions)
-    {
-        $commands = explode(" ", $conditions);
-        foreach ($commands as $command) {
-            $element = explode("=", trim($command));
-            switch ($element[0]) {
-                case "--files":
-                    $dataPack->setFiles(explode(",", trim($element[1], '"')));
-                    break;
-                case "-r":
-                    $dataPack->setReload(1);
-                    break;
-                case "--host":
-                    $dataPack->setHost($element[1]);
-                    break;
-                case "--load":
-                    $dataPack->setLoad($element[1]);
-                    break;
-            }
-        }
-        return $dataPack;
-    }
-
-    /**
-     * Unzip data pack file
-     *
-     * @param string $fileInfo
-     * @return mixed
-     * @throws \Magento\Framework\Exception\FileSystemException
-     */
-    protected function unzipFiled($fileInfo)
-    {
-        $zip = new \ZipArchive;
-
-      // Zip File Name
-        if ($zip->open($fileInfo["path"]."/".$fileInfo["file"]) === true) {
-            //get name of directory in the zip file
-            $fileIndex = $zip->statIndex(0)['name'];
-            $directoryName = str_replace("/", "", $zip->statIndex(0)['name']);
-            //directory is created if it doesnt exist
-            $zip->extractTo($this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR));
-            
-            $zip->close();
-            $this->file->deleteFile($fileInfo["path"]."/".$fileInfo["file"]);
-            return $directoryName;
-        } else {
-            $this->file->deleteFile($fileInfo["path"]."/".$fileInfo["file"]);
-            return false;
-        }
-    }
-
-    /**
-     * Return authentication token
-     * Defaults to github token for now, but can be expanded to support additional authentication methods
-     *
-     * @param array $params
-     * @return mixed
-     * @throws \Magento\Framework\Exception\FileSystemException
-     */
-    protected function getAuthenticationd($params)
-    {
-        if (!empty($params['github_access_token'])) {
-            return $params['github_access_token'];
-        } else {
-            return $this->scopeConfig->getValue(
-                'magentoese/datainstall/github_access_token',
-                ScopeConfigInterface::SCOPE_TYPE_DEFAULT
-            );
-        }
-    }
-
-        /**
      * Get a remote data pack
      *
      * @param string $url
@@ -268,5 +177,83 @@ class Save extends \Magento\Backend\App\Action
             'file' => $filename.'.zip'
         ];
         return $fileInfo;
+    }
+
+    /**
+     * Set the advanced conditions of the job
+     *
+     * @param string $conditions
+     * @return array
+     */
+    protected function setAdvancedConditions($conditions)
+    {
+        $settings = ["reload"=>0,"load"=>"", "files"=>"", "host"=>""];
+        $commands = explode(" ", $conditions);
+        foreach ($commands as $command) {
+            $element = explode("=", trim($command));
+            switch ($element[0]) {
+                case "--files":
+                    $settings["files"]=explode(",", trim($element[1], '"'));
+                    break;
+                case "-r":
+                    $settings["reload"]=1;
+                    break;
+                case "--host":
+                    $settings["host"]=$element[1];
+                    break;
+                case "--load":
+                    $settings["load"]=$element[1];
+                    break;
+            }
+        }
+        return $settings;
+    }
+
+    /**
+     * Unzip data pack file
+     *
+     * @param string $fileInfo
+     * @return mixed
+     * @throws \Magento\Framework\Exception\FileSystemException
+     */
+    protected function unzipFile($fileInfo)
+    {
+        $zip = new \ZipArchive;
+
+      // Zip File Name
+        if ($zip->open($fileInfo["path"]."/".$fileInfo["file"]) === true) {
+            //get name of directory in the zip file
+            $fileIndex = $zip->statIndex(0)['name'];
+            $directoryName = str_replace("/", "", $zip->statIndex(0)['name']);
+            //directory is created if it doesnt exist
+            $zip->extractTo($this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR));
+            
+            $zip->close();
+            $this->file->deleteFile($fileInfo["path"]."/".$fileInfo["file"]);
+            return $directoryName;
+        } else {
+            $this->file->deleteFile($fileInfo["path"]."/".$fileInfo["file"]);
+            return false;
+        }
+    }
+
+    /**
+     * Return authentication token
+     * Defaults to github token for now, but can be expanded to support additional authentication methods
+     *
+     * @param array $params
+     * @return mixed
+     * @throws \Magento\Framework\Exception\FileSystemException
+     */
+    protected function getAuthentication($params)
+    {
+        if (!empty($params['github_access_token'])) {
+            return $params['github_access_token'];
+        } else {
+            return $this->scopeConfig->getValue(
+                'magentoese/datainstall/github_access_token',
+                ScopeConfigInterface::SCOPE_TYPE_DEFAULT
+            );
+        }
     }
 }

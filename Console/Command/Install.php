@@ -71,7 +71,7 @@ class Install extends Command
             new InputArgument(
                 self::DATAPACK,
                 InputArgument::REQUIRED,
-                'Module name or path to datapack'
+                'Module name or absolute path to datapack'
             ),
             new InputOption(self::LOAD, null, InputOption::VALUE_OPTIONAL, 'Data directory to load', ''),
             new InputOption(

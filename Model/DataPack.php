@@ -8,6 +8,7 @@ use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\HTTP\Client\Curl;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Exception\FileSystemException;
 
 class DataPack implements DataPackInterface
 {
@@ -49,7 +50,9 @@ class DataPack implements DataPackInterface
     * @param File $file
     * @param ScopeConfigInterface $scopeConfigInterface
     * @param Curl $curl
+    * @param Filesystem $filesystem
     * @return void
+    * @throws FileSystemException
     */
     public function __construct(
         File $file,
@@ -77,7 +80,7 @@ class DataPack implements DataPackInterface
     /**
      * Get path of data pack files or module name
      *
-     * @param mixed $dataPackLocation
+     * @param mixed $location
      */
     public function setDataPackLocation($location)
     {
@@ -129,7 +132,7 @@ class DataPack implements DataPackInterface
     /**
      * Set host to define in base url
      *
-     * @param $host
+     * @param string $host
      * @return void
      */
     public function setHost($host)
@@ -148,17 +151,17 @@ class DataPack implements DataPackInterface
     }
 
      /**
-     * get reload flag
-     *
-     * @return int
-     */
+      * Get reload flag
+      *
+      * @return int
+      */
     public function getReload()
     {
         return $this->reload;
     }
     
     /**
-     * set reload flad
+     * Set reload flad
      *
      * @param  int $reload
      * @return void
@@ -249,11 +252,11 @@ class DataPack implements DataPackInterface
     }
 
      /**
-     * Unzip data pack file
-     *
-     * @return mixed
-     * @throws \Magento\Framework\Exception\FileSystemException
-     */
+      * Unzip data pack file
+      *
+      * @return mixed
+      * @throws \Magento\Framework\Exception\FileSystemException
+      */
     public function unZipDataPack()
     {
         $zip = new \ZipArchive;
@@ -275,8 +278,7 @@ class DataPack implements DataPackInterface
     }
     
     /**
-     * Return authentication token
-     * Defaults to github token for now, but can be expanded to support additional authentication methods
+     * Return authentication token. Defaults to github token for now, but can be expanded to support additional methods
      *
      * @param string $token
      * @return mixed
@@ -292,8 +294,5 @@ class DataPack implements DataPackInterface
                 ScopeConfigInterface::SCOPE_TYPE_DEFAULT
             );
         }
-    }
-    public function foo()
-    {
     }
 }

@@ -54,7 +54,8 @@ interface InstallerJobInterface extends ExtensibleDataInterface
 
     /**
      * Set Data Pack for job
-     * @param DataPackInterface $dataPackInterface
+     *
+     * @param DataPackInterface $dataPack
      * @return void
      */
     public function setDataPack(DataPackInterface $dataPack);
@@ -62,15 +63,15 @@ interface InstallerJobInterface extends ExtensibleDataInterface
     /**
      * Get Data Pack for job
      *
-     * @return DataPackInterface $dataPackInterface
+     * @return DataPackInterface
      */
     public function getDataPack();
 
      /**
-     * Schedule data pack import
-     *
-     * @param DataPackInterface $dataPackInterface
-     * @return string
-     */
+      * Schedule data pack import
+      *
+      * @param DataPackInterface $dataPack
+      * @return string
+      */
     public function scheduleImport(DataPackInterface $dataPack);
 }

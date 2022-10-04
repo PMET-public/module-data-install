@@ -22,7 +22,7 @@ interface DataPackInterface extends ExtensibleDataInterface
     /**
      * Get path of data pack files or module name
      *
-     * @param mixed $dataPackLocation
+     * @param mixed $location
      */
     public function setDataPackLocation($location);
 
@@ -57,7 +57,7 @@ interface DataPackInterface extends ExtensibleDataInterface
     /**
      * Set host to define in base url
      *
-     * @param $host
+     * @param string $host
      */
     public function setHost($host);
 
@@ -69,14 +69,14 @@ interface DataPackInterface extends ExtensibleDataInterface
     public function getHost();
     
     /**
-     * get reload flag
+     * Get reload flag
      *
      * @return int
      */
     public function getReload();
     
     /**
-     * set reload flag
+     * Set reload flag
      *
      * @param  int $reload
      * @return int
@@ -84,14 +84,14 @@ interface DataPackInterface extends ExtensibleDataInterface
     public function setReload($reload);
 
      /**
-     * get is remote flag
-     *
-     * @return boolean
-     */
+      * Get is remote flag
+      *
+      * @return boolean
+      */
     public function getIsRemote();
     
     /**
-     * set is remote flag
+     * Set is remote flag
      *
      * @param  boolean $isRemote
      * @return boolean

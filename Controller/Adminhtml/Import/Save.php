@@ -158,13 +158,13 @@ class Save extends \Magento\Backend\App\Action
         }
     }
 
-    /**
-     * Set the advanced conditions of the job
-     *
-     * @param string $conditions
-     * @param DataPackInterface $dataPack
-     * @return DataPackInterface
-     */
+   /**
+    * Set the advanced conditions of the job
+    *
+    * @param DataPack $dataPack
+    * @param string $conditions
+    * @return DataPack
+    */
     protected function setAdvancedConditions($dataPack, $conditions)
     {
         $commands = explode(" ", $conditions);
@@ -218,6 +218,7 @@ class Save extends \Magento\Backend\App\Action
 
     /**
      * Return authentication token
+     *
      * Defaults to github token for now, but can be expanded to support additional authentication methods
      *
      * @param array $params
@@ -237,12 +238,12 @@ class Save extends \Magento\Backend\App\Action
     }
 
         /**
-     * Get a remote data pack
-     *
-     * @param string $url
-     * @param string $githubToken
-     * @return array
-     */
+         * Get a remote data pack
+         *
+         * @param string $url
+         * @param string $githubToken
+         * @return array
+         */
     protected function getRemoteFile($url, $githubToken)
     {
         $filename = uniqid();

@@ -28,6 +28,7 @@ class InstallerJob implements InstallerJobInterface
      */
     public function getJobId()
     {
+        return $this->jobId;
     }
 
     /**
@@ -37,6 +38,7 @@ class InstallerJob implements InstallerJobInterface
      */
     public function setJobId(string $jobId)
     {
+        $this->jobId = $jobId;
     }
 
     /**
@@ -47,6 +49,7 @@ class InstallerJob implements InstallerJobInterface
      */
     public function setStatus(string $status)
     {
+        $this->status = $status;
     }
 
     /**
@@ -56,6 +59,7 @@ class InstallerJob implements InstallerJobInterface
      */
     public function getStatus()
     {
+        return $this->status;
     }
 
     /**
@@ -66,6 +70,7 @@ class InstallerJob implements InstallerJobInterface
      */
     public function setStatusMessage(string $statusMessage)
     {
+        $this->statusMessage = $statusMessage;
     }
 
     /**
@@ -75,37 +80,40 @@ class InstallerJob implements InstallerJobInterface
      */
     public function getStatusMessage()
     {
+        return $this->statusMessage;
     }
 
     /**
      * Set Data Pack for job
-     * @param DataPackInterface $dataPackInterface
+     *
+     * @param DataPackInterface $dataPack
      * @return void
      */
     public function setDataPack(DataPackInterface $dataPack)
     {
+        $this->dataPack = $dataPack;
     }
 
     /**
      * Get Data Pack for job
      *
-     * @return DataPackInterface $dataPackInterface
+     * @return DataPackInterface
      */
     public function getDataPack()
     {
+        return $this->dataPack;
     }
 
      /**
-     * Schedule data pack import
-     *
-     * @param DataPackInterface $dataPackInterface
-     * @return string
-     */
+      * Schedule data pack import
+      *
+      * @param DataPackInterface $dataPack
+      * @return string
+      */
     public function scheduleImport(DataPackInterface $dataPack)
     {
         $operation = [];
         $operation['fileSource'] = $dataPack->getDataPackLocation();
-        //$operation['packFile']=$directoryName;
         $operation['load' ]= $dataPack->getLoad();
         $operation['fileOrder'] = $dataPack->getFiles();
         $operation['reload'] = $dataPack->getReload();

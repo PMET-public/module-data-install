@@ -61,6 +61,7 @@ class DataPack implements DataPackInterface
         Filesystem $filesystem
     ) {
         $this->reload=0;
+        $this->jobId='';
         $this->file = $file;
         $this->scopeConfig = $scopeConfigInterface;
         $this->curl = $curl;
@@ -211,6 +212,27 @@ class DataPack implements DataPackInterface
     public function setAuthToken($token)
     {
         $this->authToken = $this->getAuthentication($token);
+    }
+
+    /**
+     * Get job id if pack has been imported as job
+     *
+     * @return string
+     */
+    public function getJobId()
+    {
+        return $this->jobId;
+    }
+
+    /**
+     * Set job id if pack has been imported as job
+     *
+     * @param string $jobId
+     * @return void
+     */
+    public function setJobId($jobId)
+    {
+        $this->jobId = $jobId;
     }
 
      /**

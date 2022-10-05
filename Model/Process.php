@@ -16,7 +16,6 @@ use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Csv;
 use Magento\Framework\Filesystem\DirectoryList;
-use Magento\Framework\Filesystem\DriverInterface;
 use Magento\Framework\Setup\SampleData\Context as SampleDataContext;
 use Magento\Framework\Setup\SampleData\FixtureManager;
 use MagentoEse\DataInstall\Model\Conf;
@@ -26,6 +25,7 @@ use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use MagentoEse\DataInstall\Api\Data\DataPackInterface;
 
 class Process
 {
@@ -114,20 +114,25 @@ class Process
     /**
      * Load files
      *
-     * @param array $jobSettings
+     * @param DataPackInterface $dataPack
      * @return bool
      * @throws LocalizedException
      * @throws FileSystemException
      */
-    public function loadFiles($jobSettings)
+    public function loadFiles($dataPack)
     {
-        $jobSettings = $this->setDefaults($jobSettings);
+        $jobSettings['filesource'] = $dataPack->getDataPackLocation();
+        $jobSettings['load'] = $dataPack->getLoad();
+        $jobSettings['fileorder'] = $dataPack->getFiles();
+        $jobSettings['reload'] = $dataPack->getReload();
+        $jobSettings['host'] = $dataPack->getHost();
+        $jobSettings['jobid'] = $dataPack->getJobId();
+
         $fileSource = $jobSettings['filesource'];
         $load = $jobSettings['load'];
         $fileOrder = $jobSettings['fileorder'];
         $reload = $jobSettings['reload'];
         $host = $jobSettings['host'];
-        $jobId = $jobSettings['jobid'];
 
         $fixtureDirectory = self::FIXTURE_DIRECTORY;
 

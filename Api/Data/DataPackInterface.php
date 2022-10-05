@@ -113,6 +113,21 @@ interface DataPackInterface extends ExtensibleDataInterface
      */
     public function setAuthToken($token);
 
+     /**
+      * Get job id if pack has been imported as job
+      *
+      * @return string
+      */
+    public function getJobId();
+
+    /**
+     * Set job id if pack has been imported as job
+     *
+     * @param string $jobId
+     * @return void
+     */
+    public function setJobId($jobId);
+
     /**
      * Get a remote data pack
      *

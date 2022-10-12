@@ -119,6 +119,7 @@ class Process
      * @throws LocalizedException
      * @throws FileSystemException
      */
+    // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh,Magento2.Annotation.MethodArguments.NoCommentBlock
     public function loadFiles($dataPack)
     {
         $jobSettings['filesource'] = $dataPack->getDataPackLocation();
@@ -213,34 +214,51 @@ class Process
                     // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
                     $modulePath = str_replace("/" . $fixtureDirectory . "/" . basename($fileName), "", $fileName);
                     $this->helper->logMessage($fileInfo['label'], "info");
-                    if ($fileInfo['process']=='file') {
-                        $this->processFile($rows, $header, $fileInfo['class'], $modulePath, $host);
-                    } elseif ($fileInfo['process']=='json') {
-                        $this->processJson($fileContent, $fileInfo['class'], $host);
-                    } elseif ($fileInfo['process']=='b2b') {
-                        $fileData = $this->processB2BFiles($filePath, $fixtureDirectory, $fileInfo['class']);
-                        if (empty($fileData)) {
-                            return true;
-                        } else {
+                    switch ($fileInfo['process']) {
+                        case 'file':
+                            $this->processFile($rows, $header, $fileInfo['class'], $modulePath, $host);
+                            break;
+                        case 'json':
+                            $this->processJson($fileContent, $fileInfo['class'], $host);
+                            break;
+                        case 'b2b':
+                            $fileData = $this->processB2BFiles($filePath, $fixtureDirectory, $fileInfo['class']);
+                            if (empty($fileData)) {
+                                return true;
+                            } else {
+                                $this->processB2B($fileData, $fileInfo['class']);
+                            }
+                            break;
+                        case 'graphqlrows':
+                            $fileData = $this->convertGraphQlJson($fileContent);
+                            $this->processRows($fileData['rows'], $fileData['header'], $fileInfo['class'], $host);
+                            break;
+                        case 'graphqlfile':
+                            $fileData = $this->convertGraphQlJson($fileContent);
+                            $this->processFile(
+                                $fileData['rows'],
+                                $fileData['header'],
+                                $fileInfo['class'],
+                                $modulePath,
+                                $host
+                            );
+                            break;
+                        case 'graphqlexport':
+                            $fileData = $this->convertGraphQlExport($fileContent);
+                            $this->processFile(
+                                $fileData['rows'],
+                                $fileData['header'],
+                                $fileInfo['class'],
+                                $modulePath,
+                                $host
+                            );
+                            break;
+                        case 'b2bgraphql':
+                            $fileData = $this->b2bGraphQl->processB2BGraphql($fileContent);
                             $this->processB2B($fileData, $fileInfo['class']);
-                        }
-                    } elseif ($fileInfo['process']=='graphqlrows') {
-                        $fileData = $this->convertGraphQlJson($fileContent);
-                        $this->processRows($fileData['rows'], $fileData['header'], $fileInfo['class'], $host);
-                    } elseif ($fileInfo['process']=='graphqlfile') {
-                        $fileData = $this->convertGraphQlJson($fileContent);
-                        $this->processFile(
-                            $fileData['rows'],
-                            $fileData['header'],
-                            $fileInfo['class'],
-                            $modulePath,
-                            $host
-                        );
-                    } elseif ($fileInfo['process']=='b2bgraphql') {
-                        $fileData = $this->b2bGraphQl->processB2BGraphql($fileContent);
-                        $this->processB2B($fileData, $fileInfo['class']);
-                    } else {
-                        $this->processRows($rows, $header, $fileInfo['class'], $host);
+                            break;
+                        default:
+                            $this->processRows($rows, $header, $fileInfo['class'], $host);
                     }
                 }
             }
@@ -433,6 +451,34 @@ class Process
         ///sort array by keys for cases then order is important
         ksort($row);
         return ['header'=>$header,'rows'=>$row];
+    }
+
+     /**
+      * Converts result of a GraphQl export into format that can be used by processFile
+      *
+      * @param string $json
+      * @return array
+      */
+    public function convertGraphQlExport(string $json)
+    {
+        try {
+            //convert to array of objects. Remove the parent query name node
+            $data = json_decode(json_decode($json)->data->export->data);
+        } catch (\Exception $e) {
+            $this->helper->logMessage("The JSON in your data file may be invalid", "error");
+            return true;
+        }
+        $header=$data[0];
+        unset($data[0]);
+        //there may be an additional row that has a null value based on the encoding/decoding data
+        //verify all row data matches header count and delete any bad rows
+        $headerCount = count($header);
+        foreach ($data as $key => $row) {
+            if (count($row) != $headerCount) {
+                unset($data[$key]);
+            }
+        }
+        return ['header'=>$header,'rows'=>$data];
     }
 
     /**

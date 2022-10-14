@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Copyright © Adobe, Inc. All rights reserved.
- */
+ * Copyright 2022 Adobe, Inc. All rights reserved.
+ * See LICENSE for license details.
+*/
 -->
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
     <table name="magentoese_data_installer_recurring">

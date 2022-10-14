@@ -1,7 +1,9 @@
 <?php
 /**
- * Copyright © Adobe  All rights reserved.
+ * Copyright 2022 Adobe, Inc. All rights reserved.
+ * See LICENSE for license details.
  */
+
 namespace MagentoEse\DataInstall\Block\Adminhtml\Form;
 
 use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;

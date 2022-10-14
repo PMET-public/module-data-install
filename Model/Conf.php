@@ -1,5 +1,9 @@
 <?php
-/** Copyright © Adobe  All rights reserved */
+/**
+ * Copyright 2022 Adobe, Inc. All rights reserved.
+ * See LICENSE for license details.
+ */
+
 namespace MagentoEse\DataInstall\Model;
 
 class Conf
@@ -367,6 +371,8 @@ class Conf
             'label'=>'Loading Customers']],
             ['customer_addresses.csv'=>['process'=>'file','class'=>$this->customerAddressesInstall,
             'label'=>'Loading Customer Addresses']],
+            ['customer_addresses.json'=>['process'=>'graphqlexport','class'=>$this->customerAddressesInstall,
+            'label'=>'Loading Customer Addresses']],
             ['product_attributes.csv'=>['process'=>'rows','class'=>$this->productAttributesInstall,
             'label'=>'Loading Product Attributes']],
             ['product_attributes.json'=>['process'=>'graphqlrows','class'=>$this->productAttributesInstall,
@@ -400,6 +406,10 @@ class Conf
             ['gift_cards.json'=>['process'=>'graphqlrows','class'=>$this->giftCardsInstall,
             'label'=>'Updating Gift Cards']],
             ['msi_inventory.csv'=>['process'=>'file','class'=>$this->msiInventoryInstall,
+            'label'=>'Loading MSI Inventory']],
+            ['stock_sources.csv'=>['process'=>'file','class'=>$this->msiInventoryInstall,
+            'label'=>'Loading MSI Inventory']],
+            ['stock_sources.json'=>['process'=>'graphqlexport','class'=>$this->msiInventoryInstall,
             'label'=>'Loading MSI Inventory']],
             ['upsells.csv'=>['process'=>'rows','class'=>$this->upsellsInstall,
             'label'=>'Loading Upsells']],
@@ -461,6 +471,8 @@ class Conf
             ['cart_rules.json'=>['process'=>'graphqlrows','class'=>$this->cartRulesInstall,
             'label'=>'Loading Cart Rules']],
             ['advanced_pricing.csv'=>['process'=>'file','class'=>$this->advancedPricingInstall,
+            'label'=>'Loading Advanced Pricing']],
+            ['advanced_pricing.json'=>['process'=>'graphqlexport','class'=>$this->advancedPricingInstall,
             'label'=>'Loading Advanced Pricing']],
             ['orders.csv'=>['process'=>'rows','class'=>$this->ordersInstall,
             'label'=>'Loading Orders']]

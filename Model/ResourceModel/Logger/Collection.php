@@ -1,7 +1,9 @@
 <?php
 /**
- * Copyright © Adobe, Inc. All rights reserved.
+ * Copyright 2022 Adobe, Inc. All rights reserved.
+ * See LICENSE for license details.
  */
+
 namespace MagentoEse\DataInstall\Model\ResourceModel\Logger;
 
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;

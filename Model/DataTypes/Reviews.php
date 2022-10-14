@@ -1,8 +1,9 @@
 <?php
 /**
- * Copyright © Adobe, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Copyright 2022 Adobe, Inc. All rights reserved.
+ * See LICENSE for license details.
  */
+
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\Customer\Api\CustomerRepositoryInterface;

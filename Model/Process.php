@@ -1,7 +1,7 @@
 <?php
-
 /**
- * Copyright © Adobe. All rights reserved.
+ * Copyright 2022 Adobe, Inc. All rights reserved.
+ * See LICENSE for license details.
  */
 
  //Warnings around using native php filesytem functions are suppressed e.g. file_exists()
@@ -463,22 +463,24 @@ class Process
     {
         try {
             //convert to array of objects. Remove the parent query name node
-            $data = json_decode(json_decode($json)->data->export->data);
+            $currentKey=key(get_object_vars(json_decode($json)->data));
+            $fileData = json_decode(json_decode($json)->data->$currentKey->data);
+            //$data = json_decode(json_decode($json)->data->export->data);
         } catch (\Exception $e) {
             $this->helper->logMessage("The JSON in your data file may be invalid", "error");
             return true;
         }
-        $header=$data[0];
-        unset($data[0]);
+        $header=$fileData[0];
+        unset($fileData[0]);
         //there may be an additional row that has a null value based on the encoding/decoding data
         //verify all row data matches header count and delete any bad rows
         $headerCount = count($header);
-        foreach ($data as $key => $row) {
+        foreach ($fileData as $key => $row) {
             if (count($row) != $headerCount) {
-                unset($data[$key]);
+                unset($fileData[$key]);
             }
         }
-        return ['header'=>$header,'rows'=>$data];
+        return ['header'=>$header,'rows'=>$fileData];
     }
 
     /**

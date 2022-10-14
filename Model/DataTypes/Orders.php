@@ -2,8 +2,9 @@
 ///function deprecated
 //phpcs:disable
 /**
- * Copyright © Adobe. All rights reserved.
- */
+ * Copyright 2022 Adobe, Inc. All rights reserved.
+ * See LICENSE for license details.
+*/
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\Customer\Api\Data\AddressInterface;

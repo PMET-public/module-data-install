@@ -1,7 +1,9 @@
 <?php
 /**
- * Copyright © Adobe, Inc. All rights reserved.
+ * Copyright 2022 Adobe, Inc. All rights reserved.
+ * See LICENSE for license details.
  */
+
 namespace MagentoEse\DataInstall\Controller\Adminhtml\Export;
 
 use Magento\Backend\App\Action;

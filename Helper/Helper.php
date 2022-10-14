@@ -1,6 +1,7 @@
 <?php
 /**
- * Copyright © Adobe  All rights reserved.
+ * Copyright 2022 Adobe, Inc. All rights reserved.
+ * See LICENSE for license details.
  */
 declare(strict_types=1);
 // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged

@@ -95,14 +95,14 @@ class Orders
     {
         //check if user exists
         if (empty($row['customer_email'])) {
-            $this->helper->logMessage("customer_email value is required in orders.csv", "warning");
+            $this->helper->logMessage("customer_email value is required in orders file", "warning");
             return true;
         }
         /** @var CustomerInterface $customer */
         $customer = $this->customerRepository->get($row['customer_email'], 1);
         if (!$customer->getId()) {
             $this->helper->logMessage("customer_email ".$row['customer_email'].
-            " was not found in orders.csv. Row is skipped", "warning");
+            " was not found in orders file. Row is skipped", "warning");
             return true;
         }
         $this->createOrder($row, $customer);

@@ -26,7 +26,9 @@ class CopyMedia
         ['from'=>'theme','to'=>'app/design/frontend','type'=>'theme'],
         ['from'=>'template_manager','to'=>'pub/media/.template-manager','type'=>'image'],
         ['from'=>'downloadable_products','to'=>'pub/media/import','type'=>'download'],
-        ['from'=>'.template-manager','to'=>'pub/media/.template-manager','type'=>'image']];
+        ['from'=>'.template-manager','to'=>'pub/media/.template-manager','type'=>'image'],
+        ['from'=>'misc','to'=>'pub/media/misc','type'=>'theme']
+    ];
 
     /** @var string[]  */
     protected $allowedImageFiles = [ 'jpg' => 'image/jpeg','png' => 'image/png', 'jpeg' => 'image/jpeg',
@@ -38,11 +40,11 @@ class CopyMedia
     protected $allowedDownloadableFiles = ['pdf'  => 'application/pdf', 'mp3'  => 'audio/mpeg',
         'qt'   => 'video/quicktime', 'mov'  => 'video/quicktime','txt'  => 'text/plain',
         'csv'  => 'text/plain',  'psd'  => 'image/vnd.adobe.photoshop', 'ai'   => 'application/postscript',
-        'eps'  => 'application/postscript'];
+        'eps'  => 'application/postscript','mp4'  => 'video/mp4',];
 
     /** @var string[]  */
     protected $allowedThemeFiles = ['xml'=>'application/xml','less'=>'text/plain','phtml'=>'text/html|text/x-php',
-        'css'=>'text/html','md'=>'application/octet-stream|text/plain','json'=>'application/json','csv'=>'text/plain',
+        'css'=>'text/css','md'=>'application/octet-stream|text/plain','json'=>'application/json','csv'=>'text/plain',
         'php'=>'text/html|text/x-php','eot'=>'application/vnd.ms-fontobject','svg'=>'image/svg+xml',
         'woff'=>'application/octet-stream','woff2'=>'application/octet-stream','ttf'=>'application/font-sfnt',
         'txt'=>'text/plain'];

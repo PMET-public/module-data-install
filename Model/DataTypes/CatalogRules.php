@@ -196,22 +196,27 @@ class CatalogRules
         }
 
         //get banner ids
-        $banners =  $groups = explode(",", $row['dynamic_blocks']);
         $bannerIds = [];
-        foreach ($banners as $banner) {
-            $bannerToAdd = $this->bannerCollection->create()->addFieldToFilter(
-                'name',
-                ['eq' => trim($banner)]
-            )->getFirstItem();
-            if ($bannerToAdd->getId()) {
-                $bannerIds[] = $bannerToAdd->getId();
-            } else {
-                $this->helper->logMessage(
-                    "Dynamic block ".$banner." for Catalog Rule ".$row['name']." does not exist",
-                    "warning"
-                );
+        
+        if (!empty($row['dynamic_blocks'])) {
+            $banners =  $groups = explode(",", $row['dynamic_blocks']);
+        
+            foreach ($banners as $banner) {
+                $bannerToAdd = $this->bannerCollection->create()->addFieldToFilter(
+                    'name',
+                    ['eq' => trim($banner)]
+                )->getFirstItem();
+                if ($bannerToAdd->getId()) {
+                    $bannerIds[] = $bannerToAdd->getId();
+                } else {
+                    $this->helper->logMessage(
+                        "Dynamic block ".$banner." for Catalog Rule ".$row['name']." does not exist",
+                        "warning"
+                    );
+                }
             }
         }
+       
 
         //load existing rule by name
         /** @var RuleInterface $rule */

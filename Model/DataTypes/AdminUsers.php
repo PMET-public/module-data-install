@@ -67,7 +67,7 @@ class AdminUsers
     public function install(array $row, array $settings)
     {
         if (empty($row['username']) || empty($row['firstname']) || empty($row['lastname']) || empty($row['password'])) {
-            $this->helper->logMessage("Required data for admin_users.csv is missing. Row skipped", "warning");
+            $this->helper->logMessage("Required data for admin_users file is missing. Row skipped", "warning");
             return true;
         }
         $user = $this->userCollection->create()->addFieldToFilter('username', ['eq' => $row['username']])

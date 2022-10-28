@@ -111,12 +111,12 @@ class Teams
     {
         //company name and team name required
         if (empty($row['company_name'])) {
-            $this->helper->logMessage("company_name is required in b2b_teams.csv, row skipped", "warning");
+            $this->helper->logMessage("company_name is required in b2b_teams file, row skipped", "warning");
                 return true;
         }
 
         if (empty($row['name'])) {
-            $this->helper->logMessage("name is required in b2b_teams.csv, row skipped", "warning");
+            $this->helper->logMessage("name is required in b2b_teams file, row skipped", "warning");
                 return true;
         }
 
@@ -127,7 +127,7 @@ class Teams
         $adminUserId = $this->getCompanyAdminIdByName($row['company_name']);
         if (!$adminUserId) {
             $this->helper->logMessage("Company ".$row['company_name'].
-            " in b2b_teams.csv does not exist, row skipped", "warning");
+            " in b2b_teams file does not exist, row skipped", "warning");
             return true;
         }
         $websiteId = $this->stores->getWebsiteId($row['site_code']);
@@ -279,7 +279,7 @@ class Teams
         $company = current($companyList->getItems());
 
         if (!$company) {
-            $this->helper->logMessage("The company ". $name ." requested in b2b_teams.csv does not exist", "warning");
+            $this->helper->logMessage("The company ". $name ." requested in b2b_teams file does not exist", "warning");
         } else {
             return $company->getSuperUserId();
         }
@@ -301,7 +301,7 @@ class Teams
         $company = current($companyList->getItems());
 
         if (!$company) {
-            $this->helper->logMessage("The company ". $name ." requested in b2b_teams.csv does not exist", "warning");
+            $this->helper->logMessage("The company ". $name ." requested in b2b_teams file does not exist", "warning");
         } else {
             /**@var CompanyInterface $company */
             return $company->getId();

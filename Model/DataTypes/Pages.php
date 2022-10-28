@@ -194,7 +194,7 @@ class Pages
                 }
             }
         } else {
-            $this->helper->logMessage("A row in pages.csv does not have a value in the identifier columnm. ".
+            $this->helper->logMessage("A row in pages file does not have a value in the identifier columnm. ".
                         "The row has been skipped.", "warning");
         }
 

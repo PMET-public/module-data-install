@@ -26,6 +26,10 @@ use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use MagentoEse\DataInstall\Api\Data\DataPackInterface;
+use MagentoEse\DataInstall\Api\Data\InstallerJobInterface;
+use MagentoEse\DataInstall\Api\Data\InstallerJobInterfaceFactory;
+use MagentoEse\DataInstall\Model\Queue\ScheduleBulk;
+use MagentoEse\DataInstall\Model\DataTypes\Stores;
 
 class Process
 {
@@ -61,26 +65,30 @@ class Process
     /** @var EventManager */
     protected $eventManager;
 
-     /** @var B2bGraphQl */
-     protected $b2bGraphQl;
+    /** @var B2bGraphQl */
+    protected $b2bGraphQl;
 
-    /**
-     * Process constructor
-     *
-     * @param CopyMedia $copyMedia
-     * @param DirectoryList $directoryList
-     * @param File $driverInterface
-     * @param Helper $helper
-     * @param InstallerInterfaceFactory $dataInstallerInterface
-     * @param InstallerRepositoryInterface $dataInstallerRepository
-     * @param SampleDataContext $sampleDataContext
-     * @param Validate $validate
-     * @param Queue\ScheduleBulk $scheduleBulk
-     * @param Conf $conf
-     * @param DataTypes\Stores $stores
-     * @param EventManager $eventManager
-     * @param B2bGraphQl $b2bGraphQl
-     **/
+    /** @var InstallerJobInterfaceFactory */
+    protected $installerJob;
+
+   /**
+    * 
+    * @param CopyMedia $copyMedia 
+    * @param DirectoryList $directoryList 
+    * @param File $driverInterface 
+    * @param Helper $helper 
+    * @param InstallerInterfaceFactory $dataInstallerInterface 
+    * @param InstallerRepositoryInterface $dataInstallerRepository 
+    * @param SampleDataContext $sampleDataContext 
+    * @param Validate $validate 
+    * @param ScheduleBulk $scheduleBulk 
+    * @param Conf $conf 
+    * @param Stores $stores 
+    * @param EventManager $eventManager 
+    * @param B2bGraphQl $b2bGraphQl 
+    * @param InstallerJobInterfaceFactory $installerJob 
+    * @return void 
+    */
     public function __construct(
         CopyMedia $copyMedia,
         DirectoryList $directoryList,
@@ -94,7 +102,8 @@ class Process
         Conf $conf,
         DataTypes\Stores $stores,
         EventManager $eventManager,
-        B2bGraphQl $b2bGraphQl
+        B2bGraphQl $b2bGraphQl,
+        InstallerJobInterfaceFactory $installerJob
     ) {
         $this->copyMedia = $copyMedia;
         $this->helper = $helper;
@@ -110,6 +119,7 @@ class Process
         $this->storeInstall = $stores;
         $this->eventManager = $eventManager;
         $this->b2bGraphQl = $b2bGraphQl;
+        $this->installerJob = $installerJob;
     }
     /**
      * Load files
@@ -266,7 +276,14 @@ class Process
         $this->eventManager->dispatch('magentoese_datainstall_install_end', ['eventData' => $this->settings]);
         if ($fileCount==0) {
             return false;
-        } else {
+        } elseif(! empty($jobSettings['fileorder'])){
+            //need to run a new process a second time as products cannot be updated in the same session as an import
+            //This will be a scheduled job only run if the data pack has no fileorder associated with it
+            $stage2Job = $this->installerJob->create();
+            $dataPack->setFiles(Conf::STAGE2_FILES);
+            $stage2Job->scheduleImport($dataPack);
+            return true;
+        }else{
             $this->setModuleInstalled($fileSource);
             return true;
         }

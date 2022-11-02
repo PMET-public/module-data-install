@@ -128,76 +128,19 @@ class Conf
     /** @var DataTypes\ApprovalRules */
     protected $approvalRulesInstall;
 
-    /** @var string[]  */
-    public const ALL_FILES = ['stores.csv',
-    'config_default.json',
-    'config_default.csv',
-    'config_vertical.json',
-    'config_vertical.csv',
-    'config_secret.json',
-    'config_secret.csv',
-    'config.json',
-    'config.csv',
-    'admin_roles.csv',
-    'admin_users.csv',
-    'customer_groups.csv',
-    'customer_attributes.csv',
-    'reward_exchange_rate.csv',
-    'customers.csv',
-    'customer_addresses.csv',
-    'product_attributes.csv',
-    'blocks.csv',
-    'categories.csv',
-    'customer_segments.csv',
-    'products.csv',
-    'gift_cards.csv',
-    'msi_source.csv',
-    'msi_stock.csv',
-    'msi_inventory.csv',
-    'upsells.csv',
-    'blocks.csv',
-    'dynamic_blocks.csv',
-    'widgets.csv',
-    'catalog_rules.csv',
-    'pages.csv',
-    'templates.csv',
-    'reviews.csv',
-    'b2b_companies.csv',
-    'b2b_shared_catalogs.csv',
-    'b2b_shared_catalog_categories.csv',
-    'b2b_requisition_lists.csv',
-    'b2b_approval_rules.csv',
-    'cart_rules.csv',
-    'advanced_pricing.csv',
-    'orders.csv'];
+    /** @var array]  */
+    public const STAGE2_FILES = ['msi_inventory.csv','stock_sources.csv','stock_sources.json',
+    'gift_cards.csv','gift_cards.json'];
 
-    /** @var string[]  */
-    public const STORE_FILES = ['stores.csv'];
-
-    /** @var string[]  */
-    public const STAGE1 = ['config_default.json','config_default.csv','config_vertical.json',
-    'config_vertical.csv','config_secret.json','config_secret.csv','config.json','config.csv',
-    'admin_roles.csv','admin_users.csv','customer_groups.csv','customer_attributes.csv','reward_exchange_rate.csv',
-    'customers.csv','customer_addresses.csv','product_attributes.csv',
-    'customer_segments.csv','blocks.csv','categories.csv'];
-
-    /** @var string[]  */
-    public const STAGE2 = ['products.csv','msi_source.csv','msi_stock.csv','msi_inventory.csv','upsells.csv',
-    'blocks.csv','dynamic_blocks.csv','widgets.csv','catalog_rules.csv',
-    'pages.csv','templates.csv','reviews.csv','b2b_companies.csv','b2b_shared_catalogs.csv',
-    'b2b_shared_catalog_categories.csv','b2b_requisition_lists.csv','cart_rules.csv',
-    'advanced_pricing.csv','orders.csv'];
-
-    /** @var string[]  */
+    /** @var array]  */
     public const B2B_REQUIRED_FILES = ['b2b_customers.csv','b2b_companies.csv','b2b_company_roles.csv',
     'b2b_sales_reps.csv','b2b_teams.csv'];
-    /** @var string[]  */
 
-    /** @var string[]  */
+    /** @var array  */
     public const B2B_COMPANY_COLUMNS = ['site_code','legal_name','company_name','company_email','street','city',
     'country_id','region','postcode','telephone','credit_export','reseller_id','vat_tax_id','company_admin','address'];
 
-    /** @var string[]  */
+    /** @var array  */
     public const SETTINGS = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
         'root_category' => 'Default Category', 'root_category_id' => '2'];
 

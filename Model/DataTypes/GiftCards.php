@@ -64,11 +64,7 @@ class GiftCards
         foreach ($rows as $row) {
             $productsArray[] = array_combine($header, $row);
         }
-        //delete existing gift cards
-        // foreach($productsArray as $row){
-        //     $this->deleteGiftCard($row);
-        // }
-
+        
         //pass to product importer
         //running twice as append mode adds duplicate amounts, so giftcard is deleted and then added 
         $this->productImporter->install($rows, $header, $modulePath, $settings, 'delete');
@@ -94,24 +90,6 @@ class GiftCards
             } catch (Exception $e) {
                 $this->helper->logMessage("Giftcard with sku ".$row['sku'].
                 " cannot be updated. ".$e->getMessage(), "warning");
-            }
-        } else {
-            $this->helper->logMessage("sku column required in gift_cards file", "warning");
-        }
-    }
-
-    protected function deleteGiftCard(array $row)
-    {
-        if (!empty($row['sku'])) {
-            try {
-                $product = $this->productRepository->get($row['sku']);
-                $this->appState->emulateAreaCode(
-                    AppArea::AREA_GLOBAL,
-                    [$this->productRepository, 'delete'],
-                    [$product]
-                );
-            } catch (Exception $e) {
-                $this->helper->logMessage("Error deleting gift card - ".$e->getMessage(), "warning");
             }
         } else {
             $this->helper->logMessage("sku column required in gift_cards file", "warning");

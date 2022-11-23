@@ -122,7 +122,12 @@ class DataPack implements DataPackInterface
      */
     public function setFiles($files)
     {
-        $this->files = $files;
+        //clean up possible spaces introduced in file list
+        $cleanFiles = [];
+        foreach($files as $file){
+            $cleanFiles[] = trim($file);
+        }
+        $this->files = $cleanFiles;
     }
 
     /**

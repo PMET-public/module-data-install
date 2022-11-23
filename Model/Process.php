@@ -72,22 +72,22 @@ class Process
     protected $installerJob;
 
    /**
-    * 
-    * @param CopyMedia $copyMedia 
-    * @param DirectoryList $directoryList 
-    * @param File $driverInterface 
-    * @param Helper $helper 
-    * @param InstallerInterfaceFactory $dataInstallerInterface 
-    * @param InstallerRepositoryInterface $dataInstallerRepository 
-    * @param SampleDataContext $sampleDataContext 
-    * @param Validate $validate 
-    * @param ScheduleBulk $scheduleBulk 
-    * @param Conf $conf 
-    * @param Stores $stores 
-    * @param EventManager $eventManager 
-    * @param B2bGraphQl $b2bGraphQl 
-    * @param InstallerJobInterfaceFactory $installerJob 
-    * @return void 
+    *
+    * @param CopyMedia $copyMedia
+    * @param DirectoryList $directoryList
+    * @param File $driverInterface
+    * @param Helper $helper
+    * @param InstallerInterfaceFactory $dataInstallerInterface
+    * @param InstallerRepositoryInterface $dataInstallerRepository
+    * @param SampleDataContext $sampleDataContext
+    * @param Validate $validate
+    * @param ScheduleBulk $scheduleBulk
+    * @param Conf $conf
+    * @param Stores $stores
+    * @param EventManager $eventManager
+    * @param B2bGraphQl $b2bGraphQl
+    * @param InstallerJobInterfaceFactory $installerJob
+    * @return void
     */
     public function __construct(
         CopyMedia $copyMedia,
@@ -276,14 +276,7 @@ class Process
         $this->eventManager->dispatch('magentoese_datainstall_install_end', ['eventData' => $this->settings]);
         if ($fileCount==0) {
             return false;
-        } elseif(! empty($jobSettings['fileorder'])){
-            //need to run a new process a second time as products cannot be updated in the same session as an import
-            //This will be a scheduled job only run if the data pack has no fileorder associated with it
-            $stage2Job = $this->installerJob->create();
-            $dataPack->setFiles(Conf::STAGE2_FILES);
-            $stage2Job->scheduleImport($dataPack);
-            return true;
-        }else{
+        } else {
             $this->setModuleInstalled($fileSource);
             return true;
         }

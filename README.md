@@ -508,12 +508,9 @@ The standard Magento Product import file is used. If you export from an existing
 
 *File Name* - gift_cards.csv
 
-There is an issue with the giftcard product type where an imported gift card isn't correct until it is saved. This file will load in the product and save it, thus completing the process.
+When Gift Cards are imported along with other products, the row will be skipped with an error. Gift cards need to be imported separatly.
 
-*Columns*
-**sku** - (required)
-
-sku is the only column required.  All other gift card information is included in the `products.csv` file
+The file  should be generated with the same method as `products.csv`, but should only include the Gift Card products. You do not need to remove gift cards from the original products file
 
 ### MSI Source
 

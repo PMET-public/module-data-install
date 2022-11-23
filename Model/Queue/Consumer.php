@@ -161,7 +161,7 @@ class Consumer
         $dataPack = $this->dataPackInterface->create();
         $dataPack->setDataPackLocation($data['filesource']);
         if ($data['fileorder']!=null) {
-            $dataPack->setFiles(explode(",", $data['fileorder']));
+            $dataPack->setFiles($data['fileorder']);
         } else {
             $dataPack->setFiles([]);
         }

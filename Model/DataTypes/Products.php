@@ -6,6 +6,7 @@
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use DomainException;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
@@ -15,6 +16,7 @@ use MagentoEse\DataInstall\Helper\Helper;
 use Magento\Framework\App\Area as AppArea;
 use Magento\Framework\Filesystem\Directory\ReadInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Filesystem;
 
 class Products
@@ -80,15 +82,24 @@ class Products
     }
 
     /**
-     * Install
+     * Install 
      *
-     * @param array $rows
-     * @param array $header
-     * @param string $modulePath
-     * @param array $settings
+     * @param array $rows 
+     * @param array $header 
+     * @param string $modulePath 
+     * @param array $settings 
+     * @param string $behavior 
+     * @return void 
+     * @throws CouldNotSaveException 
+     * @throws DomainException 
      */
-    public function install(array $rows, array $header, string $modulePath, array $settings)
-    {
+    public function install(
+        array $rows,
+        array $header,
+        string $modulePath,
+        array $settings,
+        $behavior = 'append'
+    ) {
         if (!empty($settings['product_image_import_directory'])) {
             $imgDir = $settings['product_image_import_directory'];
         } else {
@@ -135,20 +146,8 @@ class Products
         }
         $productsArray = $this->replaceBaseWebsiteCodes($productsArray, $settings);
         $this->helper->logMessage("Importing products", "info");
-        // for potential use if imports need to be done in smaller chunks
-        // for($i = 0; $i<=ceil(count($productsArray)/self::IMPORT_ARRAY_SIZE); $i++){
-        //     if($i==0){
-        //         $startPos = 0;
-        //         $endPos = self::IMPORT_ARRAY_SIZE;
-        //     }else{
-        //         $startPos = (self::IMPORT_ARRAY_SIZE*$i)+1;
-        //         $endPos = self::IMPORT_ARRAY_SIZE*($i+1);
-        //     }
-        //     $importChunk = array_slice($productsArray, $startPos, $endPos);
-        //     $this->import($importChunk, $imgDir, $productValidationStrategy);
-        // }
         
-        $this->import($productsArray, $imgDir, $productValidationStrategy);
+        $this->import($productsArray, $imgDir, $productValidationStrategy, $behavior);
         
         /// Restrict products from other stores
         if ($restrictProductsFromViews=='Y') {
@@ -187,16 +186,20 @@ class Products
         }
     }
 
-    /**
-     * Call importer
-     *
-     * @param array $productsArray
-     * @param string $imgDir
-     * @param string $productValidationStrategy
-     */
-    private function import($productsArray, $imgDir, $productValidationStrategy)
+   /**
+    * Call importer 
+    *
+    * @param mixed $productsArray 
+    * @param mixed $imgDir 
+    * @param mixed $productValidationStrategy 
+    * @param string $behavior 
+    * @return void 
+    * @throws CouldNotSaveException 
+    */
+    private function import($productsArray, $imgDir, $productValidationStrategy, $behavior)
     {
         $importerModel = $this->importer->create();
+        $importerModel->setBehavior($behavior);
         $importerModel->setImportImagesFileDir($imgDir);
         $importerModel->setValidationStrategy($productValidationStrategy);
         if ($productValidationStrategy == 'validation-stop-on-errors') {

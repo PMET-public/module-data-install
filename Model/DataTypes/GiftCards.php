@@ -27,6 +27,9 @@ class GiftCards
     /** @var State */
     protected $appState;
 
+    /** @var Products */
+    protected $productImporter;
+
     /**
      * Products constructor
      *
@@ -39,12 +42,14 @@ class GiftCards
         Helper $helper,
         ProductRepositoryInterface $productRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
-        State $appState
+        State $appState,
+        Products $productImporter
     ) {
         $this->productRepository = $productRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->appState = $appState;
         $this->helper = $helper;
+        $this->productImporter = $productImporter;
     }
 
     /**
@@ -54,7 +59,29 @@ class GiftCards
      * @param array $settings
      * @return bool
      */
-    public function install(array $row, array $settings)
+    public function install(array $rows, array $header, string $modulePath, array $settings)
+    {
+        foreach ($rows as $row) {
+            $productsArray[] = array_combine($header, $row);
+        }
+        //delete existing gift cards
+        // foreach($productsArray as $row){
+        //     $this->deleteGiftCard($row);
+        // }
+
+        //pass to product importer
+        //running twice as append mode adds duplicate amounts, so giftcard is deleted and then added 
+        $this->productImporter->install($rows, $header, $modulePath, $settings, 'delete');
+        $this->productImporter->install($rows, $header, $modulePath, $settings);
+        
+        //update gift cards
+        foreach ($productsArray as $row) {
+            $this->updateGiftCard($row);
+        }
+        return true;
+    }
+
+    protected function updateGiftCard(array $row)
     {
         if (!empty($row['sku'])) {
             try {
@@ -65,12 +92,29 @@ class GiftCards
                     [$product]
                 );
             } catch (Exception $e) {
-                $this->helper->logMessage("Product with sku ".$row['sku'].
-                " not found in in gift_cards file", "warning");
+                $this->helper->logMessage("Giftcard with sku ".$row['sku'].
+                " cannot be updated. ".$e->getMessage(), "warning");
             }
         } else {
             $this->helper->logMessage("sku column required in gift_cards file", "warning");
         }
-        return true;
+    }
+
+    protected function deleteGiftCard(array $row)
+    {
+        if (!empty($row['sku'])) {
+            try {
+                $product = $this->productRepository->get($row['sku']);
+                $this->appState->emulateAreaCode(
+                    AppArea::AREA_GLOBAL,
+                    [$this->productRepository, 'delete'],
+                    [$product]
+                );
+            } catch (Exception $e) {
+                $this->helper->logMessage("Error deleting gift card - ".$e->getMessage(), "warning");
+            }
+        } else {
+            $this->helper->logMessage("sku column required in gift_cards file", "warning");
+        }
     }
 }

@@ -156,13 +156,13 @@ class Products
             if (count($restrictExistingProducts) > 0) {
                  $this->helper->logMessage("Restricting ".count($restrictExistingProducts).
                  " products from new store view", "info");
-                $this->import($restrictExistingProducts, $imgDir, $productValidationStrategy);
+                $this->import($restrictExistingProducts, $imgDir, $productValidationStrategy,$behavior);
             }
 
             if (count($restrictNewProducts) > 0) {
                 $this->helper->logMessage("Restricting ".count($restrictNewProducts).
                 " new products from existing store views", "info");
-                $this->import($restrictNewProducts, $imgDir, $productValidationStrategy);
+                $this->import($restrictNewProducts, $imgDir, $productValidationStrategy,$behavior);
             }
         }
     }

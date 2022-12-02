@@ -71,6 +71,7 @@ class DataPack implements DataPackInterface
         $this->scopeConfig = $scopeConfigInterface;
         $this->curl = $curl;
         $this->verticalDirectory = $filesystem->getDirectoryWrite(DirectoryList::TMP);
+        $this->files = [];
     }
     
     /**

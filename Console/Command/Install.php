@@ -35,7 +35,6 @@ use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\App\State;
 use Magento\Framework\App\Area as AppArea;
 use MagentoEse\DataInstall\Api\Data\DataPackInterfaceFactory;
-use MagentoEse\DataInstall\Api\Data\InstallerJobInterfaceFactory;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 
 class Install extends Command
@@ -60,29 +59,23 @@ class Install extends Command
     /** @var DataPackInterfaceFactory */
     protected $dataPackInterface;
 
-    /** @var InstallerJobInterfaceFactory */
-    protected $installerJobInterface;
-
     /**
      *
      * @param ObjectManagerInterface $objectManagerInterface
      * @param State $appState
      * @param DataPackInterfaceFactory $dataPackInterface
-     * @param InstallerJobInterfaceFactory $installerJobInterface
      * @return void
      * @throws InvalidArgumentException
      */
     public function __construct(
         ObjectManagerInterface $objectManagerInterface,
         State $appState,
-        DataPackInterfaceFactory $dataPackInterface,
-        InstallerJobInterfaceFactory $installerJobInterface
+        DataPackInterfaceFactory $dataPackInterface
     ) {
         parent::__construct();
         $this->objectManagerInterface = $objectManagerInterface;
         $this->appState = $appState;
         $this->dataPackInterface = $dataPackInterface;
-        $this->installerJobInterface = $installerJobInterface;
     }
 
     /**

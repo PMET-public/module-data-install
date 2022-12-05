@@ -39,6 +39,8 @@ Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](h
 A .zip file can be created with assetts that follow the Data Pack format. It is then uploaded via the Commerce UI at *System->Data Transfer->Import Data Pack*
 Additional command attiributes the same as used by the CLI can be added as needed. When uploaded a job is then created to import the data pack
 
+A datapack can also be loaded remotely from a GitHub repository by providing the url to the .zip dowload link. A GitHub Personal Access Token will need to be added and included in the Commerce store configuration.
+
 
 ### GraphQL Scheduled
 A GraphQL query can be used to mimic the same functionality that the CLI provides. Additional queries can also return job status and logging information. See the [Data Installer GraphQL ](https://github.com/PMET-public/module-data-install-graphql)module for information
@@ -57,6 +59,8 @@ A GraphQL query can be used to mimic the same functionality that the CLI provide
    * `template_manager` - Images used in `templates.csv`
    * `wysiwyg` - CMS images. It is recommended that they be placed in a unique subdirectory to make it cleaner in the UI if multiple data packs are loaded. The path needs to match what is referenced in CMS items.
    * `email` - email logo as defined in config files
+
+4. If you are zipping a Data Pack for upload via the Commerce interface, the .zip file should include the entire folder and its contents. Just zipping the folder contents will generate an error on import.
 
 ### Handling of the default `base` website
 

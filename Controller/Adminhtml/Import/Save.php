@@ -197,7 +197,7 @@ class Save extends \Magento\Backend\App\Action
      * @return mixed
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    protected function unzipFiled($fileInfo)
+    protected function unzipFile($fileInfo)
     {
         $zip = new \ZipArchive;
 

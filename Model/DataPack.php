@@ -271,6 +271,7 @@ class DataPack implements DataPackInterface
         }
 
         $f = $this->verticalDirectory->getAbsolutePath(self::ZIPPED_DIR);
+        $this->file->createDirectory($this->verticalDirectory->getAbsolutePath(self::ZIPPED_DIR));
         $this->file->filePutContents($this->verticalDirectory->
             getAbsolutePath(DataPackInterface::ZIPPED_DIR).'/'.$filename.'.zip', $result);
 
@@ -294,20 +295,22 @@ class DataPack implements DataPackInterface
     {
         $zip = new \ZipArchive;
         $fileInfo = $this->getDataPackLocation();
-      // Zip File Name
-        if ($zip->open($fileInfo["path"]."/".$fileInfo["file"]) === true) {
-            //directory is created if it doesnt exist
-            $zip->extractTo($this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR));
-            //get name of directory in the zip file and determina absolute path
-            $this->setDataPackLocation($this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR).'/'.
-            str_replace("/", "", $zip->statIndex(0)['name']));
-            $zip->close();
-            $this->file->deleteFile($fileInfo["path"]."/".$fileInfo["file"]);
-        } else {
-            $this->file->deleteFile($fileInfo["path"]."/".$fileInfo["file"]);
-            $this->setDataPackLocation(false);
-            //return false;
-        }
+        //skip if datapack is not a zip file
+        if(!empty($fileinfo["path"]) && !empty($fileinfo["file"])){
+            if ($zip->open($fileInfo["path"]."/".$fileInfo["file"]) === true) {
+                //directory is created if it doesnt exist
+                $zip->extractTo($this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR));
+                //get name of directory in the zip file and determina absolute path
+                $this->setDataPackLocation($this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR).'/'.
+                str_replace("/", "", $zip->statIndex(0)['name']));
+                $zip->close();
+                $this->file->deleteFile($fileInfo["path"]."/".$fileInfo["file"]);
+            } else {
+                $this->file->deleteFile($fileInfo["path"]."/".$fileInfo["file"]);
+                $this->setDataPackLocation(false);
+                //return false;
+            }
+        } 
     }
     
     /**

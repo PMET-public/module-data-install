@@ -4,18 +4,28 @@ The Data Install module facilitates the loading of sample data by a series of ge
 
 **As the Data Install supports B2B, at this time the B2B modules are required in Magento even if B2B features will not be used.**
 
+## Data Pack Sources
+- Commerce Module - This is created like any other Adobe Commerce Module and can be added to the instance via the composer.json file, or under `app/code/Namespace/Module`. The Data Pack can then be referred to by its name `Namespace_Module` when being installed
+- File System - The Data Pack directory can be placed under any directory under the Commerce app.
+- Zip file - A Data Pack can be packaged as a .zip file and uploaded via the UI
+- GitHub Remote - The Data Pack can be retrieved from a GitHub repository via the same link used to download a zipped repository e.g. `https://github.com/PMET-public/vertical-data-luma/archive/refs/heads/main.zip`
+- When using GitHub Remote to access a private repository, you will need to create a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). This token can be used as an option for the the CLI or GraphQL mutation. Or it can be added to the Commerce instance under *Stores->Configuration->Advanced->System->Data Installer Authorization*. When setting up the token, you will need to give access to the `repo` scope
+
 ## Installation Methods
+
 
 ### CLI
 
-`bin/magento gxd:datainstall <module or path to data pack>`
+`bin/magento gxd:datainstall <module name, path to data pack, or remote url>`
 Optional arguments:
-`--load[=LOAD]  Data directory to load`
+`--load[=LOAD]  Data subdirectory to load if there is more than one`
  `--files[=FILES] Comma delimited list of individual files to load`
- `-r, --reload[=RELOAD] Force Reload`
- `--host[=HOST] Override of host values in stores.csv file`
+ `-r Force Reload`
+ `--remote=1 Flag if Data Pack is being retrieved via URL`
+ `--authtoken [=AUTHTOKEN] GitHub Personal Access Token`
+ `--host [=HOST] Override of host values in stores.csv file`
 
-###### Usage
+###### Usage Examples
 
 - `bin/magento gxd:datainstall MySpace_MyData`
 Install data from the `MySpace_MyData` module. This module can reside in either *vendor* or *app/code*
@@ -33,17 +43,25 @@ Mostly used for testing.  You can pass a comma delimited list specific files you
 
 - If you need to install multiple data packs at the same time, you can chain commands together:`bin/magento gxd:datainstall MySpace_MyData;bin/magento gxd:datainstall MySpace_MyData2;bin/magento gxd:datainstall MySpace_MyData3`
 
-Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](https://github.com/PMET-public/module-storystore-sample "https://github.com/PMET-public/module-storystore-sample")
 
 ### Upload Via UI
+
 A .zip file can be created with assetts that follow the Data Pack format. It is then uploaded via the Commerce UI at *System->Data Transfer->Import Data Pack*
-Additional command attiributes the same as used by the CLI can be added as needed. When uploaded a job is then created to import the data pack
+Advanced Conditions the same as used by the CLI can be added as needed. When uploaded a job is created to import the data pack. The `magentoese_datainstall.import` consumer will install the Data Pack in the background.
 
-A datapack can also be loaded remotely from a GitHub repository by providing the url to the .zip dowload link. A GitHub Personal Access Token will need to be added and included in the Commerce store configuration.
+Depending on the size of the Data Pack, you will need to make sure your server is configured to allow a larger file upload.  You can check the server setting by going to *System->Import* in the Commerce admin. There will be a message at the top of the page that will read something like - "Make sure your file isn't more than 28M". That indicates the maxium size of file that can be uploaded. This can be increased by setting two php variables to the appropriate size
+Example :
+`post_max_size = 128M`
+`upload_max_filesize = 128M`
 
-
+### GitHub Remote Via UI
+In the same UI used to upload a zip file, you can also enter a GitHub URL to remotely retrieve the Data Pack. Advanced Conditions the same as used by the CLI can be added as needed. After the Data Pack is retrieved, a job is created to schedule the import. The `magentoese_datainstall.import` consumer will install the Data Pack in the background.
+If you are accessing private repos, a GitHub Personal Access Token will need to be added and included in the Commerce store configuration under *Stores->Configuration->Advanced->System->Data Installer Authorization*. It could also be included as part of the Advanced Conditions
 ### GraphQL Scheduled
-A GraphQL query can be used to mimic the same functionality that the CLI provides. Additional queries can also return job status and logging information. See the [Data Installer GraphQL ](https://github.com/PMET-public/module-data-install-graphql)module for information
+A GraphQL mutation can be used to mimic the same functionality that the CLI provides. This would include installing an existing Data Pack or GitHub Remote. Additional queries can also return job status and logging information. See the [Data Installer GraphQL ](https://github.com/PMET-public/module-data-install-graphql)module for information
+
+### Running Scheduled Imports.
+Data Packs loaded via the UI or GraphQL will be imporated by a bulk job run by a consumer. The consumer can be started manually by `bin/magento queue:consumers:start magentoese_datainstall.import`
 
 ## Datapack data format
 
@@ -60,7 +78,10 @@ A GraphQL query can be used to mimic the same functionality that the CLI provide
    * `wysiwyg` - CMS images. It is recommended that they be placed in a unique subdirectory to make it cleaner in the UI if multiple data packs are loaded. The path needs to match what is referenced in CMS items.
    * `email` - email logo as defined in config files
 
-4. If you are zipping a Data Pack for upload via the Commerce interface, the .zip file should include the entire folder and its contents. Just zipping the folder contents will generate an error on import.
+4. Only the `data` and `media` directories are required. If you are going to be referring to the Data Pack as a commerce module, you will then need to include the rest of the standard module files.
+5. If you are zipping a Data Pack for upload via the Commerce interface, the .zip file should include the entire folder and its contents. Just zipping the folder contents will generate an error on import.
+
+Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](https://github.com/PMET-public/module-storystore-sample "https://github.com/PMET-public/module-storystore-sample")
 
 ### Handling of the default `base` website
 
@@ -1149,9 +1170,9 @@ Here is a list of all substitutions currently supported
 *example* - `{{pageid key="new-home-page"}}`
 
 ## Troubleshooting
-The Data Installer should handle most problems by reporting back as much information as possible, while continuing on with other data types.  For example it may skip a file or specific row in a file if it encounters an issue.
+The Data Installer should handle most problems by logging as much information as possible, while continuing on with other data types.  For example it may skip a file or specific row in a file if it encounters an issue.
 
 Information about skipped rows or files will be displayed in the terminal when using a CLI import. Also standard importer information will be available for products, customers, advanced pricing and msi. This will include imported rows, invalid rows, etc.
 
-For all methods, the same information is written in var/logs/data_installer.log. If it was a UI Upload or a GraphQL initiated import, the log information can be retreived via GraphQL query.
+For all methods, the same information is written in `var/logs/data_installer.log`. If it was a UI Upload or a GraphQL initiated import, the log information can be retreived via GraphQL query.
 

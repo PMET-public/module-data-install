@@ -102,9 +102,9 @@ class Save extends \Magento\Backend\App\Action
             }
             $fileUploader = null;
             $params = $this->getRequest()->getParams();
+            $this->setAdvancedConditions($dataPack, $params['advanced_conditions']);
             //params['vertical'] for upload params['remote_source'] for upload
             if ($params['remote_source']!='') {
-                $dataPack->setAuthToken("");
                 $dataPack->setDataPackLocation($dataPack->getRemoteDataPack(
                     $params['remote_source'],
                     $dataPack->getAuthToken()
@@ -136,7 +136,6 @@ class Save extends \Magento\Backend\App\Action
                 }
             }
             $dataPack->unZipDataPack();
-            $this->setAdvancedConditions($dataPack, $params['advanced_conditions']);
             if ($dataPack->getDataPackLocation()) {
               ///schedule import
                 $installerJob = $this->installerJobInterface->create();
@@ -184,6 +183,9 @@ class Save extends \Magento\Backend\App\Action
                     break;
                 case "--load":
                     $dataPack->setLoad($element[1]);
+                    break;
+                case "--authtoken":
+                    $dataPack->setAuthToken($element[1]);
                     break;
             }
         }

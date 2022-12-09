@@ -5,8 +5,10 @@
  * See LICENSE for license details.
 */
 -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
     <exchange name="magento-db" type="topic" connection="db">
-        <binding id="updateBinding" topic="magentoese_datainstall.import" destinationType="queue" destination="magentoese_datainstall.import"/>
+        <binding id="updateBinding" topic="magentoese_datainstall.import" destinationType="queue" 
+        destination="magentoese_datainstall.import"/>
     </exchange>
 </config>

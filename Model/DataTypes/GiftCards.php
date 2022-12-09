@@ -6,12 +6,14 @@
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use DomainException;
 use Exception;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\State;
 use MagentoEse\DataInstall\Helper\Helper;
 use Magento\Framework\App\Area as AppArea;
+use Magento\Framework\Exception\CouldNotSaveException;
 
 class GiftCards
 {
@@ -30,14 +32,15 @@ class GiftCards
     /** @var Products */
     protected $productImporter;
 
-    /**
-     * Products constructor
-     *
-     * @param Helper $helper
-     * @param ProductRepositoryInterface $productRepository
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
-     * @param State $appState
-     */
+   /**
+    *
+    * @param Helper $helper
+    * @param ProductRepositoryInterface $productRepository
+    * @param SearchCriteriaBuilder $searchCriteriaBuilder
+    * @param State $appState
+    * @param Products $productImporter
+    * @return void
+    */
     public function __construct(
         Helper $helper,
         ProductRepositoryInterface $productRepository,
@@ -55,9 +58,13 @@ class GiftCards
     /**
      * Install
      *
-     * @param array $row
+     * @param array $rows
+     * @param array $header
+     * @param string $modulePath
      * @param array $settings
-     * @return bool
+     * @return true
+     * @throws CouldNotSaveException
+     * @throws DomainException
      */
     public function install(array $rows, array $header, string $modulePath, array $settings)
     {
@@ -66,7 +73,7 @@ class GiftCards
         }
         
         //pass to product importer
-        //running twice as append mode adds duplicate amounts, so giftcard is deleted and then added 
+        //running twice as append mode adds duplicate amounts, so giftcard is deleted and then added
         $this->productImporter->install($rows, $header, $modulePath, $settings, 'delete');
         $this->productImporter->install($rows, $header, $modulePath, $settings);
         
@@ -77,6 +84,13 @@ class GiftCards
         return true;
     }
 
+    /**
+     * Update gift card
+     *
+     * @param array $row
+     * @return void
+     * @throws CouldNotSaveException
+     */
     protected function updateGiftCard(array $row)
     {
         if (!empty($row['sku'])) {

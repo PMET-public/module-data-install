@@ -125,7 +125,7 @@ class DataPack implements DataPackInterface
     {
         //clean up possible spaces introduced in file list
         $cleanFiles = [];
-        foreach($files as $file){
+        foreach ($files as $file) {
             $cleanFiles[] = trim($file);
         }
         $this->files = $cleanFiles;

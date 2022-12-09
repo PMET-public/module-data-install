@@ -5,7 +5,8 @@
  * See LICENSE for license details.
 */
 -->
-<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
             <item name="provider" xsi:type="string">fileupload_form.fileupload_form_data_source</item>
@@ -74,7 +75,10 @@
                 <item name="label" xsi:type="string" translate="true">Or import remote .zip file</item>
                 <item name="visible" xsi:type="boolean">true</item>
                 <item name="formElement" xsi:type="string">input</item>
-                <item name="notice" xsi:type="string" translate="true">If using github, an access token needs to set in Stores->Configuration->Advanced->System->Data Installer Authorization</item>
+                <item name="notice" xsi:type="string" translate="true">
+                    If using github, an access token needs to set in 
+                    Stores->Configuration->Advanced->System->Data Installer Authorization
+                </item>
             </item>
         </argument>
     </field>   
@@ -86,7 +90,10 @@
                 <item name="label" xsi:type="string" translate="true">Advanced Conditions</item>
                 <item name="visible" xsi:type="boolean">true</item>
                 <item name="formElement" xsi:type="string">input</item>
-                <item name="notice" xsi:type="string" translate="true"><![CDATA[--load[LOAD] --files [FILES] --host [HOST] -r|--reload [RELOAD] --authtoken [AUTHTOKEN] --remote [REMOTE]]]></item>
+                <item name="notice" xsi:type="string" translate="true">
+                    <![CDATA[--load[LOAD] --files [FILES] --host [HOST] -r|--reload [RELOAD]
+                     --authtoken [AUTHTOKEN] --remote [REMOTE]]]>
+                </item>
             </item>
         </argument>
     </field>    

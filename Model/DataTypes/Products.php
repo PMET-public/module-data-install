@@ -82,16 +82,16 @@ class Products
     }
 
     /**
-     * Install 
+     * Install
      *
-     * @param array $rows 
-     * @param array $header 
-     * @param string $modulePath 
-     * @param array $settings 
-     * @param string $behavior 
-     * @return void 
-     * @throws CouldNotSaveException 
-     * @throws DomainException 
+     * @param array $rows
+     * @param array $header
+     * @param string $modulePath
+     * @param array $settings
+     * @param string $behavior
+     * @return void
+     * @throws CouldNotSaveException
+     * @throws DomainException
      */
     public function install(
         array $rows,
@@ -156,13 +156,13 @@ class Products
             if (count($restrictExistingProducts) > 0) {
                  $this->helper->logMessage("Restricting ".count($restrictExistingProducts).
                  " products from new store view", "info");
-                $this->import($restrictExistingProducts, $imgDir, $productValidationStrategy,$behavior);
+                $this->import($restrictExistingProducts, $imgDir, $productValidationStrategy, $behavior);
             }
 
             if (count($restrictNewProducts) > 0) {
                 $this->helper->logMessage("Restricting ".count($restrictNewProducts).
                 " new products from existing store views", "info");
-                $this->import($restrictNewProducts, $imgDir, $productValidationStrategy,$behavior);
+                $this->import($restrictNewProducts, $imgDir, $productValidationStrategy, $behavior);
             }
         }
     }
@@ -187,14 +187,14 @@ class Products
     }
 
    /**
-    * Call importer 
+    * Call importer
     *
-    * @param mixed $productsArray 
-    * @param mixed $imgDir 
-    * @param mixed $productValidationStrategy 
-    * @param string $behavior 
-    * @return void 
-    * @throws CouldNotSaveException 
+    * @param mixed $productsArray
+    * @param mixed $imgDir
+    * @param mixed $productValidationStrategy
+    * @param string $behavior
+    * @return void
+    * @throws CouldNotSaveException
     */
     private function import($productsArray, $imgDir, $productValidationStrategy, $behavior)
     {

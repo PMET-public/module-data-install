@@ -216,8 +216,7 @@ class CatalogRules
                 }
             }
         }
-       
-
+   
         //load existing rule by name
         /** @var RuleInterface $rule */
         $rule = $this->ruleCollection->create()->addFieldToFilter('name', ['eq' => $row['name']])->getFirstItem();

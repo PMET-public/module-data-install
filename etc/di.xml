@@ -5,18 +5,27 @@
  * See LICENSE for license details.
 */
 -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <preference for="MagentoEse\DataInstall\Api\Data\InstallerInterface" type="MagentoEse\DataInstall\Model\Installer" />
-    <preference for="MagentoEse\DataInstall\Api\InstallerRepositoryInterface" type="MagentoEse\DataInstall\Model\InstallerRepository" />
-    <preference for="MagentoEse\DataInstall\Api\Data\LoggerInterface" type="MagentoEse\DataInstall\Model\Logger" />
-    <preference for="MagentoEse\DataInstall\Api\LoggerRepositoryInterface" type="MagentoEse\DataInstall\Model\LoggerRepository" />
-    <preference for="MagentoEse\DataInstall\Api\Data\DataPackInterface" type="MagentoEse\DataInstall\Model\DataPack" />
-    <preference for="MagentoEse\DataInstall\Api\Data\InstallerJobInterface" type="MagentoEse\DataInstall\Model\Import\InstallerJob" />
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="MagentoEse\DataInstall\Api\Data\InstallerInterface" 
+    type="MagentoEse\DataInstall\Model\Installer" />
+    <preference for="MagentoEse\DataInstall\Api\InstallerRepositoryInterface" 
+    type="MagentoEse\DataInstall\Model\InstallerRepository" />
+    <preference for="MagentoEse\DataInstall\Api\Data\LoggerInterface" 
+    type="MagentoEse\DataInstall\Model\Logger" />
+    <preference for="MagentoEse\DataInstall\Api\LoggerRepositoryInterface" 
+    type="MagentoEse\DataInstall\Model\LoggerRepository" />
+    <preference for="MagentoEse\DataInstall\Api\Data\DataPackInterface" 
+    type="MagentoEse\DataInstall\Model\DataPack" />
+    <preference for="MagentoEse\DataInstall\Api\Data\InstallerJobInterface" 
+    type="MagentoEse\DataInstall\Model\Import\InstallerJob" />
     
     <type name="Magento\Framework\Console\CommandList">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="magentoEseDataInstall" xsi:type="object">MagentoEse\DataInstall\Console\Command\Install</item>
+                <item name="magentoEseDataInstall" xsi:type="object">
+                    MagentoEse\DataInstall\Console\Command\Install
+                </item>
             </argument>
         </arguments>
     </type>
@@ -36,6 +45,7 @@
     </type>
     <!-- Plugin for webhook -->
     <!-- <type name="Mageplaza\Webhook\Model\Config\Source\HookType">
-          <plugin name="MagentoEse_DataInstall_Webhook_AddType" type="MagentoEse\DataInstall\Plugin\AddWebhookType" sortOrder="1" disabled="false" />
+          <plugin name="MagentoEse_DataInstall_Webhook_AddType" 
+          type="MagentoEse\DataInstall\Plugin\AddWebhookType" sortOrder="1" disabled="false" />
     </type> -->
 </config>

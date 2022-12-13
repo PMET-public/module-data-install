@@ -77,9 +77,11 @@ Data Packs loaded via the UI or GraphQL will be imporated by a bulk job run by a
    * `template_manager` - Images used in `templates.csv`
    * `wysiwyg` - CMS images. It is recommended that they be placed in a unique subdirectory to make it cleaner in the UI if multiple data packs are loaded. The path needs to match what is referenced in CMS items.
    * `email` - email logo as defined in config files
+   * `theme` - If a theme is used in a vertical, it can be added here. All the direcories and files used in creating a Commerce theme are placed here and will be copied to `app/design/frontend`
 
 4. Only the `data` and `media` directories are required. If you are going to be referring to the Data Pack as a commerce module, you will then need to include the rest of the standard module files.
 5. If you are zipping a Data Pack for upload via the Commerce interface, the .zip file should include the entire folder and its contents. Just zipping the folder contents will generate an error on import.
+6. The theme contained within the Data Pack will not work on Commerce Cloud due to the read-only file system. A theme will need to be added via composer. If the Data Pack is used across multiple plaforms, the Data Pack theme and the composer theme will need to have different path names, and will need to be addressed by using the `fallback_theme` in the stores file
 
 Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](https://github.com/PMET-public/module-storystore-sample "https://github.com/PMET-public/module-storystore-sample")
 
@@ -252,6 +254,7 @@ Optional file: This file is used to add and update Sites, Stores, Store Views an
 This is set at the website level. If it needs to be set for another scope, that can be done in the config.json or config.csv files.
 
 **theme** - Optional: Assigns a theme to the store view. This should be the path of the theme directory from the Vendor namespace. For example Magento/luma or MagentoEse/venia
+**fallback_theme** - Optional: Second option to assign a theme to the store view. This would be used in the case that the theme in the `theme` column does not exist
 
 ### Configuration
 

@@ -47,7 +47,7 @@ class CopyMedia
         'css'=>'text/css','md'=>'application/octet-stream|text/plain','json'=>'application/json','csv'=>'text/plain',
         'php'=>'text/html|text/x-php','eot'=>'application/vnd.ms-fontobject','svg'=>'image/svg+xml',
         'woff'=>'application/octet-stream','woff2'=>'application/octet-stream','ttf'=>'application/font-sfnt',
-        'txt'=>'text/plain'];
+        'txt'=>'text/plain','js'=>'application/javascript'];
 
     /** @var Helper */
     protected $helper;

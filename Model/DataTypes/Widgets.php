@@ -13,8 +13,11 @@ use MagentoEse\DataInstall\Model\Converter;
 use MagentoEse\DataInstall\Helper\Helper;
 use Magento\Theme\Model\ResourceModel\Theme\Collection as ThemeCollection;
 use Magento\Framework\App\State;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Widget\Model\ResourceModel\Widget\Instance\CollectionFactory;
 use Magento\Widget\Model\ResourceModel\Widget\Instance\Collection;
+use Magento\Store\Api\StoreRepositoryInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 
 class Widgets
 {
@@ -39,15 +42,25 @@ class Widgets
     /** @var CollectionFactory */
     protected $collectionFactory;
 
-    /**
-     * @param InstanceFactory $instanceFactory
-     * @param Helper $helper
-     * @param Converter $converter
-     * @param ThemeCollection $themeCollection
-     * @param Stores $stores
-     * @param State $appState
-     * @param CollectionFactory $collectionFactory
-     */
+    /** @var StoreRepositoryInterface  */
+    protected $storeRepository;
+
+    /** @var ScopeConfigInterface  */
+    protected $scopeConfig;
+
+   /**
+    * 
+    * @param InstanceFactory $instanceFactory 
+    * @param Helper $helper 
+    * @param Converter $converter 
+    * @param ThemeCollection $themeCollection 
+    * @param Stores $stores 
+    * @param State $appState 
+    * @param CollectionFactory $collectionFactory 
+    * @param StoreRepositoryInterface $storeRepository 
+    * @param ScopeConfigInterface $scopeConfig 
+    * @return void 
+    */
     public function __construct(
         InstanceFactory $instanceFactory,
         Helper $helper,
@@ -55,7 +68,9 @@ class Widgets
         ThemeCollection $themeCollection,
         Stores $stores,
         State $appState,
-        CollectionFactory $collectionFactory
+        CollectionFactory $collectionFactory,
+        StoreRepositoryInterface $storeRepository,
+        ScopeConfigInterface $scopeConfig
     ) {
         $this->instanceFactory = $instanceFactory;
         $this->helper = $helper;
@@ -64,6 +79,8 @@ class Widgets
         $this->stores = $stores;
         $this->appState = $appState;
         $this->collectionFactory = $collectionFactory;
+        $this->storeRepository = $storeRepository;
+        $this->scopeConfig = $scopeConfig;
     }
 
     /**
@@ -95,7 +112,7 @@ class Widgets
         if (empty($row['theme'])) {
             $themeId = 1;
         } else {
-            $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $row['theme'])->getThemeId();
+            $themeId = $this->getThemeId($row['theme'],$row['store_view_codes']);
             if (!$themeId) {
                 $themeId = 1;
             }
@@ -154,5 +171,28 @@ class Widgets
             'frontend',
             [$widget, 'save']
         );
+    }
+
+    /**
+     * Get theme id by store and path
+     * 
+     * @param mixed $theme 
+     * @param mixed $storeViewCode 
+     * @return mixed 
+     * @throws NoSuchEntityException 
+     */
+    protected function getThemeId($theme,$storeViewCode)
+    {
+        $storeViewId = $this->storeRepository->get($storeViewCode)->getId();
+        $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $theme)->getThemeId();
+        if (!$themeId) {
+            //if the theme doesnt exist, get the theme assigned to the store
+            $themeId = $this->scopeConfig->getValue('design/theme/theme_id', 'stores', $storeViewId);
+            if (!$themeId){
+            //if the theme doesnt exist, return empty string    
+                $themeId = '';
+            }
+        }
+        return $themeId;
     }
 }

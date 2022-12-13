@@ -873,8 +873,26 @@ class Stores
             //make sure theme is registered
             $this->themeRegistration->register();
             $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $data['theme'])->getThemeId();
+            // if theme doesnt exist, try the fallback
+            if(!$themeId){
+                $this->helper->logMessage("Theme ".$data['theme']. " not found", "warning");
+                if (!empty($data['theme_fallback'])) {
+                    //make sure theme is registered
+                    $this->themeRegistration->register();
+                    $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $data['theme_fallback'])->getThemeId();
+                    if(!$themeId){
+                        $this->helper->logMessage("Fallback theme ".$data['theme_fallback']. " not found", "warning");
+                    }
+                }
+            }
+            if(!$themeId){
+                $this->helper->logMessage("Theme not set", "warning");
+            }
             //set theme
             $this->configuration->saveConfig("design/theme/theme_id", $themeId, "stores", $storeViewId);
+            $this->helper->logMessage("Theme assigned", "info");
         }
     }
 }
+
+

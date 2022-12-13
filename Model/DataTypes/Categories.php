@@ -13,20 +13,22 @@ use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\ResourceModel\Category\TreeFactory;
 use Magento\Cms\Api\Data\BlockInterfaceFactory;
 use Magento\Framework\Data\Tree\Node;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Api\StoreRepositoryInterface;
 use MagentoEse\DataInstall\Helper\Helper;
 use MagentoEse\DataInstall\Model\Converter;
 use Magento\Theme\Model\ResourceModel\Theme\Collection as ThemeCollection;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 
 class Categories
 {
     /** @var CategoryInterfaceFactory  */
     protected $categoryFactory;
 
-     /** @var CategoryListInterface  */
+    /** @var CategoryListInterface  */
      protected $categoryList;
 
-      /** @var SearchCriteriaBuilder  */
+    /** @var SearchCriteriaBuilder  */
     protected $searchCriteria;
 
     /** @var StoreRepositoryInterface  */
@@ -56,21 +58,25 @@ class Categories
     /** @var ThemeCollection */
     protected $themeCollection;
 
-    /**
-     * Categories constructor
-     *
-     * @param CategoryInterfaceFactory $categoryFactory
-     * @param CategoryListInterface $categoryList
-     * @param SearchCriteriaBuilder $searchCriteria
-     * @param TreeFactory $resourceCategoryTreeFactory
-     * @param StoreRepositoryInterface $storeRepository
-     * @param BlockInterfaceFactory $blockFactory
-     * @param Configuration $configuration
-     * @param Converter $converter
-     * @param Helper $helper
-     * @param Stores $stores
-     * @param ThemeCollection $themeCollection
-     */
+    /** @var ScopeConfigInterface  */
+    protected $scopeConfig;
+
+   /**
+    * 
+    * @param CategoryInterfaceFactory $categoryFactory 
+    * @param CategoryListInterface $categoryList 
+    * @param SearchCriteriaBuilder $searchCriteria 
+    * @param TreeFactory $resourceCategoryTreeFactory 
+    * @param StoreRepositoryInterface $storeRepository 
+    * @param BlockInterfaceFactory $blockFactory 
+    * @param Configuration $configuration 
+    * @param Converter $converter 
+    * @param Helper $helper 
+    * @param Stores $stores 
+    * @param ThemeCollection $themeCollection 
+    * @param ScopeConfigInterface $scopeConfig 
+    * @return void 
+    */
     public function __construct(
         CategoryInterfaceFactory $categoryFactory,
         CategoryListInterface $categoryList,
@@ -82,7 +88,8 @@ class Categories
         Converter $converter,
         Helper $helper,
         Stores $stores,
-        ThemeCollection $themeCollection
+        ThemeCollection $themeCollection,
+        ScopeConfigInterface $scopeConfig
     ) {
         $this->categoryFactory = $categoryFactory;
         $this->categoryList = $categoryList;
@@ -95,6 +102,7 @@ class Categories
         $this->helper = $helper;
         $this->stores = $stores;
         $this->themeCollection = $themeCollection;
+        $this->scopeConfig = $scopeConfig;
     }
 
     /**
@@ -187,7 +195,7 @@ class Categories
                 if ($categoryAttribute == 'landing_page') {
                     $attributeData = [$categoryAttribute => $this->getCmsBlockId($row[$categoryAttribute])];
                 } elseif ($categoryAttribute == 'custom_design') {
-                    $attributeData = [$categoryAttribute => $this->getThemeId($row[$categoryAttribute])];
+                    $attributeData = [$categoryAttribute => $this->getThemeId($row[$categoryAttribute],$row['store_view_code'])];
                 } else {
                     $attributeData = [$categoryAttribute => $this->converter->convertContent($row[$categoryAttribute])];
                 }
@@ -198,16 +206,24 @@ class Categories
     }
 
     /**
-     * Get themeid by path
-     *
-     * @param string $theme
-     * @return int|string
+     * Get theme id by store and path
+     * 
+     * @param mixed $theme 
+     * @param mixed $storeViewCode 
+     * @return mixed 
+     * @throws NoSuchEntityException 
      */
-    protected function getThemeId($theme)
+    protected function getThemeId($theme,$storeViewCode)
     {
+        $storeViewId = $this->storeRepository->get($storeViewCode)->getId();
         $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $theme)->getThemeId();
         if (!$themeId) {
-            $themeId = '';
+            //if the theme doesnt exist, get the theme assigned to the store
+            $themeId = $this->scopeConfig->getValue('design/theme/theme_id', 'stores', $storeViewId);
+            if (!$themeId){
+            //if the theme doesnt exist, return empty string    
+                $themeId = '';
+            }
         }
         return $themeId;
     }

@@ -118,7 +118,8 @@ class Pages
         }
         if (!empty($row['identifier'])) {
             $foundPage=0;
-            $search = $this->searchCriteria->addFilter(PageInterface::IDENTIFIER, $row['identifier'], 'eq')->create();
+            $search = $this->searchCriteria->
+            addFilter(PageInterface::IDENTIFIER, $row['identifier'], 'eq')->create();
 
             $pages = $this->pageRepository->getList($search)->getItems();
             /** @var \Magento\Cms\Model\Page $page */
@@ -164,10 +165,10 @@ class Pages
                         }
                     } else {
                         //multiple pages exist
+                        $r=$updatePage->getStores();
                         if ($updatePage->getStores()[0]==$this->getStoreIds($row['store_view_code'])[0]) {
                             //update when store is found
-                            $updatePage->load($row['identifier'], 'identifier');
-                             $this->pageRepository->save($updatePage->addData($row));
+                            $this->pageRepository->save($updatePage->addData($row));
                             $foundPage =1;
                         }
                     }

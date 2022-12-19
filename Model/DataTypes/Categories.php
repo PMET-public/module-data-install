@@ -62,20 +62,20 @@ class Categories
     protected $scopeConfig;
 
    /**
-    * 
-    * @param CategoryInterfaceFactory $categoryFactory 
-    * @param CategoryListInterface $categoryList 
-    * @param SearchCriteriaBuilder $searchCriteria 
-    * @param TreeFactory $resourceCategoryTreeFactory 
-    * @param StoreRepositoryInterface $storeRepository 
-    * @param BlockInterfaceFactory $blockFactory 
-    * @param Configuration $configuration 
-    * @param Converter $converter 
-    * @param Helper $helper 
-    * @param Stores $stores 
-    * @param ThemeCollection $themeCollection 
-    * @param ScopeConfigInterface $scopeConfig 
-    * @return void 
+    *
+    * @param CategoryInterfaceFactory $categoryFactory
+    * @param CategoryListInterface $categoryList
+    * @param SearchCriteriaBuilder $searchCriteria
+    * @param TreeFactory $resourceCategoryTreeFactory
+    * @param StoreRepositoryInterface $storeRepository
+    * @param BlockInterfaceFactory $blockFactory
+    * @param Configuration $configuration
+    * @param Converter $converter
+    * @param Helper $helper
+    * @param Stores $stores
+    * @param ThemeCollection $themeCollection
+    * @param ScopeConfigInterface $scopeConfig
+    * @return void
     */
     public function __construct(
         CategoryInterfaceFactory $categoryFactory,
@@ -195,7 +195,8 @@ class Categories
                 if ($categoryAttribute == 'landing_page') {
                     $attributeData = [$categoryAttribute => $this->getCmsBlockId($row[$categoryAttribute])];
                 } elseif ($categoryAttribute == 'custom_design') {
-                    $attributeData = [$categoryAttribute => $this->getThemeId($row[$categoryAttribute],$row['store_view_code'])];
+                    $attributeData = [$categoryAttribute =>
+                    $this->getThemeId($row[$categoryAttribute], $row['store_view_code'])];
                 } else {
                     $attributeData = [$categoryAttribute => $this->converter->convertContent($row[$categoryAttribute])];
                 }
@@ -207,21 +208,21 @@ class Categories
 
     /**
      * Get theme id by store and path
-     * 
-     * @param mixed $theme 
-     * @param mixed $storeViewCode 
-     * @return mixed 
-     * @throws NoSuchEntityException 
+     *
+     * @param mixed $theme
+     * @param mixed $storeViewCode
+     * @return mixed
+     * @throws NoSuchEntityException
      */
-    protected function getThemeId($theme,$storeViewCode)
+    protected function getThemeId($theme, $storeViewCode)
     {
         $storeViewId = $this->storeRepository->get($storeViewCode)->getId();
         $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $theme)->getThemeId();
         if (!$themeId) {
             //if the theme doesnt exist, get the theme assigned to the store
             $themeId = $this->scopeConfig->getValue('design/theme/theme_id', 'stores', $storeViewId);
-            if (!$themeId){
-            //if the theme doesnt exist, return empty string    
+            if (!$themeId) {
+            //if the theme doesnt exist, return empty string
                 $themeId = '';
             }
         }

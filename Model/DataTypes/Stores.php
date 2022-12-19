@@ -6,6 +6,7 @@
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Exception;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Api\Data\CategoryInterfaceFactory;
 use Magento\Cms\Api\PageRepositoryInterface;
@@ -32,6 +33,7 @@ use Magento\Store\Model\ResourceModel\Store as StoreResourceModel;
 use Magento\Store\Model\ResourceModel\Website as WebsiteResourceModel;
 use Magento\Theme\Model\ResourceModel\Theme\Collection as ThemeCollection;
 use Magento\Theme\Model\Theme\Registration as ThemeRegistration;
+use Magento\Framework\Component\ComponentRegistrar;
 use Magento\UrlRewrite\Model\Exception\UrlAlreadyExistsException;
 use Magento\UrlRewrite\Model\UrlPersistInterface;
 use MagentoEse\DataInstall\Helper\Helper;
@@ -95,6 +97,9 @@ class Stores
     /** @var State  */
     protected $appState;
 
+    /** @var ComponentRegistrar */
+    protected $componantRegistrar;
+    
     /** @var ThemeRegistration */
     protected $themeRegistration;
 
@@ -871,21 +876,22 @@ class Stores
     {
         if (!empty($data['theme'])) {
             //make sure theme is registered
-            $this->themeRegistration->register();
+            $this->registerTheme($data['theme']);
             $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $data['theme'])->getThemeId();
             // if theme doesnt exist, try the fallback
-            if(!$themeId){
+            if (!$themeId) {
                 $this->helper->logMessage("Theme ".$data['theme']. " not found", "warning");
                 if (!empty($data['theme_fallback'])) {
                     //make sure theme is registered
-                    $this->themeRegistration->register();
-                    $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $data['theme_fallback'])->getThemeId();
-                    if(!$themeId){
+                    $this->registerTheme($data['theme_fallback']);
+                    $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $data['theme_fallback'])
+                    ->getThemeId();
+                    if (!$themeId) {
                         $this->helper->logMessage("Fallback theme ".$data['theme_fallback']. " not found", "warning");
                     }
                 }
             }
-            if(!$themeId){
+            if (!$themeId) {
                 $this->helper->logMessage("Theme not set", "warning");
             }
             //set theme
@@ -893,6 +899,23 @@ class Stores
             $this->helper->logMessage("Theme assigned", "info");
         }
     }
+
+    /**
+     * Register added theme
+     *
+     * @param mixed $theme
+     * @return void
+     * @throws LocalizedException
+     */
+    private function registerTheme($theme)
+    {
+        try {
+            // phpcs:ignore Magento2.Security.IncludeFile.FoundIncludeFile
+            include 'app/design/frontend/'.$theme.'/registration.php';
+        } catch (Exception $e) {
+            //ignore
+            $r=1;
+        }
+        $this->themeRegistration->register();
+    }
 }
-
-

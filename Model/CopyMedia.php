@@ -46,7 +46,7 @@ class CopyMedia
     protected $allowedThemeFiles = ['xml'=>'application/xml','less'=>'text/plain','phtml'=>'text/html|text/x-php',
         'css'=>'text/css','md'=>'application/octet-stream|text/plain','json'=>'application/json','csv'=>'text/plain',
         'php'=>'text/html|text/x-php','eot'=>'application/vnd.ms-fontobject','svg'=>'image/svg+xml',
-        'woff'=>'application/octet-stream','woff2'=>'application/octet-stream','ttf'=>'application/font-sfnt',
+        'woff'=>'font/woff','woff2'=>'font/woff2','ttf'=>'font/sfnt',
         'txt'=>'text/plain','js'=>'application/javascript'];
 
     /** @var Helper */

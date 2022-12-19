@@ -254,7 +254,7 @@ Optional file: This file is used to add and update Sites, Stores, Store Views an
 This is set at the website level. If it needs to be set for another scope, that can be done in the config.json or config.csv files.
 
 **theme** - Optional: Assigns a theme to the store view. This should be the path of the theme directory from the Vendor namespace. For example Magento/luma or MagentoEse/venia
-**fallback_theme** - Optional: Second option to assign a theme to the store view. This would be used in the case that the theme in the `theme` column does not exist
+**theme_fallback** - Optional: Second option to assign a theme to the store view. This would be used in the case that the theme in the `theme` column does not exist
 
 ### Configuration
 
@@ -934,6 +934,9 @@ Quality, Price and Value rating codes are installed by default but the visibilit
 **sku** - Required. Product to add the review to. If the product doesn't exist the row will be skipped
 
 **rating\_code** - Required. Type of rating. This can be any value: e.g. Rating, Satisfaction, etc. Quality, Price and Value rating codes are installed by default but the visibility is not set for a website, so those values could not be used unless activated in the admin before the data is imported.
+
+**rating\_value** - Required. Number of stars from 1 to 5
+
 
 **summary** - Required. This is what a user would enter in the Summary field of the review form
 

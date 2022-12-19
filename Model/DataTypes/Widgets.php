@@ -49,17 +49,17 @@ class Widgets
     protected $scopeConfig;
 
    /**
-    * 
-    * @param InstanceFactory $instanceFactory 
-    * @param Helper $helper 
-    * @param Converter $converter 
-    * @param ThemeCollection $themeCollection 
-    * @param Stores $stores 
-    * @param State $appState 
-    * @param CollectionFactory $collectionFactory 
-    * @param StoreRepositoryInterface $storeRepository 
-    * @param ScopeConfigInterface $scopeConfig 
-    * @return void 
+    *
+    * @param InstanceFactory $instanceFactory
+    * @param Helper $helper
+    * @param Converter $converter
+    * @param ThemeCollection $themeCollection
+    * @param Stores $stores
+    * @param State $appState
+    * @param CollectionFactory $collectionFactory
+    * @param StoreRepositoryInterface $storeRepository
+    * @param ScopeConfigInterface $scopeConfig
+    * @return void
     */
     public function __construct(
         InstanceFactory $instanceFactory,
@@ -112,7 +112,7 @@ class Widgets
         if (empty($row['theme'])) {
             $themeId = 1;
         } else {
-            $themeId = $this->getThemeId($row['theme'],$row['store_view_codes']);
+            $themeId = $this->getThemeId($row['theme'], $row['store_view_code']);
             if (!$themeId) {
                 $themeId = 1;
             }
@@ -175,21 +175,21 @@ class Widgets
 
     /**
      * Get theme id by store and path
-     * 
-     * @param mixed $theme 
-     * @param mixed $storeViewCode 
-     * @return mixed 
-     * @throws NoSuchEntityException 
+     *
+     * @param mixed $theme
+     * @param mixed $storeViewCode
+     * @return mixed
+     * @throws NoSuchEntityException
      */
-    protected function getThemeId($theme,$storeViewCode)
+    protected function getThemeId($theme, $storeViewCode)
     {
         $storeViewId = $this->storeRepository->get($storeViewCode)->getId();
         $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $theme)->getThemeId();
         if (!$themeId) {
             //if the theme doesnt exist, get the theme assigned to the store
             $themeId = $this->scopeConfig->getValue('design/theme/theme_id', 'stores', $storeViewId);
-            if (!$themeId){
-            //if the theme doesnt exist, return empty string    
+            if (!$themeId) {
+            //if the theme doesnt exist, return empty string
                 $themeId = '';
             }
         }

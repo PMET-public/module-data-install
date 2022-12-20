@@ -102,9 +102,12 @@ class Save extends \Magento\Backend\App\Action
             }
             $fileUploader = null;
             $params = $this->getRequest()->getParams();
+            //set auth token to empty to retrieve config setting if entered.
+            $dataPack->setAuthToken('');
             $this->setAdvancedConditions($dataPack, $params['advanced_conditions']);
             //params['vertical'] for upload params['remote_source'] for upload
             if ($params['remote_source']!='') {
+                $dataPack->setIsRemote(true);
                 $dataPack->setDataPackLocation($dataPack->getRemoteDataPack(
                     $params['remote_source'],
                     $dataPack->getAuthToken()
@@ -187,6 +190,9 @@ class Save extends \Magento\Backend\App\Action
                 case "--authtoken":
                     $dataPack->setAuthToken($element[1]);
                     break;
+                case "--remotesource":
+                    $dataPack->setIsRemote($element[1]);
+                    break;    
             }
         }
         return $dataPack;
@@ -220,27 +226,7 @@ class Save extends \Magento\Backend\App\Action
         }
     }
 
-    /**
-     * Return authentication token
-     *
-     * Defaults to github token for now, but can be expanded to support additional authentication methods
-     *
-     * @param array $params
-     * @return mixed
-     * @throws \Magento\Framework\Exception\FileSystemException
-     */
-    protected function getAuthenticationd($params)
-    {
-        if (!empty($params['github_access_token'])) {
-            return $params['github_access_token'];
-        } else {
-            return $this->scopeConfig->getValue(
-                'magentoese/datainstall/github_access_token',
-                ScopeConfigInterface::SCOPE_TYPE_DEFAULT
-            );
-        }
-    }
-
+   
         /**
          * Get a remote data pack
          *
@@ -261,7 +247,7 @@ class Save extends \Magento\Backend\App\Action
         $result=$this->curl->getBody();
         if ($result=='Not Found') {
             throw new
-            LocalizedException(__('Data pack could not be retrieved. Check the url and necessary authenticatication'));
+            LocalizedException(__('Data pack could not be retrieved. Check the url, php settings for file size, and necessary authenticatication'));
         }
         $this->file->filePutContents($this->verticalDirectory->
             getAbsolutePath(self::ZIPPED_DIR).'/'.$filename.'.zip', $result);

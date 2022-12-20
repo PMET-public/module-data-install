@@ -267,7 +267,7 @@ class DataPack implements DataPackInterface
         $result=$this->curl->getBody();
         if ($result=='Not Found') {
             throw new
-            LocalizedException(__('Data pack could not be retrieved. Check the url and necessary authenticatication'));
+            LocalizedException(__('Data pack could not be retrieved. Check the url, php settings for file size, and necessary authenticatication'));
         }
 
         $f = $this->verticalDirectory->getAbsolutePath(self::ZIPPED_DIR);
@@ -322,10 +322,10 @@ class DataPack implements DataPackInterface
         if ($token != "") {
             return $token;
         } else {
-            return $this->scopeConfig->getValue(
-                'magentoese/datainstall/github_access_token',
-                ScopeConfigInterface::SCOPE_TYPE_DEFAULT
-            );
+        return $this->scopeConfig->getValue(
+            'magentoese/datainstall/github_access_token',
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT
+        );
         }
     }
 }

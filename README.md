@@ -57,6 +57,7 @@ Example :
 ### GitHub Remote Via UI
 In the same UI used to upload a zip file, you can also enter a GitHub URL to remotely retrieve the Data Pack. Advanced Conditions the same as used by the CLI can be added as needed. After the Data Pack is retrieved, a job is created to schedule the import. The `magentoese_datainstall.import` consumer will install the Data Pack in the background.
 If you are accessing private repos, a GitHub Personal Access Token will need to be added and included in the Commerce store configuration under *Stores->Configuration->Advanced->System->Data Installer Authorization*. It could also be included as part of the Advanced Conditions
+
 ### GraphQL Scheduled
 A GraphQL mutation can be used to mimic the same functionality that the CLI provides. This would include installing an existing Data Pack or GitHub Remote. Additional queries can also return job status and logging information. See the [Data Installer GraphQL ](https://github.com/PMET-public/module-data-install-graphql)module for information
 
@@ -85,13 +86,15 @@ Data Packs loaded via the UI or GraphQL will be imporated by a bulk job run by a
 
 Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](https://github.com/PMET-public/module-storystore-sample "https://github.com/PMET-public/module-storystore-sample")
 
-### Handling of the default `base` website
+### Handling of the default `base` website and additional websites
 
 When Adobe Commerce installs, a default web site is created with a site code of `base`. In order to facilitate the ease of re-use of data packs, most are created assuming that the `base` web site exists. The data installer will make adjustments in the case that the `base` site code has been changed.
 
 If the data that is being installed calls for a `base` website, and that site does not exist, the Data Installer will substitute `base` with the site code of the default web site.
 
 Of course you can always specify any site code where appropriate in the data.
+
+If you have a data pack that creates a new website, you can have the option to have that website render as the default site. This is most useful when installing on an empty instance. This can be accomplished by having two versions of the data for both the `base` webiste and the new website. However to avoid that duplication, you can add the `--make-default-website` option to the installation. This will install the datpack as a new website, but make adjustmets to the base url and default website settings.  So the new datapack will render as the default site.
 
 ### Events, Observers and Webhooks
 

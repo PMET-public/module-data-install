@@ -193,7 +193,7 @@ class Save extends \Magento\Backend\App\Action
                 case "--remotesource":
                     $dataPack->setIsRemote($element[1]);
                     break;
-                case "-make-default-website":
+                case "--make-default-website":
                     $dataPack->setIsDefaultWebsite(1);
                     break;
             }

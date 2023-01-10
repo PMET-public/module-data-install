@@ -18,7 +18,7 @@
  * -r force reload if already loaded
  * --authtoken=<token> - token needed for remote data retreival
  * -remote - flag if data pack is rempote
- * -make-default-website - Set this site as default regardless of data pack settings
+ * --make-default-website - Set this site as default regardless of data pack settings
  **/
 
 //https://magento.stackexchange.com/questions/155654/console-command-waiting-for-input-from-user

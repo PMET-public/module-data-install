@@ -92,7 +92,7 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                 <item name="formElement" xsi:type="string">input</item>
                 <item name="notice" xsi:type="string" translate="true">
                     <![CDATA[--load[LOAD] --files [FILES] --host [HOST] -r|--reload [RELOAD]
-                     --authtoken [AUTHTOKEN] --remote [REMOTE]]]>
+                     --authtoken [AUTHTOKEN] --remote [REMOTE] --make-default-website [MAKE-DEFAULT-WEBSITE]]]>
                 </item>
             </item>
         </argument>

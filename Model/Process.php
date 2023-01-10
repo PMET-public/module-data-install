@@ -138,6 +138,7 @@ class Process
         $jobSettings['reload'] = $dataPack->getReload();
         $jobSettings['host'] = $dataPack->getHost();
         $jobSettings['jobid'] = $dataPack->getJobId();
+        $jobSettings['isDefaultWebsite'] = $dataPack->getIsDefaultWebsite();
 
         $fileSource = $jobSettings['filesource'];
         $load = $jobSettings['load'];
@@ -146,7 +147,6 @@ class Process
         $host = $jobSettings['host'];
 
         $fixtureDirectory = self::FIXTURE_DIRECTORY;
-
         //if there is no load value, check for .default flag
         $filePath = $this->getDataPath($fileSource);
         if ($load=='') {

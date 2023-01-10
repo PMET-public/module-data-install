@@ -167,6 +167,7 @@ class Consumer
         }
         $dataPack->setLoad($data['load']);
         $dataPack->setReload($data['reload']);
+        $dataPack->setIsDefaultWebsite($data['isDefaultWebsite']);
         $dataPack->setHost($data['host']);
         $dataPack->setJobId($data['jobid']);
         return $dataPack;

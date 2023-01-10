@@ -200,7 +200,19 @@ class Stores
             $data['site_code'] = $this->validateCode($data['site_code']);
             $data['site_code'] = $this->replaceBaseWebsiteCode($data['site_code']);
             $this->helper->logMessage("-updating site", "info");
+
+            //if website needs to be set as default, adjust data
+            if (isset($settings['job_settings']['isDefaultWebsite'])) {
+                if ($settings['job_settings']['isDefaultWebsite']) {
+                    $data['is_default_site'] = $settings['job_settings']['isDefaultWebsite'];
+                    $data['host'] = '';
+                } else {
+                    $data['is_default_site'] = 0;
+                }
+            }
+
             $website = $this->setSite($data);
+
             //if there is a host value, set base urls
             if ($cliHost) {
                 $data['host']=$cliHost;
@@ -218,7 +230,6 @@ class Stores
                         $this->setBaseUrls($data['host'], $website->getId());
                 }
             }
-
             //if there is no store code, skip store and view
             if (!empty($data['store_code'])) {
                 $this->helper->logMessage("-updating stores", "info");
@@ -243,7 +254,6 @@ class Stores
         } else {
             $this->helper->logMessage("site_code column needs to be included with a value", "error");
         }
-
         return true;
     }
 
@@ -261,6 +271,22 @@ class Stores
         //load site from the code.
         /** @var WebsiteInterface $website */
         $website = $this->getWebsite($data);
+        if (isset($data['is_default_site'])) {
+            $website->setData('is_default', $data['is_default_site']);
+            if (!$data['is_default_site']) {
+                //check to make sure there is another site set as default. If not, set base as default
+                $siteId = $website->getID();
+                $defaultSite = $this->websiteRepository->getDefault()->getId();
+                $this->helper->logMessage($data['site_code'] . " set as default site", "info");
+                if ($siteId==$defaultSite) {
+                    $baseSite = $this->websiteRepository->getById(1);
+                    $baseSite->setData('is_default', 1);
+                    $this->websiteResourceModel->save($baseSite);
+                    $this->helper->logMessage("base reset as default site", "info");
+                }
+            }
+        }
+        
         //no name,sort order  update - we can skip
         if (!empty($data['site_name']) || !empty($data['site_order'])) {
             $this->helper->logMessage($data['site_code'] . " eligible for add or update", "info");
@@ -426,10 +452,10 @@ class Stores
                 }
 
                 $this->storeResourceModel->save($view);
-
                 if (!empty($data['is_default_view']) && $data['is_default_view']=='Y') {
                     //default needs to be active
                     $view->setIsActive(1);
+                    
                     $this->appState->emulateAreaCode(
                         AppArea::AREA_ADMINHTML,
                         [$this->storeResourceModel, 'save'],

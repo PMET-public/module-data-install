@@ -145,4 +145,19 @@ interface DataPackInterface extends ExtensibleDataInterface
      * @return void
      */
     public function unZipDataPack();
+
+    /**
+     * Get Make Default Website
+     *
+     * @return string
+     */
+    public function getIsDefaultWebsite();
+
+    /**
+     * Set Website as default
+     *
+     * @param string $makeDefault
+     * @return void
+     */
+    public function setIsDefaultWebsite($makeDefault);
 }

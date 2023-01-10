@@ -18,6 +18,7 @@
  * -r force reload if already loaded
  * --authtoken=<token> - token needed for remote data retreival
  * -remote - flag if data pack is rempote
+ * -make-default-website - Set this site as default regardless of data pack settings
  **/
 
 //https://magento.stackexchange.com/questions/155654/console-command-waiting-for-input-from-user
@@ -46,6 +47,7 @@ class Install extends Command
     public const RELOAD_FLAG = 'reload';
     public const AUTH_TOKEN = 'authtoken';
     public const IS_REMOTE = 'remote';
+    public const MAKE_DEFAULT_SITE = 'make-default-website';
 
     /** @var ObjectManagerInterface  */
     protected $objectManagerInterface;
@@ -109,6 +111,13 @@ class Install extends Command
                 'Auth token if needed for remote retrieval'
             ),
             new InputOption(self::RELOAD_FLAG, '-r', InputOption::VALUE_OPTIONAL, 'Force Reload', 0),
+            new InputOption(
+                self::MAKE_DEFAULT_SITE,
+                '-make-default-website',
+                InputOption::VALUE_OPTIONAL,
+                'Set this site as default regardless of data pack settings',
+                0
+            ),
             new InputOption(self::IS_REMOTE, '-remote', InputOption::VALUE_OPTIONAL, 'Is data pack remote', false)
         ];
 
@@ -137,6 +146,7 @@ class Install extends Command
         $host = $input->getOption(self::HOST);
         $isRemote = $input->getOption(self::IS_REMOTE);
         $authToken = $input->getOption(self::AUTH_TOKEN);
+        $makeDefaultSite = $input->getOption(self::MAKE_DEFAULT_SITE);
         if ($files=='') {
             $fileArray=[];
         } else {
@@ -144,6 +154,10 @@ class Install extends Command
         }
         if ($reload === null) {
              $reload = 1;
+        }
+
+        if ($makeDefaultSite === null) {
+            $makeDefaultSite = 1;
         }
 
         if ($isRemote === null) {
@@ -157,6 +171,7 @@ class Install extends Command
         $dataPack->setHost($host);
         $dataPack->setIsRemote($isRemote);
         $dataPack->setAuthToken($authToken);
+        $dataPack->setIsDefaultWebsite($makeDefaultSite);
 
         //if data pack is rempote, retrieve it
         if ($dataPack->getIsRemote()) {

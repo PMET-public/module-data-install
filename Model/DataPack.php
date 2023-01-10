@@ -38,6 +38,12 @@ class DataPack implements DataPackInterface
     /** @var string  */
     protected $authToken;
 
+    /** @var string  */
+    protected $isDefaultWebsite;
+
+    /** @var string  */
+    protected $jobId;
+
     /** @var Filesystem\Directory\WriteInterface */
     protected $verticalDirectory;
 
@@ -66,6 +72,7 @@ class DataPack implements DataPackInterface
         Filesystem $filesystem
     ) {
         $this->reload=0;
+        $this->isDefaultWebsite=0;
         $this->jobId='';
         $this->file = $file;
         $this->scopeConfig = $scopeConfigInterface;
@@ -267,7 +274,8 @@ class DataPack implements DataPackInterface
         $result=$this->curl->getBody();
         if ($result=='Not Found') {
             throw new
-            LocalizedException(__('Data pack could not be retrieved. Check the url, php settings for file size, and necessary authenticatication'));
+            LocalizedException(__('Data pack could not be retrieved. Check the url, 
+            php settings for file size, and necessary authenticatication'));
         }
 
         $f = $this->verticalDirectory->getAbsolutePath(self::ZIPPED_DIR);
@@ -322,10 +330,31 @@ class DataPack implements DataPackInterface
         if ($token != "") {
             return $token;
         } else {
-        return $this->scopeConfig->getValue(
-            'magentoese/datainstall/github_access_token',
-            ScopeConfigInterface::SCOPE_TYPE_DEFAULT
-        );
+            return $this->scopeConfig->getValue(
+                'magentoese/datainstall/github_access_token',
+                ScopeConfigInterface::SCOPE_TYPE_DEFAULT
+            );
         }
+    }
+
+     /**
+      * Set Wbsite to default
+      *
+      * @param string $makeDefault
+      * @return void
+      */
+    public function setIsDefaultWebsite($makeDefault)
+    {
+        $this->isDefaultWebsite = $makeDefault;
+    }
+
+    /**
+     * Get data directory
+     *
+     * @return string
+     */
+    public function getIsDefaultWebsite()
+    {
+        return $this->isDefaultWebsite ;
     }
 }

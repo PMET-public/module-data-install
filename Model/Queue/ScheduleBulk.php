@@ -105,6 +105,7 @@ class ScheduleBulk
                     'load' => $operation['load'],
                     'fileorder' => $operation['fileOrder'],
                     'reload' => $operation['reload'],
+                    'isDefaultWebsite' => $operation['isDefaultWebsite'],
                     'host' => $operation['host'],
                     //for future use
                     'website'=>'base',

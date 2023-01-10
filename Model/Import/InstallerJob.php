@@ -123,6 +123,7 @@ class InstallerJob implements InstallerJobInterface
         $operation['fileOrder'] = $dataPack->getFiles();
         $operation['reload'] = $dataPack->getReload();
         $operation['host'] = $dataPack->getHost();
+        $operation['isDefaultWebsite'] = $dataPack->getIsDefaultWebsite();
         $jobId = $this->scheduleBulk->execute([$operation]);
         return $jobId;
     }

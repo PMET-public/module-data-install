@@ -1,0 +1,5 @@
+name,value
+site_code,luma
+store_code,luma_store
+store_view_code,luma_en_us
+restrict_products_from_views,N

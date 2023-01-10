@@ -1,0 +1,20 @@
+{
+    "data": {
+        "storeConfig": {
+            "is_default_view": true,
+            "is_default_store": true,
+            "root_category_id": 2,
+            "root_category_uid": "Mg==",
+            "store_view_code": "luma_en_us",
+            "store_code": "luma_store",
+            "store_name": "Luma Store",
+            "view_name": "Luma US",
+            "view_order": 0,
+            "site_code": "luma",
+            "site_name": "Luma Website",
+            "store_root_category": "Luma Catalog",
+            "theme": "Magento/luma",
+            "host": "subdirectory"
+        }
+    }
+}

@@ -192,7 +192,10 @@ class Save extends \Magento\Backend\App\Action
                     break;
                 case "--remotesource":
                     $dataPack->setIsRemote($element[1]);
-                    break;    
+                    break;
+                case "-make-default-website":
+                    $dataPack->setIsDefaultWebsite(1);
+                    break;
             }
         }
         return $dataPack;
@@ -225,7 +228,6 @@ class Save extends \Magento\Backend\App\Action
             return false;
         }
     }
-
    
         /**
          * Get a remote data pack
@@ -247,7 +249,8 @@ class Save extends \Magento\Backend\App\Action
         $result=$this->curl->getBody();
         if ($result=='Not Found') {
             throw new
-            LocalizedException(__('Data pack could not be retrieved. Check the url, php settings for file size, and necessary authenticatication'));
+            LocalizedException(__('Data pack could not be retrieved. Check the url, 
+            php settings for file size, and necessary authenticatication'));
         }
         $this->file->filePutContents($this->verticalDirectory->
             getAbsolutePath(self::ZIPPED_DIR).'/'.$filename.'.zip', $result);

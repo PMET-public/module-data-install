@@ -108,7 +108,13 @@ class Widgets
             );
             return true;
         }
-    //default to blank theme if theme not given
+
+        //backwards compatibility switch to store_view_code
+        if (!empty($row['store_view_codes'])) {
+            $row['store_view_code'] = $row['store_view_codes'];
+        }
+
+        //default to blank theme if theme not given
         if (empty($row['theme'])) {
             $themeId = 1;
         } else {
@@ -117,10 +123,7 @@ class Widgets
                 $themeId = 1;
             }
         }
-        //backwards compatibility switch to store_view_code
-        if (!empty($row['store_view_codes'])) {
-            $row['store_view_code'] = $row['store_view_codes'];
-        }
+        
         //if store is not given, default to all (0)
         if (empty($row['store_view_code'])) {
             $storeIds[] = 0;

@@ -6,7 +6,7 @@
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
-use FireGento\FastSimpleImport\Model\ImporterFactory as Importer;
+use MagentoEse\DataInstall\Model\Import\Importer\ImporterFactory as Importer;
 use MagentoEse\DataInstall\Helper\Helper;
 
 class MsiInventory

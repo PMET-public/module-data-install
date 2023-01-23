@@ -13,7 +13,6 @@ xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
             <module name="Magento_Store"/>
             <module name="Magento_Authorization"/>
             <module name="Magento_User"/>
-            <module name="FireGento_FastSimpleImport"/>
             <module name="Magento_PurchaseOrderRule"/>
             <module name="Magento_Company"/>
             <module name="Magento_Cms"/>

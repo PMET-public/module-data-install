@@ -19,7 +19,7 @@ use Magento\Framework\Api\DataObjectHelper;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\State;
 use Magento\Framework\Exception\LocalizedException;
-use FireGento\FastSimpleImport\Model\ImporterFactory as Importer;
+use MagentoEse\DataInstall\Model\Import\Importer\ImporterFactory as Importer;
 use Magento\Framework\Exception\NoSuchEntityException;
 use MagentoEse\DataInstall\Helper\Helper;
 use Magento\Reward\Model\RewardFactory;
@@ -384,13 +384,13 @@ class Customers
         try {
             $importerModel->processImport($customerArray);
         } catch (\Exception $e) {
-            $this->helper->logMessage($e->getMessage());
+            $this->helper->logMessage($e->getMessage(), "warning");
         }
-
+        $errors = $importerModel->getErrorMessages();
         $this->helper->logMessage($importerModel->getLogTrace());
-        if ($importerModel->getErrorMessages()!="") {
-            $this->helper->logMessage($importerModel->getErrorMessages(), "warning");
-        }
+        //if ($importerModel->getErrorMessages()!="") {
+            //$this->helper->logMessage($importerModel->getErrorMessages(), "warning");
+        //}
         unset($importerModel);
     }
 

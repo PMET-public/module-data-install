@@ -11,7 +11,7 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\State;
-use FireGento\FastSimpleImport\Model\ImporterFactory as Importer;
+use MagentoEse\DataInstall\Model\Import\Importer\ImporterFactory as Importer;
 use MagentoEse\DataInstall\Helper\Helper;
 use Magento\Framework\App\Area as AppArea;
 use Magento\Framework\Filesystem\Directory\ReadInterface;
@@ -100,6 +100,9 @@ class Products
         array $settings,
         $behavior = 'append'
     ) {
+        if ($behavior==null) {
+            $behavior = 'append';
+        }
         if (!empty($settings['product_image_import_directory'])) {
             $imgDir = $settings['product_image_import_directory'];
         } else {

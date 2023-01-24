@@ -202,6 +202,7 @@ class Products
     private function import($productsArray, $imgDir, $productValidationStrategy, $behavior)
     {
         $importerModel = $this->importer->create();
+        $importerModel->setEntityCode('catalog_product');
         $importerModel->setBehavior($behavior);
         $importerModel->setImportImagesFileDir($imgDir);
         $importerModel->setValidationStrategy($productValidationStrategy);

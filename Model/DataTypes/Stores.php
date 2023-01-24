@@ -213,6 +213,18 @@ class Stores
 
             $website = $this->setSite($data);
 
+            //check to make sure there is another site set as default. If not, set base as default
+            // $siteId = $website->getID();
+            // $defaultSite = $this->websiteRepository->getDefault()->getId();
+            // $this->helper->logMessage($data['site_code'] . " set as default site", "info");
+            // if ($siteId==$defaultSite) {
+            //     $baseSite = $this->websiteRepository->getById(1);
+            //     $baseSite->setData('is_default', '1');
+            //     $this->websiteResourceModel->save($baseSite);
+            //     $this->helper->logMessage("base reset as default site", "info");
+            //     $data['is_default_site']= '1';
+            // }
+
             //if there is a host value, set base urls
             if ($cliHost) {
                 $data['host']=$cliHost;
@@ -271,22 +283,24 @@ class Stores
         //load site from the code.
         /** @var WebsiteInterface $website */
         $website = $this->getWebsite($data);
+
         if (isset($data['is_default_site'])) {
             $website->setData('is_default', $data['is_default_site']);
-            if (!$data['is_default_site']) {
+            if ($data['is_default_site']==0) {
                 //check to make sure there is another site set as default. If not, set base as default
                 $siteId = $website->getID();
                 $defaultSite = $this->websiteRepository->getDefault()->getId();
                 $this->helper->logMessage($data['site_code'] . " set as default site", "info");
                 if ($siteId==$defaultSite) {
                     $baseSite = $this->websiteRepository->getById(1);
-                    $baseSite->setData('is_default', 1);
+                    $baseSite->setData('is_default', '1');
                     $this->websiteResourceModel->save($baseSite);
                     $this->helper->logMessage("base reset as default site", "info");
+                    $data['is_default_site']= '1';
                 }
             }
         }
-        
+        $website = $this->getWebsite($data);
         //no name,sort order  update - we can skip
         if (!empty($data['site_name']) || !empty($data['site_order'])) {
             $this->helper->logMessage($data['site_code'] . " eligible for add or update", "info");
@@ -301,6 +315,7 @@ class Stores
                 if (!empty($data['site_order'])) {
                     $website->setSortOrder($data['site_order']);
                 }
+                $website->setData('is_default', $data['is_default_site']);
 
                 $this->websiteResourceModel->save($website);
                 return $website;
@@ -312,7 +327,7 @@ class Stores
                 if (!empty($data['site_order'])) {
                     $website->setSortOrder($data['site_order']);
                 }
-
+                $website->setData('is_default', $data['is_default_site']);
                 $this->websiteResourceModel->save($website);
                 return $website;
             } else {
@@ -425,9 +440,21 @@ class Stores
     {
         //if there is no store or view code we can skip
         if (!empty($data['store_code']) || !empty($data['store_view_code'])) {
-
+            
             /** @var WebsiteInterface $website */
             $website = $this->getWebsite($data);
+
+            //verify default website is set
+            // $siteId = $website->getID();
+            // $defaultSite = $this->websiteRepository->getDefault()->getId();
+            // $this->helper->logMessage($data['site_code'] . " set as default site", "info");
+            // if ($siteId==$defaultSite) {
+            //     $baseSite = $this->websiteRepository->getById(1);
+            //     $baseSite->setData('is_default', '1');
+            //     $this->websiteResourceModel->save($baseSite);
+            //     $this->helper->logMessage("base reset as default site", "info");
+            // }
+
             $this->helper->logMessage($data['store_view_code'] . " view eligible for add or update", "info");
             //load View with the code.
             /** @var StoreInterface $store */

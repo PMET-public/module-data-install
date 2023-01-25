@@ -9,13 +9,13 @@ use Magento\Store\Model\ScopeInterface;
 class Config extends \Magento\Framework\App\Helper\AbstractHelper
 {
 
-    private const XML_PATH_IGNORE_DUPLICATES      = 'fastsimpleimport/default/ignore_duplicates';
-    private const XML_PATH_BEHAVIOR               = 'fastsimpleimport/default/behavior';
-    private const XML_PATH_ENTITY                 = 'fastsimpleimport/default/entity';
-    private const XML_PATH_VALIDATION_STRATEGY    = 'fastsimpleimport/default/validation_strategy';
-    private const XML_PATH_ALLOWED_ERROR_COUNT    = 'fastsimpleimport/default/allowed_error_count';
-    private const XML_PATH_IMPORT_IMAGES_FILE_FIR = 'fastsimpleimport/default/import_images_file_dir';
-    private const XML_PATH_CATEGORY_PATH_SEPERATOR = 'fastsimpleimport/default/category_path_seperator';
+    private const XML_PATH_IGNORE_DUPLICATES      = 'datainstaller/default/ignore_duplicates';
+    private const XML_PATH_BEHAVIOR               = 'datainstaller/default/behavior';
+    private const XML_PATH_ENTITY                 = 'datainstaller/default/entity';
+    private const XML_PATH_VALIDATION_STRATEGY    = 'datainstaller/default/validation_strategy';
+    private const XML_PATH_ALLOWED_ERROR_COUNT    = 'datainstaller/default/allowed_error_count';
+    private const XML_PATH_IMPORT_IMAGES_FILE_FIR = 'datainstaller/default/import_images_file_dir';
+    private const XML_PATH_CATEGORY_PATH_SEPERATOR = 'datainstaller/default/category_path_seperator';
 
     /**
      * @param \Magento\Framework\App\Helper\Context $context

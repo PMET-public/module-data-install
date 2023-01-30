@@ -24,6 +24,7 @@ Optional arguments:
  `--remote=1 Flag if Data Pack is being retrieved via URL`
  `--authtoken [=AUTHTOKEN] GitHub Personal Access Token`
  `--host [=HOST] Override of host values in stores.csv file`
+ `--make-default-website The datapack's new website will be set as the default site`
 
 ###### Usage Examples
 

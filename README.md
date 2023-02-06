@@ -9,7 +9,8 @@ The Data Install module facilitates the loading of sample data by a series of ge
 - File System - The Data Pack directory can be placed under any directory under the Commerce app.
 - Zip file - A Data Pack can be packaged as a .zip file and uploaded via the UI
 - GitHub Remote - The Data Pack can be retrieved from a GitHub repository via the same link used to download a zipped repository e.g. `https://github.com/PMET-public/vertical-data-luma/archive/refs/heads/main.zip`
-- When using GitHub Remote to access a private repository, you will need to create a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). This token can be used as an option for the the CLI or GraphQL mutation. Or it can be added to the Commerce instance under *Stores->Configuration->Advanced->System->Data Installer Authorization*. When setting up the token, you will need to give access to the `repo` scope
+- When using GitHub Remote to access a private repository, you will need to create a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). This token can be used as an option for the the CLI or GraphQL mutation. Or it can be added to the Commerce instance under *Stores->Configuration->Advanced->System->Data Installer Authorization*. 
+  - When setting up the token, create a "classic" token, and check the box to give access to the `repo` scope
 
 ## Installation Methods
 
@@ -57,7 +58,7 @@ Example :
 
 ### GitHub Remote Via UI
 In the same UI used to upload a zip file, you can also enter a GitHub URL to remotely retrieve the Data Pack. Advanced Conditions the same as used by the CLI can be added as needed. After the Data Pack is retrieved, a job is created to schedule the import. The `magentoese_datainstall.import` consumer will install the Data Pack in the background.
-If you are accessing private repos, a GitHub Personal Access Token will need to be added and included in the Commerce store configuration under *Stores->Configuration->Advanced->System->Data Installer Authorization*. It could also be included as part of the Advanced Conditions
+If you are accessing private repos, a GitHub Personal Access Token will need to be added and included in the Commerce store configuration under *Stores->Configuration->Advanced->System->Data Installer Authorization*. It could also be included as part of the Advanced Conditions.
 
 ### GraphQL Scheduled
 A GraphQL mutation can be used to mimic the same functionality that the CLI provides. This would include installing an existing Data Pack or GitHub Remote. Additional queries can also return job status and logging information. See the [Data Installer GraphQL ](https://github.com/PMET-public/module-data-install-graphql)module for information

@@ -12,6 +12,11 @@ use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Theme\Model\ResourceModel\Theme\Collection as ThemeCollection;
 use Magento\Theme\Model\Theme\Registration as ThemeRegistration;
 use MagentoEse\DataInstall\Helper\Helper;
+use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Filesystem;
+use Magento\Framework\Filesystem\Directory\WriteInterface;
+use Magento\Framework\Filesystem\Directory\ReadInterface;
+use Magento\Framework\Exception\FileSystemException;
 
 class Configuration
 {
@@ -37,6 +42,18 @@ class Configuration
     /** @var EncryptorInterface  */
     protected $encryptor;
 
+    /** @var DirectoryList  */
+    protected $directoryList;
+
+    /** @var FileSystem  */
+    protected $fileSystem;
+    
+    /** @var WriteInterface  */
+    protected $directoryWrite;
+
+    /** @var ReadInterface  */
+    protected $directoryRead;
+
     /**
      * Configuration constructor
      *
@@ -47,6 +64,10 @@ class Configuration
      * @param ThemeCollection $themeCollection
      * @param ThemeRegistration $themeRegistration
      * @param EncryptorInterface $encryptor
+     * @param DirectoryList $directoryList
+     * @param Filesystem $fileSystem
+
+     *
      */
     public function __construct(
         Helper $helper,
@@ -55,7 +76,9 @@ class Configuration
         ScopeConfigInterface $scopeConfig,
         ThemeCollection $themeCollection,
         ThemeRegistration $themeRegistration,
-        EncryptorInterface $encryptor
+        EncryptorInterface $encryptor,
+        DirectoryList $directoryList,
+        Filesystem $fileSystem
     ) {
         $this->helper = $helper;
         $this->resourceConfig = $resourceConfig;
@@ -64,6 +87,10 @@ class Configuration
         $this->themeCollection = $themeCollection;
         $this->themeRegistration = $themeRegistration;
         $this->encryptor = $encryptor;
+        $this->directoryList = $directoryList;
+        $this->fileSystem = $fileSystem;
+        $this->directoryWrite = $fileSystem->getDirectoryWrite(DirectoryList::ROOT);
+        $this->directoryRead = $fileSystem->getDirectoryRead(DirectoryList::ROOT);
     }
 
     /**
@@ -172,7 +199,8 @@ class Configuration
     public function saveConfig(string $path, string $value, string $scope, $scopeId)
     {
         if ($scopeId!==null) {
-            $this->resourceConfig->saveConfig($path, $this->setEncryption($value), $scope, $scopeId);
+            $adjustedValue = $this->moveLogo($path, $this->setEncryption($value), $scope, $scopeId);
+            $this->resourceConfig->saveConfig($path, $adjustedValue, $scope, $scopeId);
         } else {
             $this->helper->logMessage(
                 "Error setting configuration " . $path . ". Check your scope codes as the " .
@@ -180,6 +208,46 @@ class Configuration
                 "error"
             );
         }
+    }
+
+    /**
+     * Move logo and other images to store/scope subdirectory
+     *
+     * @param string $path
+     * @param string $value
+     * @param int $scopeId
+     * @return string
+     */
+    private function moveLogo($path, $value, $scope, $scopeId)
+    {
+        //split value
+        $valueArray = explode('/', $value);
+        switch ($path) {
+            case "design/header/logo_src":
+                $imgDir = 'logo';
+                break;
+            case "design/head/shortcut_icon":
+                $imgDir = 'favicon';
+                break;
+            default:
+                return $value;
+        }
+        //copy image
+        $fromName = $this->directoryList->getRoot().'/pub/media/'.$imgDir.'/'.$value;
+        $toName = $this->directoryList->getRoot().'/pub/media/'. $imgDir.'/'.$scope.'/'.$scopeId.'/'.end($valueArray);
+
+        if ($this->directoryRead->isFile($fromName)) {
+            try {
+                $this->directoryWrite->copyFile($fromName, $toName);
+            } catch (FileSystemException $exception) {
+                $this->helper->logMessage(
+                    "Unable to copy file ".$fromName. " --- ".$exception->getMessage(),
+                    "warning"
+                );
+            }
+        }
+
+        return $scope.'/'.$scopeId.'/'.end($valueArray);
     }
 
     /**

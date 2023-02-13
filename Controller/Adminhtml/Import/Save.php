@@ -104,7 +104,7 @@ class Save extends \Magento\Backend\App\Action
             $params = $this->getRequest()->getParams();
             //set auth token to empty to retrieve config setting if entered.
             $dataPack->setAuthToken('');
-            $this->setAdvancedConditions($dataPack, $params['advanced_conditions']);
+            $dataPack = $this->setAdvancedConditions($dataPack, $params);
             //params['vertical'] for upload params['remote_source'] for upload
             if ($params['remote_source']!='') {
                 $dataPack->setIsRemote(true);
@@ -169,32 +169,32 @@ class Save extends \Magento\Backend\App\Action
     * @param string $conditions
     * @return DataPack
     */
-    protected function setAdvancedConditions($dataPack, $conditions)
+    protected function setAdvancedConditions($dataPack, $params)
     {
-        $commands = explode(" ", $conditions);
-        foreach ($commands as $command) {
-            $element = explode("=", trim($command));
-            switch ($element[0]) {
-                case "--files":
-                    $dataPack->setFiles(explode(",", trim($element[1], '"')));
+        foreach ($params as $param => $value) {
+            switch ($param) {
+                case "files":
+                    if($value !=""){
+                        $dataPack->setFiles(explode(",", trim($value, '"')));
+                    }
                     break;
-                case "-r":
-                    $dataPack->setReload(1);
+                case "reload":
+                    $dataPack->setReload($value);
                     break;
-                case "--host":
-                    $dataPack->setHost($element[1]);
+                case "host":
+                    $dataPack->setHost($value);
                     break;
-                case "--load":
-                    $dataPack->setLoad($element[1]);
+                case "load":
+                    $dataPack->setLoad($value);
                     break;
-                case "--authtoken":
-                    $dataPack->setAuthToken($element[1]);
+                case "authtoken":
+                    $dataPack->setAuthToken($value);
                     break;
-                case "--remotesource":
-                    $dataPack->setIsRemote($element[1]);
+                case "remote_source":
+                    $dataPack->setIsRemote($value);
                     break;
-                case "--make-default-website":
-                    $dataPack->setIsDefaultWebsite(1);
+                case "make_default_website":
+                    $dataPack->setIsDefaultWebsite($value);
                     break;
             }
         }

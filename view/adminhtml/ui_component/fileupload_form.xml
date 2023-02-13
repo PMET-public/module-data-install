@@ -46,56 +46,157 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
             </item>
         </argument>
     </dataSource>
-    <fieldset name="vertical">
-      <settings>
-          <label translate="true">Import Data Pack</label>
-      </settings>
-      
-    <field name="vertical">
-        <argument name="data" xsi:type="array">
-            <item name="config" xsi:type="array">
-                <item name="dataType" xsi:type="string">string</item>
-                <item name="source" xsi:type="string">vertical</item>
-                <item name="label" xsi:type="string" translate="true">Select File</item>
-                <item name="visible" xsi:type="boolean">true</item>
-                <item name="formElement" xsi:type="string">fileUploader</item>
-                <item name="required" xsi:type="boolean">false</item>
-                <item name="notice" xsi:type="string" translate="true">.zip file required</item>
-                <item name="uploaderConfig" xsi:type="array">
-                    <item name="url" xsi:type="url" path="datainstall/import/tempupload"/>
+    <fieldset name="uploadfile">
+        <settings>
+            <collapsible>true</collapsible>
+            <opened>true</opened>
+            <label translate="true">Upload Zip File</label>
+        </settings>
+        <field name="vertical">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="source" xsi:type="string">vertical</item>
+                    <item name="label" xsi:type="string" translate="true">Select File</item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="formElement" xsi:type="string">fileUploader</item>
+                    <item name="required" xsi:type="boolean">false</item>
+                    <item name="notice" xsi:type="string" translate="true">.zip file required</item>
+                    <item name="uploaderConfig" xsi:type="array">
+                        <item name="url" xsi:type="url" path="datainstall/import/tempupload"/>
+                    </item>
                 </item>
-            </item>
-        </argument>
-    </field>
-    <field name="remote_source" sortOrder="100">
-        <argument name="data" xsi:type="array">
-            <item name="config" xsi:type="array">
-                <item name="dataType" xsi:type="string">string</item>
-                <item name="source" xsi:type="string">vertical</item>
-                <item name="label" xsi:type="string" translate="true">Or import remote .zip file</item>
-                <item name="visible" xsi:type="boolean">true</item>
-                <item name="formElement" xsi:type="string">input</item>
-                <item name="notice" xsi:type="string" translate="true">
-                    If using github to access a private repo, an access token needs to set in 
-                    Stores->Configuration->Advanced->System->Data Installer Authorization
+            </argument>
+        </field>
+    </fieldset>
+    <fieldset name="remote" sortOrder="10">
+        <settings>
+            <collapsible>true</collapsible>
+            <label translate="true">Remote Source</label>
+        </settings>
+        <field name="remote_source" sortOrder="10">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="source" xsi:type="string">vertical</item>
+                    <item name="label" xsi:type="string" translate="true">Url to remote .zip file</item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="notice" xsi:type="string" translate="true">
+                        If using github to access a private repo, and Auth Token must be provided
+                    </item>
                 </item>
-            </item>
-        </argument>
-    </field>   
-    <field name="advanced_conditions" sortOrder="200">
-        <argument name="data" xsi:type="array">
-            <item name="config" xsi:type="array">
-                <item name="dataType" xsi:type="string">string</item>
-                <item name="source" xsi:type="string">vertical</item>
-                <item name="label" xsi:type="string" translate="true">Advanced Conditions</item>
-                <item name="visible" xsi:type="boolean">true</item>
-                <item name="formElement" xsi:type="string">input</item>
-                <item name="notice" xsi:type="string" translate="true">
-                    <![CDATA[--load[LOAD] --files [FILES] --host [HOST] -r|--reload [RELOAD]
-                     --authtoken [AUTHTOKEN] --remote [REMOTE] --make-default-website [MAKE-DEFAULT-WEBSITE]]]>
+            </argument>
+        </field>
+        <field name="authtoken" sortOrder="60">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="source" xsi:type="string">vertical</item>
+                    <item name="label" xsi:type="string" translate="true">Auth Token</item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="notice" xsi:type="string" translate="true">GitHub Personal Access Token, or set in 
+                        Stores->Configuration->Advanced->System->Data Installer Authorization</item>
                 </item>
-            </item>
-        </argument>
-    </field>    
-  </fieldset>
+            </argument>
+        </field>  
+    </fieldset>
+    <fieldset name="advancedconditions" sortOrder="40">
+        <settings>
+            <collapsible>true</collapsible>
+            <label translate="true">Advanced Conditions</label>
+        </settings>
+        <field name="make_default_website" formElement="checkbox" sortOrder="10">
+            <settings>
+                <label translate="true">Make Default Website</label>
+                <tooltip>
+                    <description translate="true">The datapack's new website will be set as the default site</description>
+                </tooltip>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <prefer>toggle</prefer>
+                        <valueMap>
+                            <map name="false" xsi:type="boolean">0</map>
+                            <map name="true" xsi:type="boolean">1</map>
+                        </valueMap>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+        <field name="reload" formElement="checkbox" sortOrder="20">
+            <settings>
+                <label translate="true">Reload</label>
+                <tooltip>
+                    <description translate="true">Force reload of an already imported Data Pack</description>
+                </tooltip>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <prefer>toggle</prefer>
+                        <valueMap>
+                            <map name="false" xsi:type="boolean">0</map>
+                            <map name="true" xsi:type="boolean">1</map>
+                        </valueMap>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+        <field name="files" sortOrder="30">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="source" xsi:type="string">vertical</item>
+                    <item name="label" xsi:type="string" translate="true">Files</item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="notice" xsi:type="string" translate="true">Comma delimited list of individual files to load</item>
+                </item>
+            </argument>
+        </field>
+        <field name="load" sortOrder="40">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="source" xsi:type="string">vertical</item>
+                    <item name="label" xsi:type="string" translate="true">Directory</item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="notice" xsi:type="string" translate="true">Data subdirectory to load if there is more than one</item>
+                </item>
+            </argument>
+        </field>  
+        
+        <field name="host" sortOrder="50">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="source" xsi:type="string">vertical</item>
+                    <item name="label" xsi:type="string" translate="true">Host</item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="notice" xsi:type="string" translate="true">Override of host values in stores file</item>
+                </item>
+            </argument>
+        </field>  
+        
+        <!-- <field name="advanced_conditions" sortOrder="200">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="source" xsi:type="string">vertical</item>
+                    <item name="label" xsi:type="string" translate="true">Advanced Conditions</item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="notice" xsi:type="string" translate="true">
+                        <![CDATA[&#45;&#45;load[LOAD] &#45;&#45;files [FILES] &#45;&#45;host [HOST] -r|&#45;&#45;reload [RELOAD]
+                        &#45;&#45;authtoken [AUTHTOKEN] &#45;&#45;remote [REMOTE] &#45;&#45;make-default-website [MAKE-DEFAULT-WEBSITE]]]>
+                    </item>
+                </item>
+            </argument>
+        </field>     -->
+    </fieldset>
 </form>

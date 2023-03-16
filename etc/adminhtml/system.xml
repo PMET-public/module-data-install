@@ -9,15 +9,27 @@
 xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <section id="system">
-            <group id="data_installer_authorization" translate="label" type="text" sortOrder="1200" showInDefault="1" 
+            <group id="data_installer" translate="label" type="text" sortOrder="1200" showInDefault="1" 
             showInWebsite="0" showInStore="0">
-                <label>Data Installer Authorization</label>
+                <label>Data Installer</label>
                 <field id="github_access_token" translate="label" type="obscure" sortOrder="20" showInDefault="1" 
                 showInWebsite="0" showInStore="0">
                     <label>GitHub Access Token</label>
                     <config_path>magentoese/datainstall/github_access_token</config_path>
                     <comment><![CDATA[Add A GitHub Personal Access Token if you are retrieving a datapack from a 
                         GitHub repository]]></comment>
+                </field>
+                <field id="js_url" translate="label" type="text" sortOrder="20" showInDefault="1" 
+                showInWebsite="0" showInStore="0">
+                    <label>.js URL</label>
+                    <config_path>magentoese/datainstall/app_url</config_path>
+                    <comment><![CDATA[URL to App builder .js file]]></comment>
+                </field>
+                <field id="css_url" translate="label" type="text" sortOrder="20" showInDefault="1" 
+                showInWebsite="0" showInStore="0">
+                    <label>.css URL</label>
+                    <config_path>magentoese/datainstall/css_url</config_path>
+                    <comment><![CDATA[URL to App Builder .css file]]></comment>
                 </field>
             </group>
         </section>

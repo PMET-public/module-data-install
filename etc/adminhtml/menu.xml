@@ -11,5 +11,14 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
         <add id="MagentoEse_DataInstall::import_vertical" title="Import Data Pack" module="MagentoEse_DataInstall" 
         sortOrder="100" action="datainstall/import/upload" parent="Magento_Backend::system_convert" 
         resource="MagentoEse_DataInstall::import_vertical"/>
+        <add id="MagentoEse_DataInstall::datainstallui"
+             title="Data Install IU (Beta)"
+             translate="title"
+             module="MagentoEse_DataInstall"
+             sortOrder="99"
+             parent="Magento_Backend::system_convert"
+             action="datainstallui/"
+             resource="MagentoEse_DataInstall::datainstallui"
+        />
     </menu>
 </config>

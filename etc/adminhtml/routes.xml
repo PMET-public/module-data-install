@@ -11,5 +11,8 @@ xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
         <route frontName="datainstall" id="datainstall">
             <module name="MagentoEse_DataInstall"/>
         </route>
+        <route id="datainstallui" frontName="datainstallui">
+            <module name="MagentoEse_DataInstall"/>
+        </route>
     </router>
 </config>

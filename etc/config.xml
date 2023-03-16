@@ -5,12 +5,10 @@
  * See LICENSE for license details.
 */
 -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <magentoese>
             <datainstall>
-                <githubtoken></githubtoken>
                 <!-- <app_url>https://localhost:9080/index.8959c3ac.js</app_url>
                 <css_url>https://localhost:9080/index.f37f2f72.css</css_url> -->
                 <app_url>https://285361-datainstaller-stage.adobeio-static.net/index.6040a44f.js</app_url>

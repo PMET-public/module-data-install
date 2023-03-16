@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2022 Adobe, Inc. All rights reserved.
+ * See LICENSE for license details.
+*/
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <title>Data Install UI (Beta)</title>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="MagentoEse\DataInstall\Block\Adminhtml\Index" template="MagentoEse_DataInstall::index.phtml" name="datainstallui_ui" cacheable="false" />
+        </referenceContainer>
+        <referenceBlock name="head.additional">
+            <block class="MagentoEse\DataInstall\Block\Adminhtml\Index" name="datainstallui_css" template="MagentoEse_DataInstall::css.phtml"/>
+        </referenceBlock>
+    </body>
+</page>

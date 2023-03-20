@@ -166,7 +166,7 @@ class Save extends \Magento\Backend\App\Action
     * Set the advanced conditions of the job
     *
     * @param DataPack $dataPack
-    * @param string $conditions
+    * @param array $params
     * @return DataPack
     */
     protected function setAdvancedConditions($dataPack, $params)
@@ -174,7 +174,7 @@ class Save extends \Magento\Backend\App\Action
         foreach ($params as $param => $value) {
             switch ($param) {
                 case "files":
-                    if($value !=""){
+                    if ($value !="") {
                         $dataPack->setFiles(explode(",", trim($value, '"')));
                     }
                     break;

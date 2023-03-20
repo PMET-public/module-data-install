@@ -215,6 +215,7 @@ class Configuration
      *
      * @param string $path
      * @param string $value
+     * @param string $scope
      * @param int $scopeId
      * @return string
      */

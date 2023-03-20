@@ -96,8 +96,10 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                     <item name="label" xsi:type="string" translate="true">Auth Token</item>
                     <item name="visible" xsi:type="boolean">true</item>
                     <item name="formElement" xsi:type="string">input</item>
-                    <item name="notice" xsi:type="string" translate="true">GitHub Personal Access Token, or set in 
-                        Stores->Configuration->Advanced->System->Data Installer Authorization</item>
+                    <item name="notice" xsi:type="string" translate="true">
+                        GitHub Personal Access Token, or set in 
+                        Stores->Configuration->Advanced->System->Data Installer Authorization
+                    </item>
                 </item>
             </argument>
         </field>  
@@ -111,7 +113,9 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
             <settings>
                 <label translate="true">Make Default Website</label>
                 <tooltip>
-                    <description translate="true">The datapack's new website will be set as the default site</description>
+                    <description translate="true">
+                        The datapack's new website will be set as the default site
+                    </description>
                 </tooltip>
             </settings>
             <formElements>
@@ -130,7 +134,9 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
             <settings>
                 <label translate="true">Reload</label>
                 <tooltip>
-                    <description translate="true">Force reload of an already imported Data Pack</description>
+                    <description translate="true">
+                        Force reload of an already imported Data Pack
+                    </description>
                 </tooltip>
             </settings>
             <formElements>
@@ -153,7 +159,9 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                     <item name="label" xsi:type="string" translate="true">Files</item>
                     <item name="visible" xsi:type="boolean">true</item>
                     <item name="formElement" xsi:type="string">input</item>
-                    <item name="notice" xsi:type="string" translate="true">Comma delimited list of individual files to load</item>
+                    <item name="notice" xsi:type="string" translate="true">
+                        Comma delimited list of individual files to load
+                    </item>
                 </item>
             </argument>
         </field>
@@ -165,7 +173,9 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                     <item name="label" xsi:type="string" translate="true">Directory</item>
                     <item name="visible" xsi:type="boolean">true</item>
                     <item name="formElement" xsi:type="string">input</item>
-                    <item name="notice" xsi:type="string" translate="true">Data subdirectory to load if there is more than one</item>
+                    <item name="notice" xsi:type="string" translate="true">
+                        Data subdirectory to load if there is more than one
+                    </item>
                 </item>
             </argument>
         </field>  
@@ -178,25 +188,12 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                     <item name="label" xsi:type="string" translate="true">Host</item>
                     <item name="visible" xsi:type="boolean">true</item>
                     <item name="formElement" xsi:type="string">input</item>
-                    <item name="notice" xsi:type="string" translate="true">Override of host values in stores file</item>
-                </item>
-            </argument>
-        </field>  
-        
-        <!-- <field name="advanced_conditions" sortOrder="200">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="dataType" xsi:type="string">string</item>
-                    <item name="source" xsi:type="string">vertical</item>
-                    <item name="label" xsi:type="string" translate="true">Advanced Conditions</item>
-                    <item name="visible" xsi:type="boolean">true</item>
-                    <item name="formElement" xsi:type="string">input</item>
                     <item name="notice" xsi:type="string" translate="true">
-                        <![CDATA[&#45;&#45;load[LOAD] &#45;&#45;files [FILES] &#45;&#45;host [HOST] -r|&#45;&#45;reload [RELOAD]
-                        &#45;&#45;authtoken [AUTHTOKEN] &#45;&#45;remote [REMOTE] &#45;&#45;make-default-website [MAKE-DEFAULT-WEBSITE]]]>
+                        Override of host values in stores file
                     </item>
                 </item>
             </argument>
-        </field>     -->
+        </field>  
+
     </fieldset>
 </form>

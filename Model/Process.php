@@ -385,8 +385,7 @@ class Process
             foreach ($row as $key => $value) {
                 $data[$header[$key]] = $value;
             }
-
-            $this->collectRedos($process->install($data, $this->settings, $host), $row, $header, $process);
+            $process->install($data, $this->settings, $host);
         }
     }
 
@@ -521,49 +520,6 @@ class Process
             $attributeString .=$value->label."\n";
         }
         return trim($attributeString);
-    }
-
-    /**
-     * Collect redos (deprecated)
-     *
-     * @param string $success
-     * @param array $row
-     * @param array $header
-     * @param string $process
-     */
-    private function collectRedos($success, $row, $header, $process)
-    {
-        if (!$success) {
-            $failed = [];
-            $failed['row'][]= $row;
-            $failed['header']= $header;
-            $failed['process']= $process;
-            $this->redo[] = $failed;
-        }
-    }
-
-    /**
-     * Process redos (deprecated)
-     */
-    private function processRedos()
-    {
-        //copy over and reset redo
-        $redos = $this->redo;
-        $this->redo = [];
-        foreach ($redos as $redo) {
-            $this->processRows($redo['row'], $redo['header'], $redo['process'], '');
-        }
-
-        ///if its failed again, fail the process
-        if (count($this->redo) > 0) {
-            foreach ($this->redo as $redo) {
-                $this->helper->logMessage(
-                    "Installing " . $this->getClassName(get_class($redo['process'])) .
-                    " was not fully successful, likely due to a dependency on other sample data that doesnt exist",
-                    "error"
-                );
-            }
-        }
     }
 
     /**

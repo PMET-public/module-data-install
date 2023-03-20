@@ -25,7 +25,7 @@ class Index extends Action implements HttpGetActionInterface
      */
     //public const ADMIN_RESOURCE = 'Magento_ServicesId::configuration';
 
-    const MENU_ID = 'MagentoEse_DataInstall::datainstallui';
+    private const MENU_ID = 'MagentoEse_DataInstall::datainstallui';
 
     /**
      * @var PageFactory

@@ -2,7 +2,7 @@
 /**
  * Copyright 2022 Adobe, Inc. All rights reserved.
  * See LICENSE for license details.
-*/
+ */
 
 namespace MagentoEse\DataInstall\Block\Adminhtml;
 
@@ -31,10 +31,10 @@ class Index extends Template
     private $scopeConfig;
 
     /**
-     * 
-     * @param Context $context 
-     * @param ScopeConfigInterface $storeManager 
-     * @return void 
+     *
+     * @param Context $context
+     * @param ScopeConfigInterface $scopeConfig
+     * @return void
      */
     public function __construct(
         Context $context,
@@ -70,17 +70,17 @@ class Index extends Template
         );
     }
 
-    
-    /**
-     * Returns Qraph!l BFF url
-     *
-     * @return string
-     */
+     /**
+      * Returns Qraph!l BFF url
+      *
+      * @return string
+      */
     public function getBaseUrl(): string
     {
         return $this->scopeConfig->getValue(
             self::BASE_URL_PATH,
-            ScopeConfigInterface::SCOPE_TYPE_DEFAULT, 0);
+            ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+            0
+        );
     }
-
 }

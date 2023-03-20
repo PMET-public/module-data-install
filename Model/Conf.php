@@ -93,7 +93,7 @@ class Conf
      protected $advancedPricingInstall;
 
      /** @var DataTypes\Orders */
-     protected $orderInstall;
+     protected $ordersInstall;
 
      /** @var DataTypes\CustomerSegments */
     protected $customerSegmentsInstall;

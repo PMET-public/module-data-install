@@ -301,8 +301,8 @@ class Converter
         $urlFilter = null;
         foreach ($separatedAttributes as $attributeNumber => $attributeValue) {
             $attributeData = $this->getArrayValue($attributeValue, '=');
-            $attributeOptions = $this->productConverter->getAttributeOptions($attributeData[0]);
-            $attributeValue = $attributeOptions->getItemByColumnValue('value', $attributeData[1]);
+            //$attributeOptions = $this->productConverter->getAttributeOptions($attributeData[0]);
+            //$attributeValue = $attributeOptions->getItemByColumnValue('value', $attributeData[1]);
             if ($attributeNumber == 0) {
                 $urlFilter = $attributeData[0] . '=' . $attributeValue->getId();
                 continue;

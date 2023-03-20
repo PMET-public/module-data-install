@@ -37,6 +37,7 @@ use Magento\Framework\App\State;
 use Magento\Framework\App\Area as AppArea;
 use MagentoEse\DataInstall\Api\Data\DataPackInterfaceFactory;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
+use Magento\Framework\Console\Cli;
 
 class Install extends Command
 {
@@ -194,6 +195,6 @@ class Install extends Command
             $output->writeln("No files found to load in " . $module.
             " Check the your values of --load or --files if used, or the default set in the datapack");
         }
-        return $this;
+        return Cli::RETURN_SUCCESS;
     }
 }

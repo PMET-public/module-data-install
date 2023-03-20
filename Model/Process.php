@@ -34,10 +34,25 @@ use MagentoEse\DataInstall\Model\DataTypes\Stores;
 class Process
 {
     protected const FIXTURE_DIRECTORY = 'data';
+    
+    /** @var array */
+    protected $redo;
 
     /** @var array */
     protected $settings;
 
+    /** @var CopyMedia  */
+    protected $copyMedia;
+
+    /** @var Validate  */
+    protected $validate;
+
+    /** @var File  */
+    protected $driverInterface;
+
+    /** @var DirectoryList  */
+    protected $directoryList;
+        
     /** @var Csv  */
     protected $csvReader;
 

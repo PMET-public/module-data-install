@@ -58,6 +58,9 @@ class Orders
     /** @var ObjectManagerInterface  */
     protected $objectManager;
 
+    /** @var OrderFactory  */
+    protected $orderFactory;
+
     public function __construct(
         Helper $helper,
         CustomerRepositoryInterface $customerRepository,

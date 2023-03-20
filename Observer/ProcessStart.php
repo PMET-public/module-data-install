@@ -41,7 +41,7 @@ class ProcessStart implements \Magento\Framework\Event\ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $this->helper->setSettings = $observer->getData('eventData');
+        $this->helper->setSettings($observer->getData('eventData'));
         $this->helper->logMessage(
             "Start Data Installer process",
             "warning"

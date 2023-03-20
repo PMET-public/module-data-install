@@ -137,32 +137,4 @@ class AdminUsers
         }
     }
 
-    /**
-     * Create Sales Rep Role
-     *
-     * @return \Magento\Authorization\Model\Role
-     */
-    private function createSalesRepRole()
-    {
-        try {
-            $role=$this->roleFactory->create();
-            $role->setName('Sales Rep') //Set Role Name Which you want to create
-            ->setPid(0) //set parent role id of your role
-            ->setRoleType(RoleGroup::ROLE_TYPE)
-               ->setUserType(UserContextInterface::USER_TYPE_ADMIN);
-            $role->save();
-
-            /* Add resources we allow to this role */
-            $resource=['Magento_Backend::admin',
-               'Magento_Sales::sales'
-            ];
-            //save resources to role
-            $this->rulesFactory->create()->setRoleId($role->getId())->setResources($resource)->saveRel();
-
-            return $role;
-        } catch (\Exception $e) {
-            //ignore
-            $ignore=1;
-        }
-    }
 }

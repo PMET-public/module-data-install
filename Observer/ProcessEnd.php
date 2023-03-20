@@ -42,7 +42,7 @@ class ProcessEnd implements \Magento\Framework\Event\ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $this->helper->setSettings = $observer->getData('eventData');
+        $this->helper->setSettings($observer->getData('eventData'));
         $this->helper->logMessage(
             "End Data Installer process",
             "warning"

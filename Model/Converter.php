@@ -289,31 +289,6 @@ class Converter
         return $replaceData;
     }
 
-    /**
-     * Get url filter
-     *
-     * @param string $urlAttributes
-     * @return string
-     */
-    protected function getUrlFilter(string $urlAttributes)
-    {
-        $separatedAttributes = $this->getArrayValue($urlAttributes, ';');
-        $urlFilter = null;
-        foreach ($separatedAttributes as $attributeNumber => $attributeValue) {
-            $attributeData = $this->getArrayValue($attributeValue, '=');
-            //$attributeOptions = $this->productConverter->getAttributeOptions($attributeData[0]);
-            //$attributeValue = $attributeOptions->getItemByColumnValue('value', $attributeData[1]);
-            if ($attributeNumber == 0) {
-                $urlFilter = $attributeData[0] . '=' . $attributeValue->getId();
-                continue;
-            }
-
-            $urlFilter .= '&' . $attributeData[0] . '=' . $attributeValue->getId();
-        }
-
-        return $urlFilter;
-    }
-
     /**  ****************  */
     /**  CUSTOMER GROUP   */
     /**  *************   */

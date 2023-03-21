@@ -23,6 +23,9 @@ class AdvancedPricing
     /** @var Importer */
     protected $importer;
 
+     /** @var Stores */
+     protected $stores;
+
     /**
      * AdvancedPricing constructor
      *
@@ -31,10 +34,12 @@ class AdvancedPricing
      */
     public function __construct(
         Helper $helper,
-        Importer $importer
+        Importer $importer,
+        Stores $stores
     ) {
         $this->importer = $importer;
         $this->helper = $helper;
+        $this->stores = $stores;
     }
 
     /**

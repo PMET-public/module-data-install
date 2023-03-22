@@ -14,6 +14,7 @@ xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/et
          comment="Directory path of data installed"/>
         <column xsi:type="int" name="is_installed" padding="10" unsigned="true" nullable="false" 
         comment="Recurring elements installed"/>
+        <column xsi:type="timestamp" name="add_date" nullable="false" default="CURRENT_TIMESTAMP"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="id"/>
         </constraint>

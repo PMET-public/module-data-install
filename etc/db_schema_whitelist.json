@@ -3,7 +3,8 @@
         "column": {
             "id": true,
             "module_name": true,
-            "is_installed": true
+            "is_installed": true,
+            "add_date": true
         },
         "constraint": {
             "PRIMARY": true

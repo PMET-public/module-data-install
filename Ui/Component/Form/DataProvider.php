@@ -10,13 +10,13 @@ use Magento\Framework\Registry;
 
 class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
 {
+    
     /**
      * DataProvider constructor
      *
      * @param string $name
      * @param string $primaryFieldName
      * @param string $requestFieldName
-     * @param Registry $registry
      * @param array $meta
      * @param array $data
      */
@@ -24,12 +24,10 @@ class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
         string $name,
         string $primaryFieldName,
         string $requestFieldName,
-        Registry $registry,
         array $meta = [],
         array $data = []
     ) {
         parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
-        $this->registry = $registry;
     }
 
     /**

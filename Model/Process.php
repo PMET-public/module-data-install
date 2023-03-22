@@ -180,16 +180,15 @@ class Process
         $this->eventManager->dispatch('magentoese_datainstall_install_start', ['eventData' => $this->settings]);
 
         //bypass if data is already installed
-        $fileSource .="/".$fixtureDirectory;
-        if ($this->isModuleInstalled($fileSource)==1 && $reload===0) {
-            //output reload option if cli is used
-            //if ($this->isCli()) {
+        $fileSource = $filePath.$fixtureDirectory;
+        if ($this->isModuleInstalled($fileSource)==1) {
+            if($reload===0 or $reload==='false') {
                 $this->helper->logMessage(
                     $fileSource." has already been installed.  Add the -r option if you want to reinstall",
                     "warning"
                 );
-            //}
-            return true;
+                return true;
+            }
         } else {
             $this->registerModule($fileSource);
         }
@@ -292,7 +291,7 @@ class Process
         if ($fileCount==0) {
             return false;
         } else {
-            $this->setModuleInstalled($fileSource);
+            //$this->setModuleInstalled($fileSource);
             return true;
         }
     }
@@ -896,7 +895,7 @@ class Process
      * @throws CouldNotSaveException
      * @throws NoSuchEntityException
      */
-    private function setModuleInstalled($moduleName)
+    public function setModuleInstalled($moduleName)
     {
         $tracker = $this->dataInstallerInterface->create();
         $tracker = $this->dataInstallerRepository->getByModuleName($moduleName);

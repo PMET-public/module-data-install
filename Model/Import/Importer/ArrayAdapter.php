@@ -148,7 +148,7 @@ class ArrayAdapter extends \Magento\ImportExport\Model\Import\AbstractSource
      * Get Next Row
      *
      * @return mixed
-     * 
+     *
      */
     protected function _getNextRow()
     {

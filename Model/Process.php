@@ -182,7 +182,7 @@ class Process
         //bypass if data is already installed
         $fileSource = $filePath.$fixtureDirectory;
         if ($this->isModuleInstalled($fileSource)==1) {
-            if($reload===0 or $reload==='false') {
+            if ($reload===0 or $reload==='false') {
                 $this->helper->logMessage(
                     $fileSource." has already been installed.  Add the -r option if you want to reinstall",
                     "warning"

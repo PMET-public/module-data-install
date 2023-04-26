@@ -2,7 +2,6 @@
 
 namespace MagentoEse\DataInstall\Model\AI;
 
-use Magento\Catalog\Model\Product;
 	use Magento\Framework\App\Filesystem\DirectoryList;
 	use Magento\Framework\Filesystem\Io\File;
 	

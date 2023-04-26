@@ -18,7 +18,7 @@ class Generate extends \Magento\Backend\App\Action
 {
 
     public const IMAGE_API = 'https://api.openai.com/v1/images/generations';
-    public const IMAGE_SIZE = '1100x1100';
+    public const IMAGE_SIZE = '1024x1024';
     public const CHAT_API = 'https://api.openai.com/v1/chat/completions';
     //public const CHAT_API = 'https://api.openai.com/v1/models';
 
@@ -158,7 +158,7 @@ class Generate extends \Magento\Backend\App\Action
         $message =  '{
             "prompt": "'.$prompt.'",
             "n": 1,
-            "size": "1024x1024"
+            "size": "'.SELF::IMAGE_SIZE.'"
           }';
         $this->curl->setOption(CURLOPT_URL, $url);
         $this->curl->setOption(CURLOPT_RETURNTRANSFER, true);
@@ -173,8 +173,7 @@ class Generate extends \Magento\Backend\App\Action
 
         if ($result=='Not Found') {
             throw new
-            LocalizedException(__('Data pack could not be retrieved. Check the url, 
-            php settings for file size, and necessary authenticatication'));
+            LocalizedException(__('Data could not be retrieved.'));
         }
         $imageUrl = $result->data[0]->url;
         return $imageUrl;

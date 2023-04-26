@@ -95,7 +95,7 @@ class Generate extends \Magento\Backend\App\Action
             throw new LocalizedException(__('Invalid Request'));
         }
         $params = $this->getRequest()->getParams();
-        $content = $this->getProductApi(self::CHAT_API,$params['prompt'],$params['numberOfProducts']);
+        $content = $this->getProductApi(self::CHAT_API,$params['is_fictional'].' '. $params['prompt'],$params['numberOfProducts']);
         $rows = [];
         foreach($content as $product){
             $image = $this->getImageApi(self::IMAGE_API,$product->name.' '.$product->category.' '.$product->description);
@@ -127,7 +127,7 @@ class Generate extends \Magento\Backend\App\Action
     {
         $message = '{
             "model": "gpt-3.5-turbo",
-            "messages": [{"role": "user", "content": "Generate a sample list of '.$size.' fictional '.$prompt.' in a .json format enclosed by quotes that includes these values: sku,name,category,price,qty,description"}]
+            "messages": [{"role": "user", "content": "Generate a sample list of '.$size.' '.$prompt.' in a .json format enclosed by quotes that includes these values: sku,name,category,price,qty,description"}]
           }';
         $this->curl->setOption(CURLOPT_URL, $url);
         $this->curl->setOption(CURLOPT_RETURNTRANSFER, true);

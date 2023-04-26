@@ -52,7 +52,7 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
             <opened>true</opened>
             <label translate="true">AI Product Generation</label>
         </settings>
-        <field name="make_default_website" formElement="checkbox" sortOrder="30">
+        <field name="is_fictional" formElement="checkbox" sortOrder="30">
             <settings>
                 <label translate="true">Real Products</label>
                 <tooltip>
@@ -66,8 +66,8 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                     <settings>
                         <prefer>toggle</prefer>
                         <valueMap>
-                            <map name="false" xsi:type="boolean">0</map>
-                            <map name="true" xsi:type="boolean">1</map>
+                            <map name="false" xsi:type="string">fictional</map>
+                            <map name="true" xsi:type="string"></map>
                         </valueMap>
                     </settings>
                 </checkbox>

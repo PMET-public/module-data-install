@@ -200,10 +200,10 @@ class Helper extends AbstractHelper
     private function setDbLog($message, $messageType)
     {
         $logger = $this->loggerInterface->create();
-        $logger->setjobId($this->settings['job_settings']['jobid']);
+        //$logger->setjobId($this->settings['job_settings']['jobid']);
         $logger->setMessage($message);
         $logger->setLevel($messageType);
-        $logger->setDataPack($this->settings['job_settings']['filesource']);
+        //$logger->setDataPack($this->settings['job_settings']['filesource']);
         $this->loggerRepository->save($logger);
     }
 

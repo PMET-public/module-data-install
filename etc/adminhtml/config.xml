@@ -10,7 +10,8 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <magentoese>
             <datainstall>
-                <githubtoken></githubtoken>
+                <github_access_token></github_access_token>
+                <openai_api_key></openai_api_key>
                 <!-- <app_url>https://localhost:9080/index.8959c3ac.js</app_url>
                 <css_url>https://localhost:9080/index.f37f2f72.css</css_url> -->
                 <app_url>https://285361-datainstaller-stage.adobeio-static.net/index.6040a44f.js</app_url>

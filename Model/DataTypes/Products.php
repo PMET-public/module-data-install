@@ -108,7 +108,7 @@ class Products
         } else {
             $imgDir = $modulePath . self::DEFAULT_IMAGE_PATH;
         }
-        //check to see if the image directory exists.  If not, set it to safe default
+          //check to see if the image directory exists.  If not, set it to safe default
         //this will catch the case of updating products, but not needing to include image files
         if (!$this->directoryRead->isDirectory($imgDir)) {
             $this->helper->logMessage(

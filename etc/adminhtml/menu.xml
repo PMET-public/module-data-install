@@ -20,5 +20,14 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
              action="datainstallui/"
              resource="MagentoEse_DataInstall::datainstallui"
         />
+        <add id="MagentoEse_DataInstall::aiproductgeneration"
+             title="AI Product Generation"
+             translate="title"
+             module="MagentoEse_DataInstall"
+             sortOrder="101"
+             parent="Magento_Backend::system_convert"
+             action="datainstall/aiimport/"
+             resource="MagentoEse_DataInstall::datainstallui"
+        />
     </menu>
 </config>

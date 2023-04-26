@@ -19,6 +19,12 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file
                     <comment><![CDATA[Add A GitHub Personal Access Token if you are retrieving a datapack from a 
                         GitHub repository]]></comment>
                 </field>
+                <field id="openai_api_key" translate="label" type="obscure" sortOrder="20" showInDefault="1" 
+                showInWebsite="0" showInStore="0">
+                    <label>OpenAI API Key</label>
+                    <config_path>magentoese/datainstall/openai_api_key</config_path>
+                    <comment><![CDATA[Add an OpenAI API Key for generating products via AI]]></comment>
+                </field>
                 <field id="js_url" translate="label" type="text" sortOrder="20" showInDefault="1" 
                 showInWebsite="0" showInStore="0">
                     <label>.js URL</label>

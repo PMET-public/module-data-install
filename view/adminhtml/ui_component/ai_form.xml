@@ -67,7 +67,7 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                         <prefer>toggle</prefer>
                         <valueMap>
                             <map name="false" xsi:type="string">fictional</map>
-                            <map name="true" xsi:type="string"></map>
+                            <map name="true" xsi:type="string">real</map>
                         </valueMap>
                     </settings>
                 </checkbox>

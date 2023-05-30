@@ -12,6 +12,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\HTTP\Client\Curl;
 use MagentoEse\DataInstall\Model\AI\ImportImageService;
 use MagentoEse\DataInstall\Model\DataTypes\Products as ProductImport;
+use MagentoEse\DataInstall\Model\DataTypes\Reviews as ReviewImport;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 
 class Generate extends \Magento\Backend\App\Action
@@ -22,8 +23,10 @@ class Generate extends \Magento\Backend\App\Action
     public const CHAT_API = 'https://api.openai.com/v1/chat/completions';
     //public const CHAT_API = 'https://api.openai.com/v1/models';
 
-    protected $header = ['sku','name','price','product_type','attribute_set_code','product_websites','qty',
+    protected $productHeader = ['sku','name','price','product_type','attribute_set_code','product_websites','qty',
     'product_online','visibility','is_in_stock','categories','short_description','weight','base_image','small_image','thumbnail_image'];
+
+    protected $ratingHeader = ['sku','rating_code','rating_value','summary','review','reviewer'];
 
     /** @var DataPackInterfaceFactory */
     protected $dataPack;
@@ -58,29 +61,35 @@ class Generate extends \Magento\Backend\App\Action
     /** @var ImportImageService */
     protected $importImageService;
 
+     /** @var ReviewImport */
+     protected $reviewImport;
+
      /** @var ProductImport */
      protected $productImport;
 
-   /**
-    * 
-    * @param Context $context 
-    * @param Curl $curl 
-    * @param ImportImageService $importImageService 
-    * @param ProductImport $productImport 
-    * @param ScopeConfigInterface $scopeConfig 
-    * @return void 
-    */
+  /**
+   * 
+   * @param Context $context 
+   * @param Curl $curl 
+   * @param ImportImageService $importImageService 
+   * @param ProductImport $productImport 
+   * @param ReviewImport $reviewImport 
+   * @param ScopeConfigInterface $scopeConfig 
+   * @return void 
+   */
     public function __construct(
         Context $context,
         Curl $curl,
         ImportImageService $importImageService,
         ProductImport $productImport,
+        ReviewImport $reviewImport,
         ScopeConfigInterface $scopeConfig
     ) {
         parent::__construct($context);
         $this->curl = $curl;
         $this->importImageService = $importImageService;
         $this->productImport = $productImport;
+        $this->reviewImport = $reviewImport;
         $this->scopeConfig = $scopeConfig;
     }
     /**
@@ -96,21 +105,34 @@ class Generate extends \Magento\Backend\App\Action
         }
         $params = $this->getRequest()->getParams();
         $content = $this->getProductApi(self::CHAT_API,$params['is_fictional'].' '. $params['prompt'],$params['numberOfProducts']);
-        $rows = [];
-        foreach($content as $product){
-            $image = $this->getImageApi(self::IMAGE_API,$product->name.' '.$product->category.' '.$product->description);
-            $localImage = $this->importImageService->execute($product->sku, $image, true, ['image', 'small_image', 'thumbnail']);
-            $row=[$product->sku,$product->name,$product->price,'simple','Default','base',$product->qty,
-            "1","Catalog, Search","1",'Default Category/'.$product->category,$product->description,"5",$localImage,$localImage,$localImage];
-            $rows[]=$row;
-
+        $productRows = [];
+        $reviewsRows = [];
+        foreach($content as $products){
+            foreach($products as $product){
+                $image = $this->getImageApi(self::IMAGE_API,$product->name.' '.$product->category.' '.$product->description);
+                $localImage = $this->importImageService->execute($product->sku, $image, true, ['image', 'small_image', 'thumbnail']);
+                $productRow=[$product->sku,$product->name,$product->price,'simple','Default','base',$product->qty,
+                "1","Catalog, Search","1",'Default Category/'.$product->category,$product->description,"5",$localImage,$localImage,$localImage];
+                $productRows[] = $productRow;
+                $reviewsRow = ['sku'=>$product->sku,'rating_code'=>'Value','rating_value'=>$product->rating_value,'summary'=>$product->summary,'review'=>$product->review,'reviewer'=>$product->reviewer];
+                //$reviewsRow = [$product->sku,'Value',$product->rating_value,$product->summary,$product->review,$product->reviewer];
+                $reviewsRows[] = $reviewsRow;
+            }
             
         }
         $settings = ['site_code'=>'base','store_code'=>'main_website-store','store_view_code'=>'default',
         'root_category'=>'Default Category','root_category_id'=>'2','product_image_import_directory'=>'/var/www/html/var/import/images',
         'product_validation_strategy'=>'validation-stop-on-errors'];
-        $this->productImport->install($rows,$this->header,'',$settings);
-        exit;
+        $this->productImport->install($productRows,$this->productHeader,'',$settings);
+        foreach($reviewsRows as $review){
+            $this->reviewImport->install($review,$settings);
+        }
+        
+        $this->messageManager->addSuccessMessage(__('Products generated'));
+        return $this->_redirect('index');
+        // $resultRedirect = $this->resultRedirectFactory->create();
+        // $resultRedirect->setPath('*/*/index');
+        // return $resultRedirect;
     }
 
    
@@ -127,7 +149,7 @@ class Generate extends \Magento\Backend\App\Action
     {
         $message = '{
             "model": "gpt-3.5-turbo",
-            "messages": [{"role": "user", "content": "Generate a sample list of '.$size.' '.$prompt.' in a .json format enclosed by quotes that includes these values: sku,name,category,price,qty,description"}]
+            "messages": [{"role": "user", "content": "Generate a sample list of '.$size.' '.$prompt.' in a .json format enclosed by quotes that includes these values: sku,name,category,price,qty,description,rating_value,review,summary,reviewer. rating_value is a number between 1 and 5. summary is a single sentence explanation of a customers satisfaction based on the rating_value given. review is two additional sentences about the customers satisfaction. reviewer is a first and last name"}]
           }';
         $this->curl->setOption(CURLOPT_URL, $url);
         $this->curl->setOption(CURLOPT_RETURNTRANSFER, true);
@@ -139,8 +161,13 @@ class Generate extends \Magento\Backend\App\Action
         $result=$this->curl->getBody();
         $result=$this->curl->post($url,$message);
         $result=json_decode($this->curl->getBody());
-
-        $result = json_decode($result->choices[0]->message->content);
+        try{
+            $result = json_decode($result->choices[0]->message->content);
+        }  catch(Exception $e){
+            print_r($e);
+            print_r($result);
+        }
+        
         return $result;
     }
 

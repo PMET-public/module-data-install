@@ -107,8 +107,7 @@ class Generate extends \Magento\Backend\App\Action
         $content = $this->getProductApi(self::CHAT_API,$params['is_fictional'].' '. $params['prompt'],$params['numberOfProducts']);
         $productRows = [];
         $reviewsRows = [];
-        foreach($content as $products){
-            foreach($products as $product){
+        foreach($content as $product){
                 $image = $this->getImageApi(self::IMAGE_API,$product->name.' '.$product->category.' '.$product->description);
                 $localImage = $this->importImageService->execute($product->sku, $image, true, ['image', 'small_image', 'thumbnail']);
                 $productRow=[$product->sku,$product->name,$product->price,'simple','Default','base',$product->qty,
@@ -117,8 +116,6 @@ class Generate extends \Magento\Backend\App\Action
                 $reviewsRow = ['sku'=>$product->sku,'rating_code'=>'Value','rating_value'=>$product->rating_value,'summary'=>$product->summary,'review'=>$product->review,'reviewer'=>$product->reviewer];
                 //$reviewsRow = [$product->sku,'Value',$product->rating_value,$product->summary,$product->review,$product->reviewer];
                 $reviewsRows[] = $reviewsRow;
-            }
-            
         }
         $settings = ['site_code'=>'base','store_code'=>'main_website-store','store_view_code'=>'default',
         'root_category'=>'Default Category','root_category_id'=>'2','product_image_import_directory'=>'/var/www/html/var/import/images',
@@ -149,7 +146,7 @@ class Generate extends \Magento\Backend\App\Action
     {
         $message = '{
             "model": "gpt-3.5-turbo",
-            "messages": [{"role": "user", "content": "Generate a sample list of '.$size.' '.$prompt.' in a .json format enclosed by quotes that includes these values: sku,name,category,price,qty,description,rating_value,review,summary,reviewer. rating_value is a number between 1 and 5. summary is a single sentence explanation of a customers satisfaction based on the rating_value given. review is two additional sentences about the customers satisfaction. reviewer is a first and last name"}]
+            "messages": [{"role": "user", "content": "Generate a sample list of '.$size.' '.$prompt.' in a .json format enclosed by quotes that includes a node for each product with these values: sku,name,category,price,qty,description,rating_value,review,summary,reviewer. rating_value is a number between 1 and 5. summary is a single sentence explanation of a customers satisfaction based on the rating_value given. review is two additional sentences about the customers satisfaction. reviewer is a first and last name"}]
           }';
         $this->curl->setOption(CURLOPT_URL, $url);
         $this->curl->setOption(CURLOPT_RETURNTRANSFER, true);

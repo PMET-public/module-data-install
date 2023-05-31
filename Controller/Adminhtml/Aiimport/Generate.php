@@ -158,6 +158,7 @@ class Generate extends \Magento\Backend\App\Action
         $result=$this->curl->getBody();
         $result=$this->curl->post($url,$message);
         $result=json_decode($this->curl->getBody());
+        print_r($result);
         try{
             $result = json_decode($result->choices[0]->message->content);
         }  catch(Exception $e){
@@ -194,7 +195,7 @@ class Generate extends \Magento\Backend\App\Action
         $result=$this->curl->getBody();
         $result=$this->curl->post($url,$message);
         $result=json_decode($this->curl->getBody());
-
+        print_r($result);  
         if ($result=='Not Found') {
             throw new
             LocalizedException(__('Data could not be retrieved.'));

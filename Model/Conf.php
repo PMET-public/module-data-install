@@ -288,6 +288,8 @@ class Conf
             'label'=>'Loading config.json']],
             ['config.csv'=>['process'=>'rows','class'=>$this->configurationInstall,
             'label'=>'Loading config.csv']],
+            ['store_configurations.json'=>['process'=>'graphqlrows','class'=>$this->configurationInstall,
+            'label'=>'Loading store_configurations.json']],
             ['admin_roles.csv'=>['process'=>'file','class'=>$this->adminRolesInstall,
             'label'=>'Loading Admin Roles']],
             ['admin_roles.json'=>['process'=>'graphqlfile','class'=>$this->adminRolesInstall,

@@ -234,7 +234,7 @@ class Configuration
                 return $value;
         }
         //copy image
-        $fromName = $this->directoryList->getRoot().'/pub/media/'.$imgDir.'/'.$value;
+        $fromName = $this->directoryList->getRoot().'/pub/media/'.$imgDir.'/'.$valueArray[2];
         $toName = $this->directoryList->getRoot().'/pub/media/'. $imgDir.'/'.$scope.'/'.$scopeId.'/'.end($valueArray);
 
         if ($this->directoryRead->isFile($fromName)) {

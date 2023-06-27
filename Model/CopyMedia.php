@@ -20,14 +20,15 @@ class CopyMedia
 {
     /** @var string[][]  */
     protected $directoryMappings=[['from'=>'wysiwyg','to'=>'pub/media/wysiwyg','type'=>'image'],
-        ['from'=>'logo','to'=>'pub/media/logo/stores','type'=>'image'],
-        ['from'=>'email','to'=>'pub/media/email/logo/stores','type'=>'image'],
-        ['from'=>'favicon','to'=>'pub/media/favicon/stores','type'=>'image'],
+        ['from'=>'logo','to'=>'pub/media/logo','type'=>'image'],
+        ['from'=>'email','to'=>'pub/media/email/logo','type'=>'image'],
+        ['from'=>'favicon','to'=>'pub/media/favicon','type'=>'image'],
         ['from'=>'theme','to'=>'app/design/frontend','type'=>'theme'],
         ['from'=>'template_manager','to'=>'pub/media/.template-manager','type'=>'image'],
         ['from'=>'downloadable_products','to'=>'pub/media/import','type'=>'download'],
         ['from'=>'.template-manager','to'=>'pub/media/.template-manager','type'=>'image'],
-        ['from'=>'misc','to'=>'pub/media/misc','type'=>'theme']
+        ['from'=>'misc','to'=>'pub/media/misc','type'=>'theme'],
+        ['from'=>'ThemeCustomizer', 'to'=>'pub/media/ThemeCustomizer','type'=>'theme']
     ];
 
     /** @var string[]  */

@@ -409,7 +409,7 @@ class Converter
     {
         $replaceData = [];
         $banner = $this->bannerCollection->create()->addFieldToFilter('name', $matchValue)->getFirstItem();
-        if (!empty($banner)) {
+        if ($banner->getId() !== null) {
             $bannerId = $banner->getId();
             $replaceData['regexp'][] = '/{{dynamicblock name="' . preg_quote($matchValue) . '"}}/';
             $replaceData['value'][] = $bannerId;

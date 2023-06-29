@@ -27,10 +27,11 @@ class AdvancedPricing
      protected $stores;
 
     /**
-     * AdvancedPricing constructor
      *
      * @param Helper $helper
      * @param Importer $importer
+     * @param Stores $stores
+     * @return void
      */
     public function __construct(
         Helper $helper,

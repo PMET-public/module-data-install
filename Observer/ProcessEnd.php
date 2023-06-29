@@ -28,11 +28,12 @@ class ProcessEnd implements ObserverInterface
     /** @var WebhookHelperData */
     //protected $webhookHelper;
     
-    /**
-     * Process End constructor
-     *
-     * @param Helper $helper
-     */
+   /**
+    *
+    * @param Helper $helper
+    * @param Process $process
+    * @return void
+    */
     public function __construct(Helper $helper, Process $process)//, WebhookHelperData $webhookHelper)
     {
         $this->helper = $helper;

@@ -52,7 +52,7 @@ class Index extends Action implements HttpGetActionInterface
     public function execute()
     {
         $resultPage = $this->resultPageFactory->create();
-        $resultPage->setActiveMenu(static::MENU_ID);
+        $resultPage->setActiveMenu(self::MENU_ID);
         $resultPage->getConfig()->getTitle()->prepend(__('Data Install UI (Beta)'));
         return $resultPage;
     }

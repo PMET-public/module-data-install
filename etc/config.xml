@@ -10,8 +10,8 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <magentoese>
             <datainstall>
-                <app_url />
-                <css_url />
+                <app_url/>
+                <css_url/>
             </datainstall>
         </magentoese>
     </default>

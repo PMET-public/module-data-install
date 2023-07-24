@@ -20,6 +20,7 @@ class CopyMedia
 {
     /** @var string[][]  */
     protected $directoryMappings=[['from'=>'wysiwyg','to'=>'pub/media/wysiwyg','type'=>'image'],
+        ['from'=>'.renditions','to'=>'pub/media/.renditions','type'=>'image'],
         ['from'=>'logo','to'=>'pub/media/logo','type'=>'image'],
         ['from'=>'email','to'=>'pub/media/email/logo','type'=>'image'],
         ['from'=>'favicon','to'=>'pub/media/favicon','type'=>'image'],

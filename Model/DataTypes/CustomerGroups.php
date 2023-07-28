@@ -7,6 +7,7 @@
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use Magento\Customer\Api\Data\GroupInterfaceFactory;
+use Magento\Customer\Api\Data\GroupInterface;
 use Magento\Customer\Api\GroupRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Exception\LocalizedException;
@@ -90,6 +91,23 @@ class CustomerGroups
         $groupList = $this->groupRepository->getList($search)->getItems();
         foreach ($groupList as $group) {
             return $group->getId();
+        }
+    }
+
+     /**
+      * Get customer group by code
+      *
+      * @param string $customerGroupCode
+      * @return null
+      * @throws LocalizedException
+      */
+    public function deleteCustomerGroupByCode(string $customerGroupCode)
+    {
+        $search = $this->searchCriteriaBuilder
+            ->addFilter('code', $customerGroupCode, 'eq')->create();
+        $groupList = $this->groupRepository->getList($search)->getItems();
+        foreach ($groupList as $group) {
+            $this->groupRepository->delete($group);
         }
     }
 

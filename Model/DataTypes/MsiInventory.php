@@ -12,7 +12,7 @@ use MagentoEse\DataInstall\Helper\Helper;
 class MsiInventory
 {
     /** @var Importer */
-    protected $importer;
+    private $importer;
 
     /** @var Helper */
     protected $helper;

@@ -352,10 +352,6 @@ class Conf
             'label'=>'Updating Gift Cards']],
             ['msi_inventory.csv'=>['process'=>'file','class'=>$this->msiInventoryInstall,
             'label'=>'Loading MSI Inventory']],
-            ['stock_sources.csv'=>['process'=>'file','class'=>$this->msiInventoryInstall,
-            'label'=>'Loading MSI Inventory']],
-            ['stock_sources.json'=>['process'=>'graphqlexport','class'=>$this->msiInventoryInstall,
-            'label'=>'Loading MSI Inventory']],
             ['upsells.csv'=>['process'=>'rows','class'=>$this->upsellsInstall,
             'label'=>'Loading Upsells']],
             ['upsells.json'=>['process'=>'graphqlrows','class'=>$this->upsellsInstall,
@@ -424,7 +420,11 @@ class Conf
             ['advanced_pricing.json'=>['process'=>'graphqlexport','class'=>$this->advancedPricingInstall,
             'label'=>'Loading Advanced Pricing']],
             ['orders.csv'=>['process'=>'rows','class'=>$this->ordersInstall,
-            'label'=>'Loading Orders']]
+            'label'=>'Loading Orders']],
+            ['stock_sources.csv'=>['process'=>'file','class'=>$this->msiInventoryInstall,
+            'label'=>'Loading MSI Inventory']],
+            ['stock_sources.json'=>['process'=>'graphqlexport','class'=>$this->msiInventoryInstall,
+            'label'=>'Loading MSI Inventory']],
         ];
     }
 }

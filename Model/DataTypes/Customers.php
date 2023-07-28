@@ -25,6 +25,8 @@ use MagentoEse\DataInstall\Helper\Helper;
 use Magento\Reward\Model\RewardFactory;
 use Magento\Reward\Model\Reward;
 use Magento\Framework\App\Area as AppArea;
+use Magento\Framework\Indexer\IndexerRegistry;
+use Magento\Customer\Model\Customer;
 
 class Customers
 {
@@ -71,7 +73,7 @@ class Customers
     protected $countryFactory;
 
     /** @var Importer  */
-    protected $importer;
+    private $importer;
 
      /** @var Helper  */
      protected $helper;
@@ -81,6 +83,9 @@ class Customers
 
     /** @var RewardFactory  */
     protected $rewardFactory;
+
+    /** @var IndexerRegistry */
+    protected $indexerRegistry;
 
     /** @var array */
     protected $importUnsafeColumns=['company_admin', 'role', 'add_to_autofill','group',
@@ -104,6 +109,7 @@ class Customers
      * @param CustomerRepositoryInterface $customerRepositoryInterface
      * @param AddressRepositoryInterface $addressRepositoryInterface
      * @param RewardFactory $rewardFactory
+     * @param IndexerRegistry $indexerRegistry
      */
     public function __construct(
         CustomerGroups $customerGroups,
@@ -120,7 +126,8 @@ class Customers
         Helper $helper,
         CustomerRepositoryInterface $customerRepositoryInterface,
         AddressRepositoryInterface $addressRepositoryInterface,
-        RewardFactory $rewardFactory
+        RewardFactory $rewardFactory,
+        IndexerRegistry $indexerRegistry
     ) {
         $this->customerGroups=$customerGroups;
         $this->stores = $stores;
@@ -137,6 +144,7 @@ class Customers
         $this->customerRepositoryInterface = $customerRepositoryInterface;
         $this->addressRespository = $addressRepositoryInterface;
         $this->rewardFactory = $rewardFactory;
+        $this->indexerRegistry = $indexerRegistry;
     }
 
     /**
@@ -175,7 +183,11 @@ class Customers
         } else {
             $importMethod = 'customer';
         }
+
         $this->import($cleanCustomerArray, $productValidationStrategy, $importMethod);
+
+        $indexer = $this->indexerRegistry->get(Customer::CUSTOMER_GRID_INDEXER_ID);
+        $indexer->reindexAll();
 
         //add rewards points
         $this->addRewardsPoints($customerArray);
@@ -187,7 +199,7 @@ class Customers
                 $startingElement = $this->addToAutofill($autoFillCustomer, $startingElement);
             }
         }
-      
+       
         foreach ($cleanCustomerArray as $row) {
             try {
                 $customer = $this->customerRepositoryInterface->get(
@@ -200,15 +212,14 @@ class Customers
                 } else {
                     $customer->setCreatedIn($this->stores->getViewName($this->settings['store_view_code']));
                 }
+
                 $this->appState->emulateAreaCode(
                     AppArea::AREA_FRONTEND,
                     [$this->customerRepositoryInterface, 'save'],
                     [$customer]
                 );
 
-            // $this->customerRepositoryInterface->save($customer);
-
-             ///set addresses as default
+                ///set addresses as default
                 $addresses = $customer->getAddresses();
                 $addressesToKeep=[];
                 foreach ($addresses as $address) {

@@ -23,7 +23,6 @@ use Magento\Company\Api\Data\StructureInterfaceFactory;
  use Magento\Framework\Exception\NoSuchEntityException;
  use MagentoEse\DataInstall\Helper\Helper;
  use Magento\Company\Api\Data\StructureInterface;
-use Magento\CompanyCredit\Model\CreditLimitRepository;
 
 class Companies
 {
@@ -140,7 +139,6 @@ class Companies
         //validate and set optional values
         //required company_name,company_admin,street,city,country_id,region,postcode,telephone,company_admin
         //set default - sales_rep ,company_email,site_code,credit_limit
-
         if (empty($row['company_name'])) {
             $this->helper->logMessage("Company missing name, row skipped", "warning");
             return true;
@@ -175,7 +173,7 @@ class Companies
             "  missing country_id, row skipped", "warning");
             return true;
         }
-
+        
         $region = $this->region->create();
         $row['region_id'] = $region->loadByCode($row['region'], $row['country_id'])->getId();
         if (empty($row['region_id'])) {
@@ -226,7 +224,6 @@ class Companies
         if (empty($row['credit_limit'])) {
             $row['credit_limit']=0;
         }
-
         /** @var CompanyInterface $newCompany */
         $newCompany = $this->getCompanyByName($row['company_name']);
         //create company
@@ -237,7 +234,6 @@ class Companies
                 [$adminCustomer, $row]
             );
         }
-
         $newCompany->setSalesRepresentativeId($salesRep->getId());
         $newCompany->setLegalName($row['company_name']);
         $newCompany->setStatus(1);

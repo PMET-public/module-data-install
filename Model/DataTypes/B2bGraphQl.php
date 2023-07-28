@@ -25,6 +25,15 @@ class B2bGraphQl
         $this->helper = $helper;
     }
 
+    const DEFAULT_ADDRESS = [
+        'street' => ['13 Evergreen Terrace'],
+        'city' => 'Springfield',
+        'region' => ['region'=>'Ohio'],
+        'postcode' => '45502',
+        'telephone' => '5555555555',
+        'country_id' => 'US',
+    ];
+
     /**
      * Convert company json to arrays matched to csv files
      *
@@ -136,6 +145,9 @@ class B2bGraphQl
                 foreach ($user as $key => $value) {
                     switch ($key) {
                         case 'addresses':
+                            if (empty($value[0])) {
+                                $value[0]=self::DEFAULT_ADDRESS;
+                            }
                             $address = $this->parseGraphqlAddress($value[0]);
                             if ($setHeader) {
                                 // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
@@ -143,6 +155,7 @@ class B2bGraphQl
                             }
                             // phpcs:ignore Magento2.Performance.ForeachArrayMerge.ForeachArrayMerge
                             $rows[$rowCount] = array_merge($rows[$rowCount], $address['rows']);
+                              
                             break;
 
                         case 'role':
@@ -477,6 +490,8 @@ class B2bGraphQl
      */
     private function parseGraphqlAddress($address)
     {
+        $header = [];
+        $rows = [];
         foreach ($address as $key => $value) {
             switch ($key) {
                 case 'street':

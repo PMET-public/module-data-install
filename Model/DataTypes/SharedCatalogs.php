@@ -102,9 +102,11 @@ class SharedCatalogs
         $sharedCatalog = $this->getSharedCatalogByName($row['name']);
 
         if (!$sharedCatalog) {
-            //create customer group
-            $this->customerGroups->install(['name'=>$row['name']]);
+            //create customer group *this may no longer be needed
+            //$this->customerGroups->install(['name'=>$row['name']]);
             $sharedCatalog = $this->sharedCatalogInterfaceFactory->create();
+            //delete customer group if it exists
+            $this->customerGroups->deleteCustomerGroupByCode($row['name']);
         }
 
         $sharedCatalog->setName($row['name']);
@@ -115,7 +117,6 @@ class SharedCatalogs
         }
         if (empty($row['type']) || $row['type']=='Custom') {
             $sharedCatalog->setType(SharedCatalogInterface::TYPE_CUSTOM);
-            $sharedCatalog->setCustomerGroupId($this->customerGroups->getCustomerGroupId($row['name']));
             $sharedCatalog->setStoreId($this->stores->getStoreId($row['store_code']));
         } else {
             $sharedCatalog->setType(SharedCatalogInterface::TYPE_PUBLIC);
@@ -124,7 +125,6 @@ class SharedCatalogs
         $this->sharedCatalogRepository->save($sharedCatalog);
 
         //assign catalog to company
-        $r = $sharedCatalog->getId();
         //get all compainies and return to array
         $companiesData = explode(',', $row['companies']);
         $companiesToAssign = [];

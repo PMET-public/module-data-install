@@ -39,7 +39,7 @@ class Products
     protected $searchCriteriaBuilder;
 
     /** @var Importer */
-    protected $importer;
+    private $importer;
 
     /** @var State */
     protected $appState;

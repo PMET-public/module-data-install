@@ -70,29 +70,32 @@ class AdminUsers
             $this->helper->logMessage("Required data for admin_users file is missing. Row skipped", "warning");
             return true;
         }
-        $user = $this->userCollection->create()->addFieldToFilter('username', ['eq' => $row['username']])
-        ->getFirstItem();
-        //create user if it doesnt exist
-        if (!$user->getData('username')) {
-            $user = $this->userFactory->create();
-        }
-        $user->setEmail($row['email']);
-        $user->setFirstName($row['firstname']);
-        $user->setLastName($row['lastname']);
-        $user->setUserName($row['username']);
-        $user->setPassword($row['password']);
-        try {
-            $user->save();
-        } catch (Exception $e) {
-            $messages = $e->getMessages();
-            foreach ($messages as $message) {
-                $this->helper->logMessage($message->getText(), "warning");
+        //Skip process if user is admin
+        if (!$row['username'] == 'admin') {
+            $user = $this->userCollection->create()->addFieldToFilter('username', ['eq' => $row['username']])
+            ->getFirstItem();
+            //create user if it doesnt exist
+            if (!$user->getData('username')) {
+                $user = $this->userFactory->create();
             }
-            return true;
+            $user->setEmail($row['email']);
+            $user->setFirstName($row['firstname']);
+            $user->setLastName($row['lastname']);
+            $user->setUserName($row['username']);
+            $user->setPassword($row['password']);
+            try {
+                $user->save();
+            } catch (Exception $e) {
+                $messages = $e->getMessages();
+                foreach ($messages as $message) {
+                    $this->helper->logMessage($message->getText(), "warning");
+                }
+                return true;
+            }
+
+            $this->addUserToRole($user, $row);
         }
-
-        $this->addUserToRole($user, $row);
-
+        
         return true;
     }
 

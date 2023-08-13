@@ -33,7 +33,7 @@ namespace MagentoEse\DataInstall\Model\AI;
             
         }
 
-        protected function getMediaDirTmpDir()
+        public function getMediaDirTmpDir()
         {
             return $this->directoryList->getPath(DirectoryList::MEDIA) . DIRECTORY_SEPARATOR . 'tmp';
         }

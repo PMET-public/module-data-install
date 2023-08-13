@@ -5,8 +5,8 @@
  * See LICENSE for license details.
 */
 -->
-<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
     <argument name="data" xsi:type="array">
         <item name="js_config" xsi:type="array">
             <item name="provider" xsi:type="string">ai_form.ai_form_data_source</item>
@@ -46,7 +46,7 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
             </item>
         </argument>
     </dataSource>
-       <fieldset name="aiproductgeneration" sortOrder="40">
+    <fieldset name="aiproductgeneration" sortOrder="40">
         <settings>
             <collapsible>false</collapsible>
             <opened>true</opened>
@@ -84,6 +84,9 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                     <item name="notice" xsi:type="string" translate="true">
                         Prompt used to generate Products
                     </item>
+                    <item name="validation" xsi:type="array">
+                        <item name="required-entry" xsi:type="boolean">true</item>
+                    </item>
                 </item>
             </argument>
         </field>
@@ -96,10 +99,77 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                     <item name="visible" xsi:type="boolean">true</item>
                     <item name="formElement" xsi:type="string">input</item>
                     <item name="notice" xsi:type="string" translate="true">
-                       Number of products to generate
+                        Number of products to generate
+                    </item>
+                    <item name="validation" xsi:type="array">
+                        <item name="required-entry" xsi:type="boolean">true</item>
                     </item>
                 </item>
             </argument>
-        </field>  
+        </field>
+        <field name="product_type" sortOrder="30">
+            <argument name="data" xsi:type="array">
+                <!--<item name="options" xsi:type="object">Magento\Catalog\Model\Product\Type</item>-->
+                <item name="options" xsi:type="array">
+                    <item name="0" xsi:type="array">
+                        <item name="label" xsi:type="string">Simple</item>
+                        <item name="value" xsi:type="string">simple</item>
+                    </item>
+                    <item name="1" xsi:type="array">
+                        <item name="label" xsi:type="string">Configurable</item>
+                        <item name="value" xsi:type="string">configurable</item>
+                    </item>
+                </item>
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="label" xsi:type="string" translate="true">Product Type</item>
+                    <item name="formElement" xsi:type="string">select</item>
+                    <item name="source" xsi:type="string">vertical</item>
+                    <item name="default" xsi:type="string">simple</item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="validation" xsi:type="array">
+                        <item name="required-entry" xsi:type="boolean">true</item>
+                    </item>
+                </item>
+            </argument>
+            <settings>
+                <switcherConfig>
+                    <rules>
+                        <rule name="0">
+                            <value>simple</value>
+                            <actions>
+                                <action name="0">
+                                    <target>${ $.ns }.${ $.ns }.aiproductgeneration.configurable_type_attributes</target>
+                                    <callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="1">
+                            <value>configurable</value>
+                            <actions>
+                                <action name="0">
+                                    <target>${ $.ns }.${ $.ns }.aiproductgeneration.configurable_type_attributes</target>
+                                    <callback>show</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                    </rules>
+                    <enabled>true</enabled>
+                </switcherConfig>
+            </settings>
+        </field>
+        <field name="configurable_type_attributes" sortOrder="31">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="source" xsi:type="string">vertical</item>
+                    <item name="label" xsi:type="string" translate="true">Define Attributes for your configurable products</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="notice" xsi:type="string" translate="true">
+                        Add comma seperated attribute codes. The attribute code should not contain spaces.
+                    </item>
+                </item>
+            </argument>
+        </field>
     </fieldset>
 </form>

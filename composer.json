@@ -1,7 +1,7 @@
 {
     "name": "magentoese/module-data-install",
     "type": "magento2-module",
-    "version" : "2.3.0",
+    "version" : "2.3.1",
     "autoload": {
         "files": [ "registration.php" ],
         "psr-4": {
@@ -9,7 +9,7 @@
         }
     },
     "require": {
-        "magento/extension-b2b": "^1.2"
+        "magento/extension-b2b": "^1.4"
     }
     ,
     "config": {

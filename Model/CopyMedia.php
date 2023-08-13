@@ -27,8 +27,13 @@ class CopyMedia
         ['from'=>'template_manager','to'=>'pub/media/.template-manager','type'=>'image'],
         ['from'=>'downloadable_products','to'=>'pub/media/import','type'=>'download'],
         ['from'=>'.template-manager','to'=>'pub/media/.template-manager','type'=>'image'],
-        ['from'=>'misc','to'=>'pub/media/misc','type'=>'theme']
+        ['from'=>'misc','to'=>'pub/media/misc','type'=>'theme'],
+        ['from'=>'negotiable_quotes_attachment','to'=>'pub/media/negotiable_quotes_attachment','type'=>'quotes']
     ];
+
+    /** @var string[]  */
+    protected $allowedQuotesFiles = [ 'jpg' => 'image/jpeg','png' => 'image/png', 'jpeg' => 'image/jpeg',
+        'pdf'  => 'application/pdf','doc' => 'application/msword', 'docx'  => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'xls' => 'application/vnd.ms-excel', 'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
 
     /** @var string[]  */
     protected $allowedImageFiles = [ 'jpg' => 'image/jpeg','png' => 'image/png', 'jpeg' => 'image/jpeg',
@@ -171,6 +176,10 @@ class CopyMedia
 
             case "download":
                 $validFiles = array_merge($this->allowedImageFiles, $this->allowedDownloadableFiles);
+                break;
+
+            case "quotes":
+                $validFiles = $this->allowedQuotesFiles;
                 break;
         }
         foreach ($validFiles as $extension => $type) {

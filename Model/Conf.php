@@ -6,6 +6,44 @@
 
 namespace MagentoEse\DataInstall\Model;
 
+use MagentoEse\DataInstall\Model\DataTypes\AdminRoles;
+use MagentoEse\DataInstall\Model\DataTypes\AdminUsers;
+use MagentoEse\DataInstall\Model\DataTypes\AdvancedPricing;
+use MagentoEse\DataInstall\Model\DataTypes\ApprovalRules;
+use MagentoEse\DataInstall\Model\DataTypes\Blocks;
+use MagentoEse\DataInstall\Model\DataTypes\CartRules;
+use MagentoEse\DataInstall\Model\DataTypes\CatalogRules;
+use MagentoEse\DataInstall\Model\DataTypes\Categories;
+use MagentoEse\DataInstall\Model\DataTypes\Companies;
+use MagentoEse\DataInstall\Model\DataTypes\CompanyRoles;
+use MagentoEse\DataInstall\Model\DataTypes\CompanyUserRoles;
+use MagentoEse\DataInstall\Model\DataTypes\Configuration;
+use MagentoEse\DataInstall\Model\DataTypes\CustomerAddresses;
+use MagentoEse\DataInstall\Model\DataTypes\CustomerAttributes;
+use MagentoEse\DataInstall\Model\DataTypes\CustomerGroups;
+use MagentoEse\DataInstall\Model\DataTypes\Customers;
+use MagentoEse\DataInstall\Model\DataTypes\CustomerSegments;
+use MagentoEse\DataInstall\Model\DataTypes\DynamicBlocks;
+use MagentoEse\DataInstall\Model\DataTypes\GiftCards;
+use MagentoEse\DataInstall\Model\DataTypes\MsiInventory;
+use MagentoEse\DataInstall\Model\DataTypes\MsiSource;
+use MagentoEse\DataInstall\Model\DataTypes\MsiStock;
+use MagentoEse\DataInstall\Model\DataTypes\NegotiatedQuotes;
+use MagentoEse\DataInstall\Model\DataTypes\Orders;
+use MagentoEse\DataInstall\Model\DataTypes\Pages;
+use MagentoEse\DataInstall\Model\DataTypes\ProductAttributes;
+use MagentoEse\DataInstall\Model\DataTypes\Products;
+use MagentoEse\DataInstall\Model\DataTypes\RequisitionLists;
+use MagentoEse\DataInstall\Model\DataTypes\Reviews;
+use MagentoEse\DataInstall\Model\DataTypes\RewardExchangeRate;
+use MagentoEse\DataInstall\Model\DataTypes\SharedCatalogCategories;
+use MagentoEse\DataInstall\Model\DataTypes\SharedCatalogs;
+use MagentoEse\DataInstall\Model\DataTypes\Stores;
+use MagentoEse\DataInstall\Model\DataTypes\Teams;
+use MagentoEse\DataInstall\Model\DataTypes\Templates;
+use MagentoEse\DataInstall\Model\DataTypes\Upsells;
+use MagentoEse\DataInstall\Model\DataTypes\Widgets;
+
 class Conf
 {
      /** @var DataTypes\Stores  */
@@ -141,50 +179,59 @@ class Conf
     'country_id','region','postcode','telephone','credit_export','reseller_id','vat_tax_id','company_admin','address'];
 
     /** @var array  */
+    public const B2B_NEGOTIATED_COLUMNS = ['store','customer_email','currency','status','quote_name',
+        'negotiated_price_type','negotiated_price_value','expiration_period','creator_type','creator_id',
+        'base_negotiated_total_price'];
+
+    /** @var array  */
     public const SETTINGS = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
         'root_category' => 'Default Category', 'root_category_id' => '2'];
+
+    private NegotiatedQuotes $negotiatedQuotesInstall;
 
     /**
      * Conf constructor
      *
-     * @param DataTypes\AdminUsers $adminUsers
-     * @param DataTypes\AdminRoles $adminRoles
-     * @param DataTypes\AdvancedPricing $advancedPricing
-     * @param DataTypes\ApprovalRules $approvalRules
-     * @param DataTypes\Blocks $blocks
-     * @param DataTypes\CatalogRules $catalogRules
-     * @param DataTypes\CartRules $cartRules
-     * @param DataTypes\Categories $categories
-     * @param DataTypes\Companies $companies
-     * @param DataTypes\CompanyRoles $companyRoles
-     * @param DataTypes\CompanyUserRoles $companyUserRoles
-     * @param DataTypes\Configuration $configuration
-     * @param DataTypes\CustomerGroups $customerGroups
-     * @param DataTypes\CustomerAttributes $customerAttributes
-     * @param DataTypes\RewardExchangeRate $rewardExchangeRate
-     * @param DataTypes\Customers $customers
-     * @param DataTypes\CustomerAddresses $customerAddresses
-     * @param DataTypes\CustomerSegments $customerSegments
-     * @param DataTypes\DynamicBlocks $dynamicBlocks
-     * @param DataTypes\Widgets $widgets
-     * @param DataTypes\MsiStock $msiStock
-     * @param DataTypes\MsiSource $msiSource
-     * @param DataTypes\MsiInventory $msiInventory
-     * @param DataTypes\Orders $orders
-     * @param DataTypes\Pages $pages
-     * @param DataTypes\ProductAttributes $productAttributes
-     * @param DataTypes\Products $products
-     * @param DataTypes\GiftCards $giftCards
-     * @param DataTypes\RequisitionLists $requisitionLists
-     * @param DataTypes\SharedCatalogs $sharedCatalogs
-     * @param DataTypes\SharedCatalogCategories $sharedCatalogCategories
-     * @param DataTypes\Stores $stores
-     * @param DataTypes\Reviews $reviews
-     * @param DataTypes\Teams $teams
-     * @param DataTypes\Templates $templates
-     * @param DataTypes\Upsells $upsells
+     * @param NegotiatedQuotes $negotiatedQuotes
+     * @param AdminUsers $adminUsers
+     * @param AdminRoles $adminRoles
+     * @param AdvancedPricing $advancedPricing
+     * @param ApprovalRules $approvalRules
+     * @param Blocks $blocks
+     * @param CatalogRules $catalogRules
+     * @param CartRules $cartRules
+     * @param Categories $categories
+     * @param Companies $companies
+     * @param CompanyRoles $companyRoles
+     * @param CompanyUserRoles $companyUserRoles
+     * @param Configuration $configuration
+     * @param CustomerGroups $customerGroups
+     * @param CustomerAttributes $customerAttributes
+     * @param RewardExchangeRate $rewardExchangeRate
+     * @param Customers $customers
+     * @param CustomerAddresses $customerAddresses
+     * @param CustomerSegments $customerSegments
+     * @param DynamicBlocks $dynamicBlocks
+     * @param Widgets $widgets
+     * @param MsiStock $msiStock
+     * @param MsiSource $msiSource
+     * @param MsiInventory $msiInventory
+     * @param Orders $orders
+     * @param Pages $pages
+     * @param ProductAttributes $productAttributes
+     * @param Products $products
+     * @param GiftCards $giftCards
+     * @param RequisitionLists $requisitionLists
+     * @param SharedCatalogs $sharedCatalogs
+     * @param SharedCatalogCategories $sharedCatalogCategories
+     * @param Stores $stores
+     * @param Reviews $reviews
+     * @param Teams $teams
+     * @param Templates $templates
+     * @param Upsells $upsells
      */
     public function __construct(
+        DataTypes\NegotiatedQuotes $negotiatedQuotes,
         DataTypes\AdminUsers $adminUsers,
         DataTypes\AdminRoles $adminRoles,
         DataTypes\AdvancedPricing $advancedPricing,
@@ -258,6 +305,7 @@ class Conf
         $this->sharedCatalogsInstall = $sharedCatalogs;
         $this->sharedCatalogCategoriesInstall = $sharedCatalogCategories;
         $this->companyTeamsInstall = $teams;
+        $this->negotiatedQuotesInstall = $negotiatedQuotes;
     }
 
     /**
@@ -409,6 +457,8 @@ class Conf
             'label'=>'Loading B2B Requisiton Lists']],
             ['b2b_approval_rules.csv'=>['process'=>'rows','class'=>$this->approvalRulesInstall,
             'label'=>'Loading B2B Approval Rules']],
+            ['b2b_negotiated_quotes.json'=>['process'=>'json','class'=>$this->negotiatedQuotesInstall,
+            'label'=>'Loading B2B Quotes']],
             ['cart_rules.csv'=>['process'=>'rows','class'=>$this->cartRulesInstall,
             'label'=>'Loading Cart Rules']],
             ['cart_rules.json'=>['process'=>'graphqlrows','class'=>$this->cartRulesInstall,

@@ -14,7 +14,8 @@ class ImportAIDataService
 {
     public const IMAGE_API = 'https://api.openai.com/v1/images/generations';
     public const IMAGE_SIZE = '1024x1024';
-    public const CHAT_API = 'https://api.openai.com/v1/chat/completions';
+    public const CHAT_API = 'https://api.openai.com/v1/completions';
+    public const CONFIG_CHAT_API = 'https://api.openai.com/v1/chat/completions';
     //public const CHAT_API = 'https://api.openai.com/v1/models';
 
     protected array $productAttributeHeader = [
@@ -85,7 +86,9 @@ class ImportAIDataService
         'configurable_variations'
     ];
 
-    protected $ratingHeader = ['sku','rating_code','rating_value','summary','review','reviewer'];
+    protected array $ratingHeader = ['sku','rating_code','rating_value','summary','review','reviewer'];
+
+    private string $resultsFileName = '';
 
     private ImportImageService $importImageService;
     private Curl $curl;
@@ -93,8 +96,10 @@ class ImportAIDataService
     private ScopeConfigInterface $scopeConfig;
     private ProductAttributesImport $productAttributesImport;
     private ReviewImport $reviewsImport;
+    private GenerateImportFiles $generateImportFiles;
 
     public function __construct(
+        GenerateImportFiles $generateImportFiles,
         ReviewImport $reviewsImport,
         ProductAttributesImport $productAttributesImport,
         Curl                 $curl,
@@ -108,6 +113,7 @@ class ImportAIDataService
         $this->scopeConfig = $scopeConfig;
         $this->productAttributesImport = $productAttributesImport;
         $this->reviewsImport = $reviewsImport;
+        $this->generateImportFiles = $generateImportFiles;
     }
 
     /**
@@ -172,7 +178,14 @@ class ImportAIDataService
             $additionalAttributes
         );
 
+        $this->resultsFileName = $params['prompt'] . '_' . time() . '.json';
+
+        if ($params['product_type'] === 'configurable') {
+            $content = $this->getConfigProductApi(self::CONFIG_CHAT_API, $promptMessage);
+        } else {
         $content = $this->getProductApi(self::CHAT_API, $promptMessage);
+        }
+
         $rows = $rowsConfig = $configVariations = $rowsAttributes = $rowsReviews = [];
 
         $settings = [
@@ -251,7 +264,8 @@ class ImportAIDataService
                     if (!empty($product->reviews)) {
                         foreach ($product->reviews as $review) {
                             $rowsReviews[] = array_combine($this->ratingHeader, [
-                                $review->sku,
+                                //$review->sku,
+                                $product->sku,
                                 'Value',
                                 $review->rating_value,
                                 $review->summary,
@@ -269,9 +283,6 @@ class ImportAIDataService
                 }
             }
         }
-        if (!empty($rowsAttributes)) {
-            $this->importAttributes($rowsAttributes);
-        }
 
         if (!empty($configVariations)) {
             foreach ($configVariations as $sku => $configVariation) {
@@ -282,6 +293,11 @@ class ImportAIDataService
             }
         }
 
+        try {
+            if (!empty($rowsAttributes)) {
+                $this->importAttributes($rowsAttributes);
+            }
+
         //import config after simple
         $this->productImport->install($rows, $this->simpleHeader, '', $settings);
 
@@ -290,25 +306,72 @@ class ImportAIDataService
         }
 
         $this->importReviews($rowsReviews, $settings);
+        } catch (\Exception $e) {
+            //file import failed
+            $importStatus = '0';
+            $importError = $e->getMessage();
+        }
+
         exit;
     }
 
-    private function getPromptMessage($prompt, $size, $productType = "simple", $additionalAttributes = '')
+    private function getSimpleProductPrompt($size, $prompt): string
     {
+        return <<<EOT
+In terms of magento Generate {$size} samples of {$prompt} products in .json structure of multidimensional objects only. No extra text around json data so that it can be processed by coding:
+{"products" : [{
+  "product_type": "string",
+  "sku": "string",
+  "name": "string",
+  "category": "string",
+  "price": 0.00,
+  "qty": 0,
+  "description": "string",
+  "reviews": [{
+    "rating_value": {{random.randint(1, 5)}},
+    "review": "string",
+    "summary": "string",
+    "reviewer": "string"
+  }]
+}]
+}
+EOT;
+    }
+
+    private function getConfigurableProductPrompt($size, $prompt, $additionalAttributes): string
+    {
+        $sampleAns = '[{\"product_type\": \"configurable\",\"sku\": \"string\",\"name\": \"string\",\"category\": \"string\",\"price\": numeric,\"qty\": numeric,\"description\": \"string\",\"parent_sku\": \"string\",\"any_other_attribute\": \"value\"},{\"product_type\": \"simple\",\"sku\": \"string\",\"name\": \"string\",\"category\": \"string\",\"price\": numeric,\"qty\": numeric,\"description\": \"string\",\"parent_sku\": \"string\",\"any_other_attribute\": \"value\"}]';
+
+        return <<<EOT
+Generate a set of configurable products list of size {$size} for {$prompt} in a .json format enclosed by quotes that includes these indexes only: product_type,sku,name,category,price,qty,description,parent_sku,{$additionalAttributes} ,reviews. Where "reviews" is an array of at most two reviews in the format "sku,store_view_code,rating_code,rating_value,summary,review,reviewer". "rating_value" is numeric value 1 to 5. Keep the child and parent mapping.
+For example - Product: Shoes
+Answer: {$sampleAns}
+Product: {$prompt}
+EOT;
+    }
+
+    private function getPrompt($prompt, $size, $productType = "simple", $additionalAttributes = '')
+    {
+        $promptSize =$size;
+        //$promptSize = floor(sqrt((int)$size));
         if ($productType == "configurable") {
             $sampleAns = '[{\"product_type\": \"configurable\",\"sku\": \"string\",\"name\": \"string\",\"category\": \"string\",\"price\": numeric,\"qty\": numeric,\"description\": \"string\",\"parent_sku\": \"string\",\"any_other_attribute\": \"value\"},{\"product_type\": \"simple\",\"sku\": \"string\",\"name\": \"string\",\"category\": \"string\",\"price\": numeric,\"qty\": numeric,\"description\": \"string\",\"parent_sku\": \"string\",\"any_other_attribute\": \"value\"}]';
             return '{
             "model": "gpt-3.5-turbo",
-            "messages": [{"role": "user", "content": "Generate a set of configurable products list of size ' . $size . ' for ' . $prompt . ' in a .json format enclosed by quotes that includes these indexes only: product_type,sku,name,category,price,qty,description,parent_sku,' . $additionalAttributes . ',reviews. Where "reviews" is an array of at most two reviews in the format "sku,store_view_code,rating_code,rating_value,summary,review,reviewer". "rating_value" is numeric value 1 to 5. Keep the child and parent mapping. For example - Product: Shoes \n Answer: ' . $sampleAns . '\n Product: ' . $prompt . '"}],
+            "messages": [{"role": "user", "content": "Generate a set of configurable products list of size ' . $size . ' for ' . $prompt . ' in a .json format enclosed by quotes that includes these indexes only: product_type,sku,name,category,price,qty,description,parent_sku,' . $additionalAttributes . ',reviews. Where \"reviews\" is an array of at most two reviews in the format \"sku,store_view_code,rating_code,rating_value,summary,review,reviewer\". \"rating_value\" is numeric value 1 to 5. Keep the child and parent mapping. For example - Product: Shoes \n Answer: ' . $sampleAns . '\n Product: ' . $prompt . '"}],
             "max_tokens": 1000
           }';
         }
 
-        return '{
-            "model": "gpt-3.5-turbo",
-            "messages": [{"role": "user", "content": "Generate sample list of ' . $size . ' ' . $prompt . ' in .json format enclosed by quotes that includes these values only: \"product_type,sku,name,category,price,qty,description,reviews\". Where \"reviews\" is array of max five reviews in format \"sku,store_view_code,rating_code,rating_value,summary,review,reviewer\". \"rating_value\" is numeric from 1-5"}],
-            "max_tokens": 4000
-          }';
+        $promptText = $this->getSimpleProductPrompt($promptSize, $prompt);
+
+        return [
+            "model" => "text-davinci-003",
+            'prompt' => $promptText,
+            'max_tokens' => 3800,
+            'n' => (int)$size,
+            'temperature' => 0.7,
+        ];
     }
 
     /**
@@ -320,7 +383,50 @@ class ImportAIDataService
      * @throws FileSystemException
      * @throws Exception
      */
-    protected function getProductApi(mixed $url, $message)
+    protected function getProductApi(mixed $url, $message): array
+    {
+        $this->curl->setOptions([
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_HTTPHEADER => [
+                //'OpenAI-Model: text-davinci-003',
+                "Authorization: Bearer " . $this->getAuthentication(),
+                "Content-Type: application/json"
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true
+        ]);
+        $this->curl->post($url, (is_array($message) ? json_encode($message) : $message));
+        $response = $this->curl->getBody();
+
+        //save result in file
+        $this->generateImportFiles->execute($this->resultsFileName, $response);
+
+        $data = [];
+        $choices = json_decode($response)->choices;
+
+        //$pattern = '/\{[^}]+\}/';
+        foreach ($choices as $choice) {
+            $generated_json = trim($choice->text);
+            /*preg_match_all($pattern, $generated_json, $matches);
+            $objects = $matches[0];*/
+
+            $json = json_decode($generated_json);
+            if (!empty($json->products)) {
+                $json = $json->products;
+            }
+
+            foreach ($json as $object) {
+                $array = (is_string($object)) ? json_decode($object) : $object;
+                $data[] = $array;
+            }
+        }
+
+        return $data;
+    }
+
+    protected function getConfigProductApi(mixed $url, $message): array
     {
         $this->curl->setOption(CURLOPT_URL, $url);
         $this->curl->setOption(CURLOPT_RETURNTRANSFER, true);
@@ -363,6 +469,9 @@ class ImportAIDataService
 
         $this->curl->post($url, $message);
         $result1=$this->curl->getBody();
+
+        //save result in file
+        $this->generateImportFiles->execute($this->resultsFileName, ',' . $result1);
         $result=json_decode($result1);
 
         if ($result=='Not Found' || empty($result)) {
@@ -374,11 +483,9 @@ class ImportAIDataService
     }
 
     /**
-     * Return authentication token. Defaults to github token for now, but can be expanded to support additional methods
+     * Return authentication token.
      *
-     * @param string $token
-     * @return mixed
-     * @throws \Magento\Framework\Exception\FileSystemException
+     * @return string
      */
     protected function getAuthentication(): mixed
     {
@@ -386,5 +493,23 @@ class ImportAIDataService
             'magentoese/datainstall/openai_api_key',
             ScopeConfigInterface::SCOPE_TYPE_DEFAULT
         );
+    }
+
+    private function getPromptMessageOld($prompt, $size, $productType = "simple", $additionalAttributes = '')
+    {
+        if ($productType == "configurable") {
+            $sampleAns = '[{\"product_type\": \"configurable\",\"sku\": \"string\",\"name\": \"string\",\"category\": \"string\",\"price\": numeric,\"qty\": numeric,\"description\": \"string\",\"parent_sku\": \"string\",\"any_other_attribute\": \"value\"},{\"product_type\": \"simple\",\"sku\": \"string\",\"name\": \"string\",\"category\": \"string\",\"price\": numeric,\"qty\": numeric,\"description\": \"string\",\"parent_sku\": \"string\",\"any_other_attribute\": \"value\"}]';
+            return '{
+            "model": "gpt-3.5-turbo",
+            "messages": [{"role": "user", "content": "Generate a set of configurable products list of size ' . $size . ' for ' . $prompt . ' in a .json format enclosed by quotes that includes these indexes only: product_type,sku,name,category,price,qty,description,parent_sku,' . $additionalAttributes . ',reviews. Where "reviews" is an array of at most two reviews in the format "sku,store_view_code,rating_code,rating_value,summary,review,reviewer". "rating_value" is numeric value 1 to 5. Keep the child and parent mapping. For example - Product: Shoes \n Answer: ' . $sampleAns . '\n Product: ' . $prompt . '"}],
+            "max_tokens": 1000
+          }';
+        }
+
+        return '{
+            "model": "gpt-3.5-turbo",
+            "messages": [{"role": "user", "content": "Generate sample list of ' . $size . ' ' . $prompt . ' in .json format enclosed by quotes that includes these values only: \"product_type,sku,name,category,price,qty,description,reviews\". Where \"reviews\" is array of max five reviews in format \"sku,store_view_code,rating_code,rating_value,summary,review,reviewer\". \"rating_value\" is numeric from 1-5"}],
+            "max_tokens": 4000
+          }';
     }
 }

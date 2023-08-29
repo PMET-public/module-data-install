@@ -14,6 +14,9 @@ class B2bGraphQl
     /** @var Helper */
     protected $helper;
 
+    /** @var array */
+    protected $companyRoles;
+
     /**
      * B2BGraphQl Constructor
      *
@@ -25,7 +28,7 @@ class B2bGraphQl
         $this->helper = $helper;
     }
 
-    const DEFAULT_ADDRESS = [
+    protected const DEFAULT_ADDRESS = [
         'street' => ['13 Evergreen Terrace'],
         'city' => 'Springfield',
         'region' => ['region'=>'Ohio'],

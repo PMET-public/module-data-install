@@ -21,6 +21,9 @@ class DataPack implements DataPackInterface
     protected $location;
 
     /** @var string  */
+    protected $imagePackLocation;
+
+    /** @var string  */
     protected $load;
 
     /** @var string  */
@@ -99,6 +102,26 @@ class DataPack implements DataPackInterface
     public function setDataPackLocation($location)
     {
         $this->location = $location;
+    }
+
+     /**
+      * Get path of image pack
+      *
+      * @return mixed
+      */
+    public function getImagePackLocation()
+    {
+        return $this->imagePackLocation;
+    }
+
+    /**
+     * Get path of image pack
+     *
+     * @param mixed $location
+     */
+    public function setImagePackLocation($location)
+    {
+        $this->imagePackLocation = $location;
     }
 
     /**
@@ -317,6 +340,59 @@ class DataPack implements DataPackInterface
             //return false;
         }
     }
+
+    /**
+     * Unzip image pack file
+     *
+     * @return mixed
+     * @throws \Magento\Framework\Exception\FileSystemException
+     */
+    public function unZipImagePack()
+    {
+        $zip = new \ZipArchive;
+        $fileInfo = $this->getImagePackLocation();
+        if ($zip->open($fileInfo["path"]."/".$fileInfo["file"]) === true) {
+            //directory is created if it doesnt exist
+            $zip->extractTo($this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR));
+            //get name of directory in the zip file and determina absolute path
+            $this->setImagePackLocation($this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR).'/'.
+            str_replace("/", "", $zip->statIndex(0)['name']));
+            $zip->close();
+            $this->file->deleteFile($fileInfo["path"]."/".$fileInfo["file"]);
+        } else {
+            $this->file->deleteFile($fileInfo["path"]."/".$fileInfo["file"]);
+            $this->setImagePackLocation(false);
+            //return false;
+        }
+    }
+    /**
+     * Combine data packs
+     *
+     * @param string $source
+     * @param string $destination
+     * @return void
+     * @throws FileSystemException
+     */
+    public function mergeDataPacks($source, $destination)
+    {
+        $this->cprp($source, $destination);
+    }
+    
+    /**
+     * Does the data back have files in a media directory
+     *
+     * @return boolean
+     */
+    public function isMediaIncluded()
+    {
+        $files = $this->getFiles();
+        foreach ($files as $file) {
+            if (strpos($file, 'media') !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     /**
      * Return authentication token. Defaults to github token for now, but can be expanded to support additional methods
@@ -356,5 +432,35 @@ class DataPack implements DataPackInterface
     public function getIsDefaultWebsite()
     {
         return $this->isDefaultWebsite ;
+    }
+
+    /**
+     * Recursive Copy
+     *
+     * @param string $source
+     * @param string $destination
+     * @return void
+     */
+    private function cprp($source, $destination)
+    {
+        if ($this->file->isDirectory($source)) {
+            // phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
+            $dir=opendir($source);
+            while ($file=readdir($dir)) {
+                if ($file!="." && $file!="..") {
+                    if ($this->file->isDirectory($source."/".$file)) {
+                        if (!$this->file->isDirectory($destination."/".$file)) {
+                            $this->file->createDirectory($destination."/".$file);
+                        }
+                        $this->cprp($source."/".$file, $destination."/".$file);
+                    } else {
+                        $this->file->copy($source."/".$file, $destination."/".$file);
+                    }
+                }
+            }
+            closedir($dir);
+        } else {
+            $this->file->copy($source, $destination);
+        }
     }
 }

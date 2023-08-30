@@ -137,8 +137,43 @@ class Save extends \Magento\Backend\App\Action
                     //if an except is thrown, no image has been uploaded
                     throw new LocalizedException(__('Data Pack is required'));
                 }
+                //upload media if exists
+                try {
+                    $verticalId = 'images';
+                    //file goes into tmp/datapacks/upload
+                    if (isset($params['images']) && count($params['images'])) {
+                        $verticalId = $params['images'][0];
+                        //phpcs:ignore Magento2.Functions.DiscouragedFunction.Discouraged
+                        if (!file_exists($verticalId['tmp_name'])) {
+                            $verticalId['tmp_name'] = $verticalId['path'] . '/' . $verticalId['file'];
+                            $fileUploader = $this->uploaderFactory->create(['fileId' => $verticalId]);
+                            $fileUploader->setAllowedExtensions(['zip']);
+                            $fileUploader->setAllowRenameFiles(true);
+                            $fileUploader->setAllowCreateFolders(true);
+                            $fileUploader->validateFile();
+                        //upload file
+                            $dataPack->setImagePackLocation($fileUploader->save($this->verticalDirectory->
+                            getAbsolutePath(DataPackInterface::ZIPPED_DIR)));
+                        }
+                    }
+                } catch (ValidationException $e) {
+                    throw new LocalizedException(__('File extension is not supported. Only extension allowed is .zip'));
+                } //catch (\Exception $e) {
+                    //if an except is thrown, no image has been uploaded
+                    //throw new LocalizedException(__('Data Pack is required'));
+                //}
             }
             $dataPack->unZipDataPack();
+            if ($dataPack->getImagePackLocation()) {
+                $dataPack->unZipImagePack();
+                $dataPack->mergeDataPacks($dataPack->getImagePackLocation(), $dataPack->getDataPackLocation());
+                //delete image pack directory
+                if ($this->file->isExists($dataPack->getImagePackLocation())) {
+                    $this->file->deleteDirectory($dataPack->getImagePackLocation());
+                }
+            }
+            //TODO: warning if media does not exist in data
+            //TODO: validate if not an image pack or not a data pack
             if ($dataPack->getDataPackLocation()) {
               ///schedule import
                 $installerJob = $this->installerJobInterface->create();

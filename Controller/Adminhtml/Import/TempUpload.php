@@ -51,7 +51,19 @@ class TempUpload extends \Magento\Backend\App\Action
     {
         $jsonResult = $this->resultFactory->create(ResultFactory::TYPE_JSON);
         try {
-            $fileUploader = $this->uploaderFactory->create(['fileId' => 'vertical']);
+            try {
+                $fileUploader = $this->uploaderFactory->create(['fileId' => 'vertical']);
+            } catch (\Exception $e) {
+                //ignore;
+            }
+
+            try {
+                $fileUploader = $this->uploaderFactory->create(['fileId' => 'images']);
+            } catch (\Exception $e) {
+                //ignore;
+            }
+            
+            
             $fileUploader->setAllowedExtensions(['zip']);
             $fileUploader->setAllowRenameFiles(true);
             $fileUploader->setAllowCreateFolders(true);

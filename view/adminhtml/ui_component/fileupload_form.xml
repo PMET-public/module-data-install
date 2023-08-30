@@ -57,11 +57,27 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                 <item name="config" xsi:type="array">
                     <item name="dataType" xsi:type="string">string</item>
                     <item name="source" xsi:type="string">vertical</item>
-                    <item name="label" xsi:type="string" translate="true">Select File</item>
+                    <item name="label" xsi:type="string" translate="true">Select Data Pack File</item>
                     <item name="visible" xsi:type="boolean">true</item>
                     <item name="formElement" xsi:type="string">fileUploader</item>
                     <item name="required" xsi:type="boolean">false</item>
-                    <item name="notice" xsi:type="string" translate="true">.zip file required</item>
+                    <item name="notice" xsi:type="string" translate="true">Data Pack .zip file required</item>
+                    <item name="uploaderConfig" xsi:type="array">
+                        <item name="url" xsi:type="url" path="datainstall/import/tempupload"/>
+                    </item>
+                </item>
+            </argument>
+        </field>
+        <field name="images">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="source" xsi:type="string">vertical</item>
+                    <item name="label" xsi:type="string" translate="true">Select Images File</item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="formElement" xsi:type="string">fileUploader</item>
+                    <item name="required" xsi:type="boolean">false</item>
+                    <item name="notice" xsi:type="string" translate="true">Images .zip file required</item>
                     <item name="uploaderConfig" xsi:type="array">
                         <item name="url" xsi:type="url" path="datainstall/import/tempupload"/>
                     </item>
@@ -72,14 +88,28 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
     <fieldset name="remote" sortOrder="10">
         <settings>
             <collapsible>true</collapsible>
-            <label translate="true">Remote Source</label>
+            <label translate="true">Remote Sources</label>
         </settings>
         <field name="remote_source" sortOrder="10">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="dataType" xsi:type="string">string</item>
                     <item name="source" xsi:type="string">vertical</item>
-                    <item name="label" xsi:type="string" translate="true">Url to remote .zip file</item>
+                    <item name="label" xsi:type="string" translate="true">Url to remote Data Pack .zip file</item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="notice" xsi:type="string" translate="true">
+                        If using github to access a private repo, and Auth Token must be provided
+                    </item>
+                </item>
+            </argument>
+        </field>
+        <field name="remote_source_images" sortOrder="10">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="source" xsi:type="string">vertical</item>
+                    <item name="label" xsi:type="string" translate="true">Url to remote Data Pack Images .zip file</item>
                     <item name="visible" xsi:type="boolean">true</item>
                     <item name="formElement" xsi:type="string">input</item>
                     <item name="notice" xsi:type="string" translate="true">

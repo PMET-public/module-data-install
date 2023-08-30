@@ -29,6 +29,20 @@ interface DataPackInterface extends ExtensibleDataInterface
     public function setDataPackLocation($location);
 
     /**
+     * Get path of image files pack
+     *
+     * @return string
+     */
+    public function getImagePackLocation();
+
+    /**
+     * Get path of image files pack
+     *
+     * @param mixed $location
+     */
+    public function setImagePackLocation($location);
+
+    /**
      * Set data directory to load
      *
      * @param string $dataDirectory
@@ -145,6 +159,28 @@ interface DataPackInterface extends ExtensibleDataInterface
      * @return void
      */
     public function unZipDataPack();
+
+    /**
+     * Unzip a image pack file
+     *
+     * @return void
+     */
+    public function unZipImagePack();
+
+    /**
+     * Merge Data Packs
+     * Used to copy data from one data pack to another in the case of separate image and data uploads
+     *
+     * @return void
+     */
+    public function mergeDataPacks($source, $destination);
+
+    /**
+     * Is media included in data pack
+     *
+     * @return boolean
+     */
+    public function isMediaIncluded();
 
     /**
      * Get Make Default Website

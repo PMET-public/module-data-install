@@ -508,24 +508,31 @@ class Customers
                     ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
                     0
                 );
-                $this->configuration->saveConfig(
-                    $pathPrefix . $x . '/address_value',
-                    $row['street'],
-                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-                    0
-                );
-                $this->configuration->saveConfig(
-                    $pathPrefix . $x . '/city_value',
-                    $row['city'],
-                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-                    0
-                );
-                $this->configuration->saveConfig(
+                if(!empty($row['street'])){
+                    $this->configuration->saveConfig(
+                        $pathPrefix . $x . '/address_value',
+                        $row['street'],
+                        ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+                        0
+                    );
+                }
+                if(!empty($row['city'])){
+                    $this->configuration->saveConfig(
+                        $pathPrefix . $x . '/city_value',
+                        $row['city'],
+                        ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+                        0
+                    );
+                }
+                if(!empty($row['country_id'])){
+                   $this->configuration->saveConfig(
                     $pathPrefix . $x . '/country_value',
                     $row['country_id'],
                     ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
                     0
-                );
+                    ); 
+                }
+                
                 if (!empty($row['company'])) {
                     $this->configuration->saveConfig(
                         $pathPrefix . $x . '/company_value',
@@ -549,25 +556,31 @@ class Customers
                         0
                     );
                 }
-
-                $this->configuration->saveConfig(
-                    $pathPrefix . $x . '/firstname_value',
-                    $row['firstname'],
-                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-                    0
-                );
-                $this->configuration->saveConfig(
-                    $pathPrefix . $x . '/label',
-                    $row['firstname'] . ' ' . $row['lastname'],
-                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-                    0
-                );
-                $this->configuration->saveConfig(
-                    $pathPrefix . $x . '/lastname_value',
-                    $row['lastname'],
-                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-                    0
-                );
+                if (!empty($row['firstname'])) {
+                    $this->configuration->saveConfig(
+                        $pathPrefix . $x . '/firstname_value',
+                        $row['firstname'],
+                        ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+                        0
+                    );
+                }
+                if (!empty($row['firstname'])) {
+                    $this->configuration->saveConfig(
+                        $pathPrefix . $x . '/label',
+                        $row['firstname'] . ' ' . $row['lastname'],
+                        ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+                        0
+                    );
+                }
+                if (!empty($row['lastname'])) {
+                    $this->configuration->saveConfig(
+                        $pathPrefix . $x . '/lastname_value',
+                        $row['lastname'],
+                        ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+                        0
+                    );
+                }
+                
                 $this->configuration->saveConfig(
                     $pathPrefix . $x . '/password_value',
                     $row['password'],
@@ -580,18 +593,22 @@ class Customers
                     ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
                     0
                 );
-                $this->configuration->saveConfig(
-                    $pathPrefix . $x . '/telephone_value',
-                    $row['telephone'],
-                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-                    0
-                );
-                $this->configuration->saveConfig(
-                    $pathPrefix . $x . '/zip_value',
-                    $row['postcode'],
-                    ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
-                    0
-                );
+                if(!empty($row['telephone'])){
+                    $this->configuration->saveConfig(
+                        $pathPrefix . $x . '/telephone_value',
+                        $row['telephone'],
+                        ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+                        0
+                    );
+                }
+                if(!empty($row['postcode'])){
+                    $this->configuration->saveConfig(
+                        $pathPrefix . $x . '/zip_value',
+                        $row['postcode'],
+                        ScopeConfigInterface::SCOPE_TYPE_DEFAULT,
+                        0
+                    );
+                }
                 return $x + 1;
             }
         }
@@ -704,7 +721,12 @@ class Customers
      */
     protected function getRegionId(array $address)
     {
-        $country = $this->countryFactory->create()->loadByCode($address['country_id']);
-        return $country->getRegionCollection()->addFieldToFilter('name', $address['region'])->getFirstItem()->getId();
+        try{
+             $country = $this->countryFactory->create()->loadByCode($address['country_id']);
+            return $country->getRegionCollection()->addFieldToFilter('name', $address['region'])->getFirstItem()->getId();
+        }catch(Exception $e){
+            return '';
+        }
+       
     }
 }

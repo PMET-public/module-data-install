@@ -52,6 +52,9 @@ class Save extends \Magento\Backend\App\Action
     /** @var InstallerJobInterfaceFactory */
     protected $installerJobInterface;
 
+    /** @var DirectoryList */
+    protected $directoryList;
+
     /**
      * Save constructor.
      *
@@ -64,6 +67,7 @@ class Save extends \Magento\Backend\App\Action
      * @param File $file
      * @param ScopeConfigInterface $scopeConfig
      * @param Curl $curl
+     * @param DirectoryList $directoryList
      * @throws \Magento\Framework\Exception\FileSystemException
      */
     public function __construct(
@@ -75,7 +79,8 @@ class Save extends \Magento\Backend\App\Action
         ScheduleBulk $scheduleBulk,
         File $file,
         ScopeConfigInterface $scopeConfig,
-        Curl $curl
+        Curl $curl,
+        DirectoryList $directoryList
     ) {
         parent::__construct($context);
         $this->dataPack = $dataPack;
@@ -86,6 +91,7 @@ class Save extends \Magento\Backend\App\Action
         $this->file = $file;
         $this->scopeConfig = $scopeConfig;
         $this->curl = $curl;
+        $this->directoryList = $directoryList;
     }
     /**
      * Execute
@@ -158,10 +164,7 @@ class Save extends \Magento\Backend\App\Action
                     }
                 } catch (ValidationException $e) {
                     throw new LocalizedException(__('File extension is not supported. Only extension allowed is .zip'));
-                } //catch (\Exception $e) {
-                    //if an except is thrown, no image has been uploaded
-                    //throw new LocalizedException(__('Data Pack is required'));
-                //}
+                }
             }
             $dataPack->unZipDataPack();
             if ($dataPack->getImagePackLocation()) {
@@ -173,7 +176,20 @@ class Save extends \Magento\Backend\App\Action
                 }
             }
             //TODO: warning if media does not exist in data
-            //TODO: validate if not an image pack or not a data pack
+            $mediaDir = $this->verticalDirectory->isExist($dataPack->getDataPackLocation().'/media');
+
+            if (!$mediaDir) {
+                $this->messageManager->addWarningMessage(__('Media directory does not exist in data pack, and valid 
+                images file is not uploaded. 
+                This is not an error if no images are expected, but it could effect import if it is expected.'));
+            } else {
+                $mediaDir =  $this->file->readDirectory($dataPack->getDataPackLocation().'/media');
+                if (count($mediaDir)==0) {
+                    $this->messageManager->addWarningMessage(__('Images have not been included. 
+                    This is not an error if no media is expected, but it could effect import if it is expected.'));
+                }
+            }
+
             if ($dataPack->getDataPackLocation()) {
               ///schedule import
                 $installerJob = $this->installerJobInterface->create();

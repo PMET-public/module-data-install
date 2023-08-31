@@ -169,8 +169,11 @@ interface DataPackInterface extends ExtensibleDataInterface
 
     /**
      * Merge Data Packs
+     *
      * Used to copy data from one data pack to another in the case of separate image and data uploads
      *
+     * @param string $source
+     * @param string $destination
      * @return void
      */
     public function mergeDataPacks($source, $destination);

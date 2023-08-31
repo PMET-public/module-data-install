@@ -20,15 +20,15 @@ class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
      * @param array $meta
      * @param array $data
      */
-    public function __construct(
-        string $name,
-        string $primaryFieldName,
-        string $requestFieldName,
-        array $meta = [],
-        array $data = []
-    ) {
-        parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
-    }
+    // public function __construct(
+    //     string $name,
+    //     string $primaryFieldName,
+    //     string $requestFieldName,
+    //     array $meta = [],
+    //     array $data = []
+    // ) {
+    //     parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
+    // }
 
     /**
      * Get Data

@@ -7,7 +7,7 @@ The Data Install module facilitates the loading of sample data by a series of ge
 ## Data Pack Sources
 - Commerce Module - This is created like any other Adobe Commerce Module and can be added to the instance via the composer.json file, or under `app/code/Namespace/Module`. The Data Pack can then be referred to by its name `Namespace_Module` when being installed
 - File System - The Data Pack directory can be placed under any directory under the Commerce app.
-- Zip file - A Data Pack can be packaged as a .zip file and uploaded via the UI
+- Zip file - A Data Pack can be packaged as a .zip file and uploaded via the UI. The data and media (images) can be uploaded as separate .zip files via the Commerce UI
 - GitHub Remote - The Data Pack can be retrieved from a GitHub repository via the same link used to download a zipped repository e.g. `https://github.com/PMET-public/vertical-data-luma/archive/refs/heads/main.zip`
 - When using GitHub Remote to access a private repository, you will need to create a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). This token can be used as an option for the the CLI or GraphQL mutation. Or it can be added to the Commerce instance under *Stores->Configuration->Advanced->System->Data Installer Authorization*. 
   - When setting up the token, create a "classic" token, and check the box to give access to the `repo` scope
@@ -49,6 +49,9 @@ Mostly used for testing.  You can pass a comma delimited list specific files you
 ### Upload Via UI
 
 A .zip file can be created with assetts that follow the Data Pack format. It is then uploaded via the Commerce UI at *System->Data Transfer->Import Data Pack*
+
+If you have extracted data and images via the GraphQL queries, those assets can be merged into one Data Pack. Or the resulting .zip file from the `imagesExtract` can be loaded separatly. 
+
 Advanced Conditions the same as used by the CLI can be added as needed. When uploaded a job is created to import the data pack. The `magentoese_datainstall.import` consumer will install the Data Pack in the background.
 
 Depending on the size of the Data Pack, you will need to make sure your server is configured to allow a larger file upload.  You can check the server setting by going to *System->Import* in the Commerce admin. There will be a message at the top of the page that will read something like - "Make sure your file isn't more than 28M". That indicates the maxium size of file that can be uploaded. This can be increased by setting two php variables to the appropriate size

@@ -12,6 +12,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem;
 use Magento\Framework\File\UploaderFactory;
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\App\Request\Http;
 
 class TempUpload extends \Magento\Backend\App\Action
 {
@@ -24,22 +25,28 @@ class TempUpload extends \Magento\Backend\App\Action
     /** @var Filesystem\Directory\WriteInterface  */
     protected $tmpDirectory;
 
+    /** @var Http  */
+    protected $request;
+
     /**
      * TempUpload constructor
      *
      * @param Context $context
      * @param UploaderFactory $uploaderFactory
      * @param Filesystem $filesystem
+     * @param Http $request
      * @throws \Magento\Framework\Exception\FileSystemException
      */
     public function __construct(
         Context $context,
         UploaderFactory $uploaderFactory,
-        Filesystem $filesystem
+        Filesystem $filesystem,
+        Http $request
     ) {
         parent::__construct($context);
         $this->uploaderFactory = $uploaderFactory;
         $this->tmpDirectory = $filesystem->getDirectoryWrite(DirectoryList::TMP);
+        $this->request = $request;
     }
 
     /**
@@ -51,19 +58,14 @@ class TempUpload extends \Magento\Backend\App\Action
     {
         $jsonResult = $this->resultFactory->create(ResultFactory::TYPE_JSON);
         try {
-            try {
+            if ($this->request->getFiles('vertical')) {
                 $fileUploader = $this->uploaderFactory->create(['fileId' => 'vertical']);
-            } catch (\Exception $e) {
-                //ignore;
             }
 
-            try {
+            if ($this->request->getFiles('images')) {
                 $fileUploader = $this->uploaderFactory->create(['fileId' => 'images']);
-            } catch (\Exception $e) {
-                //ignore;
             }
-            
-            
+
             $fileUploader->setAllowedExtensions(['zip']);
             $fileUploader->setAllowRenameFiles(true);
             $fileUploader->setAllowCreateFolders(true);

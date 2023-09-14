@@ -114,13 +114,21 @@ class Widgets
             $row['store_view_code'] = $row['store_view_codes'];
         }
 
-        //default to blank theme if theme not given
+        //reject if  theme if theme not given
         if (empty($row['theme'])) {
-            $themeId = 1;
+            $this->helper->logMessage(
+                "theme is required in the widgets data file. Row has been skipped.",
+                "warning"
+            );
+            return true;
         } else {
             $themeId = $this->getThemeId($row['theme'], $row['store_view_code']);
-            if (!$themeId) {
-                $themeId = 1;
+            if ($themeId=='') {
+                $this->helper->logMessage(
+                    "Invalid theme, or theme in the widgets data file is not installed. Row has been skipped.",
+                    "warning"
+                );
+                return true;
             }
         }
         
@@ -186,15 +194,15 @@ class Widgets
      */
     protected function getThemeId($theme, $storeViewCode)
     {
-        $storeViewId = $this->storeRepository->get($storeViewCode)->getId();
+        ///try{
+            
+        //}catch(Exception $e){
+        //    $storeViewId = 1;
+        //}
+        
         $themeId = $this->themeCollection->getThemeByFullPath('frontend/' . $theme)->getThemeId();
         if (!$themeId) {
-            //if the theme doesnt exist, get the theme assigned to the store
-            $themeId = $this->scopeConfig->getValue('design/theme/theme_id', 'stores', $storeViewId);
-            if (!$themeId) {
-            //if the theme doesnt exist, return empty string
-                $themeId = '';
-            }
+            $themeId = '';
         }
         return $themeId;
     }

@@ -107,6 +107,7 @@ class Blocks
         $cmsBlock->setContent($row['content']);
         $cmsBlock->setTitle($row['title']);
         $cmsBlock->setData('stores', $viewId);
+        $cmsBlock->setStoreId($viewId);
         $cmsBlock->setIsActive($row['is_active']);
         $this->blockRepository->save($cmsBlock);
         unset($cmsBlock);

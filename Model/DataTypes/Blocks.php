@@ -85,19 +85,23 @@ class Blocks
 
          //get view id from view code, use admin if not defined
         if (!empty($row['store_view_code'])) {
-            $viewId = $this->stores->getViewId(trim($row['store_view_code']));
+            $storeCodes = explode(",", $row['store_view_code']);
+            $viewId = [];
+            foreach ($storeCodes as $storeCode) {
+                $viewId[] = $this->stores->getViewId(trim($storeCode));
+            }
         } else {
-            $viewId = $this->stores->getViewId(trim($settings['store_view_code']));
+            $viewId = [$this->stores->getViewId(trim($settings['store_view_code']))];
         }
 
         //if the requested view doesnt exist, default it to 0
         if (!$viewId) {
-            $viewId=0;
+            $viewId=[0];
         }
 
         try {
             /** @var BlockInterface $cmsBlock */
-            $cmsBlock = $this->getBlockByIdentifier->execute($row['identifier'], $viewId);
+            $cmsBlock = $this->getBlockByIdentifier->execute($row['identifier'], $viewId[0]);
         } catch (Exception $e) {
             //if block isnt found, create a new one
             $cmsBlock = $this->blockFactory->create();
@@ -107,7 +111,7 @@ class Blocks
         $cmsBlock->setContent($row['content']);
         $cmsBlock->setTitle($row['title']);
         $cmsBlock->setData('stores', $viewId);
-        $cmsBlock->setStoreId($viewId);
+        $cmsBlock->setStoreIds($viewId);
         $cmsBlock->setIsActive($row['is_active']);
         $this->blockRepository->save($cmsBlock);
         unset($cmsBlock);

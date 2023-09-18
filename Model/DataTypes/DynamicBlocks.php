@@ -112,13 +112,12 @@ class DynamicBlocks
             //backwards compatibility
             if (!empty($row['store'])) {
                 $row['store_view_code'] = $row['store'];
-            } else {
-                 $row['store_view_code']='admin';
             }
         }
         if (empty($row['store_view_code'])) {
             $row['store_view_code']='admin';
         }
+
         //get existing banner to see if we need to create or update content for different store view
         $bannerCollection = $this->bannerCollection->create();
         $banners = $bannerCollection->addFilter('name', $row['name'], 'eq')->setPageSize(1)->setCurPage(1);
@@ -138,10 +137,20 @@ class DynamicBlocks
             $row['banner_content'] = $row['content'];
         }
 
-        $banner->setStoreContents(
-            [$this->converter->getStoreidByCode($row['store_view_code']) =>
-            $this->converter->convertContent($row['banner_content'])]
-        );
+        $storeViewCodes = explode(",", $row['store_view_code']);
+
+        foreach ($storeViewCodes as $storeViewCode) {
+            
+            //admin is the recoginzed code for default store view
+            if ($storeViewCode=='default') {
+                $storeViewCode='admin';
+            }
+            $banner->setStoreContents(
+                [$this->converter->getStoreidByCode(trim($storeViewCode)) =>
+                $this->converter->convertContent($row['banner_content'])]
+            );
+        }
+
         $this->bannerResourceModel->save($banner);
         //set default if this is a new banner
         if ($banners->count()==0) {

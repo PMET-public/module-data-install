@@ -831,7 +831,7 @@ You may to then update `store_view_code`,`segments` and `banner_content`
 
 **type** - Optional. If left empty it will be set to Any Dynamic block Type. Other valid values are a comma delimited list of one or more of :`content`,`footer`,`header`,`leftcol`,`rightcol`
 
-**store_view_code** - Optional. Default is `admin`, which makes it available across all stores
+**store_view_code** - Optional. Default is `admin`, which makes it available across all stores. A comma delimited list of store view codes is supported
 
 **segments** - Optional. Comma delimited lists of qualifying segment names. If left empty it will be made available to all segments
 

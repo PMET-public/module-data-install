@@ -1,4 +1,8 @@
-<?php /** @noinspection DuplicatedCode */
+<?php
+/**
+ * Copyright 2023 Adobe, Inc. All rights reserved.
+ * See LICENSE for license details.
+ */
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
@@ -230,7 +234,7 @@ class NegotiatedQuotes
         }
 
         try {
-            //make to sure to call quote save
+            //make sure to call quote save
             $this->updatePriceQuote($quoteId);
         } catch (NoSuchEntityException $e) {
             $this->helper->logMessage("Unable to recalculate Negotiable Quote Price ". $this->quoteName .
@@ -396,7 +400,7 @@ class NegotiatedQuotes
         $this->setNegotiableQuoteStatus($quote, $row['status']);
         $this->retrieveNegotiableQuote($quote)
             ->setSnapshot(
-                json_encode($this->replaceNegotiableQuoteSnapshot($quote, ($row['snapshot'] ?? []) ))
+                json_encode($this->replaceNegotiableQuoteSnapshot($quote, ($row['snapshot'] ?? '') ))
             );
 
         //replace if any extra addition form the exported snapshot in order to keep the view restriction
@@ -411,15 +415,25 @@ class NegotiatedQuotes
      * @param $exportedSnapshotData
      * @return array
      */
-    private function replaceNegotiableQuoteSnapshot($quote, $exportedSnapshotData): array
+    private function replaceNegotiableQuoteSnapshot($quote, $exportedSnapshotData)
     {
         $currentSnapshotData = $this->negotiableQuoteConverter->quoteToArray($quote);
         $exportedSnapshotData = json_decode($exportedSnapshotData, true);
+        $exportedSnapshotData = !is_null($exportedSnapshotData) ? $exportedSnapshotData : [];
         return $this->replaceSnapshotDiff($exportedSnapshotData, $currentSnapshotData);
     }
 
+    private function getItemFromArray($items, $search) {
+        foreach ($items as $item) {
+            if ($item['name'] == $search['name'] && $item['sku'] == $search['sku']){
+                return $item;
+            }
+        }
 
-    private function replaceSnapshotDiff($snapshot, $currentSnapshotData): array
+        return [];
+    }
+
+    private function replaceSnapshotDiff($snapshot, $currentSnapshotData)
     {
         $sets = ["quote", "negotiable_quote", "shipping_address", "billing_address"];
         $indexArr = [
@@ -435,35 +449,43 @@ class NegotiatedQuotes
         }
 
         if (!empty($snapshot['items']) && !empty($currentSnapshotData['items'])) {
-            $currentSnapshotDataItems = array_column($currentSnapshotData['items'], NULL,'sku');
+            //$currentSnapshotDataItems = array_column($currentSnapshotData['items'], NULL,'name');
+            $currentSnapshotDataItems = $currentSnapshotData['items'];
 
             $indexArr = [
                 "quote_id", "item_id", "product_id", "parent_item_id", "store_id"
             ];
             foreach ($snapshot['items'] as &$item) {
                 $sku = $item['sku'];
+                $name = $item['name'];
 
-                if (array_key_exists($sku, $currentSnapshotDataItems)) {
+                $itemMatched = $this->getItemFromArray($currentSnapshotDataItems, $item);
+                if (!empty($itemMatched)) {
                     foreach ($indexArr as $index => $value) {
                         if (isset($item[$index]))
-                            $item[$index] = $currentSnapshotDataItems[$sku][$index] ?? '';
+                            $item[$index] = $itemMatched[$index] ?? '';
                     }
 
                     if (isset($item["negotiable_quote_item"]["quote_item_id"])) {
-                        $item["negotiable_quote_item"]["quote_item_id"] = $currentSnapshotDataItems[$sku]["negotiable_quote_item"]["quote_item_id"] ?? '';
-                    }
+                        $item["negotiable_quote_item"]["quote_item_id"] = $itemMatched["negotiable_quote_item"]["quote_item_id"] ?? '';
                 }
 
                 if (isset($item["options"])) {
-                    //only handling the qty
+                        /*
+                         * customers cannot add product but can update qty, add note and remove product.
+                         * while admin can add,update,remove,change configurable options product and add note.
+                         */
+                        //only handling the qty for both admin and customer case
                     $options = $item["options"];
-                    $item["options"] = $currentSnapshotDataItems[$sku]["options"] ?? [];
+                        $item["options"] = $itemMatched["options"] ?? [];
                     foreach ($options as $k => $option) {
-                        if (isset($option['value'])) {
-                            $val = json_decode($option, true);
+                            if (isset($option['code']) && $option['code'] == 'info_buyRequest' && isset($option['value'])) {
+                                $val = json_decode($option['value'], true);
                             $valNew = json_decode($item["options"][$k]['value'], true);
                             $valNew['qty'] = $val['qty'] ?? '';
-                            $valNew['custom_price'] = $val['custom_price'] ?? '';
+                                if (!empty($val['custom_price']))
+                                    $valNew['custom_price'] = $val['custom_price'];
+
                             $valNew['original_qty'] = $val['original_qty'] ?? '';
 
                             $item["options"][$k]['value'] = json_encode($valNew);
@@ -471,6 +493,7 @@ class NegotiatedQuotes
                     }
                 }
             }
+        }
         }
 
         return $snapshot;
@@ -557,7 +580,7 @@ class NegotiatedQuotes
             if ($item['type'] == Configurable::TYPE_CODE) {
                 $childProductSku = $item['sku'];
 
-                if (empty($item['super_attributes'])) {
+                if (/*!empty($item['super_attribute']) ||*/ $childProductSku) {
                     $options = [];
 
                     try {
@@ -581,14 +604,14 @@ class NegotiatedQuotes
                         }
                     }
 
-                    $item['super_attributes'] = $options;
+                    $item['super_attribute'] = $options;
                 }
 
-                if (!is_array($item['super_attributes'])) {
-                    $item['super_attributes'] = json_decode($item['super_attributes'], true);
+                if (!is_array($item['super_attribute'])) {
+                    $item['super_attribute'] = json_decode($item['super_attribute'], true);
                 }
 
-                $dataToSend['super_attribute'] = $item['super_attributes'];
+                $dataToSend['super_attribute'] = $item['super_attribute'];
             }
 
             try {
@@ -647,8 +670,13 @@ class NegotiatedQuotes
             }
         }
 
-        //if (!empty($row['expiration_period'])) $negotiableQuote->setExpirationPeriod($row['expiration_period']);
         $formattedExpirationDate = $this->getExpirationDate();
+        if (!empty($row['expiration_period']) &&
+            $formattedExpirationDate !== Expiration::DATE_QUOTE_NEVER_EXPIRES &&
+            strtotime($row['expiration_period']) > strtotime($formattedExpirationDate)
+        ) {
+            $formattedExpirationDate = $row['expiration_period'];
+        }
         $negotiableQuote->setExpirationPeriod(
             $formattedExpirationDate
         );
@@ -679,8 +707,6 @@ class NegotiatedQuotes
      */
     private function setNegotiableQuoteItems(CartInterface $quote, $products): array
     {
-        $productsIndexed = array_column($products, NULL,'sku');
-
         foreach ($quote->getAllVisibleItems() as $quoteItem) {
             /** @var Item $quoteItem */
             $sku = $quoteItem->getSku();
@@ -908,8 +934,8 @@ class NegotiatedQuotes
         $this->commentResource->save($comment);
         $commentId = $comment->getId();
 
-        if (!empty($comments['files'])) {
-            foreach ($comments['files'] as $file) {
+        if (!empty($commentData['files'])) {
+            foreach ($commentData['files'] as $file) {
                 if (isset($file['file_name']) && isset($file['file_path']) && isset($file['file_type'])) {
                     $attachment = $this->commentAttachmentFactory->create();
                     $attachment->setCommentId($commentId)
@@ -1034,14 +1060,22 @@ class NegotiatedQuotes
 
         if (isset($log['added_to_cart'])) {
             foreach ($log['added_to_cart'] as $sku => $itemData) {
+                try {
+                    $prod = $this->productRepository->get($sku);
+                    $itemData['product_id'] = $prod->getId();
+
+
+                    //options addition has error in current b2b version. workaround added
                 if (array_key_exists($sku, $productIndexed)) {
                     $prod = $productIndexed[$sku];
-                    $itemData['product_id'] = $prod['product_id'];
-
                     if (isset($itemData['options']) && isset($prod['options']))
                         $itemData['options'] = $this->getOptionsArray($prod['options']);
+                    }
 
                     $log['added_to_cart'][$sku] = $itemData;
+                } catch (NoSuchEntityException $e) {
+                    $this->helper->logMessage("Added to cart Log History data for ". $this->quoteName .
+                        " is invalid {$e->getMessage()}, row skipped", "warning");
                 }
             }
         }
@@ -1064,27 +1098,51 @@ class NegotiatedQuotes
         //need to check with multi options
         if (isset($log['removed_from_cart'])) {
             foreach ($log['removed_from_cart'] as $key => $itemData) {
-                if (array_key_exists($itemData['sku'], $productIndexed)) {
-                    $prod = $productIndexed[$itemData['sku']];
-                    $itemData['product_id'] = $prod['product_id'];
-
-                    //$log['removed_from_cart'][$key] = $itemData;
-                    $log['removed_from_cart'][$prod['item_id']] = $itemData;
+                try {
+                    $prod = $this->productRepository->get($itemData['sku']);
+                    $itemData['product_id'] = $prod->getId();
+                    //for key as item id, no requirement to add and delete item from cart, as key is not used
+                    $log['removed_from_cart'][$key] = $itemData;
+                } catch (NoSuchEntityException $e) {
+                    $this->helper->logMessage("Removed from cart Log History data for ". $this->quoteName .
+                        " is invalid {$e->getMessage()}, row skipped", "warning");
                 }
             }
         }
 
         if (isset($log['updated_in_cart'])) {
             foreach ($log['updated_in_cart'] as $sku => $itemData) {
-                if (array_key_exists($sku, $productIndexed)) {
-                    $prod = $productIndexed[$sku];
-                    $itemData['product_id'] = $prod['product_id'];
+                try {
+                    if (isset($itemData['product_sku'])) {
+                        $productModel = $this->productRepository->get($itemData['product_sku']);
+                        unset($itemData['product_sku']);
+                        $itemData['product_id'] = $productModel->getId();
+                        if (isset($itemData['options_changed'])) {
+                            $optChange = $itemData['options_changed'];
+                            $productAttributes = $productModel->getTypeInstance()
+                                ->getConfigurableAttributesAsArray($productModel);
 
-                    //need to test with multiple options update to confirm if it is required
-                    /*if (isset($itemData['options_changed']) && isset($prod['options']))
-                        $itemData['options_changed'] = $this->getOptionsArray($prod['options']);*/
-
+                            $attIndexed = array_column($productAttributes, null, 'attribute_code');
+                            foreach ($optChange as $attrCode => $optionVals) {
+                                $attribute = $attIndexed[$attrCode];
+                                $attrOptions = $attribute['options'];
+                                foreach ($attrOptions as $attrOption) {
+                                    if ($attrOption['label'] === $optionVals['old_value']) {
+                                        $optionVals['old_value'] = $attrOption['value'];
+                                    }
+                                    if ($attrOption['label'] === $optionVals['new_value']) {
+                                        $optionVals['new_value'] = $attrOption['value'];
+                                    }
+                                }
+                                unset($itemData['options_changed'][$attrCode]);
+                                $itemData['options_changed'][$attribute['attribute_id']] = $optionVals;
+                            }
+                        }
+                    }
                     $log['updated_in_cart'][$sku] = $itemData;
+                } catch (NoSuchEntityException $e) {
+                    $this->helper->logMessage("Updated in cart Log History data for ". $this->quoteName .
+                        " is invalid {$e->getMessage()}, row skipped", "warning");
                 }
             }
         }
@@ -1129,6 +1187,9 @@ class NegotiatedQuotes
         }
 
         if (isset($snapshot['expiration_date']) && $snapshot['expiration_date'] != Expiration::DATE_QUOTE_NEVER_EXPIRES) {
+            $defaultExpirationDate = $this->retrieveNegotiableQuote($quote)->getExpirationPeriod();
+
+            if ($defaultExpirationDate != Expiration::DATE_QUOTE_NEVER_EXPIRES && strtotime($defaultExpirationDate) > strtotime($snapshot['expiration_date']))
             $snapshot['expiration_date'] = $this->retrieveNegotiableQuote($quote)->getExpirationPeriod();
         }
 
@@ -1152,12 +1213,29 @@ class NegotiatedQuotes
     {
         $newItemData = [];
         foreach ($snapshotCart as $itemData) {
-            if (array_key_exists($itemData['sku'], $productIndexed)) {
+            if (array_key_exists($itemData['sku'], $productIndexed) && !empty($prod['product_id'])) {
                 $prod = $productIndexed[$itemData['sku']];
                 $itemData['product_id'] = $prod['product_id'];
 
-                if (isset($itemData['options']) && isset($prod['options']))
-                    $itemData['options'] = $this->getOptionsArray($prod['options']);
+                if (isset($itemData['options']) && isset($itemData['product_sku'])) {
+                    $productModel = $this->productRepository->get($itemData['product_sku']);
+                    unset($itemData['product_sku']);
+                    $itemData['product_id'] = $productModel->getId();
+
+                    $productAttributes = $productModel->getTypeInstance()
+                        ->getConfigurableAttributesAsArray($productModel);
+
+                    $attIndexed = array_column($productAttributes, null, 'attribute_code');
+                    foreach ($itemData['options'] as $k => $opts) {
+                        $attribute = $attIndexed[$opts['option']];
+                        $attOptionsIndexed = array_column($attribute['options'], 'value', 'label');
+                        $opts[$k] = [
+                            'option' => $attribute['attribute_id'],
+                            'value' => $attOptionsIndexed[$opts['value']]
+                        ];
+                    }
+                }
+                //$itemData['options'] = $this->getOptionsArray($prod['options']);
 
                 if (!empty($itemData['notes'])) {
                     $notesIdsMap = !empty($prod['note_id_map']) ? $prod['note_id_map'] : [];

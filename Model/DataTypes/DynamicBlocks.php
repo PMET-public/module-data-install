@@ -140,7 +140,6 @@ class DynamicBlocks
         $storeViewCodes = explode(",", $row['store_view_code']);
 
         foreach ($storeViewCodes as $storeViewCode) {
-            
             //admin is the recoginzed code for default store view
             if ($storeViewCode=='default') {
                 $storeViewCode='admin';

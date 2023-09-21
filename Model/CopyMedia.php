@@ -35,7 +35,10 @@ class CopyMedia
 
     /** @var string[]  */
     protected $allowedQuotesFiles = [ 'jpg' => 'image/jpeg','png' => 'image/png', 'jpeg' => 'image/jpeg',
-        'pdf'  => 'application/pdf','doc' => 'application/msword', 'docx'  => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'xls' => 'application/vnd.ms-excel', 'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+        'pdf'  => 'application/pdf','doc' => 'application/msword',
+        'docx'  => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'xls' => 'application/vnd.ms-excel',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
 
     /** @var string[]  */
     protected $allowedImageFiles = [ 'jpg' => 'image/jpeg','png' => 'image/png', 'jpeg' => 'image/jpeg',

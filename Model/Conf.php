@@ -186,8 +186,8 @@ class Conf
     /** @var array  */
     public const SETTINGS = ['site_code'=>'base', 'store_code'=>'main_website_store','store_view_code'=>'default',
         'root_category' => 'Default Category', 'root_category_id' => '2'];
-
-    private NegotiatedQuotes $negotiatedQuotesInstall;
+    /** @var NegotiatedQuotes */
+    private $negotiatedQuotesInstall;
 
     /**
      * Conf constructor

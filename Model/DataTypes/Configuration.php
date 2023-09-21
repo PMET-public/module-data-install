@@ -230,6 +230,9 @@ class Configuration
             case "design/head/shortcut_icon":
                 $imgDir = 'favicon';
                 break;
+            case "design/email/logo":
+                $imgDir = 'email/logo';
+                break;
             default:
                 return $value;
         }

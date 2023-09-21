@@ -330,7 +330,6 @@ class NegotiatedQuotes
                     $quote->getShippingAddress()->setShippingMethod($address['shipping_method']);
                     $quote->getShippingAddress()->setCollectShippingRates(true);
                     $quote->getShippingAddress()->collectShippingRates();
-
                 }
             }
         }
@@ -343,14 +342,20 @@ class NegotiatedQuotes
         }
 
         //keep dates as in export and extend expiry to current + 30days
-        if (!empty($row['updated_at'])) $quote->setUpdatedAt($row['updated_at']);
-        if (!empty($row['created_at'])) $quote->setCreatedAt($row['created_at']);
+        if (!empty($row['updated_at'])) {
+            $quote->setUpdatedAt($row['updated_at']);
+        }
+        if (!empty($row['created_at'])) {
+            $quote->setCreatedAt($row['created_at']);
+        }
 
-        if (!$this->addProductsToCart($row, $quote, $storeId))
+        if (!$this->addProductsToCart($row, $quote, $storeId)) {
             return false;
+        }
 
-        if (!$this->setPaymentMethod($row, $quote))
+        if (!$this->setPaymentMethod($row, $quote)) {
             return false;
+        }
 
         $quote->collectTotals();
         $this->quoteRepository->save($quote);
@@ -400,7 +405,7 @@ class NegotiatedQuotes
         $this->setNegotiableQuoteStatus($quote, $row['status']);
         $this->retrieveNegotiableQuote($quote)
             ->setSnapshot(
-                json_encode($this->replaceNegotiableQuoteSnapshot($quote, ($row['snapshot'] ?? '') ))
+                json_encode($this->replaceNegotiableQuoteSnapshot($quote, ($row['snapshot'] ?? '')))
             );
 
         //replace if any extra addition form the exported snapshot in order to keep the view restriction
@@ -423,9 +428,10 @@ class NegotiatedQuotes
         return $this->replaceSnapshotDiff($exportedSnapshotData, $currentSnapshotData);
     }
 
-    private function getItemFromArray($items, $search) {
+    private function getItemFromArray($items, $search)
+    {
         foreach ($items as $item) {
-            if ($item['name'] == $search['name'] && $item['sku'] == $search['sku']){
+            if ($item['name'] == $search['name'] && $item['sku'] == $search['sku']) {
                 return $item;
             }
         }
@@ -443,8 +449,9 @@ class NegotiatedQuotes
         ];
         foreach ($sets as $key) {
             foreach ($indexArr as $index) {
-                if (isset($snapshot[$key][$index]))
+                if (isset($snapshot[$key][$index])) {
                     $snapshot[$key][$index] = $currentSnapshotData[$key][$index] ?? '';
+                }
             }
         }
 
@@ -462,44 +469,47 @@ class NegotiatedQuotes
                 $itemMatched = $this->getItemFromArray($currentSnapshotDataItems, $item);
                 if (!empty($itemMatched)) {
                     foreach ($indexArr as $index => $value) {
-                        if (isset($item[$index]))
+                        if (isset($item[$index])) {
                             $item[$index] = $itemMatched[$index] ?? '';
+                        }
                     }
 
                     if (isset($item["negotiable_quote_item"]["quote_item_id"])) {
                         $item["negotiable_quote_item"]["quote_item_id"] = $itemMatched["negotiable_quote_item"]["quote_item_id"] ?? '';
-                }
+                    }
 
-                if (isset($item["options"])) {
+                    if (isset($item["options"])) {
                         /*
                          * customers cannot add product but can update qty, add note and remove product.
                          * while admin can add,update,remove,change configurable options product and add note.
                          */
                         //only handling the qty for both admin and customer case
-                    $options = $item["options"];
+                        $options = $item["options"];
                         $item["options"] = $itemMatched["options"] ?? [];
-                    foreach ($options as $k => $option) {
+                        foreach ($options as $k => $option) {
                             if (isset($option['code']) && $option['code'] == 'info_buyRequest' && isset($option['value'])) {
                                 $val = json_decode($option['value'], true);
-                            $valNew = json_decode($item["options"][$k]['value'], true);
-                            $valNew['qty'] = $val['qty'] ?? '';
-                                if (!empty($val['custom_price']))
+                                $valNew = json_decode($item["options"][$k]['value'], true);
+                                $valNew['qty'] = $val['qty'] ?? '';
+                                if (!empty($val['custom_price'])) {
                                     $valNew['custom_price'] = $val['custom_price'];
+                                }
 
-                            $valNew['original_qty'] = $val['original_qty'] ?? '';
+                                $valNew['original_qty'] = $val['original_qty'] ?? '';
 
-                            $item["options"][$k]['value'] = json_encode($valNew);
+                                $item["options"][$k]['value'] = json_encode($valNew);
+                            }
                         }
                     }
                 }
             }
         }
-        }
 
         return $snapshot;
     }
 
-    function arrayDiffRecursiveCurrent($currentSnapshotData, $exportedSnapshotData) {
+    function arrayDiffRecursiveCurrent($currentSnapshotData, $exportedSnapshotData)
+    {
         $diff = [];
 
         foreach ($currentSnapshotData as $key => $value) {
@@ -511,7 +521,8 @@ class NegotiatedQuotes
         return $diff;
     }
 
-    function arrayDiffRecursiveExport($currentSnapshotData, $exportedSnapshotData) {
+    function arrayDiffRecursiveExport($currentSnapshotData, $exportedSnapshotData)
+    {
         $diff = [];
 
         foreach ($exportedSnapshotData as $key => $value) {
@@ -527,7 +538,7 @@ class NegotiatedQuotes
             } elseif (!array_key_exists($key, $currentSnapshotData)) {
                 //arises two cases where we had to replace ids and where we have to keep the non-ids value
                 $diff[$key] = $value;
-            } elseif ( $currentSnapshotData[$key] !== $value) {
+            } elseif ($currentSnapshotData[$key] !== $value) {
                 //arises two cases where we had to replace ids and where we have to keep the non-ids|null value
                 $diff[$key] = $value;
             } else {
@@ -585,7 +596,10 @@ class NegotiatedQuotes
 
                     try {
                         $childItem = $this->productRepository->get(
-                            $childProductSku, false, $storeId, true
+                            $childProductSku,
+                            false,
+                            $storeId,
+                            true
                         );
                     } catch (NoSuchEntityException $e) {
                         $this->helper->logMessage("Child Product data ".$childProductSku.
@@ -784,7 +798,6 @@ class NegotiatedQuotes
     private function getCreator($creator, $creatorType = ItemNoteInterface::CREATOR_TYPE_BUYER): bool|int|null
     {
         if (empty($this->creators[$creatorType][$creator])) {
-
             $this->creators[$creatorType][$creator] = $this->creatorModel->retrieveCreatorByUsername(
                 $creatorType,
                 $creator
@@ -851,8 +864,9 @@ class NegotiatedQuotes
         foreach ($comments as $comment) {
             try {
                 $commentId = $this->saveComment($comment, $quoteId);
-                if (isset($comment['uid']))
+                if (isset($comment['uid'])) {
                     $commentIdsMap[$comment['uid']] = $commentId;
+                }
             } catch (AlreadyExistsException|Exception $e) {
                 $this->helper->logMessage("Comment data for ". $this->quoteName.
                     " is invalid {$e->getMessage()}, row skipped", "warning");
@@ -882,8 +896,9 @@ class NegotiatedQuotes
                     $previousHistorySnapshot
                 );
 
-                if ($previousHistory)
+                if ($previousHistory) {
                     $previousHistorySnapshot = $this->serializer->unserialize($previousHistory->getSnapshotData());
+                }
             } catch (CouldNotSaveException $e) {
                 $this->helper->logMessage("History data for ". $this->quoteName .
                     " is invalid {$e->getMessage()}, row skipped", "warning");
@@ -965,8 +980,7 @@ class NegotiatedQuotes
         array $productIndexed,
         array $commentsIdsMap = [],
         array $previousHistorySnapshot = []
-    ): ?\Magento\NegotiableQuote\Api\Data\HistoryInterface
-    {
+    ): ?\Magento\NegotiableQuote\Api\Data\HistoryInterface {
         if (isset($history['creator']) && isset($history['status']) && isset($history['log_data'])) {
             //set negotiable status as per history
             $logData = (!empty($history['log_data'])) ? $this->serializer->unserialize($history['log_data']) : [];
@@ -991,7 +1005,9 @@ class NegotiatedQuotes
             $snapshotNew = $history['snapshot_data'];
             $snapshot = [];
 
-            if (!empty($history['created_at'])) $historyLog->setCreatedAt($history['created_at']);
+            if (!empty($history['created_at'])) {
+                $historyLog->setCreatedAt($history['created_at']);
+            }
 
             if (!empty($history['snapshot_data'])) {
                 //as snapshots contains identifiers, need to replace them with current ones.
@@ -1039,8 +1055,7 @@ class NegotiatedQuotes
         array $commentsIdsMap = [],
         array $snapshot = [],
         array $previousHistorySnapshot = []
-    ): array
-    {
+    ): array {
         //need to find a logic to get old address, for now utilizing current add
         if (isset($log['address']['old_value'])) {
             $log['address']['old_value'] = $this->collectAddressData($quote);
@@ -1066,10 +1081,11 @@ class NegotiatedQuotes
 
 
                     //options addition has error in current b2b version. workaround added
-                if (array_key_exists($sku, $productIndexed)) {
-                    $prod = $productIndexed[$sku];
-                    if (isset($itemData['options']) && isset($prod['options']))
-                        $itemData['options'] = $this->getOptionsArray($prod['options']);
+                    if (array_key_exists($sku, $productIndexed)) {
+                        $prod = $productIndexed[$sku];
+                        if (isset($itemData['options']) && isset($prod['options'])) {
+                            $itemData['options'] = $this->getOptionsArray($prod['options']);
+                        }
                     }
 
                     $log['added_to_cart'][$sku] = $itemData;
@@ -1189,15 +1205,17 @@ class NegotiatedQuotes
         if (isset($snapshot['expiration_date']) && $snapshot['expiration_date'] != Expiration::DATE_QUOTE_NEVER_EXPIRES) {
             $defaultExpirationDate = $this->retrieveNegotiableQuote($quote)->getExpirationPeriod();
 
-            if ($defaultExpirationDate != Expiration::DATE_QUOTE_NEVER_EXPIRES && strtotime($defaultExpirationDate) > strtotime($snapshot['expiration_date']))
-            $snapshot['expiration_date'] = $this->retrieveNegotiableQuote($quote)->getExpirationPeriod();
+            if ($defaultExpirationDate != Expiration::DATE_QUOTE_NEVER_EXPIRES && strtotime($defaultExpirationDate) > strtotime($snapshot['expiration_date'])) {
+                $snapshot['expiration_date'] = $this->retrieveNegotiableQuote($quote)->getExpirationPeriod();
+            }
         }
 
         if (isset($snapshot['comments'])) {
             $ids = [];
             foreach ($snapshot['comments'] as $oldId) {
-                if (array_key_exists($oldId, $commentsIdsMap))
+                if (array_key_exists($oldId, $commentsIdsMap)) {
                     $ids[] = $commentsIdsMap[$oldId];
+                }
             }
             $snapshot['comments'] = $ids;
         }
@@ -1241,8 +1259,9 @@ class NegotiatedQuotes
                     $notesIdsMap = !empty($prod['note_id_map']) ? $prod['note_id_map'] : [];
                     $ids = [];
                     foreach ($itemData['notes'] as $oldId) {
-                        if (array_key_exists($oldId, $notesIdsMap))
+                        if (array_key_exists($oldId, $notesIdsMap)) {
                             $ids[] = $notesIdsMap[$oldId];
+                        }
                     }
                     $itemData['notes'] = $ids;
                 }
@@ -1337,5 +1356,4 @@ class NegotiatedQuotes
         }
         return $flatAddressArray;
     }
-
 }

@@ -16,20 +16,45 @@ use Magento\User\Api\Data\UserInterfaceFactory;
 
 class Creator
 {
+
+    /**
+     * @var UserInterfaceFactory
+     */
     private UserInterfaceFactory $userFactory;
+
+    /**
+     * @var IntegrationServiceInterface
+     */
     private IntegrationServiceInterface $integration;
+
+    /**
+     * @var CustomerRepositoryInterface
+     */
     private CustomerRepositoryInterface $customerRepository;
 
+    /**
+     *
+     * @param UserInterfaceFactory        $userFactory
+     * @param IntegrationServiceInterface $integration
+     * @param CustomerRepositoryInterface $customerRepository
+     */
     public function __construct(
         UserInterfaceFactory $userFactory,
         IntegrationServiceInterface $integration,
         CustomerRepositoryInterface $customerRepository
     ) {
-        $this->userFactory = $userFactory;
-        $this->integration = $integration;
+        $this->userFactory        = $userFactory;
+        $this->integration        = $integration;
         $this->customerRepository = $customerRepository;
     }
 
+    /**
+     * Get customer by username
+     *
+     * @param  mixed  $type
+     * @param  string $username
+     * @return string
+     */
     public function retrieveCreatorByUsername($type, $username): string
     {
         switch ($type) {
@@ -45,7 +70,7 @@ class Creator
                 try {
                     $customer = $this->customerRepository->get($username);
                     return $customer->getId();
-                } catch (NoSuchEntityException|LocalizedException $e) {
+                } catch (NoSuchEntityException | LocalizedException $e) {
                     return '0';
                 }
                 break;
@@ -55,8 +80,13 @@ class Creator
     }
 
     /**
-     * @throws NoSuchEntityException
+     * Get Customer
+     *
+     * @param  string $email
+     * @param  string $websiteId
+     * @return CustomerInterface
      * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function getCustomer($email, $websiteId = ''): CustomerInterface
     {

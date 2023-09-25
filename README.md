@@ -187,6 +187,8 @@ Each element of potential sample data is encapsulated in its own file. Below is 
 
 [**b2b_teams.csv**](#b2b-teams) - Creates company structure and assigns users to teams
 
+[**b2b_negotiated_quotes.json**](#b2b-negotiated-quotes) - Creates negotiable quotes of company
+
 *Not yet supported*
 **staging,orders, refunds, credit memos or anything else not listed**
 
@@ -1129,6 +1131,28 @@ This file is used to set up company structure, add teams and assign users to the
 **company_name** - Required. Company defined in `b2b_companies.csv`
 
 **members** - Optional. Comma delimited list of email addresses defined in `b2b_customers.csv`
+
+### B2B Negotiated Quotes
+
+*File Name* - b2b_negotiated_quotes.json
+
+This file is used to create negotiable quotes for the company. For now an existing quote cannot be updated. In case a quote is marked `ordered`, it will also create the associated order with it. 
+
+*Columns*
+
+**site_code** - Optional. Will default to value in `settings.csv`. This code needs to match the website that the `company users` were created in
+
+**name** - Required. It is the Quote Name.
+
+**email** - Required. It is the email of company users for which negotiable quote was created.
+
+**status** - Required. Negotiable Quote status.
+
+**creator_type_id** - Required. The type of user who created the quote.
+
+**creator** - Required. The username of email of creator.
+
+
 # Content substitution
 
 There are some elements of content, particularly from Page Builder, that reference IDs of blocks, categories, etc. Because those IDs aren't known until something is installed, there needs to be a mechanism to reference those elements to be replaced with IDs later.

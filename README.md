@@ -1150,7 +1150,7 @@ This file is used to create negotiable quotes for the company. For now an existi
 
 **creator_type_id** - Required. The type of user who created the quote.
 
-**creator** - Required. The username of email of creator.
+**creator** - Required. The username or email of creator.
 
 
 # Content substitution

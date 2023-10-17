@@ -15,6 +15,8 @@ use Magento\Framework\Filesystem\Directory\WriteInterface;
 use Magento\Framework\Filesystem\Directory\ReadInterface;
 use Magento\Framework\File\Mime;
 use MagentoEse\DataInstall\Helper\Helper;
+use Magento\MediaGallerySynchronization\Model\Synchronize;
+use Magento\Framework\Exception\LocalizedException;
 
 class CopyMedia
 {
@@ -83,14 +85,18 @@ class CopyMedia
     /** @var Mime */
     protected $fileMime;
 
+    /** @var Syncronize */
+    protected $synchronize;
+
     /**
-     * CopyMedia constructor
      *
      * @param Helper $helper
      * @param SampleDataContext $sampleDataContext
      * @param Filesystem $fileSystem
      * @param DirectoryList $directoryList
      * @param Mime $fileMime
+     * @param Synchronize $synchronize
+     * @return void
      * @throws FileSystemException
      */
     public function __construct(
@@ -98,7 +104,8 @@ class CopyMedia
         SampleDataContext $sampleDataContext,
         Filesystem $fileSystem,
         DirectoryList $directoryList,
-        Mime $fileMime
+        Mime $fileMime,
+        Synchronize $synchronize
     ) {
         $this->helper = $helper;
         $this->fixtureManager = $sampleDataContext->getFixtureManager();
@@ -107,6 +114,7 @@ class CopyMedia
         $this->directoryRead = $fileSystem->getDirectoryRead(DirectoryList::ROOT);
         $this->directoryList = $directoryList;
         $this->fileMime = $fileMime;
+        $this->synchronize = $synchronize;
     }
 
     /**
@@ -120,6 +128,13 @@ class CopyMedia
             $fromName = $filePath . "media/" . $nextDirectory['from'];
             $toName = $this->directoryList->getRoot()."/".$nextDirectory['to'];
             $this->copyFilesFromTo($fromName, $toName, $nextDirectory['type']);
+        }
+        //attempt to run the media-gallery:sync command
+        try {
+            $this->synchronize->execute();
+        } catch (LocalizedException $e) {
+            //ignore if media gallery is not synced
+            $e = 0;
         }
     }
 

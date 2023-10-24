@@ -451,6 +451,11 @@ class Conf
             'sharedCatalogCategoriesInstall'=>$this->sharedCatalogCategoriesInstall,
             'approvalRulesInstall'=>$this->approvalRulesInstall],
             'label'=>'Loading B2B Data']],
+            //loading again to update b2b data
+            ['customer_addresses.csv'=>['process'=>'file','class'=>$this->customerAddressesInstall,
+            'label'=>'Loading Customer Addresses']],
+            ['customer_addresses.json'=>['process'=>'graphqlexport','class'=>$this->customerAddressesInstall,
+            'label'=>'Loading Customer Addresses']],
             ['b2b_shared_catalogs.csv'=>['process'=>'rows','class'=>$this->sharedCatalogsInstall,
             'label'=>'Loading B2B Shared Catalogs']],
             ['b2b_shared_catalog_categories.csv'=>['process'=>'file','class'=>$this->sharedCatalogCategoriesInstall,

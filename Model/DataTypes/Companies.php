@@ -135,7 +135,6 @@ class Companies
      */
     public function install(array $row, array $settings)
     {
-        //TODO: Enable Purchase Orders
         //validate and set optional values
         //required company_name,company_admin,street,city,country_id,region,postcode,telephone,company_admin
         //set default - sales_rep ,company_email,site_code,credit_limit
@@ -235,11 +234,14 @@ class Companies
             );
         }
         $newCompany->setSalesRepresentativeId($salesRep->getId());
+        
         $newCompany->setLegalName($row['company_name']);
         $newCompany->setStatus(1);
         $extensionAttributes = $newCompany->getExtensionAttributes();
-        $newCompany->setExtensionAttributes($extensionAttributes->setIsPurchaseOrderEnabled(true));
-        $newCompany->save();
+        $extensionAttributes->setIsPurchaseOrderEnabled(1);
+        $newCompany->setExtensionAttributes($extensionAttributes);
+        $this->companyRepositoryInterface->save($newCompany);
+
         //set credit limit
         $creditLimit = $this->creditLimitManagement->getCreditByCompanyId($newCompany->getId());
         $creditLimit->setCreditLimit($row['credit_limit']);
@@ -253,7 +255,10 @@ class Companies
                 $this->addCustomerToCompany($newCompany, $companyCustomer);
                 /* add the customer in the tree under the admin user
                 //They may be moved later on if they are part of a team */
-                if ($row['admin_email']!='Y') {
+                if($row['admin_email']=='Y'){
+                    break;
+                }
+                if ($row['admin_email']!=$companyCustomerEmail) {
                     //delete user if currently tied to admin
                     $userStruct = $this->getStructureByEntity($companyCustomer->getId(), 1);
                     if ($userStruct) {

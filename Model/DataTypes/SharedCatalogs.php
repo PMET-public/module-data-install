@@ -117,7 +117,7 @@ class SharedCatalogs
         }
         if (empty($row['type']) || $row['type']=='Custom') {
             $sharedCatalog->setType(SharedCatalogInterface::TYPE_CUSTOM);
-            $sharedCatalog->setStoreId($this->stores->getStoreId($row['store_code']));
+            $sharedCatalog->setStoreId(0);
         } else {
             $sharedCatalog->setType(SharedCatalogInterface::TYPE_PUBLIC);
             $sharedCatalog->setStoreId(0);

@@ -255,31 +255,39 @@ class Process
                             break;
                         case 'graphqlrows':
                             $fileData = $this->convertGraphQlJson($fileContent);
-                            $this->processRows($fileData['rows'], $fileData['header'], $fileInfo['class'], $host);
+                            if($fileData){
+                                $this->processRows($fileData['rows'], $fileData['header'], $fileInfo['class'], $host);
+                            }
                             break;
                         case 'graphqlfile':
                             $fileData = $this->convertGraphQlJson($fileContent);
-                            $this->processFile(
+                            if($fileData){
+                                $this->processFile(
                                 $fileData['rows'],
                                 $fileData['header'],
                                 $fileInfo['class'],
                                 $modulePath,
                                 $host
-                            );
+                                );
+                            }
                             break;
                         case 'graphqlexport':
                             $fileData = $this->convertGraphQlExport($fileContent);
-                            $this->processFile(
+                            if($fileData){
+                                $this->processFile(
                                 $fileData['rows'],
                                 $fileData['header'],
                                 $fileInfo['class'],
                                 $modulePath,
                                 $host
-                            );
+                                );
+                            }
                             break;
                         case 'b2bgraphql':
                             $fileData = $this->b2bGraphQl->processB2BGraphql($fileContent);
-                            $this->processB2B($fileData, $fileInfo['class']);
+                            if($fileData){
+                                $this->processB2B($fileData, $fileInfo['class']);
+                            }
                             break;
                         default:
                             $this->processRows($rows, $header, $fileInfo['class'], $host);
@@ -429,7 +437,7 @@ class Process
             $fileData = json_decode($json)->data->$currentKey;
         } catch (\Exception $e) {
             $this->helper->logMessage("The JSON in your data file may be invalid", "error");
-            return true;
+            return false;
         }
         $header=[];
         //if items exists it is a multi value file
@@ -490,7 +498,7 @@ class Process
             //$data = json_decode(json_decode($json)->data->export->data);
         } catch (\Exception $e) {
             $this->helper->logMessage("The JSON in your data file may be invalid", "error");
-            return true;
+            return false;
         }
         $header=$fileData[0];
         unset($fileData[0]);

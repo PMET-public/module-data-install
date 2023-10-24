@@ -9,6 +9,8 @@ namespace MagentoEse\DataInstall\Model\DataTypes;
 use MagentoEse\DataInstall\Helper\Helper;
 use MagentoEse\DataInstall\Model\Conf;
 
+use function PHPUnit\Framework\throwException;
+
 class B2bGraphQl
 {
     /** @var Helper */
@@ -48,9 +50,12 @@ class B2bGraphQl
         try {
             //convert to array of objects. Remove the parent query name node
             $fileData = json_decode($json, true);
+            if(!$fileData){
+                throw new \Exception('Your b2b file has no data');
+            }
         } catch (\Exception $e) {
-            $this->helper->logMessage("The JSON in your b2b file is invalid", "error");
-            return true;
+            $this->helper->logMessage("The JSON in your b2b file may be invalid", "error");
+            return false;
         }
         $b2bData=[];
         $b2bData['b2b_companies.csv'] = $this->parseB2BCompanyGraphql($fileData);
@@ -433,7 +438,7 @@ class B2bGraphQl
         $inputData = $fileData['data']['companies']['items'];
         foreach ($inputData as $company) {
             //if catalog is already defined, add to company array. else add element
-            if (!empty($fileData['data']['shared_catalog']['name'])) {
+            if (!empty($company['shared_catalog']['name'])) {
                 $sharedCatalogName = $company['shared_catalog']['name'];
                 $catalogCategories = $company['shared_catalog']['categories'];
                 foreach ($catalogCategories as $category) {

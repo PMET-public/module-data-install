@@ -255,37 +255,37 @@ class Process
                             break;
                         case 'graphqlrows':
                             $fileData = $this->convertGraphQlJson($fileContent);
-                            if($fileData){
+                            if ($fileData) {
                                 $this->processRows($fileData['rows'], $fileData['header'], $fileInfo['class'], $host);
                             }
                             break;
                         case 'graphqlfile':
                             $fileData = $this->convertGraphQlJson($fileContent);
-                            if($fileData){
+                            if ($fileData) {
                                 $this->processFile(
-                                $fileData['rows'],
-                                $fileData['header'],
-                                $fileInfo['class'],
-                                $modulePath,
-                                $host
+                                    $fileData['rows'],
+                                    $fileData['header'],
+                                    $fileInfo['class'],
+                                    $modulePath,
+                                    $host
                                 );
                             }
                             break;
                         case 'graphqlexport':
                             $fileData = $this->convertGraphQlExport($fileContent);
-                            if($fileData){
+                            if ($fileData) {
                                 $this->processFile(
-                                $fileData['rows'],
-                                $fileData['header'],
-                                $fileInfo['class'],
-                                $modulePath,
-                                $host
+                                    $fileData['rows'],
+                                    $fileData['header'],
+                                    $fileInfo['class'],
+                                    $modulePath,
+                                    $host
                                 );
                             }
                             break;
                         case 'b2bgraphql':
                             $fileData = $this->b2bGraphQl->processB2BGraphql($fileContent);
-                            if($fileData){
+                            if ($fileData) {
                                 $this->processB2B($fileData, $fileInfo['class']);
                             }
                             break;

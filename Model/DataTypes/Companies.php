@@ -6,6 +6,7 @@
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Magento\CatalogGraphQl\Model\Category\Filter\SearchCriteria;
 use Magento\Company\Api\Data\StructureInterfaceFactory;
  use Magento\Company\Model\StructureRepository;
  use Magento\Company\Model\Customer\Company as CompanyCustomer;
@@ -17,6 +18,7 @@ use Magento\Company\Api\Data\StructureInterfaceFactory;
  use Magento\Directory\Model\RegionFactory;
  use Magento\Company\Api\CompanyRepositoryInterface;
  use Magento\Framework\Api\SearchCriteriaBuilder;
+ use Magento\Framework\Api\SearchCriteriaInterface;
  use Magento\Company\Api\Data\CompanyInterface;
  use Magento\CompanyCredit\Api\CreditLimitRepositoryInterface;
  use Magento\Framework\App\State;
@@ -63,6 +65,9 @@ class Companies
     /** @var SearchCriteriaBuilder */
     protected $searchCriteriaBuilder;
 
+    /** @var SearchCriteriaInterface */
+    protected $searchCriteriaInterface;
+
     /** @var State */
     protected $appState;
 
@@ -86,6 +91,7 @@ class Companies
      * @param StructureRepository $structureRepository
      * @param CompanyRepositoryInterface $companyRepositoryInterface
      * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param SearchCriteriaInterface $searchCriteriaInterface
      * @param State $appState
      * @param Stores $stores
      * @param Helper $helper
@@ -102,6 +108,7 @@ class Companies
         StructureRepository $structureRepository,
         CompanyRepositoryInterface $companyRepositoryInterface,
         SearchCriteriaBuilder $searchCriteriaBuilder,
+        SearchCriteriaInterface $searchCriteriaInterface,
         State $appState,
         Stores $stores,
         Helper $helper
@@ -116,6 +123,7 @@ class Companies
         $this->structureRepository = $structureRepository;
         $this->companyRepositoryInterface = $companyRepositoryInterface;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->searchCriteriaInterface = $searchCriteriaInterface;
         $this->appState = $appState;
         $this->stores = $stores;
         $this->helper = $helper;
@@ -255,7 +263,7 @@ class Companies
                 $this->addCustomerToCompany($newCompany, $companyCustomer);
                 /* add the customer in the tree under the admin user
                 //They may be moved later on if they are part of a team */
-                if($row['admin_email']=='Y'){
+                if ($row['admin_email']=='Y') {
                     break;
                 }
                 if ($row['admin_email']!=$companyCustomerEmail) {
@@ -325,13 +333,20 @@ class Companies
      */
     private function addToTree($customerId, $parentId)
     {
+        //parent id is the id of the struct that the admin is in
+        //path is parent struct id / user struct id
+        //parent id is 2 not 4, path is 2/4 not 2/6
+        //get parent struct
+        $structSearch = $this->searchCriteriaBuilder
+        ->addFilter(StructureInterface::ENTITY_ID, $parentId)->create()->setPageSize(1)->setCurrentPage(1);
         $newStruct = $this->structure->create();
         $newStruct->setEntityId($customerId);
         $newStruct->setEntityType(0);
         $newStruct->setParentId($parentId);
         $newStruct->setLevel(1);
         $this->structureRepository->save($newStruct);
-        $newStruct->setPath($parentId.'/'.$newStruct->getId());
+        $parentStruct = $this->structureRepository->getList($structSearch)->getItems();
+        $newStruct->setPath(reset($parentStruct)->getId().'/'.$newStruct->getId());
         $this->structureRepository->save($newStruct);
     }
 

@@ -47,13 +47,9 @@ class B2bGraphQl
      */
     public function processB2BGraphql($json)
     {
-        try {
-            //convert to array of objects. Remove the parent query name node
-            $fileData = json_decode($json, true);
-            if(!$fileData){
-                throw new \Exception('Your b2b file has no data');
-            }
-        } catch (\Exception $e) {
+        //convert to array of objects. Remove the parent query name node
+        $fileData = json_decode($json, true);
+        if (!$fileData) {
             $this->helper->logMessage("The JSON in your b2b file may be invalid", "error");
             return false;
         }

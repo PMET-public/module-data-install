@@ -190,7 +190,7 @@ class ApprovalRules
         $rule->setDescription($ruleData['description']);
         $this->setRuleApprovers($rule, $ruleData['approval_from']);
 
-        if ($ruleData['applies_to_all'] === true) {
+        if ($ruleData['applies_to_all'] === true || $ruleData['applies_to_all'] == 1) {
             $rule->setAppliesToAll(true);
         } else {
             $rule->setAppliesToAll(false);

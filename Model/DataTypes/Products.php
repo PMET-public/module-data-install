@@ -17,7 +17,14 @@ use Magento\Framework\App\Area as AppArea;
 use Magento\Framework\Filesystem\Directory\ReadInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem;
+use Magento\SharedCatalog\Api\Data\SharedCatalogInterface;
+use Magento\SharedCatalog\Api\CategoryManagementInterface;
+use Magento\SharedCatalog\Api\SharedCatalogRepositoryInterface;
+use Magento\SharedCatalog\Api\ProductManagementInterface;
+use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollection;
+use Magento\Catalog\Api\CategoryRepositoryInterface;
 
 class Products
 {
@@ -50,6 +57,21 @@ class Products
     /** @var Filesystem */
     protected $fileSystem;
 
+    /** @var SharedCatalogRepositoryInterface */
+    protected $sharedCatalogRepository;
+
+    /** @var CategoryManagementInterface */
+    protected $categoryManagement;
+
+    /** @var ProductManagementInterface */
+    protected $productManagement;
+
+    /** @var CategoryCollection */
+    protected $categoryCollection;
+
+    /** @var CategoryRepositoryInterface */
+    protected $categoryRepository;
+
     /**
      * Products constructor
      *
@@ -61,6 +83,11 @@ class Products
      * @param State $appState
      * @param DirectoryList $directoryList
      * @param Filesystem $fileSystem
+     * @param SharedCatalogRepositoryInterface $sharedCatalogRepository
+     * @param CategoryManagementInterface $catgetoryManagement
+     * @param ProductManagementInterface $productManagement
+     * @param CategoryCollection $categoryCollection
+     * @param CategoryRepositoryInterface $categoryRepository
      */
     public function __construct(
         Helper $helper,
@@ -70,7 +97,12 @@ class Products
         Importer $importer,
         State $appState,
         DirectoryList $directoryList,
-        Filesystem $fileSystem
+        Filesystem $fileSystem,
+        SharedCatalogRepositoryInterface $sharedCatalogRepository,
+        CategoryManagementInterface $catgetoryManagement,
+        ProductManagementInterface $productManagement,
+        CategoryCollection $categoryCollection,
+        CategoryRepositoryInterface $categoryRepository
     ) {
         $this->stores = $stores;
         $this->productRepository = $productRepository;
@@ -79,6 +111,11 @@ class Products
         $this->appState = $appState;
         $this->helper = $helper;
         $this->directoryRead = $fileSystem->getDirectoryRead(DirectoryList::ROOT);
+        $this->sharedCatalogRepository = $sharedCatalogRepository;
+        $this->categoryManagement = $catgetoryManagement;
+        $this->productManagement = $productManagement;
+        $this->categoryCollection = $categoryCollection;
+        $this->categoryRepository = $categoryRepository;
     }
 
     /**
@@ -168,6 +205,109 @@ class Products
                 $this->import($restrictNewProducts, $imgDir, $productValidationStrategy, $behavior);
             }
         }
+        $this->assignToDefaultSharedCatalog($productsArray, $settings);
+    }
+
+    /**
+     * Assign products to default shared catalog
+     *
+     * @param mixed $productsArray
+     * @return void
+     * @throws LocalizedException
+     */
+
+    private function assignToDefaultSharedCatalog($productsArray, $settings)
+    {
+        //get default shared catalog
+        $catalogSearch = $this->searchCriteriaBuilder->addFilter(SharedCatalogInterface::TYPE, 1, 'eq')->create();
+        $sharedCatalogs = $this->sharedCatalogRepository->getList($catalogSearch)->getItems();
+        $defaultSharedCatalogId = array_pop($sharedCatalogs)->getId();
+        //get default shared catalog categories
+        $defaultSharedCatalogCategories = $this->categoryManagement->getCategories($defaultSharedCatalogId);
+        //get default shared catalog products
+        $defaultSharedCatalogProducts = $this->productManagement->getProducts($defaultSharedCatalogId);
+        //get incoming products and categories
+        $incomingProducts = [];
+        $incomingCategories = [];
+        foreach ($productsArray as $product) {
+            $incomingProducts[] = $product['sku'];
+            $productCategories = explode(',', $product['categories']);
+            foreach ($productCategories as $category) {
+                $incomingCategories[] = $category;
+            }
+        }
+        $newCategories = $this->getCategoriesByPath($incomingCategories, $settings);
+        //combine arrays
+        $allProductIds = array_unique(array_merge($defaultSharedCatalogProducts, $incomingProducts), SORT_REGULAR);
+        $allCategoryIds = array_unique(array_merge($defaultSharedCatalogCategories, $newCategories), SORT_REGULAR);
+        //assign categories to default shared catalog
+        foreach ($allCategoryIds as $categoryId) {
+            $allCategories[] = $this->categoryRepository->get($categoryId);
+        }
+        $this->categoryManagement->assignCategories($defaultSharedCatalogId, $allCategories);
+        //assign products to default shared catalog
+        foreach ($allProductIds as $productId) {
+            $allProducts[] = $this->productRepository->get($productId);
+        }
+        $this->productManagement->assignProducts($defaultSharedCatalogId, $allProducts);
+    }
+
+     /**
+      * Get categories based on path
+      *
+      * @param array $categories
+      * @param array $settings
+      * @return array
+      * @throws LocalizedException
+      */
+    private function getCategoriesByPath($categories, $settings)
+    {
+        $categoryIds = [];
+        $allCategories = $this->getAllCategories($settings);
+        foreach ($categories as $category) {
+            $index = mb_strtolower($category);
+            if (isset($allCategories[$index])) {
+                $categoryId = $allCategories[$index]->getId(); // here is your category id
+                $categoryIds[]=(int)$categoryId;
+            }
+        }
+        return $categoryIds;
+    }
+
+    /**
+     * Get all categories for store
+     *
+     * @param array $settings
+     * @return array
+     */
+    private function getAllCategories($settings)
+    {
+
+        $allCategories = [];
+        $collection = $this->categoryCollection->create();
+        $collection->addAttributeToSelect('name')
+            ->addAttributeToSelect('url_key')
+            ->addAttributeToSelect('url_path');
+        $collection->setStoreId($this->stores->getStoreId($settings['store_code']));
+        /* @var $collection \Magento\Catalog\Model\ResourceModel\Category\Collection */
+        foreach ($collection as $category) {
+            $allCategories[$category->getId()] = $category;
+            $structure = explode('/', $category->getPath());
+            $pathSize = count($structure);
+            $allCategories[$category->getId()] = $category;
+            if ($pathSize > 1) {
+                $path = [];
+                for ($i = 1; $i < $pathSize; $i++) {
+                    $name = $collection->getItemById((int)$structure[$i])->getName();
+                    $path[] = str_replace('/', '\\' . '/', $name);
+                    ;
+                }
+                $index = mb_strtolower(implode('/', $path));
+                $allCategories[$index] = $category;
+            }
+        }
+
+        return $allCategories;
     }
 
     /**

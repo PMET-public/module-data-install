@@ -195,6 +195,10 @@ class Stores
     public function install(array $data, array $settings, $cliHost)
     {
         $this->settings = $settings;
+        if (!empty($settings['is_override'])) {
+            $data = $this->overrideSettings($data, $settings);
+        }
+
         if (!empty($data['site_code'])) {
             //fix site code if its not correct
             $data['site_code'] = $this->validateCode($data['site_code']);
@@ -970,5 +974,35 @@ class Stores
             $r=1;
         }
         $this->themeRegistration->register();
+    }
+
+    /**
+     * Override settings
+     *
+     * @param array $data
+     * @param array $settings
+     * @return array
+     */
+    private function overrideSettings(array $data, array $settings) : array
+    {
+        if (!empty($settings['site_code'])) {
+            $data['site_code'] = $settings['site_code'];
+        }
+        if (!empty($settings['store_code'])) {
+            $data['store_code'] = $settings['store_code'];
+        }
+        if (!empty($settings['store_view_code'])) {
+            $data['store_view_code'] = $settings['store_view_code'];
+        }
+        if (!empty($settings['site_name'])) {
+            $data['site_name'] = $settings['site_name'];
+        }
+        if (!empty($settings['store_name'])) {
+            $data['store_name'] = $settings['store_name'];
+        }
+        if (!empty($settings['view_name'])) {
+            $data['view_name'] = $settings['store_view_name'];
+        }
+        return $data;
     }
 }

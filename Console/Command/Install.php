@@ -49,6 +49,13 @@ class Install extends Command
     public const AUTH_TOKEN = 'authtoken';
     public const IS_REMOTE = 'remote';
     public const MAKE_DEFAULT_SITE = 'make-default-website';
+    public const OVERRIDE_FLAG = 'override-settings';
+    public const SITE_CODE = 'site-code';
+    public const SITE_NAME = 'site-name';
+    public const STORE_CODE = 'store-code';
+    public const STORE_NAME = 'store-name';
+    public const STORE_VIEW_CODE = 'store-view-code';
+    public const STORE_VIEW_NAME = 'store-view-name';
 
     /** @var ObjectManagerInterface  */
     protected $objectManagerInterface;
@@ -112,6 +119,7 @@ class Install extends Command
                 'Auth token if needed for remote retrieval'
             ),
             new InputOption(self::RELOAD_FLAG, '-r', InputOption::VALUE_OPTIONAL, 'Force Reload', 0),
+            new InputOption(self::OVERRIDE_FLAG, '-o', InputOption::VALUE_OPTIONAL, 'Override site/store settings', 0),
             new InputOption(
                 self::MAKE_DEFAULT_SITE,
                 '-make-default-website',
@@ -119,7 +127,25 @@ class Install extends Command
                 'Set this site as default regardless of data pack settings',
                 0
             ),
-            new InputOption(self::IS_REMOTE, '-remote', InputOption::VALUE_OPTIONAL, 'Is data pack remote', false)
+            new InputOption(self::IS_REMOTE, '-remote', InputOption::VALUE_OPTIONAL, 'Is data pack remote', false),
+            new InputOption(self::SITE_CODE, '-site-code', InputOption::VALUE_OPTIONAL, 'Site Code', ''),
+            new InputOption(self::SITE_NAME, '-site-name', InputOption::VALUE_OPTIONAL, 'Site Name', ''),
+            new InputOption(self::STORE_CODE, '-store-code', InputOption::VALUE_OPTIONAL, 'Store Code', ''),
+            new InputOption(self::STORE_NAME, '-store-name', InputOption::VALUE_OPTIONAL, 'Store Name', ''),
+            new InputOption(
+                self::STORE_VIEW_CODE,
+                '-store-view-code',
+                InputOption::VALUE_OPTIONAL,
+                'Store View Code',
+                ''
+            ),
+            new InputOption(
+                self::STORE_VIEW_NAME,
+                '-store-view-name',
+                InputOption::VALUE_OPTIONAL,
+                'Store View Name',
+                ''
+            )
         ];
 
         $this->setName('gxd:datainstall')
@@ -143,6 +169,7 @@ class Install extends Command
         $module = $input->getArgument(self::DATAPACK);
         $load = $input->getOption(self::LOAD);
         $reload = $input->getOption(self::RELOAD_FLAG);
+        $override = $input->getOption(self::OVERRIDE_FLAG);
         $files = $input->getOption(self::FILES);
         $host = $input->getOption(self::HOST);
         $isRemote = $input->getOption(self::IS_REMOTE);
@@ -155,6 +182,10 @@ class Install extends Command
         }
         if ($reload === null) {
              $reload = 1;
+        }
+
+        if ($override === null) {
+            $override = 1;
         }
 
         if ($makeDefaultSite === null) {
@@ -173,6 +204,13 @@ class Install extends Command
         $dataPack->setIsRemote($isRemote);
         $dataPack->setAuthToken($authToken);
         $dataPack->setIsDefaultWebsite($makeDefaultSite);
+        $dataPack->setIsOverride($override);
+        $dataPack->setSiteCode($input->getOption(self::SITE_CODE));
+        $dataPack->setSiteName($input->getOption(self::SITE_NAME));
+        $dataPack->setStoreCode($input->getOption(self::STORE_CODE));
+        $dataPack->setStoreName($input->getOption(self::STORE_NAME));
+        $dataPack->setStoreViewCode($input->getOption(self::STORE_VIEW_CODE));
+        $dataPack->setStoreViewName($input->getOption(self::STORE_VIEW_NAME));
 
         //if data pack is rempote, retrieve it
         if ($dataPack->getIsRemote()) {

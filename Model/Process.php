@@ -154,6 +154,7 @@ class Process
         $jobSettings['host'] = $dataPack->getHost();
         $jobSettings['jobid'] = $dataPack->getJobId();
         $jobSettings['isDefaultWebsite'] = $dataPack->getIsDefaultWebsite();
+        $jobSettings['isOverride'] = $dataPack->getIsOverride();
 
         $fileSource = $jobSettings['filesource'];
         $load = $jobSettings['load'];
@@ -173,7 +174,7 @@ class Process
         }
         $fixtureDirectory = 'data/'.$load;
 
-        $this->settings = $this->getConfiguration($filePath, $fixtureDirectory);
+        $this->settings = $this->getConfiguration($filePath, $fixtureDirectory, $dataPack);
         $this->settings['job_settings'] = $jobSettings;
         $this->helper->setSettings($this->settings);
         //dispatch start event
@@ -565,10 +566,11 @@ class Process
      *
      * @param string $filePath
      * @param string $fixtureDirectory
+     * @param DataPackInterface $dataPack
      * @return array
      * @throws LocalizedException
      */
-    private function getConfiguration(string $filePath, string $fixtureDirectory): array
+    private function getConfiguration(string $filePath, string $fixtureDirectory, DataPackInterface $dataPack): array
     {
         $valid = false;
         $this->settings = Conf::SETTINGS;
@@ -607,6 +609,41 @@ class Process
         $setupArray['site_code'] = $this->storeInstall->replaceBaseWebsiteCode($setupArray['site_code']);
         $setupArray['fixture_directory'] = $fixtureDirectory;
         $setupArray['file_path'] = $filePath;
+        if ($dataPack->getIsOverride() ==1) {
+            $setupArray = $this->overrideSettings($setupArray, $dataPack);
+        }
+        return $setupArray;
+    }
+
+    /**
+     * Override settings file
+     *
+     * @param array $setupArray
+     * @param DataPackInterface $dataPack
+     * @return array
+     */
+    private function overrideSettings($setupArray, $dataPack)
+    {
+        if ($dataPack->getSiteCode() !='') {
+            $setupArray['site_code'] = $dataPack->getSiteCode();
+        }
+        if ($dataPack->getSiteName() !='') {
+            $setupArray['site_name'] = $dataPack->getSiteName();
+        }
+        if ($dataPack->getStoreCode() !='') {
+            $setupArray['store_code'] = $dataPack->getStoreCode();
+        }
+        if ($dataPack->getStoreName() !='') {
+            $setupArray['store_name'] = $dataPack->getStoreName();
+        }
+        if ($dataPack->getStoreViewCode() !='') {
+            $setupArray['store_view_code'] = $dataPack->getStoreViewCode();
+        }
+        if ($dataPack->getStoreViewName() !='') {
+            $setupArray['store_view_name'] = $dataPack->getStoreViewName();
+        }
+        $setupArray['is_override'] = 1;
+
         return $setupArray;
     }
     

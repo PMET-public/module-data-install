@@ -44,6 +44,27 @@ class DataPack implements DataPackInterface
     /** @var string  */
     protected $isDefaultWebsite;
 
+    /** @var boolean */
+    protected $isOverride;
+
+    /** @var string  */
+    protected $siteCode;
+
+    /** @var string  */
+    protected $siteName;
+
+    /** @var string  */
+    protected $storeCode;
+
+    /** @var string  */
+    protected $storeName;
+
+    /** @var string  */
+    protected $storeViewCode;
+
+    /** @var string  */
+    protected $storeViewName;
+
     /** @var string  */
     protected $jobId;
 
@@ -462,5 +483,152 @@ class DataPack implements DataPackInterface
         } else {
             $this->file->copy($source, $destination);
         }
+    }
+
+    /**
+     * Get Override flag
+     *
+     * @return boolean
+     */
+    public function getIsOverride()
+    {
+        return $this->isOverride;
+    }
+
+    /**
+     * Set Override flag
+     *
+     * @param boolean $isOverride
+     * @return void
+     */
+    public function setIsOverride($isOverride)
+    {
+        $this->isOverride = $isOverride;
+    }
+    
+    /**
+     * Get Site Code
+     *
+     * @return string
+     */
+    public function getSiteCode()
+    {
+        return $this->siteCode;
+    }
+
+    /**
+     * Set Site Code
+     *
+     * @param string $siteCode
+     * @return void
+     */
+    public function setSiteCode($siteCode)
+    {
+        $this->siteCode = $siteCode;
+    }
+
+    /**
+     * Set Site Name
+     *
+     * @param string $siteName
+     * @return void
+     */
+    public function setSiteName($siteName)
+    {
+        $this->siteName = $siteName;
+    }
+
+    /**
+     * Get Site Name
+     *
+     * @return string
+     */
+    public function getSiteName()
+    {
+        return $this->siteName;
+    }
+
+    /**
+     * Set Store Code
+     *
+     * @param string $storeCode
+     * @return void
+     */
+    public function setStoreCode($storeCode)
+    {
+        $this->storeCode = $storeCode;
+    }
+
+    /**
+     * Get Store Code
+     *
+     * @return string
+     */
+    public function getStoreCode()
+    {
+        return $this->storeCode;
+    }
+
+    /**
+     * Set Store Name
+     *
+     * @param string $storeName
+     * @return void
+     */
+    public function setStoreName($storeName)
+    {
+        $this->storeName = $storeName;
+    }
+
+    /**
+     * Get Store Name
+     *
+     * @return string
+     */
+    public function getStoreName()
+    {
+        return $this->storeName;
+    }
+
+    /**
+     * Set Store View Code
+     *
+     * @param string $storeViewCode
+     * @return void
+     */
+    public function setStoreViewCode($storeViewCode)
+    {
+        $this->storeViewCode = $storeViewCode;
+    }
+
+    /**
+     * Get Store View Code
+     *
+     * @return string
+     */
+    public function getStoreViewCode()
+    {
+        return $this->storeViewCode;
+    }
+
+    /**
+     * Set Store View Name
+     *
+     * @param string $storeViewName
+     * @return void
+     */
+    public function setStoreViewName($storeViewName)
+    {
+        $this->storeViewName = $storeViewName;
+    }
+
+    /**
+     * Get Store View Name
+     *
+     * @return string
+     */
+    public function getStoreViewName()
+    {
+        return $this->storeViewName;
     }
 }

@@ -199,4 +199,109 @@ interface DataPackInterface extends ExtensibleDataInterface
      * @return void
      */
     public function setIsDefaultWebsite($makeDefault);
+
+    /**
+     * Get Override flag
+     *
+     * @return boolean
+     */
+    public function getIsOverride();
+
+    /**
+     * Set Override flag
+     *
+     * @param boolean $isOverride
+     * @return void
+     */
+    public function setIsOverride($isOverride);
+
+    /**
+     * Set Site Code
+     *
+     * @param string $siteCode
+     * @return void
+     */
+    public function setSiteCode($siteCode);
+
+    /**
+     * Get Site Code
+     *
+     * @return string
+     */
+    public function getSiteCode();
+
+    /**
+     * Set Site Name
+     *
+     * @param string $siteName
+     * @return void
+     */
+    public function setSiteName($siteName);
+
+    /**
+     * Get Site Name
+     *
+     * @return string
+     */
+    public function getSiteName();
+
+    /**
+     * Set Store Code
+     *
+     * @param string $storeCode
+     * @return void
+     */
+    public function setStoreCode($storeCode);
+
+    /**
+     * Get Store Code
+     *
+     * @return string
+     */
+    public function getStoreCode();
+
+    /**
+     * Set Store Name
+     *
+     * @param string $storeName
+     * @return void
+     */
+    public function setStoreName($storeName);
+    
+    /**
+     * Get Store Name
+     *
+     * @return string
+     */
+    public function getStoreName();
+
+    /**
+     * Set Store View Code
+     *
+     * @param string $storeViewCode
+     * @return void
+     */
+    public function setStoreViewCode($storeViewCode);
+
+    /**
+     * Get Store View Code
+     *
+     * @return string
+     */
+    public function getStoreViewCode();
+
+    /**
+     * Set Store View Name
+     *
+     * @param string $storeViewName
+     * @return void
+     */
+    public function setStoreViewName($storeViewName);
+    
+    /**
+     * Get Store View Name
+     *
+     * @return string
+     */
+    public function getStoreViewName();
 }

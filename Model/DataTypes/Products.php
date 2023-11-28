@@ -211,7 +211,8 @@ class Products
     /**
      * Assign products to default shared catalog
      *
-     * @param mixed $productsArray
+     * @param array $productsArray
+     * @param array $settings
      * @return void
      * @throws LocalizedException
      */

@@ -30,9 +30,6 @@ class MsiSource
     /** @var SearchCriteriaBuilder */
     protected $searchCriteria;
 
-    /** @var Stores */
-    protected $stores;
-
     /** @var SourceRepositoryInterface */
     protected $sourceRepository;
 
@@ -46,7 +43,6 @@ class MsiSource
      * @param StockInterfaceFactory $stockInterfaceFactory
      * @param StockRepositoryInterface $stockRepositoryInterface
      * @param SearchCriteriaBuilder $searchCriteria
-     * @param Stores $stores
      * @param SourceRepositoryInterface $sourceRepository
      * @param SourceInterfaceFactory $sourceInterfaceFactory
      */
@@ -55,7 +51,6 @@ class MsiSource
         StockInterfaceFactory $stockInterfaceFactory,
         StockRepositoryInterface $stockRepositoryInterface,
         SearchCriteriaBuilder $searchCriteria,
-        Stores $stores,
         SourceRepositoryInterface $sourceRepository,
         SourceInterfaceFactory $sourceInterfaceFactory
     ) {
@@ -63,7 +58,6 @@ class MsiSource
         $this->stockInterfaceFactory = $stockInterfaceFactory;
         $this->stockRepository = $stockRepositoryInterface;
         $this->searchCriteria = $searchCriteria;
-        $this->stores = $stores;
         $this->sourceRepository = $sourceRepository;
         $this->sourceInterfaceFactory = $sourceInterfaceFactory;
     }

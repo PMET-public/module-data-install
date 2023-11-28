@@ -111,6 +111,35 @@ class ScheduleBulk
                     'website'=>'base',
                     'store'=>'store'
                 ];
+                //TODO: add store and website to serialized data
+                if(!empty($operation['override_settings'])) {
+                    if($operation['override_settings']){
+                        $serializedData['override_settings'] = true;
+
+                        if(!empty($operation['site_code'])) {
+                            $serializedData['site_code'] = $operation['site_code'];
+                        }
+                        if(!empty($operation['site_name'])) {
+                            $serializedData['site_name'] = $operation['site_name'];
+                        }
+                        if(!empty($operation['store_code'])) {
+                            $serializedData['store_code'] = $operation['store_code'];
+                        }
+                        if(!empty($operation['store_name'])) {
+                            $serializedData['store_name'] = $operation['store_name'];
+                        }
+                        if(!empty($operation['store_view_code'])) {
+                            $serializedData['store_view_code'] = $operation['store_view_code'];
+                        }
+                        if(!empty($operation['store_view_name'])) {
+                            $serializedData['store_view_name'] = $operation['store_view_name'];
+                        }
+
+                    } else{
+                        $serializedData['override_settings'] = false;
+                    }
+        
+                }
                 $data = [
                     'data' => [
                         'bulk_uuid' => $bulkUuid,

@@ -1000,7 +1000,7 @@ class Stores
         if (!empty($settings['store_name'])) {
             $data['store_name'] = $settings['store_name'];
         }
-        if (!empty($settings['view_name'])) {
+        if (!empty($settings['store_view_name'])) {
             $data['view_name'] = $settings['store_view_name'];
         }
         return $data;

@@ -302,9 +302,9 @@ class DataPack implements DataPackInterface
     }
     /**
      * Set to delete source files after import
-     * 
-     * @param bool $deleteSourceFiles 
-     * @return void 
+     *
+     * @param bool $deleteSourceFiles
+     * @return void
      */
     public function setDeleteSourceFiles($deleteSourceFiles)
     {
@@ -313,10 +313,11 @@ class DataPack implements DataPackInterface
 
     /**
      * Delete source files after import
-     * 
-     * @return bool 
+     *
+     * @return bool
      */
-    public function deleteSourceFiles(){
+    public function deleteSourceFiles()
+    {
         return $this->deleteSourceFiles;
     }
 

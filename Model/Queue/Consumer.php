@@ -140,7 +140,7 @@ class Consumer
         $dataPack->setReload(1);
         $this->process->loadFiles($dataPack);
         //delete source files if it's an uploaded package
-        if($dataPack->deleteSourceFiles()){
+        if ($dataPack->deleteSourceFiles()) {
             if ($this->fileSystem->isExists($dataPack->getDataPackLocation())) {
                 $this->fileSystem->deleteDirectory($dataPack->getDataPackLocation());
                 //delete the archive that is from a mac compress process
@@ -172,28 +172,28 @@ class Consumer
         $dataPack->setIsDefaultWebsite($data['isDefaultWebsite']);
         $dataPack->setHost($data['host']);
         $dataPack->setJobId($data['jobid']);
-        if(!empty($data['override_settings'])) {
-            if($data['override_settings']){
+        if (!empty($data['override_settings'])) {
+            if ($data['override_settings']) {
                 $dataPack->setIsOverride(true);
-                if(!empty($data['site_code'])) {
+                if (!empty($data['site_code'])) {
                     $dataPack->setSiteCode($data['site_code']);
                 }
-                if(!empty($data['site_name'])) {
+                if (!empty($data['site_name'])) {
                     $dataPack->setSiteName($data['site_name']);
                 }
-                if(!empty($data['store_code'])) {
+                if (!empty($data['store_code'])) {
                     $dataPack->setStoreCode($data['store_code']);
                 }
-                if(!empty($data['store_name'])) {
+                if (!empty($data['store_name'])) {
                     $dataPack->setStoreName($data['store_name']);
                 }
-                if(!empty($data['store_view_code'])) {
+                if (!empty($data['store_view_code'])) {
                     $dataPack->setStoreViewCode($data['store_view_code']);
                 }
-                if(!empty($data['store_view_name'])) {
+                if (!empty($data['store_view_name'])) {
                     $dataPack->setStoreViewName($data['store_view_name']);
-                } 
-            } else{
+                }
+            } else {
                 $dataPack->setIsOverride(false);
             }
         }

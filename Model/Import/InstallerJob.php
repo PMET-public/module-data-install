@@ -124,24 +124,24 @@ class InstallerJob implements InstallerJobInterface
         $operation['reload'] = $dataPack->getReload();
         $operation['host'] = $dataPack->getHost();
         $operation['isDefaultWebsite'] = $dataPack->getIsDefaultWebsite();
-        if($dataPack->getIsOverride()){
+        if ($dataPack->getIsOverride()) {
             $operation['override_settings'] = true;
-            if($dataPack->getSiteCode()) {
+            if ($dataPack->getSiteCode()) {
                 $operation['site_code'] = $dataPack->getSiteCode();
             }
-            if($dataPack->getSiteName()) {
+            if ($dataPack->getSiteName()) {
                 $operation['site_name'] = $dataPack->getSiteName();
             }
-            if($dataPack->getStoreCode()) {
+            if ($dataPack->getStoreCode()) {
                 $operation['store_code'] = $dataPack->getStoreCode();
             }
-            if($dataPack->getStoreName()) {
+            if ($dataPack->getStoreName()) {
                 $operation['store_name'] = $dataPack->getStoreName();
             }
-            if($dataPack->getStoreViewCode()) {
+            if ($dataPack->getStoreViewCode()) {
                 $operation['store_view_code'] = $dataPack->getStoreViewCode();
             }
-            if($dataPack->getStoreViewName()) {
+            if ($dataPack->getStoreViewName()) {
                 $operation['store_view_name'] = $dataPack->getStoreViewName();
             }
         }

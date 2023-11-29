@@ -199,4 +199,19 @@ interface DataPackInterface extends ExtensibleDataInterface
      * @return void
      */
     public function setIsDefaultWebsite($makeDefault);
+
+    /**
+     * Return true if source files are to be deleted after import
+     * 
+     * @return boolean 
+     */
+    public function deleteSourceFiles();
+
+    /**
+     * Set true if source files are to be deleted after import
+     * 
+     * @param boolean $deleteSourceFiles 
+     * @return void 
+     */
+    public function setDeleteSourceFiles($deleteSourceFiles);
 }

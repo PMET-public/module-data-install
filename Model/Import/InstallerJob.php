@@ -124,6 +124,7 @@ class InstallerJob implements InstallerJobInterface
         $operation['reload'] = $dataPack->getReload();
         $operation['host'] = $dataPack->getHost();
         $operation['isDefaultWebsite'] = $dataPack->getIsDefaultWebsite();
+        $operation['deleteSourceFiles'] = $dataPack->deleteSourceFiles();
         $jobId = $this->scheduleBulk->execute([$operation]);
         return $jobId;
     }

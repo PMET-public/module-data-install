@@ -107,6 +107,7 @@ class ScheduleBulk
                     'reload' => $operation['reload'],
                     'isDefaultWebsite' => $operation['isDefaultWebsite'],
                     'host' => $operation['host'],
+                    'deleteSourceFiles' => $operation['deleteSourceFiles'],
                     //for future use
                     'website'=>'base',
                     'store'=>'store'

@@ -56,6 +56,9 @@ class DataPack implements DataPackInterface
     /** @var ScopeConfigInterface */
     protected $scopeConfig;
 
+    /** @var boolean */
+    protected $deleteSourceFiles;
+
     /** @var Curl */
     protected $curl;
     
@@ -82,6 +85,7 @@ class DataPack implements DataPackInterface
         $this->curl = $curl;
         $this->verticalDirectory = $filesystem->getDirectoryWrite(DirectoryList::TMP);
         $this->files = [];
+        $this->deleteSourceFiles = false;
     }
     
     /**
@@ -274,6 +278,25 @@ class DataPack implements DataPackInterface
     public function setJobId($jobId)
     {
         $this->jobId = $jobId;
+    }
+    /**
+     * Set to delete source files after import
+     * 
+     * @param bool $deleteSourceFiles 
+     * @return void 
+     */
+    public function setDeleteSourceFiles($deleteSourceFiles)
+    {
+        $this->deleteSourceFiles = $deleteSourceFiles;
+    }
+
+    /**
+     * Delete source files after import
+     * 
+     * @return bool 
+     */
+    public function deleteSourceFiles(){
+        return $this->deleteSourceFiles;
     }
 
      /**

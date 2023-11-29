@@ -140,12 +140,14 @@ class Consumer
         $dataPack->setReload(1);
         $this->process->loadFiles($dataPack);
         //delete source files if it's an uploaded package
-        if ($this->fileSystem->isExists($dataPack->getDataPackLocation())) {
-            $this->fileSystem->deleteDirectory($dataPack->getDataPackLocation());
-            //delete the archive that is from a mac compress process
-            $macFile = $this->fileSystem->getParentDirectory($dataPack->getDataPackLocation())."/__MACOSX";
-            if ($this->fileSystem->isExists($macFile)) {
-                $this->fileSystem->deleteDirectory($macFile);
+        if($dataPack->deleteSourceFiles()){
+            if ($this->fileSystem->isExists($dataPack->getDataPackLocation())) {
+                $this->fileSystem->deleteDirectory($dataPack->getDataPackLocation());
+                //delete the archive that is from a mac compress process
+                $macFile = $this->fileSystem->getParentDirectory($dataPack->getDataPackLocation())."/__MACOSX";
+                if ($this->fileSystem->isExists($macFile)) {
+                    $this->fileSystem->deleteDirectory($macFile);
+                }
             }
         }
     }
@@ -195,6 +197,7 @@ class Consumer
                 $dataPack->setIsOverride(false);
             }
         }
+        $dataPack->setDeleteSourceFiles($data['deleteSourceFiles']);
         return $dataPack;
     }
 }

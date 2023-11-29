@@ -303,5 +303,19 @@ interface DataPackInterface extends ExtensibleDataInterface
      *
      * @return string
      */
-    public function getStoreViewName();
+    
+     public function getStoreViewName();
+     /** Return true if source files are to be deleted after import
+     * 
+     * @return boolean 
+     */
+    public function deleteSourceFiles();
+
+    /**
+     * Set true if source files are to be deleted after import
+     * 
+     * @param boolean $deleteSourceFiles 
+     * @return void 
+     */
+    public function setDeleteSourceFiles($deleteSourceFiles);
 }

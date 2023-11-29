@@ -101,6 +101,8 @@ class Save extends \Magento\Backend\App\Action
     public function execute()
     {
         $dataPack = $this->dataPack->create();
+        //set to delete source files
+        $dataPack->setDeleteSourceFiles(true);
         try {
             if ($this->getRequest()->getMethod() !== 'POST' ||
             !$this->_formKeyValidator->validate($this->getRequest())) {

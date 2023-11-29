@@ -145,6 +145,7 @@ class InstallerJob implements InstallerJobInterface
                 $operation['store_view_name'] = $dataPack->getStoreViewName();
             }
         }
+        $operation['deleteSourceFiles'] = $dataPack->deleteSourceFiles();
         $jobId = $this->scheduleBulk->execute([$operation]);
         return $jobId;
     }

@@ -77,18 +77,24 @@ class Blocks
             $this->helper->logMessage("Block missing identifier or title, row skipped", "warning");
             return true;
         }
+
         //set status as active if not defined properly
         $row['is_active']??='Y';
         $row['is_active'] = 'Y' ? 1:0;
 
         $row['content'] = $this->converter->convertContent($row['content']??'');
 
-         //get view id from view code, use admin if not defined
+         //get view id from view code, use admin if not defined. Override if requested
         if (!empty($row['store_view_code'])) {
             $storeCodes = explode(",", $row['store_view_code']);
             $viewId = [];
             foreach ($storeCodes as $storeCode) {
                 $viewId[] = $this->stores->getViewId(trim($storeCode));
+            }
+            if (!empty($settings['is_override'])) {
+                if (!empty($settings['store_view_code'])) {
+                    $viewId = [$this->stores->getViewId(trim($settings['store_view_code']))];
+                }
             }
         } else {
             $viewId = [$this->stores->getViewId(trim($settings['store_view_code']))];
@@ -116,5 +122,35 @@ class Blocks
         $this->blockRepository->save($cmsBlock);
         unset($cmsBlock);
         return true;
+    }
+
+     /**
+      * Override settings
+      *
+      * @param array $row
+      * @param array $settings
+      * @return array
+      */
+    private function overrideSettings(array $row, array $settings) : array
+    {
+        if (!empty($settings['site_code'])) {
+            $row['site_code'] = $settings['site_code'];
+        }
+        if (!empty($settings['store_code'])) {
+            $row['store_code'] = $settings['store_code'];
+        }
+        if (!empty($settings['store_view_code'])) {
+            $row['store_view_code'] = $settings['store_view_code'];
+        }
+        if (!empty($settings['site_name'])) {
+            $row['site_name'] = $settings['site_name'];
+        }
+        if (!empty($settings['store_name'])) {
+            $row['store_name'] = $settings['store_name'];
+        }
+        if (!empty($settings['store_view_name'])) {
+            $row['view_name'] = $settings['store_view_name'];
+        }
+        return $data;
     }
 }

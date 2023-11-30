@@ -118,6 +118,12 @@ class DynamicBlocks
             $row['store_view_code']='admin';
         }
 
+        if (!empty($settings['is_override'])) {
+            if (!empty($settings['store_view_code'])) {
+                $row['store_view_code'] = $settings['store_view_code'];
+            }
+        }
+
         //get existing banner to see if we need to create or update content for different store view
         $bannerCollection = $this->bannerCollection->create();
         $banners = $bannerCollection->addFilter('name', $row['name'], 'eq')->setPageSize(1)->setCurPage(1);

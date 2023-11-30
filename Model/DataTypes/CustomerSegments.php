@@ -105,6 +105,14 @@ class CustomerSegments
         if (empty($row['site_code'])) {
             $row['site_code'] = $settings['site_code'];
         }
+
+        //add override option
+        if (!empty($settings['is_override'])) {
+            if (!empty($settings['site_code'])) {
+                $row['site_code'] = $settings['site_code'];
+            }
+        }
+
         //convert site codes to ids, put in array
         if ($row['site_code']=='all') {
             $siteCodes = $this->stores->getAllWebsiteCodes();

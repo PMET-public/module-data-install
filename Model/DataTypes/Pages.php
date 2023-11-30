@@ -122,8 +122,14 @@ class Pages
             addFilter(PageInterface::IDENTIFIER, $row['identifier'], 'eq')->create();
 
             $pages = $this->pageRepository->getList($search)->getItems();
-            /** @var \Magento\Cms\Model\Page $page */
 
+            if (!empty($settings['is_override'])) {
+                if (!empty($settings['store_view_code'])) {
+                    $row['store_view_code'] = ($settings['store_view_code']);
+                }
+            }
+
+            /** @var \Magento\Cms\Model\Page $page */
             if (count($pages) == 0) {
                 $page = $this->pageInterfaceFactory->create();
                 $page->addData($row)

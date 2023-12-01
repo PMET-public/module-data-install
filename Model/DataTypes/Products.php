@@ -25,7 +25,7 @@ use Magento\SharedCatalog\Api\SharedCatalogRepositoryInterface;
 use Magento\SharedCatalog\Api\ProductManagementInterface;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollection;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
-
+use Magento\Framework\Exception\NoSuchEntityException;
 class Products
 {
     //protected const IMPORT_ARRAY_SIZE = 2500;
@@ -185,7 +185,7 @@ class Products
             );
         }
         $productsArray = $this->replaceBaseWebsiteCodes($productsArray, $settings);
-        $this->helper->logMessage("Importing products", "info");
+        $this->helper->logMessage("Importing Products", "info");
         
         $this->import($productsArray, $imgDir, $productValidationStrategy, $behavior);
         
@@ -218,6 +218,7 @@ class Products
 
     private function assignToDefaultSharedCatalog($productsArray, $settings)
     {
+        $this->helper->logMessage("Assigning products to default shared catalog", "info");
         //get default shared catalog
         $catalogSearch = $this->searchCriteriaBuilder->addFilter(SharedCatalogInterface::TYPE, 1, 'eq')->create();
         $sharedCatalogs = $this->sharedCatalogRepository->getList($catalogSearch)->getItems();
@@ -241,15 +242,27 @@ class Products
         $allProductIds = array_unique(array_merge($defaultSharedCatalogProducts, $incomingProducts), SORT_REGULAR);
         $allCategoryIds = array_unique(array_merge($defaultSharedCatalogCategories, $newCategories), SORT_REGULAR);
         //assign categories to default shared catalog
-        foreach ($allCategoryIds as $categoryId) {
-            $allCategories[] = $this->categoryRepository->get($categoryId);
+        try{
+            foreach ($allCategoryIds as $categoryId) {
+                $allCategories[] = $this->categoryRepository->get($categoryId);
+            }
+             $this->categoryManagement->assignCategories($defaultSharedCatalogId, $allCategories);
+        } catch (NoSuchEntityException $e) {
+            $this->helper->logMessage("Categories may need to be manually assigned to default shared catalog if you are using it", "warning");
         }
-        $this->categoryManagement->assignCategories($defaultSharedCatalogId, $allCategories);
+       
         //assign products to default shared catalog
+        try{
         foreach ($allProductIds as $productId) {
             $allProducts[] = $this->productRepository->get($productId);
         }
-        $this->productManagement->assignProducts($defaultSharedCatalogId, $allProducts);
+        
+            $this->productManagement->assignProducts($defaultSharedCatalogId, $allProducts);
+        } catch (NoSuchEntityException $e) {
+            $this->helper->logMessage("Products may need to be manually assigned to default shared catalog if you are using it", "warning");
+        }
+
+        
     }
 
      /**

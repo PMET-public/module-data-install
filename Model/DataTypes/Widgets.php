@@ -114,6 +114,13 @@ class Widgets
             $row['store_view_code'] = $row['store_view_codes'];
         }
 
+        //store view code override
+        if (!empty($settings['is_override'])) {
+            if (!empty($settings['store_view_code'])) {
+                $row['store_view_code'] = $settings['store_view_code'];
+            }
+        }
+
         //reject if  theme if theme not given
         if (empty($row['theme'])) {
             $this->helper->logMessage(

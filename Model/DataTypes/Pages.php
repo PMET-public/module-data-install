@@ -123,6 +123,7 @@ class Pages
 
             $pages = $this->pageRepository->getList($search)->getItems();
 
+            //store view code override
             if (!empty($settings['is_override'])) {
                 if (!empty($settings['store_view_code'])) {
                     $row['store_view_code'] = $settings['store_view_code'];

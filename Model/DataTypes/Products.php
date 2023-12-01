@@ -26,6 +26,7 @@ use Magento\SharedCatalog\Api\ProductManagementInterface;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollection;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
+
 class Products
 {
     //protected const IMPORT_ARRAY_SIZE = 2500;
@@ -243,27 +244,27 @@ class Products
         $allProductIds = array_unique(array_merge($defaultSharedCatalogProducts, $incomingProducts), SORT_REGULAR);
         $allCategoryIds = array_unique(array_merge($defaultSharedCatalogCategories, $newCategories), SORT_REGULAR);
         //assign categories to default shared catalog
-        try{
+        try {
             foreach ($allCategoryIds as $categoryId) {
                 $allCategories[] = $this->categoryRepository->get($categoryId);
             }
              $this->categoryManagement->assignCategories($defaultSharedCatalogId, $allCategories);
         } catch (NoSuchEntityException $e) {
-            $this->helper->logMessage("Categories may need to be manually assigned to default shared catalog if you are using it", "warning");
+            $this->helper->logMessage("Categories may need to be manually assigned 
+            to default shared catalog if you are using it", "warning");
         }
        
         //assign products to default shared catalog
-        try{
-        foreach ($allProductIds as $productId) {
-            $allProducts[] = $this->productRepository->get($productId);
-        }
+        try {
+            foreach ($allProductIds as $productId) {
+                $allProducts[] = $this->productRepository->get($productId);
+            }
         
             $this->productManagement->assignProducts($defaultSharedCatalogId, $allProducts);
         } catch (NoSuchEntityException $e) {
-            $this->helper->logMessage("Products may need to be manually assigned to default shared catalog if you are using it", "warning");
+            $this->helper->logMessage("Products may need to be manually assigned 
+            to default shared catalog if you are using it", "warning");
         }
-
-        
     }
 
      /**

@@ -400,8 +400,7 @@ class DataPack implements DataPackInterface
             //directory is created if it doesnt exist
             $zip->extractTo($this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR));
             //get name of directory in the zip file and determina absolute path
-            $this->setImagePackLocation($this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR).'/'.
-            str_replace("/", "", $zip->statIndex(0)['name']));
+            $this->setImagePackLocation($this->verticalDirectory->getAbsolutePath(self::UNZIPPED_DIR).'/media');
             $zip->close();
             $this->file->deleteFile($fileInfo["path"]."/".$fileInfo["file"]);
         } else {

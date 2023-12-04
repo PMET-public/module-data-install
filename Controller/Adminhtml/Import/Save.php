@@ -171,7 +171,7 @@ class Save extends \Magento\Backend\App\Action
             $dataPack->unZipDataPack();
             if ($dataPack->getImagePackLocation()) {
                 $dataPack->unZipImagePack();
-                $dataPack->mergeDataPacks($dataPack->getImagePackLocation(), $dataPack->getDataPackLocation());
+                $dataPack->mergeDataPacks($dataPack->getImagePackLocation(), $dataPack->getDataPackLocation().'/media');
                 //delete image pack directory
                 if ($this->file->isExists($dataPack->getImagePackLocation())) {
                     $this->file->deleteDirectory($dataPack->getImagePackLocation());

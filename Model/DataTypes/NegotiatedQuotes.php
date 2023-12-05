@@ -296,8 +296,22 @@ class NegotiatedQuotes
             $row['site_code'] = $settings['site_code'];
         }
 
+         //add site code override
+         if (!empty($settings['is_override'])) {
+            if (!empty($settings['site_code'])) {
+                $row['site_code'] = $settings['site_code'];
+            }
+        }
+
         if (empty($row['store'])) {
             $row['store'] = $settings['store_view_code'];
+        }
+
+        //store view code override
+        if (!empty($settings['is_override'])) {
+            if (!empty($settings['store_view_code'])) {
+                $row['store_view_code'] = $settings['store_view_code'];
+            }
         }
 
         if (!$this->validateData($row)) {

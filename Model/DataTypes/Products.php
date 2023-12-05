@@ -173,6 +173,11 @@ class Products
             $productsArray[] = array_combine($header, $row);
         }
 
+        //override store_view_code and product_websites
+        if (!empty($settings['is_override'])) {
+            $productsArray = $this->siteStoreOverride($productsArray, $settings);
+        }
+
         /// create array to restrict existing products from other store views
         if ($restrictProductsFromViews=='Y') {
             ///get all products that are not in my view not in my data file
@@ -511,21 +516,23 @@ class Products
     }
 
     /**
-     * Add codes to import file
+     * Override store view and site code
      *
      * @param array $products
      * @param array $settings
      * @return array
      */
-    private function addSettingsToImportFile($products, $settings)
+    private function siteStoreOverride($products, $settings)
     {
         $i=0;
         foreach ($products as $product) {
-            //store_view_code, product_websites
-            if (empty($product['store_view_code']) || $product['store_view_code']=='') {
-                $product['store_view_code'] = $settings['store_view_code'];
+            //only override store_view_code if not set in file
+            if (!empty($product['store_view_code'])) {
+                if (!empty($settings['store_view_code'])) {
+                    $product['store_view_code'] = $settings['store_view_code'];
+                }
             }
-            if (empty($product['product_websites']) || $product['product_websites']=='') {
+            if (!empty($settings['site_code'])) {
                 $product['product_websites'] = $settings['site_code'];
             }
             $products[$i] = $product;

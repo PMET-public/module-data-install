@@ -97,7 +97,7 @@ class ProductAttributes
      * @return bool
      * @throws LocalizedException
      */
-    public function install(array $row,array $settings)
+    public function install(array $row, array $settings)
     {
         //Required:attribute_code
         if (empty($row['attribute_code'])) {

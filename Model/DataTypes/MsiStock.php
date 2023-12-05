@@ -125,6 +125,18 @@ class MsiStock
             );
             return true;
         }
+         //if websites not defined, use default
+        if (empty($row['site_code'])) {
+            $row['site_code'] = $settings['site_code'];
+        }
+
+        //add site code override
+        if (!empty($settings['is_override'])) {
+            if (!empty($settings['site_code'])) {
+                $row['site_code'] = $settings['site_code'];
+            }
+        }
+
         //validate that site_code exists
         $siteCodes = explode(",", preg_replace('/\s+/', '', $row['site_code']));
         $websiteCodes = [];

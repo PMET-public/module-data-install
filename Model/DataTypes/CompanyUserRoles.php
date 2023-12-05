@@ -97,6 +97,14 @@ class CompanyUserRoles
         if (empty($row['site_code'])) {
             $row['site_code'] = $settings['site_code'];
         }
+
+        //add site code override
+        if (!empty($settings['is_override'])) {
+            if (!empty($settings['site_code'])) {
+                $row['site_code'] = $settings['site_code'];
+            }
+        }
+
         $websiteId = $this->stores->getWebsiteId($row['site_code']);
         //skip company admin roles
         if (!empty($row['role']) && $row['company_admin']!='Y') {

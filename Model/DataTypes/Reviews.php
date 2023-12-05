@@ -152,9 +152,17 @@ class Reviews
     {
         if (!empty($row['items'])) {
             foreach ($row['items'] as $review) {
-                //get the default configuration
-                //$newRow = $this->getDefaultReview();
                 $newRow['sku'] = $row['sku'];
+                if (empty($row['store_view_code'])) {
+                    $row['store_view_code'] = $settings['store_view_code'];
+                }
+        
+                //store view code override
+                if (!empty($settings['is_override'])) {
+                    if (!empty($settings['store_view_code'])) {
+                        $row['store_view_code'] = $settings['store_view_code'];
+                    }
+                }
                 $newRow['store_view_code'] = $row['store_view_code'];
                 $newRow['rating_code'] = $review->ratings_breakdown[0]->name;
                 $newRow['rating_value'] = $review->ratings_breakdown[0]->value;

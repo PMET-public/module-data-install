@@ -98,6 +98,13 @@ class SharedCatalogs
         if (empty($row['store_code'])) {
             $row['store_code'] = $settings['store_code'];
         }
+
+        //store code override
+        if (!empty($settings['is_override'])) {
+            if (!empty($settings['store_code'])) {
+                $row['store_code'] = $settings['store_code'];
+            }
+        }
         //check for existing shared catalog to update
         $sharedCatalog = $this->getSharedCatalogByName($row['name']);
 

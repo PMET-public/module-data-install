@@ -93,10 +93,11 @@ class ProductAttributes
      * Install
      *
      * @param array $row
+     * @param array $settings
      * @return bool
      * @throws LocalizedException
      */
-    public function install(array $row)
+    public function install(array $row,array $settings)
     {
         //Required:attribute_code
         if (empty($row['attribute_code'])) {
@@ -108,6 +109,12 @@ class ProductAttributes
         }
 
         if (!empty($row['store_view_code'])) {
+            //store view code override
+            if (!empty($settings['is_override'])) {
+                if (!empty($settings['store_view_code'])) {
+                    $row['store_view_code'] = $settings['store_view_code'];
+                }
+            }
             $storeViewId = $this->stores->getViewId($row['store_view_code']);
         } else {
             $storeViewId = 0;

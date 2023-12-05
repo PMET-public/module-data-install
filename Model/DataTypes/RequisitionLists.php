@@ -88,6 +88,13 @@ class RequisitionLists
             $row['site_code']=$settings['site_code'];
         }
 
+         //add site code override
+        if (!empty($settings['is_override'])) {
+            if (!empty($settings['site_code'])) {
+                $row['site_code'] = $settings['site_code'];
+            }
+        }
+
         //get website id and validate
         $websiteId = $this->stores->getWebsiteId($row['site_code']);
 

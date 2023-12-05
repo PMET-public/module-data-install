@@ -71,6 +71,13 @@ class AdvancedPricing
                 $productRow['tier_price_website'] = self::DEFAULT_WEBSITE;
             }
 
+            //site code override
+            if (!empty($settings['is_override'])) {
+                if ($productRow['tier_price_website'] != self::DEFAULT_WEBSITE) {
+                    $productRow['tier_price_website'] = $settings['site_code'];
+                }
+            }
+
             if (empty($productRow['tier_price_customer_group'])) {
                 $productRow['tier_price_customer_group'] = self::DEFAULT_CUSTOMER_GROUP;
             }

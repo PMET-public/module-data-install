@@ -123,6 +123,14 @@ class Teams
         if (empty($row['site_code'])) {
             $row['site_code'] = $settings['site_code'];
         }
+
+         //add site code override
+        if (!empty($settings['is_override'])) {
+            if (!empty($settings['site_code'])) {
+                $row['site_code'] = $settings['site_code'];
+            }
+        }
+
         //get admin user id - will also validate that company exists
         $adminUserId = $this->getCompanyAdminIdByName($row['company_name']);
         if (!$adminUserId) {

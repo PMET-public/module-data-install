@@ -54,6 +54,9 @@ class Configuration
     /** @var ReadInterface  */
     protected $directoryRead;
 
+    /** @var array */
+    protected $settings;
+
     /**
      * Configuration constructor
      *
@@ -102,6 +105,8 @@ class Configuration
      */
     public function install(array $row, array $settings)
     {
+        $this->settings = $settings;
+
         if (!empty($row['path'])) {
             $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
             $scopeId = "0";
@@ -113,9 +118,21 @@ class Configuration
                 if ($scope=='website' || $scope=='websites') {
                     $scope = 'websites';
                     $row['scope_code'] = $this->stores->replaceBaseWebsiteCode($row['scope_code']);
+                    //override site setting
+                    if (!empty($this->settings['is_override'])) {
+                        if (!empty($this->settings['site_code'])) {
+                            $row['scope_code'] = $this->settings['site_code'];
+                        }
+                    }
                     $scopeId = $this->stores->getWebsiteId($row['scope_code']);
                 } elseif ($scope=='store' || $scope=='stores') {
                     $scope = 'stores';
+                    //override store setting
+                    if (!empty($this->settings['is_override'])) {
+                        if (!empty($this->settings['store_view_code'])) {
+                            $row['scope_code'] = $this->settings['store_view_code'];
+                        }
+                    }
                     $scopeId = $this->stores->getViewId($row['scope_code']);
                 }
             }
@@ -135,6 +152,8 @@ class Configuration
      */
     public function installJson(string $json, array $settings)
     {
+        $this->settings = $settings;
+
         //TODO: Validate json
         try {
             $config = json_decode($json)->configuration;
@@ -147,35 +166,46 @@ class Configuration
             array_walk_recursive($item, [$this,'getValuePath'], $key);
         }
 
-        //TODO:set theme - this will be incorporated into the config structure
-        //$this->setTheme('MagentoEse/venia',$this->stores->getStoreId($this->stores->getDefaultStoreCode()));
         return true;
     }
 
     /**
-     * Get confibg by value and path
+     * Get config by value and path
      *
      * @param object $item
      * @param string $key
      * @param string $path
      */
+    //phpcs:ignore Generic.Metrics.NestingLevel.TooHigh,Magento2.Annotation.MethodArguments.NoCommentBlock
     public function getValuePath($item, string $key, string $path)
     {
         $scopeCode = ScopeConfigInterface::SCOPE_TYPE_DEFAULT;
         $scopeId = 0;
-
+        //TODO:settings override
         if ($key != 'store_view' && $key != 'website') {
             $path = $path . "/" . $key;
             if (is_object($item)) {
                 if (!empty($item->website)) {
                     //TODO: handle encrypt flag
                     foreach ($item->website as $scopeCode => $value) {
+                        //override site setting
+                        if (!empty($this->settings['is_override'])) {
+                            if (!empty($this->settings['site_code'])) {
+                                $scopeCode = $this->settings['site_code'];
+                            }
+                        }
                         $scopeId = $this->stores->getWebsiteId($scopeCode);
                         $this->saveConfig($path, $value, 'websites', $scopeId);
                     }
                 } elseif (!empty($item->store_view)) {
                     //TODO: handle encrypt flag
                     foreach ($item->store_view as $scopeCode => $value) {
+                        //override store setting
+                        if (!empty($this->settings['is_override'])) {
+                            if (!empty($this->settings['store_view_code'])) {
+                                $scopeCode = $this->settings['store_view_code'];
+                            }
+                        }
                         $scopeId = $this->stores->getViewId($scopeCode);
                         $this->saveConfig($path, $value, 'stores', $scopeId);
                     }

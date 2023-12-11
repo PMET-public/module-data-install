@@ -288,6 +288,16 @@ class Customers
                 $customer['_store']=$this->settings['store_view_code'];
             }
 
+            //override site and store
+            if (!empty($this->settings['is_override'])) {
+                if (!empty($this->settings['store_view_code'])) {
+                    $customer['_store'] = $this->settings['store_view_code'];
+                }
+                if (!empty($this->settings['site_code'])) {
+                    $customer['_website'] = $this->settings['site_code'];
+                }
+            }
+
             //add group_id column if it doesnt exist
             if (empty($customer['group_id'])) {
                 $customer['group_id']=1;

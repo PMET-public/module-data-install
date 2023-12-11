@@ -62,7 +62,7 @@ class CustomerAddresses
         foreach ($rows as $row) {
             $customerArray[] = array_combine($header, $row);
         }
-        $cleanCustomerArray = $this->cleanDataForImport($customerArray);
+        $cleanCustomerArray = $this->cleanDataForImport($customerArray, $settings);
         $this->import($cleanCustomerArray, $productValidationStrategy, 'customer_address');
 
         return true;
@@ -72,9 +72,10 @@ class CustomerAddresses
      * Clean up data to make safe for import
      *
      * @param array $customerArray
+     * @param array $settings
      * @return array
      */
-    private function cleanDataForImport($customerArray)
+    private function cleanDataForImport($customerArray, $settings)
     {
 
         $newCustomerArray=[];
@@ -90,7 +91,14 @@ class CustomerAddresses
             }
 
             if (empty($customer['_website'])) {
-                $customer['_website']=$this->settings['site_code'];
+                $customer['_website']=$settings['site_code'];
+            }
+
+            //override site and store
+            if (!empty($settings['is_override'])) {
+                if (!empty($settings['site_code'])) {
+                    $customer['_website'] = $settings['site_code'];
+                }
             }
             //_entity_id is a required column, but if its populated it may cause unexpected errors.
             $customer['_entity_id'] = '';

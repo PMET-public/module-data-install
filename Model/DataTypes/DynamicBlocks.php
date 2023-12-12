@@ -82,11 +82,12 @@ class DynamicBlocks
      * Install
      *
      * @param array $row
+     * @param array $settings
      * @return bool
      * @throws AlreadyExistsException
      * @throws NoSuchEntityException
      */
-    public function install(array $row)
+    public function install(array $row, array $settings)
     {
         //skip if no name
         if (empty($row['name']) || $row['name'] == '') {

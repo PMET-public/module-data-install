@@ -251,27 +251,24 @@ class Save extends \Magento\Backend\App\Action
                     break;
                 case "site_code":
                     $dataPack->setSiteCode($value);
-                    $dataPack->setIsOverride(true);
                     break;
                 case "site_name":
                     $dataPack->setSiteName($value);
-                    $dataPack->setIsOverride(true);
                     break;
                 case "store_code":
                     $dataPack->setStoreCode($value);
-                    $dataPack->setIsOverride(true);
                     break;
                 case "store_name":
                     $dataPack->setStoreName($value);
-                    $dataPack->setIsOverride(true);
                     break;
                 case "store_view_code":
                     $dataPack->setStoreViewCode($value);
-                    $dataPack->setIsOverride(true);
                     break;
                 case "store_view_name":
                     $dataPack->setStoreViewName($value);
-                    $dataPack->setIsOverride(true);
+                    break;
+                case "is_override":
+                    $dataPack->setIsOverride($value);
                     break;
             }
         }

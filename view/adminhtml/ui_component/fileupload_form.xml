@@ -217,6 +217,27 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
             <collapsible>true</collapsible>
             <label translate="true">Data Pack Overrides</label>
         </settings>
+        <field name="is_override" formElement="checkbox" sortOrder="2">
+            <settings>
+                <label translate="true">Override</label>
+                <tooltip>
+                    <description translate="true">
+                        Override the Data Pack's site and store values
+                    </description>
+                </tooltip>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <prefer>toggle</prefer>
+                        <valueMap>
+                            <map name="false" xsi:type="boolean">0</map>
+                            <map name="true" xsi:type="boolean">1</map>
+                        </valueMap>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
         <field name="site_code" sortOrder="10">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">

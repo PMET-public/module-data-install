@@ -100,7 +100,13 @@ class Install extends Command
                 InputArgument::REQUIRED,
                 'Module name, absolute path to datapack or remote url'
             ),
-            new InputOption(self::LOAD, null, InputOption::VALUE_OPTIONAL, 'Data directory to load', ''),
+            new InputOption(
+                self::LOAD,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Data directory to load',
+                ''
+            ),
             new InputOption(
                 self::FILES,
                 null,
@@ -119,8 +125,20 @@ class Install extends Command
                 InputOption::VALUE_OPTIONAL,
                 'Auth token if needed for remote retrieval'
             ),
-            new InputOption(self::RELOAD_FLAG, '-r', InputOption::VALUE_OPTIONAL, 'Force Reload', 0),
-            new InputOption(self::OVERRIDE_FLAG, '-o', InputOption::VALUE_OPTIONAL, 'Override site/store settings', 0),
+            new InputOption(
+                self::RELOAD_FLAG,
+                '-r',
+                InputOption::VALUE_OPTIONAL,
+                'Force Reload',
+                0
+            ),
+            new InputOption(
+                self::OVERRIDE_FLAG,
+                '-o',
+                InputOption::VALUE_OPTIONAL,
+                'Override site/store settings',
+                0
+            ),
             new InputOption(
                 self::MAKE_DEFAULT_SITE,
                 '-make-default-website',
@@ -128,11 +146,41 @@ class Install extends Command
                 'Set this site as default regardless of data pack settings',
                 0
             ),
-            new InputOption(self::IS_REMOTE, '-remote', InputOption::VALUE_OPTIONAL, 'Is data pack remote', false),
-            new InputOption(self::SITE_CODE, '-site-code', InputOption::VALUE_OPTIONAL, 'Site Code that overrides Data Pack data', ''),
-            new InputOption(self::SITE_NAME, '-site-name', InputOption::VALUE_OPTIONAL, 'Site Name that overrides Data Pack data', ''),
-            new InputOption(self::STORE_CODE, '-store-code', InputOption::VALUE_OPTIONAL, 'Store Code that overrides Data Pack data', ''),
-            new InputOption(self::STORE_NAME, '-store-name', InputOption::VALUE_OPTIONAL, 'Store Name that overrides Data Pack data', ''),
+            new InputOption(
+                self::IS_REMOTE,
+                '-remote',
+                InputOption::VALUE_OPTIONAL,
+                'Is data pack remote',
+                false
+            ),
+            new InputOption(
+                self::SITE_CODE,
+                '-site-code',
+                InputOption::VALUE_OPTIONAL,
+                'Site Code that overrides Data Pack data',
+                ''
+            ),
+            new InputOption(
+                self::SITE_NAME,
+                '-site-name',
+                InputOption::VALUE_OPTIONAL,
+                'Site Name that overrides Data Pack data',
+                ''
+            ),
+            new InputOption(
+                self::STORE_CODE,
+                '-store-code',
+                InputOption::VALUE_OPTIONAL,
+                'Store Code that overrides Data Pack data',
+                ''
+            ),
+            new InputOption(
+                self::STORE_NAME,
+                '-store-name',
+                InputOption::VALUE_OPTIONAL,
+                'Store Name that overrides Data Pack data',
+                ''
+            ),
             new InputOption(
                 self::STORE_VIEW_CODE,
                 '-store-view-code',

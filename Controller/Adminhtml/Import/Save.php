@@ -272,7 +272,7 @@ class Save extends \Magento\Backend\App\Action
                     break;
                 case "restrict_products_from_views":
                     $dataPack->setRestrictProductsFromViews($value);
-                    break;    
+                    break;
             }
         }
         return $dataPack;

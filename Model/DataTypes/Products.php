@@ -196,7 +196,7 @@ class Products
         $this->import($productsArray, $imgDir, $productValidationStrategy, $behavior);
         
         /// Restrict products from other stores
-        if ($restrictProductsFromViews=='Y' || $restrictProductsFromViews==1 ) {
+        if ($restrictProductsFromViews=='Y' || $restrictProductsFromViews==1) {
             $this->helper->logMessage("Restricting products from other store views", "info");
 
             if (count($restrictExistingProducts) > 0) {

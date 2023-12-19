@@ -56,6 +56,7 @@ class Install extends Command
     public const STORE_NAME = 'store-name';
     public const STORE_VIEW_CODE = 'store-view-code';
     public const STORE_VIEW_NAME = 'store-view-name';
+    public const RESTRICT_PRODUCTS_FROM_VIEWS = 'restrict-products-from-views';
 
     /** @var ObjectManagerInterface  */
     protected $objectManagerInterface;
@@ -128,23 +129,30 @@ class Install extends Command
                 0
             ),
             new InputOption(self::IS_REMOTE, '-remote', InputOption::VALUE_OPTIONAL, 'Is data pack remote', false),
-            new InputOption(self::SITE_CODE, '-site-code', InputOption::VALUE_OPTIONAL, 'Site Code', ''),
-            new InputOption(self::SITE_NAME, '-site-name', InputOption::VALUE_OPTIONAL, 'Site Name', ''),
-            new InputOption(self::STORE_CODE, '-store-code', InputOption::VALUE_OPTIONAL, 'Store Code', ''),
-            new InputOption(self::STORE_NAME, '-store-name', InputOption::VALUE_OPTIONAL, 'Store Name', ''),
+            new InputOption(self::SITE_CODE, '-site-code', InputOption::VALUE_OPTIONAL, 'Site Code that overrides Data Pack data', ''),
+            new InputOption(self::SITE_NAME, '-site-name', InputOption::VALUE_OPTIONAL, 'Site Name that overrides Data Pack data', ''),
+            new InputOption(self::STORE_CODE, '-store-code', InputOption::VALUE_OPTIONAL, 'Store Code that overrides Data Pack data', ''),
+            new InputOption(self::STORE_NAME, '-store-name', InputOption::VALUE_OPTIONAL, 'Store Name that overrides Data Pack data', ''),
             new InputOption(
                 self::STORE_VIEW_CODE,
                 '-store-view-code',
                 InputOption::VALUE_OPTIONAL,
-                'Store View Code',
+                'Store View Code that overrides Data Pack data',
                 ''
             ),
             new InputOption(
                 self::STORE_VIEW_NAME,
                 '-store-view-name',
                 InputOption::VALUE_OPTIONAL,
-                'Store View Name',
+                'Store View Name that overrides Data Pack data',
                 ''
+            ),
+            new InputOption(
+                self::RESTRICT_PRODUCTS_FROM_VIEWS,
+                '-restrict-products-from-views',
+                InputOption::VALUE_OPTIONAL,
+                'Restrict incoming products from other store views',
+                false
             )
         ];
 
@@ -170,6 +178,7 @@ class Install extends Command
         $load = $input->getOption(self::LOAD);
         $reload = $input->getOption(self::RELOAD_FLAG);
         $override = $input->getOption(self::OVERRIDE_FLAG);
+        $restrictProducts = $input->getOption(self::RESTRICT_PRODUCTS_FROM_VIEWS);
         $files = $input->getOption(self::FILES);
         $host = $input->getOption(self::HOST);
         $isRemote = $input->getOption(self::IS_REMOTE);
@@ -186,6 +195,10 @@ class Install extends Command
 
         if ($override === null) {
             $override = 1;
+        }
+
+        if ($restrictProducts === null) {
+            $restrictProducts = 1;
         }
 
         if ($makeDefaultSite === null) {
@@ -211,6 +224,7 @@ class Install extends Command
         $dataPack->setStoreName($input->getOption(self::STORE_NAME));
         $dataPack->setStoreViewCode($input->getOption(self::STORE_VIEW_CODE));
         $dataPack->setStoreViewName($input->getOption(self::STORE_VIEW_NAME));
+        $dataPack->setRestrictProductsFromViews($restrictProducts);
 
         //if data pack is rempote, retrieve it
         if ($dataPack->getIsRemote()) {

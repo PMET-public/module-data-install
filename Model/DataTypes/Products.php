@@ -179,7 +179,7 @@ class Products
         }
 
         /// create array to restrict existing products from other store views
-        if ($restrictProductsFromViews=='Y') {
+        if ($restrictProductsFromViews=='Y' || $restrictProductsFromViews==1) {
             ///get all products that are not in my view not in my data file
             //restricts from incoming store
             $restrictExistingProducts = $this->restrictExistingProducts($productsArray, $settings['store_view_code']);
@@ -196,7 +196,7 @@ class Products
         $this->import($productsArray, $imgDir, $productValidationStrategy, $behavior);
         
         /// Restrict products from other stores
-        if ($restrictProductsFromViews=='Y') {
+        if ($restrictProductsFromViews=='Y' || $restrictProductsFromViews==1 ) {
             $this->helper->logMessage("Restricting products from other store views", "info");
 
             if (count($restrictExistingProducts) > 0) {

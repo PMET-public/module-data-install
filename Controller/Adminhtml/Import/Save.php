@@ -270,6 +270,9 @@ class Save extends \Magento\Backend\App\Action
                 case "is_override":
                     $dataPack->setIsOverride($value);
                     break;
+                case "restrict_products_from_views":
+                    $dataPack->setRestrictProductsFromViews($value);
+                    break;    
             }
         }
         return $dataPack;

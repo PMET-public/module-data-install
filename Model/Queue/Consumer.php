@@ -172,6 +172,7 @@ class Consumer
         $dataPack->setIsDefaultWebsite($data['isDefaultWebsite']);
         $dataPack->setHost($data['host']);
         $dataPack->setJobId($data['jobid']);
+        $dataPack->setRestrictProductsFromViews($data['restrictProductsFromViews']);
         if (!empty($data['override_settings'])) {
             if ($data['override_settings']) {
                 $dataPack->setIsOverride(true);

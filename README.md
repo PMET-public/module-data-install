@@ -1,6 +1,6 @@
 # Magento 2 Data Install Module
 
-The Data Install module facilitates the loading of sample data by a series of generic .csv files, or the .json results from GraphQL queries (see the [Data Installer GraphQL ](https://github.com/PMET-public/module-data-install-graphql)module ). This allows for the easy creation/editing of data sets for particular scenerios. It also helps facilitate packaging of demos or verticals so they can be added to an existing site with demo data, or an empty site.
+The Data Install module facilitates the loading of sample data by a series of generic .csv files, or the .json results from GraphQL queries (see the [Data Installer GraphQL ](https://github.com/PMET-public/module-data-install-graphql)module ). This allows for the easy creation/editing of data sets for particular scenarios. It also helps facilitate packaging of demos or verticals so they can be added to an existing site with demo data, or an empty site.
 
 **As the Data Install supports B2B, at this time the B2B modules are required in Magento even if B2B features will not be used.**
 
@@ -26,6 +26,14 @@ Optional arguments:
  `--authtoken [=AUTHTOKEN] GitHub Personal Access Token`
  `--host [=HOST] Override of host values in stores.csv file`
  `--make-default-website The datapack's new website will be set as the default site`
+ 
+ Overrides
+ `--site-code=Site code to override Data Pack Data`
+ `--store-code=Store Code to override Data Pack Data`
+ `--store-view-code=Store View Code to override Data Pack Data`
+`--site-name=Site Name to override Data Pack Data`
+`--store-name=Store Name to override Data Pack Data`
+`--store-view-name=Store View Name to override Data Pack Data`
 
 ###### Usage Examples
 
@@ -48,13 +56,13 @@ Mostly used for testing.  You can pass a comma delimited list specific files you
 
 ### Upload Via UI
 
-A .zip file can be created with assetts that follow the Data Pack format. It is then uploaded via the Commerce UI at *System->Data Transfer->Import Data Pack*
+A .zip file can be created with assets that follow the Data Pack format. It is then uploaded via the Commerce UI at *System->Data Transfer->Import Data Pack*
 
-If you have extracted data and images via the GraphQL queries, those assets can be merged into one Data Pack. Or the resulting .zip file from the `imagesExtract` can be loaded separatly. 
+If you have extracted data and images via the GraphQL queries, those assets can be merged into one Data Pack. Or the resulting .zip file from the `imagesExtract` can be loaded separately. 
 
 Advanced Conditions the same as used by the CLI can be added as needed. When uploaded a job is created to import the data pack. The `magentoese_datainstall.import` consumer will install the Data Pack in the background.
 
-Depending on the size of the Data Pack, you will need to make sure your server is configured to allow a larger file upload.  You can check the server setting by going to *System->Import* in the Commerce admin. There will be a message at the top of the page that will read something like - "Make sure your file isn't more than 28M". That indicates the maxium size of file that can be uploaded. This can be increased by setting two php variables to the appropriate size
+Depending on the size of the Data Pack, you will need to make sure your server is configured to allow a larger file upload.  You can check the server setting by going to *System->Import* in the Commerce admin. There will be a message at the top of the page that will read something like - "Make sure your file isn't more than 28M". That indicates the maximum size of file that can be uploaded. This can be increased by setting two php variables to the appropriate size
 Example :
 `post_max_size = 128M`
 `upload_max_filesize = 128M`
@@ -67,7 +75,7 @@ If you are accessing private repos, a GitHub Personal Access Token will need to 
 A GraphQL mutation can be used to mimic the same functionality that the CLI provides. This would include installing an existing Data Pack or GitHub Remote. Additional queries can also return job status and logging information. See the [Data Installer GraphQL ](https://github.com/PMET-public/module-data-install-graphql)module for information
 
 ### Running Scheduled Imports.
-Data Packs loaded via the UI or GraphQL will be imporated by a bulk job run by a consumer. The consumer can be started manually by `bin/magento queue:consumers:start magentoese_datainstall.import`
+Data Packs loaded via the UI or GraphQL will be imported by a bulk job run by a consumer. The consumer can be started manually by `bin/magento queue:consumers:start magentoese_datainstall.import`
 
 ## Datapack data format
 
@@ -83,11 +91,11 @@ Data Packs loaded via the UI or GraphQL will be imporated by a bulk job run by a
    * `template_manager` - Images used in `templates.csv`
    * `wysiwyg` - CMS images. It is recommended that they be placed in a unique subdirectory to make it cleaner in the UI if multiple data packs are loaded. The path needs to match what is referenced in CMS items.
    * `email` - email logo as defined in config files
-   * `theme` - If a theme is used in a vertical, it can be added here. All the direcories and files used in creating a Commerce theme are placed here and will be copied to `app/design/frontend`
+   * `theme` - If a theme is used in a vertical, it can be added here. All the directories and files used in creating a Commerce theme are placed here and will be copied to `app/design/frontend`
 
 4. Only the `data` and `media` directories are required. If you are going to be referring to the Data Pack as a commerce module, you will then need to include the rest of the standard module files.
 5. If you are zipping a Data Pack for upload via the Commerce interface, the .zip file should include the entire folder and its contents. Just zipping the folder contents will generate an error on import.
-6. The theme contained within the Data Pack will not work on Commerce Cloud due to the read-only file system. A theme will need to be added via composer. If the Data Pack is used across multiple plaforms, the Data Pack theme and the composer theme will need to have different path names, and will need to be addressed by using the `fallback_theme` in the stores file
+6. The theme contained within the Data Pack will not work on Commerce Cloud due to the read-only file system. A theme will need to be added via composer. If the Data Pack is used across multiple platforms, the Data Pack theme and the composer theme will need to have different path names, and will need to be addressed by using the `fallback_theme` in the stores file
 
 Sample Data Module - [https://github.com/PMET-public/module-storystore-sample](https://github.com/PMET-public/module-storystore-sample "https://github.com/PMET-public/module-storystore-sample")
 
@@ -99,7 +107,7 @@ If the data that is being installed calls for a `base` website, and that site do
 
 Of course you can always specify any site code where appropriate in the data.
 
-If you have a data pack that creates a new website, you can have the option to have that website render as the default site. This is most useful when installing on an empty instance. This can be accomplished by having two versions of the data for both the `base` webiste and the new website. However to avoid that duplication, you can add the `--make-default-website` option to the installation. This will install the datpack as a new website, but make adjustmets to the base url and default website settings.  So the new datapack will render as the default site.
+If you have a data pack that creates a new website, you can have the option to have that website render as the default site. This is most useful when installing on an empty instance. This can be accomplished by having two versions of the data for both the `base` website and the new website. However to avoid that duplication, you can add the `--make-default-website` option to the installation. This will install the datapack as a new website, but make adjustments to the base url and default website settings.  So the new datapack will render as the default site.
 
 ### Events, Observers and Webhooks
 
@@ -140,7 +148,7 @@ Each element of potential sample data is encapsulated in its own file. Below is 
 
 [**products.csv**](#products) - Creates simple and configurable products
 
-[**gift\_cards.csv**](#gift-cards) - Updates products of type giftcard due to importer issue
+[**gift\_cards.csv**](#gift-cards) - Updates products of type gift card due to importer issue
 
 [**msi\_stock.csv**](#msi-stock) - Creates Stock definitions for MSI, and ties the stock to MSI sources
 
@@ -216,11 +224,13 @@ Optional file. This file contains settings used by the install process. This fil
 
 **store\_view\_code** - Default : default
 
-**product\_image\_import\_directory** - Path from server root to directory where images should be read during product import.  Defaults to `<module with data files>\media\products`
+**is\_override** - Default: false. Set to true if you want the code values in this file to override any code values set in the data files.
 
-**restrict\_products\_from\_views** - (Y/N, Default: Y) Used to set the visibility of products, so products from one store view don't show in the search from another. When installing new products, the visibility for existing products is set to **Not Visible Individually** for the view defined by **store\_view\_code**. Visibility for products added from the products.csv file will be set to **Not Visible Individually** for all views (including *default*) except for the **store\_view\_code** defined in that row of the products.csv data file.
+**product\_image\_import\_directory** - Path from server root to directory where images should be read during product import if it is different than the conventional media directory.  Defaults to `<data pack>\media\products`
 
-**product\_validation\_strategy** - (validation-stop-on-errors,validation-skip-errors) Default : validation-skip-errors. Setting to either stop a product import on an data error or allow it to continue. This is the Validation Strategy setting in the Import admin UI.
+**restrict\_products\_from\_views** - (Y/N, Default: N) Used to set the visibility of products, so products from one store view don't show in the search from another. When installing new products, the visibility for existing products is set to **Not Visible Individually** for the view defined by **store\_view\_code**. Visibility for products added from the products file will be set to **Not Visible Individually** for all views (including *default*) except for the **store\_view\_code** defined in that row of the products data file.
+
+**product\_validation\_strategy** - (validation-stop-on-errors,validation-skip-errors) Default : validation-skip-errors. Setting to either stop a product import on an data error or allow it to continue. Mostly used during debugging to have the importer stop vs. skip rows and potentially return more meaningful error information. This is the Validation Strategy setting in the Import admin UI.
 
 ### Stores
 
@@ -428,7 +438,7 @@ where name in '...'`
 **apply\_to** - Optional. Defaults to 0.
 Accepted values 2= Apply to Visitors, 1= Apply to Registered Users, 0= Both Visitors and Registered
 
-**conditions_serialized** - Optional (but if you dont put anything in, then really whats the point?) - This is taken from the database magento_customersegment_segment.conditions_serialized column. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers like product and customer attributes.  ID values for Region and Country should remain in place as they should be consistant across installations.
+**conditions_serialized** - Optional (but if you don't put anything in, then really whats the point?) - This is taken from the database magento_customersegment_segment.conditions_serialized column. Content will be run through the [**Content Substitution**](#content-substitution) process that will replace identifiers like product and customer attributes.  ID values for Region and Country should remain in place as they should be consistent across installations.
 
 ### Customers
 
@@ -546,7 +556,7 @@ The standard Magento Product import file is used. If you export from an existing
 
 *File Name* - gift_cards.csv
 
-When Gift Cards are imported along with other products, the row will be skipped with an error. Gift cards need to be imported separatly.
+When Gift Cards are imported along with other products, the row will be skipped with an error. Gift cards need to be imported separately.
 
 The file  should be generated with the same method as `products.csv`, but should only include the Gift Card products. You do not need to remove gift cards from the original products file
 
@@ -617,7 +627,7 @@ The standard Magento Advanced Pricing import file is used. If you export from an
 *File Name* - product\_attributes.csv
 
 This file is used to add and update Product Attributes and assign them to attribute sets. The codes provided in the file are used to determine if a new attribute will be created or updated.
-Product attribute configurations can be complex. The columns examples below are a bare minimum needed if you were createing the file manually.  It's recommended to do a database extract.All settings are supported using database column names and values.
+Product attribute configurations can be complex. The columns examples below are a bare minimum needed if you were creating the file manually.  It's recommended to do a database extract.All settings are supported using database column names and values.
 
 *Note: There is a very specific known bug. If you re-load a product attribute file with an attribute type of text swatch, the option values will be duplicated. You will then need to remove the duplicate options*
 
@@ -1212,5 +1222,5 @@ The Data Installer should handle most problems by logging as much information as
 
 Information about skipped rows or files will be displayed in the terminal when using a CLI import. Also standard importer information will be available for products, customers, advanced pricing and msi. This will include imported rows, invalid rows, etc.
 
-For all methods, the same information is written in `var/logs/data_installer.log`. If it was a UI Upload or a GraphQL initiated import, the log information can be retreived via GraphQL query.
+For all methods, the same information is written in `var/logs/data_installer.log`. If it was a UI Upload or a GraphQL initiated import, the log information can be retrieved via GraphQL query.
 

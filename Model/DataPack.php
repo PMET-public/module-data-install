@@ -68,6 +68,9 @@ class DataPack implements DataPackInterface
     /** @var string  */
     protected $jobId;
 
+    /** @var boolean  */
+    protected $restrictProductsFromViews;
+
     /** @var Filesystem\Directory\WriteInterface */
     protected $verticalDirectory;
 
@@ -107,6 +110,8 @@ class DataPack implements DataPackInterface
         $this->verticalDirectory = $filesystem->getDirectoryWrite(DirectoryList::TMP);
         $this->files = [];
         $this->deleteSourceFiles = false;
+        $this->isOverride = false;
+        $this->restrictProductsFromViews = false;
     }
     
     /**
@@ -653,5 +658,26 @@ class DataPack implements DataPackInterface
     public function getStoreViewName()
     {
         return $this->storeViewName;
+    }
+
+    /**
+     * Set Restrict Products From Store Views
+     *
+     * @param boolean $restrictProductsFromViews
+     * @return void
+     */
+    public function setRestrictProductsFromViews($restrictProductsFromViews)
+    {
+        $this->restrictProductsFromViews = $restrictProductsFromViews;
+    }
+
+    /**
+     * Get Restrict Products From Store Views
+     *
+     * @return boolean
+     */
+    public function restrictProductsFromViews()
+    {
+        return $this->restrictProductsFromViews;
     }
 }

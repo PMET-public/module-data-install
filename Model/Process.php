@@ -642,6 +642,9 @@ class Process
         if ($dataPack->getStoreViewName() !='') {
             $setupArray['store_view_name'] = $dataPack->getStoreViewName();
         }
+        if ($dataPack->restrictProductsFromViews() !='') {
+            $setupArray['restrict_products_from_views'] = $dataPack->restrictProductsFromViews();
+        }
         $setupArray['is_override'] = 1;
 
         return $setupArray;

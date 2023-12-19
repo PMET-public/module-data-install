@@ -319,4 +319,21 @@ interface DataPackInterface extends ExtensibleDataInterface
      * @return void
      */
     public function setDeleteSourceFiles($deleteSourceFiles);
+
+    
+    /**
+     * Should the products be restricted from other store views
+     * 
+     * @return boolean 
+     */
+    public function restrictProductsFromViews();
+
+
+    /**
+     * Set true if products should be restricted from other store views
+     *
+     * @param boolean $restrictProductsFromViews
+     * @return void
+     */
+    public function setRestrictProductsFromViews($restrictProductsFromViews);
 }

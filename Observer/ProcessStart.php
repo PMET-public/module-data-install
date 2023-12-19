@@ -10,9 +10,7 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use MagentoEse\DataInstall\Helper\Helper;
 
-//use Mageplaza\Webhook\Helper\Data as WebhookHelperData;
-
-class ProcessStart implements \Magento\Framework\Event\ObserverInterface
+class ProcessStart implements ObserverInterface
 {
     
     /** @var string */
@@ -21,18 +19,14 @@ class ProcessStart implements \Magento\Framework\Event\ObserverInterface
     /** @var Helper */
     protected $helper;
 
-    /** @var WebhookHelperData */
-    //protected $webhookHelper;
-    
     /**
      * Process Start Constructor
      *
      * @param Helper $helper
      */
-    public function __construct(Helper $helper)//,WebhookHelperData $webhookHelper)
+    public function __construct(Helper $helper)
     {
         $this->helper = $helper;
-        //$this->webhookHelper = $webhookHelper;
     }
     /**
      * Observer function
@@ -51,6 +45,5 @@ class ProcessStart implements \Magento\Framework\Event\ObserverInterface
         $item = $observer;
         $item->setData('filesource', $itemData['filesource']);
         $item->setData('jobid', $itemData['jobid']);
-        ///$this->webhookHelper->send($item, $this->hookType);
     }
 }

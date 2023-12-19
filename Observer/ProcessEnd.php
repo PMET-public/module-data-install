@@ -11,8 +11,6 @@ use Magento\Framework\Event\ObserverInterface;
 use MagentoEse\DataInstall\Helper\Helper;
 use MagentoEse\DataInstall\Model\Process;
 
-//use Mageplaza\Webhook\Helper\Data as WebhookHelperData;
-
 class ProcessEnd implements ObserverInterface
 {
     
@@ -24,21 +22,17 @@ class ProcessEnd implements ObserverInterface
 
     /** @var Process */
     protected $process;
-
-    /** @var WebhookHelperData */
-    //protected $webhookHelper;
-    
+   
    /**
     *
     * @param Helper $helper
     * @param Process $process
     * @return void
     */
-    public function __construct(Helper $helper, Process $process)//, WebhookHelperData $webhookHelper)
+    public function __construct(Helper $helper, Process $process)
     {
         $this->helper = $helper;
         $this->process = $process;
-        //$this->webhookHelper = $webhookHelper;
     }
 
     /**
@@ -55,9 +49,5 @@ class ProcessEnd implements ObserverInterface
             "End Data Installer process",
             "warning"
         );
-        //TODO: will need to copy section from ProcessStart assuming the payload is going to be the same
-        //$item = $observer->getData('eventData');
-        //$item = $item['job_settings'];
-        //$this->webhookHelper->send($item, $this->hookType);
     }
 }

@@ -111,10 +111,8 @@ If you have a data pack that creates a new website, you can have the option to h
 
 ### Events, Observers and Webhooks
 
-There are two events generated at the start and end of the installation process that can be used by other modules
+There are two events generated at the start and end of the installation process that can be used: 
 `magentoese_datainstall_install_start` and `magentoese_datainstall_install_end`
-
-Plugins and observers have been created to integrate with the `mageplaza/module-webhook` extension. As of this writing they are not included as the module is not yet php 8.1 compatible.  When updated, this will allow webhooks to be configured based on the start and end events.
 
 ## Data Files
 

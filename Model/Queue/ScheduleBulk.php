@@ -135,6 +135,10 @@ class ScheduleBulk
                         if (!empty($operation['store_view_name'])) {
                             $serializedData['store_view_name'] = $operation['store_view_name'];
                         }
+                        if (!empty($operation['restrict_products_from_views'])) {
+                            $serializedData['restrict_products_from_views'] =
+                            $operation['restrict_products_from_views'];
+                        }
                     } else {
                         $serializedData['override_settings'] = false;
                     }

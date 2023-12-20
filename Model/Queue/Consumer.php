@@ -160,6 +160,7 @@ class Consumer
      */
     private function createDataPack($data)
     {
+        /** @var DataPackInterface $dataPack */
         $dataPack = $this->dataPackInterface->create();
         $dataPack->setDataPackLocation($data['filesource']);
         if ($data['fileorder']!=null) {
@@ -172,7 +173,6 @@ class Consumer
         $dataPack->setIsDefaultWebsite($data['isDefaultWebsite']);
         $dataPack->setHost($data['host']);
         $dataPack->setJobId($data['jobid']);
-        $dataPack->setRestrictProductsFromViews($data['restrictProductsFromViews']);
         if (!empty($data['override_settings'])) {
             if ($data['override_settings']) {
                 $dataPack->setIsOverride(true);
@@ -193,6 +193,9 @@ class Consumer
                 }
                 if (!empty($data['store_view_name'])) {
                     $dataPack->setStoreViewName($data['store_view_name']);
+                }
+                if (!empty($data['restrict_products_from_views'])) {
+                    $dataPack->setRestrictProductsFromViews($data['restrict_products_from_views']);
                 }
             } else {
                 $dataPack->setIsOverride(false);

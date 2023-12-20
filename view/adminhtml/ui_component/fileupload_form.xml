@@ -310,7 +310,7 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
         </field>
         <field name="restrict_products_from_views" formElement="checkbox" sortOrder="70">
             <settings>
-                <label translate="true">Override</label>
+                <label translate="true">Restrict Products From Other Views</label>
                 <tooltip>
                     <description translate="true">
                         Restrict incoming products from other store views

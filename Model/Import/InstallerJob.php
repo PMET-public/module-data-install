@@ -144,6 +144,9 @@ class InstallerJob implements InstallerJobInterface
             if ($dataPack->getStoreViewName()) {
                 $operation['store_view_name'] = $dataPack->getStoreViewName();
             }
+            if ($dataPack->restrictProductsFromViews()) {
+                $operation['restrict_products_from_views'] = $dataPack->restrictProductsFromViews();
+            }
         }
         $operation['deleteSourceFiles'] = $dataPack->deleteSourceFiles();
         $jobId = $this->scheduleBulk->execute([$operation]);

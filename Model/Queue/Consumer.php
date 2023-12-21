@@ -10,6 +10,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\EntityManager\EntityManager;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\TemporaryStateExceptionInterface;
+use Magento\Framework\Event\ManagerInterface as EventManager;
 use Magento\Framework\Bulk\OperationInterface;
 use MagentoEse\DataInstall\Model\Process;
 use Psr\Log\LoggerInterface;
@@ -44,6 +45,9 @@ class Consumer
     /** @var DataPackInterfaceFactory */
     protected $dataPackInterface;
 
+    /** @var EventManager */
+    protected $eventManager;
+
     /**
      *
      * @param LoggerInterface $logger
@@ -52,6 +56,7 @@ class Consumer
      * @param Process $process
      * @param File $fileSystem
      * @param DataPackInterfaceFactory $dataPackInterface
+     * @param EventManager $eventManager
      * @return void
      */
     public function __construct(
@@ -60,7 +65,8 @@ class Consumer
         EntityManager $entityManager,
         Process $process,
         File $fileSystem,
-        DataPackInterfaceFactory $dataPackInterface
+        DataPackInterfaceFactory $dataPackInterface,
+        EventManager $eventManager
     ) {
         $this->logger = $logger;
         $this->serializer = $serializer;
@@ -68,6 +74,7 @@ class Consumer
         $this->process = $process;
         $this->fileSystem = $fileSystem;
         $this->dataPackInterface = $dataPackInterface;
+        $this->eventManager = $eventManager;
     }
 
     /**
@@ -94,12 +101,16 @@ class Consumer
                 $status = OperationInterface::STATUS_TYPE_RETRIABLY_FAILED;
                 $errorCode = $e->getCode();
                 $message = $e->getMessage();
+                //dispatch error
+                $this->eventManager->dispatch('magentoese_datainstall_job_error', ['eventData' => $e]);
             } else {
                 $status = OperationInterface::STATUS_TYPE_NOT_RETRIABLY_FAILED;
                 $errorCode = $e->getCode();
                 $message = __(
                     'Sorry, something went wrong during data import. Please see log for details.'
                 );
+                //dispatch error
+                $this->eventManager->dispatch('magentoese_datainstall_job_error', ['eventData' => $e]);
             }
         } catch (NoSuchEntityException $e) {
             $this->logger->critical($e->getMessage());
@@ -108,16 +119,22 @@ class Consumer
                 : OperationInterface::STATUS_TYPE_NOT_RETRIABLY_FAILED;
             $errorCode = $e->getCode();
             $message = $e->getMessage();
+            //dispatch error
+            $this->eventManager->dispatch('magentoese_datainstall_job_error', ['eventData' => $e]);
         } catch (LocalizedException $e) {
             $this->logger->critical($e->getMessage());
             $status = OperationInterface::STATUS_TYPE_NOT_RETRIABLY_FAILED;
             $errorCode = $e->getCode();
             $message = $e->getMessage();
+            //dispatch error
+            $this->eventManager->dispatch('magentoese_datainstall_job_error', ['eventData' => $e]);
         } catch (\Exception $e) {
             $this->logger->critical($e->getMessage());
             $status = OperationInterface::STATUS_TYPE_NOT_RETRIABLY_FAILED;
             $errorCode = $e->getCode();
             $message = __('Sorry, something went wrong during data import. Please see log for details.');
+            //dispatch error
+            $this->eventManager->dispatch('magentoese_datainstall_job_error', ['eventData' => $e]);
         }
 
         $operation->setStatus($status ?? OperationInterface::STATUS_TYPE_COMPLETE)
@@ -135,6 +152,8 @@ class Consumer
      */
     private function execute($dataPack): void
     {
+        //dispatch start event
+        $this->eventManager->dispatch('magentoese_datainstall_job_start', ['eventData' => $dataPack]);
         $this->process->loadFiles($dataPack);
         $dataPack->setFiles(['msi_inventory.csv']);
         $dataPack->setReload(1);
@@ -150,6 +169,8 @@ class Consumer
                 }
             }
         }
+        //dispatch end event
+        $this->eventManager->dispatch('magentoese_datainstall_job_end', ['eventData' => $dataPack]);
     }
 
     /**

@@ -12,6 +12,19 @@ xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
         instance="MagentoEse\DataInstall\Observer\ProcessStart" />
     </event>
     <event name="magentoese_datainstall_install_end">
-        <observer name="MagentoEse_DataInstall_End_Observer" instance="MagentoEse\DataInstall\Observer\ProcessEnd" />
+        <observer name="MagentoEse_DataInstall_End_Observer" 
+        instance="MagentoEse\DataInstall\Observer\ProcessEnd" />
+    </event>
+    <event name="magentoese_datainstall_job_start">
+        <observer name="MagentoEse_DataInstall_Job_Start_Observer" 
+        instance="MagentoEse\DataInstall\Observer\JobStart" />
+    </event>
+    <event name="magentoese_datainstall_job_end">
+        <observer name="MagentoEse_DataInstall_Job_End_Observer" 
+        instance="MagentoEse\DataInstall\Observer\JobEnd" />
+    </event>
+    <event name="magentoese_datainstall_job_error">
+        <observer name="MagentoEse_DataInstall_Job_Error_Observer" 
+        instance="MagentoEse\DataInstall\Observer\JobError" />
     </event>
 </config>

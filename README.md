@@ -109,10 +109,15 @@ Of course you can always specify any site code where appropriate in the data.
 
 If you have a data pack that creates a new website, you can have the option to have that website render as the default site. This is most useful when installing on an empty instance. This can be accomplished by having two versions of the data for both the `base` website and the new website. However to avoid that duplication, you can add the `--make-default-website` option to the installation. This will install the datapack as a new website, but make adjustments to the base url and default website settings.  So the new datapack will render as the default site.
 
-### Events, Observers and Webhooks
-
-There are two events generated at the start and end of the installation process that can be used: 
-`magentoese_datainstall_install_start` and `magentoese_datainstall_install_end`
+### Events and Observers
+##### Events
+`magentoese_datainstall_install_start` - When an installation process starts
+`magentoese_datainstall_install_end` - When an installation process ends
+`magentoese_datainstall_job_start` - When a queued job has started
+`magentoese_datainstall_job_end` - When the queued job is complete
+`magentoese_datainstall_job_error` - Added in the catch blocks of the queue consumer to catch high level errors.
+###### Observers
+There are observers written for each of the events. They are used to log when the event has been dispatched
 
 ## Data Files
 

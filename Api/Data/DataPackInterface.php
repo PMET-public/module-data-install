@@ -334,4 +334,19 @@ interface DataPackInterface extends ExtensibleDataInterface
      * @return void
      */
     public function setRestrictProductsFromViews($restrictProductsFromViews);
+
+    /**
+     * A Json encoded string of additional parameters
+     *
+     * @param string $additionalParameters
+     * @return void
+     */
+    public function setAdditionalParameters($additionalParameters);
+
+    /**
+     * A Json encoded string of additional parameters
+     *
+     * @return string
+     */
+    public function getAdditionalParameters();
 }

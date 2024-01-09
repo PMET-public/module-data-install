@@ -273,6 +273,12 @@ class Save extends \Magento\Backend\App\Action
                 case "restrict_products_from_views":
                     $dataPack->setRestrictProductsFromViews($value);
                     break;
+                case "user_email":
+                    $additionalParameters = [];
+                    $additionalParameters['user_email'] = $value;
+                    $additionalParameters['instance_url'] = $this->scopeConfig->getValue('web/secure/base_url');
+                    $dataPack->setAdditionalParameters(json_encode($additionalParameters));
+                    break;
             }
         }
         return $dataPack;

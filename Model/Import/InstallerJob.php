@@ -124,6 +124,7 @@ class InstallerJob implements InstallerJobInterface
         $operation['reload'] = $dataPack->getReload();
         $operation['host'] = $dataPack->getHost();
         $operation['isDefaultWebsite'] = $dataPack->getIsDefaultWebsite();
+        $operation['additional_parameters'] = $dataPack->getAdditionalParameters();
         if ($dataPack->getIsOverride()) {
             $operation['override_settings'] = true;
             if ($dataPack->getSiteCode()) {

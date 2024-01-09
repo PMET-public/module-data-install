@@ -110,7 +110,8 @@ class ScheduleBulk
                     'deleteSourceFiles' => $operation['deleteSourceFiles'],
                     //for future use
                     'website'=>'base',
-                    'store'=>'store'
+                    'store'=>'store',
+                    'additional_parameters' => $operation['additional_parameters'] ?? ''
                 ];
                 //TODO: add store and website to serialized data
                 if (!empty($operation['override_settings'])) {

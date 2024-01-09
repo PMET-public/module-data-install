@@ -26,6 +26,7 @@ Optional arguments:
  `--authtoken [=AUTHTOKEN] GitHub Personal Access Token`
  `--host [=HOST] Override of host values in stores.csv file`
  `--make-default-website The datapack's new website will be set as the default site`
+ `--additional-parameters JSON object to add data to be passed to the Data Pack`
  
  Overrides
  `--site-code=Site code to override Data Pack Data`

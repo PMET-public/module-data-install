@@ -65,6 +65,9 @@ class DataPack implements DataPackInterface
     /** @var string  */
     protected $storeViewName;
 
+    /** @var string */
+    protected $additionalParameters;
+
     /** @var string  */
     protected $jobId;
 
@@ -679,5 +682,27 @@ class DataPack implements DataPackInterface
     public function restrictProductsFromViews()
     {
         return $this->restrictProductsFromViews;
+    }
+
+    /**
+     * Set Additional Parameters
+     *
+     * @param string $additionalParameters
+     * @return void
+     */
+    public function setAdditionalParameters($additionalParameters)
+    {
+        $this->additionalParameters = $additionalParameters;
+    }
+
+    /**
+     * Get Additional Parameters
+     *
+     * @return string
+     */
+
+    public function getAdditionalParameters()
+    {
+        return $this->additionalParameters;
     }
 }

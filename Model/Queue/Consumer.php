@@ -194,6 +194,7 @@ class Consumer
         $dataPack->setIsDefaultWebsite($data['isDefaultWebsite']);
         $dataPack->setHost($data['host']);
         $dataPack->setJobId($data['jobid']);
+        $dataPack->setAdditionalParameters($data['additional_parameters']);
         if (!empty($data['override_settings'])) {
             if ($data['override_settings']) {
                 $dataPack->setIsOverride(true);

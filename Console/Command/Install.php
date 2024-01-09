@@ -14,11 +14,20 @@
  * Options
  *
  * --load=<directory> - can be any other sub directory in the data pack, module or remote url
- * --files=stores.csv,products.csv - comma delimite list of specific files to load
+ * --files=stores.csv,products.csv - comma delimited list of specific files to load
  * -r force reload if already loaded
- * --authtoken=<token> - token needed for remote data retreival
- * -remote - flag if data pack is rempote
+ * --authtoken=<token> - token needed for remote data retrieval
+ * -remote - flag if data pack is remote
  * --make-default-website - Set this site as default regardless of data pack settings
+ * -o - Override site/store settings
+ * --site-code - Site Code that overrides Data Pack data
+ * --site-name - Site Name that overrides Data Pack data
+ * --store-code - Store Code that overrides Data Pack data
+ * --store-name - Store Name that overrides Data Pack data
+ * --store-view-code - Store View Code that overrides Data Pack data
+ * --store-view-name - Store View Name that overrides Data Pack data
+ * --restrict-products-from-views - Restrict incoming products from other store views
+ * --additional-parameters - Json encoded object of Additional parameters to pass to the data pack
  **/
 
 //https://magento.stackexchange.com/questions/155654/console-command-waiting-for-input-from-user
@@ -57,6 +66,7 @@ class Install extends Command
     public const STORE_VIEW_CODE = 'store-view-code';
     public const STORE_VIEW_NAME = 'store-view-name';
     public const RESTRICT_PRODUCTS_FROM_VIEWS = 'restrict-products-from-views';
+    public const ADDITIONAL_PARAMETERS = 'additional-parameters';
 
     /** @var ObjectManagerInterface  */
     protected $objectManagerInterface;
@@ -201,7 +211,15 @@ class Install extends Command
                 InputOption::VALUE_OPTIONAL,
                 'Restrict incoming products from other store views',
                 false
+            ),
+            new InputOption(
+                self::ADDITIONAL_PARAMETERS,
+                '-additional-parameters',
+                InputOption::VALUE_OPTIONAL,
+                'Json encoded object of Additional parameters',
+                ''
             )
+
         ];
 
         $this->setName('gxd:datainstall')
@@ -273,6 +291,7 @@ class Install extends Command
         $dataPack->setStoreViewCode($input->getOption(self::STORE_VIEW_CODE));
         $dataPack->setStoreViewName($input->getOption(self::STORE_VIEW_NAME));
         $dataPack->setRestrictProductsFromViews($restrictProducts);
+        $dataPack->setAdditionalParameters($input->getOption(self::ADDITIONAL_PARAMETERS));
 
         //if data pack is rempote, retrieve it
         if ($dataPack->getIsRemote()) {

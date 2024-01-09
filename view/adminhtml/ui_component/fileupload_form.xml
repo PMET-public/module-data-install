@@ -52,7 +52,7 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
             <opened>true</opened>
             <label translate="true">Upload Zip File</label>
         </settings>
-        <field name="vertical">
+        <field name="vertical" sortOrder="10">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="dataType" xsi:type="string">string</item>
@@ -68,7 +68,7 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                 </item>
             </argument>
         </field>
-        <field name="images">
+        <field name="images" sortOrder="20">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="dataType" xsi:type="string">string</item>
@@ -80,6 +80,23 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                     <item name="notice" xsi:type="string" translate="true">Images .zip file required</item>
                     <item name="uploaderConfig" xsi:type="array">
                         <item name="url" xsi:type="url" path="datainstall/import/tempupload"/>
+                    </item>
+                </item>
+            </argument>
+        </field>
+        <field name="user_email" sortOrder="30">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="source" xsi:type="string">vertical</item>
+                    <item name="label" xsi:type="string" translate="true">Email Notification</item>
+                    <item name="validation" xsi:type="array">
+                        <item name="email2" xsi:type="boolean">true</item>
+                    </item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="notice" xsi:type="string" translate="true">
+                        Notification sent when Data Pack is installed
                     </item>
                 </item>
             </argument>

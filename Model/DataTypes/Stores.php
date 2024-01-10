@@ -950,10 +950,12 @@ class Stores
             }
             if (!$themeId) {
                 $this->helper->logMessage("Theme not set", "warning");
+            }else{
+                //set theme
+                $this->configuration->saveConfig("design/theme/theme_id", $themeId, "stores", $storeViewId);
+                $this->helper->logMessage("Theme assigned", "info");
             }
-            //set theme
-            $this->configuration->saveConfig("design/theme/theme_id", $themeId, "stores", $storeViewId);
-            $this->helper->logMessage("Theme assigned", "info");
+            
         }
     }
 
@@ -971,6 +973,8 @@ class Stores
             include 'app/design/frontend/'.$theme.'/registration.php';
         } catch (Exception $e) {
             //ignore
+            $k = $e->getMessage();
+            $this->helper->logMessage($e->getMessage(), "error");
             $r=1;
         }
         $this->themeRegistration->register();

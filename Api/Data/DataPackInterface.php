@@ -349,4 +349,11 @@ interface DataPackInterface extends ExtensibleDataInterface
      * @return string
      */
     public function getAdditionalParameters();
+
+    /**
+     * Convert Data Pack settings to array to be used in event data
+     *
+     * @return array
+     */
+    public function convertDataPackToArray();
 }

@@ -1,7 +1,7 @@
 {
     "name": "magentoese/module-data-install",
     "type": "magento2-module",
-    "version" : "2.5.2",
+    "version" : "2.5.3",
     "autoload": {
         "files": [ "registration.php" ],
         "psr-4": {

@@ -15,7 +15,7 @@ class JobError implements ObserverInterface
 {
     
     /** @var string */
-    protected $hookType = 'magentoese_datainstall_job_end';
+    protected $hookType = 'magentoese_datainstall_job_error';
 
     /** @var Helper */
     protected $helper;

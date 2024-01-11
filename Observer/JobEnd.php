@@ -44,7 +44,7 @@ class JobEnd implements ObserverInterface
     {
         $dataPack = $observer->getData('eventData');
         $this->helper->logMessage(
-            "End Data Installer Job - id: ".$dataPack->getJobId()." file: ".$dataPack->getDataPackLocation(),
+            "End Data Installer Job - id: ".$dataPack['jobId']." file: ".$dataPack['location'],
             "warning"
         );
     }

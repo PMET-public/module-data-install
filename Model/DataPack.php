@@ -705,4 +705,34 @@ class DataPack implements DataPackInterface
     {
         return $this->additionalParameters;
     }
+
+    /**
+     * Convert Data Pack to Array
+     *
+     * @return array
+     */
+    public function convertDataPackToArray()
+    {
+        $dataPackArray = [];
+        $dataPackArray['location'] = $this->getDataPackLocation();
+        $dataPackArray['imagePackLocation'] = $this->getImagePackLocation();
+        $dataPackArray['load'] = $this->getLoad();
+        $dataPackArray['files'] = $this->getFiles();
+        $dataPackArray['host'] = $this->getHost();
+        $dataPackArray['reload'] = $this->getReload();
+        $dataPackArray['isRemote'] = $this->getIsRemote();
+        $dataPackArray['authToken'] = $this->getAuthToken();
+        $dataPackArray['isDefaultWebsite'] = $this->getIsDefaultWebsite();
+        $dataPackArray['isOverride'] = $this->getIsOverride();
+        $dataPackArray['siteCode'] = $this->getSiteCode();
+        $dataPackArray['siteName'] = $this->getSiteName();
+        $dataPackArray['storeCode'] = $this->getStoreCode();
+        $dataPackArray['storeName'] = $this->getStoreName();
+        $dataPackArray['storeViewCode'] = $this->getStoreViewCode();
+        $dataPackArray['storeViewName'] = $this->getStoreViewName();
+        $dataPackArray['restrictProductsFromViews'] = $this->restrictProductsFromViews();
+        $dataPackArray['additionalParameters'] = $this->getAdditionalParameters();
+        $dataPackArray['jobId'] = $this->getJobId();
+        return $dataPackArray;
+    }
 }

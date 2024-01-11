@@ -153,7 +153,10 @@ class Consumer
     private function execute($dataPack): void
     {
         //dispatch start event
-        $this->eventManager->dispatch('magentoese_datainstall_job_start', ['eventData' => $dataPack]);
+        $this->eventManager->dispatch(
+            'magentoese_datainstall_job_start',
+            ['eventData' => $dataPack->convertDataPackToArray()]
+        );
         $this->process->loadFiles($dataPack);
         $dataPack->setFiles(['msi_inventory.csv']);
         $dataPack->setReload(1);
@@ -170,7 +173,10 @@ class Consumer
             }
         }
         //dispatch end event
-        $this->eventManager->dispatch('magentoese_datainstall_job_end', ['eventData' => $dataPack]);
+        $this->eventManager->dispatch(
+            'magentoese_datainstall_job_end',
+            ['eventData' => $dataPack->convertDataPackToArray()]
+        );
     }
 
     /**

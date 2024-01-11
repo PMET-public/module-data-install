@@ -37,7 +37,7 @@ class JobStart implements ObserverInterface
     {
         $dataPack = $observer->getData('eventData');
         $this->helper->logMessage(
-            "Start Data Installer Job - id: ".$dataPack->getJobId()." file: ".$dataPack->getDataPackLocation(),
+            "Start Data Installer Job - id: ".$dataPack['jobId']." file: ".$dataPack['location'],
             "warning"
         );
     }

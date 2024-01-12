@@ -37,6 +37,7 @@ use Magento\Framework\Component\ComponentRegistrar;
 use Magento\UrlRewrite\Model\Exception\UrlAlreadyExistsException;
 use Magento\UrlRewrite\Model\UrlPersistInterface;
 use MagentoEse\DataInstall\Helper\Helper;
+use Magento\Framework\Filesystem\DirectoryList;
 
 class Stores
 {
@@ -98,7 +99,7 @@ class Stores
     protected $appState;
 
     /** @var ComponentRegistrar */
-    protected $componantRegistrar;
+    protected $componentRegistrar;
     
     /** @var ThemeRegistration */
     protected $themeRegistration;
@@ -109,32 +110,38 @@ class Stores
     /** @var ScopeConfigInterface */
     protected $scopeConfig;
 
-    /**
-     * Stores constructor
-     *
-     * @param Helper $helper
-     * @param WebsiteInterfaceFactory $websiteInterfaceFactory
-     * @param WebsiteResourceModel $websiteResourceModel
-     * @param WebsiteRepositoryInterface $websiteRepository
-     * @param GroupResourceModel $groupResourceModel
-     * @param GroupInterfaceFactory $groupInterfaceFactory
-     * @param GroupRepositoryInterface $groupRepository
-     * @param CategoryInterfaceFactory $categoryInterfaceFactory
-     * @param CategoryRepositoryInterface $categoryRepository
-     * @param StoreResourceModel $storeResourceModel
-     * @param StoreRepositoryInterface $storeRepository
-     * @param StoreInterfaceFactory $storeInterfaceFactory
-     * @param ResourceConfig $configuration
-     * @param UrlPersistInterface $urlPersist
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
-     * @param PageRepositoryInterface $pageRepository
-     * @param CmsPageUrlRewriteGenerator $cmsPageUrlRewriteGenerator
-     * @param State $appState
-     * @param ThemeRegistration $themeRegistration
-     * @param ThemeCollection $themeCollection
-     * @param ScopeConfigInterface $scopeConfig
-     */
+    /** @var DirectoryList */
+    protected $directoryList;
 
+   /**
+    * Stores constructor
+
+    * @param Helper $helper
+    * @param WebsiteInterfaceFactory $websiteInterfaceFactory
+    * @param WebsiteResourceModel $websiteResourceModel
+    * @param WebsiteRepositoryInterface $websiteRepository
+    * @param GroupResourceModel $groupResourceModel
+    * @param GroupInterfaceFactory $groupInterfaceFactory
+    * @param GroupRepositoryInterface $groupRepository
+    * @param CategoryInterfaceFactory $categoryInterfaceFactory
+    * @param CategoryRepositoryInterface $categoryRepository
+    * @param StoreResourceModel $storeResourceModel
+    * @param StoreRepositoryInterface $storeRepository
+    * @param StoreInterfaceFactory $storeInterfaceFactory
+    * @param ResourceConfig $configuration
+    * @param UrlPersistInterface $urlPersist
+    * @param SearchCriteriaBuilder $searchCriteriaBuilder
+    * @param PageRepositoryInterface $pageRepository
+    * @param CmsPageUrlRewriteGenerator $cmsPageUrlRewriteGenerator
+    * @param State $appState
+    * @param ComponentRegistrar $componentRegistrar
+    * @param ThemeRegistration $themeRegistration
+    * @param ThemeCollection $themeCollection
+    * @param ScopeConfigInterface $scopeConfig
+    * @param DirectoryList $directoryList
+    * @return void
+    */
+    
     public function __construct(
         Helper $helper,
         WebsiteInterfaceFactory $websiteInterfaceFactory,
@@ -154,9 +161,11 @@ class Stores
         PageRepositoryInterface $pageRepository,
         CmsPageUrlRewriteGenerator $cmsPageUrlRewriteGenerator,
         State $appState,
+        ComponentRegistrar $componentRegistrar,
         ThemeRegistration $themeRegistration,
         ThemeCollection $themeCollection,
-        ScopeConfigInterface $scopeConfig
+        ScopeConfigInterface $scopeConfig,
+        DirectoryList $directoryList
     ) {
         $this->helper = $helper;
         $this->websiteInterfaceFactory = $websiteInterfaceFactory;
@@ -176,9 +185,11 @@ class Stores
         $this->pageRepository = $pageRepository;
         $this->cmsPageUrlRewriteGenerator = $cmsPageUrlRewriteGenerator;
         $this->appState = $appState;
+        $this->componentRegistrar = $componentRegistrar;
         $this->themeRegistration = $themeRegistration;
         $this->themeCollection = $themeCollection;
         $this->scopeConfig = $scopeConfig;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -967,10 +978,13 @@ class Stores
     private function registerTheme($theme)
     {
         try {
-            // phpcs:ignore Magento2.Security.IncludeFile.FoundIncludeFile
-            include 'app/design/frontend/'.$theme.'/registration.php';
+            $this->componentRegistrar->register(
+                ComponentRegistrar::THEME,
+                'frontend/'.$theme,
+                $this->directoryList->getRoot().'/app/design/frontend/'.$theme
+            );
         } catch (Exception $e) {
-            //ignore
+            //ignore as it will throw an exception if the theme is already registered
             $r=1;
         }
         $this->themeRegistration->register();

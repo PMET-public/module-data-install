@@ -27,4 +27,8 @@ xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
         <observer name="MagentoEse_DataInstall_Job_Error_Observer" 
         instance="MagentoEse\DataInstall\Observer\JobError" />
     </event>
+    <event name="magentoese_datainstall_files_processed">
+        <observer name="MagentoEse_DataInstall_Files_Processed_Observer" 
+        instance="MagentoEse\DataInstall\Observer\DeployStaticContent" />
+    </event>
 </config>

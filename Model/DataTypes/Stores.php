@@ -115,7 +115,7 @@ class Stores
 
    /**
     * Stores constructor
-
+    *
     * @param Helper $helper
     * @param WebsiteInterfaceFactory $websiteInterfaceFactory
     * @param WebsiteResourceModel $websiteResourceModel

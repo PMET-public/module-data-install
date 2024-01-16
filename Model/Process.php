@@ -202,7 +202,7 @@ class Process
         $this->helper->logMessage("Copying Media", "info");
 
         $this->copyMedia->moveFiles($filePath);
-
+        
         foreach ($fileOrder as $nextFile) {
             //get processing instructions based on filename
             //returns ['filename','process','class','label'];
@@ -300,6 +300,7 @@ class Process
         if ($fileCount==0) {
             return false;
         } else {
+            $this->eventManager->dispatch('magentoese_datainstall_files_processed', ['eventData' => $this->settings]);
             return true;
         }
     }

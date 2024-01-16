@@ -84,7 +84,7 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                 </item>
             </argument>
         </field>
-        <field name="user_email" sortOrder="30">
+        <!-- <field name="user_email" sortOrder="30">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="dataType" xsi:type="string">string</item>
@@ -100,7 +100,7 @@ xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuratio
                     </item>
                 </item>
             </argument>
-        </field>
+        </field> -->
     </fieldset>
     <fieldset name="remote" sortOrder="50">
         <settings>

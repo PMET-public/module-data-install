@@ -71,7 +71,7 @@ class AdminUsers
             return true;
         }
         //Skip process if user is admin
-        if (!$row['username'] == 'admin') {
+        if ($row['username'] !== 'admin') {
             $user = $this->userCollection->create()->addFieldToFilter('username', ['eq' => $row['username']])
             ->getFirstItem();
             //create user if it doesnt exist

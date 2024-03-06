@@ -452,7 +452,7 @@ class Converter
      * @return array
      * @throws LocalizedException
      */
-    protected function matcherCategoryUrl(string $matchValue)
+    protected function matcherCategoryurl(string $matchValue)
     {
         $replaceData = [];
         $category = $this->getCategoryByUrlKey($matchValue);

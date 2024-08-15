@@ -403,7 +403,12 @@ class Customers
             $importerModel->setAllowedErrorCount(100);
         }
         try {
-            $importerModel->processImport($customerArray);
+            $this->appState->emulateAreaCode(
+                AppArea::AREA_ADMINHTML,
+                [$importerModel, 'processImport'],
+                [$customerArray]
+            );
+            //$importerModel->processImport($customerArray);
         } catch (\Exception $e) {
             $this->helper->logMessage($e->getMessage(), "warning");
         }

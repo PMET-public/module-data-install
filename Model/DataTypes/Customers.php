@@ -161,6 +161,11 @@ class Customers
     // phpcs:ignore Generic.Metrics.NestingLevel.TooHigh,Magento2.Annotation.MethodArguments.NoCommentBlock
     public function install(array $rows, array $header, string $modulePath, array $settings)
     {
+        try {
+            $this->appState->setAreaCode(AppArea::AREA_ADMINHTML);
+        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+            $this->helper->logMessage('Area code was already set: ' . $e->getMessage())
+        }
 
         $this->settings = $settings;
 

@@ -8,6 +8,8 @@ namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use MagentoEse\DataInstall\Model\Import\Importer\ImporterFactory as Importer;
 use MagentoEse\DataInstall\Helper\Helper;
+use Magento\Framework\App\Area as AppArea;
+use Magento\Framework\App\State;
 
 class MsiInventory
 {
@@ -17,6 +19,9 @@ class MsiInventory
     /** @var Helper */
     protected $helper;
 
+    /** @var State  */
+    protected $appState;
+
     /**
      * MsiInventory constructor
      *
@@ -25,10 +30,12 @@ class MsiInventory
      */
     public function __construct(
         Helper $helper,
-        Importer $importer
+        Importer $importer,
+        State $appState
     ) {
         $this->helper = $helper;
         $this->importer = $importer;
+        $this->appState = $appState;
     }
 
     /**
@@ -71,7 +78,12 @@ class MsiInventory
             $importerModel->setAllowedErrorCount(100);
         }
         try {
-            $importerModel->processImport($productsArray);
+            $this->appState->emulateAreaCode(
+                AppArea::AREA_ADMINHTML,
+                [$importerModel, 'processImport'],
+                [$productsArray]
+            );
+            //$importerModel->processImport($productsArray);
         } catch (\Exception $e) {
             $this->helper->logMessage($e->getMessage());
         }

@@ -7,6 +7,8 @@
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use MagentoEse\DataInstall\Model\Import\Importer\ImporterFactory as Importer;
+use Magento\Framework\App\Area as AppArea;
+use Magento\Framework\App\State;
 use MagentoEse\DataInstall\Helper\Helper;
 
 class AdvancedPricing
@@ -23,24 +25,30 @@ class AdvancedPricing
     /** @var Importer */
     protected $importer;
 
-     /** @var Stores */
-     protected $stores;
+    /** @var Stores */
+    protected $stores;
+
+    /** @var State  */
+    protected $appState;
 
     /**
      *
      * @param Helper $helper
      * @param Importer $importer
      * @param Stores $stores
+     * @param State $appState
      * @return void
      */
     public function __construct(
         Helper $helper,
         Importer $importer,
-        Stores $stores
+        Stores $stores,
+        State $appState
     ) {
         $this->importer = $importer;
         $this->helper = $helper;
         $this->stores = $stores;
+        $this->appState = $appState;
     }
 
     /**
@@ -134,7 +142,11 @@ class AdvancedPricing
             $importerModel->setAllowedErrorCount(100);
         }
         try {
-            $importerModel->processImport($productsArray);
+            $this->appState->emulateAreaCode(
+                AppArea::AREA_ADMINHTML,
+                [$importerModel, 'processImport'],
+                [$productsArray]
+            );
         } catch (\Exception $e) {
             $this->helper->logMessage($e->getMessage());
         }

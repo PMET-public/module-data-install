@@ -8,6 +8,8 @@ namespace MagentoEse\DataInstall\Model\DataTypes;
 
 use MagentoEse\DataInstall\Model\Import\Importer\ImporterFactory as Importer;
 use MagentoEse\DataInstall\Helper\Helper;
+use Magento\Framework\App\Area as AppArea;
+use Magento\Framework\App\State;
 
 class CustomerAddresses
 {
@@ -20,6 +22,9 @@ class CustomerAddresses
     /** @var Helper  */
     protected $helper;
 
+    /** @var State  */
+    protected $appState;
+
     /** @var array */
     protected $importUnsafeColumns=[''];
 
@@ -29,15 +34,18 @@ class CustomerAddresses
      * @param Stores $stores
      * @param Importer $importer
      * @param Helper $helper
+     * @param State $appState
      */
     public function __construct(
         Stores $stores,
         Importer $importer,
-        Helper $helper
+        Helper $helper,
+        State $appState
     ) {
         $this->stores = $stores;
         $this->importer = $importer;
         $this->helper = $helper;
+        $this->appState = $appState;
     }
 
     /**
@@ -130,7 +138,11 @@ class CustomerAddresses
             $importerModel->setAllowedErrorCount(100);
         }
         try {
-            $importerModel->processImport($customerArray);
+            $this->appState->emulateAreaCode(
+                AppArea::AREA_ADMINHTML,
+                [$importerModel, 'processImport'],
+                [$customerArray]
+            );
         } catch (\Exception $e) {
             $this->helper->logMessage($e->getMessage());
         }

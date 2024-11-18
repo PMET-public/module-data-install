@@ -6,6 +6,7 @@
 
 namespace MagentoEse\DataInstall\Model\DataTypes;
 
+use Exception;
 use Magento\CatalogGraphQl\Model\Category\Filter\SearchCriteria;
 use Magento\Company\Api\Data\StructureInterfaceFactory;
  use Magento\Company\Model\StructureRepository;
@@ -25,7 +26,8 @@ use Magento\Company\Api\Data\StructureInterfaceFactory;
  use Magento\Framework\Exception\NoSuchEntityException;
  use MagentoEse\DataInstall\Helper\Helper;
  use Magento\Company\Api\Data\StructureInterface;
-
+ use Magento\CompanyPayment\Model\ResourceModel\CompanyPaymentMethod;
+ use Magento\CompanyPayment\Model\CompanyPaymentMethodFactory;
 class Companies
 {
 
@@ -77,6 +79,13 @@ class Companies
     /** @var Helper */
     protected $helper;
 
+    /** @var CompanyPaymentMethod */
+    protected $companyPaymentMethodResource;
+
+    /** @var CompanyPaymentMethodFactory */
+    protected $companyPaymentMethodFactory;
+
+
     /**
      * Companies constructor
      *
@@ -95,6 +104,8 @@ class Companies
      * @param State $appState
      * @param Stores $stores
      * @param Helper $helper
+     * @param CompanyPaymentMethod $companyPaymentMethodResource
+     * @param CompanyPaymentMethodFactory $companyPaymentMethodFactory
      */
     public function __construct(
         CompanyCustomer $companyCustomer,
@@ -111,7 +122,9 @@ class Companies
         SearchCriteriaInterface $searchCriteriaInterface,
         State $appState,
         Stores $stores,
-        Helper $helper
+        Helper $helper,
+        CompanyPaymentMethod $companyPaymentMethodResource,
+        CompanyPaymentMethodFactory $companyPaymentMethodFactory
     ) {
         $this->companyCustomer = $companyCustomer;
         $this->customer = $customer;
@@ -128,6 +141,8 @@ class Companies
         $this->stores = $stores;
         $this->helper = $helper;
         $this->creditLimitRepository = $creditLimitRepository;
+        $this->companyPaymentMethodResource = $companyPaymentMethodResource;
+        $this->companyPaymentMethodFactory = $companyPaymentMethodFactory;
     }
 
     /**
@@ -291,8 +306,27 @@ class Companies
                 }
             }
         }
+        // This is done because there is a conflict with payments when the company is resaved.
+        // This is likely due to the transactional nature of the load where db changes are not reflected in the object
+        $this->removeCompanyPayments($newCompany);
         return true;
     }
+    /**
+     * 
+     * @param mixed $company 
+     * @return void 
+     * @throws Exception 
+     */
+    public function removeCompanyPayments( $company
+    ) {
+        /** @var \Magento\CompanyPayment\Model\CompanyPaymentMethod $paymentSettings */
+        $paymentSettings = $this->companyPaymentMethodFactory->create();
+        $paymentSettings->setCompanyId($company->getId());
+        $this->companyPaymentMethodResource->delete($paymentSettings);
+    }
+
+
+
     /**
      * Get company structure
      *

@@ -311,21 +311,19 @@ class Companies
         $this->removeCompanyPayments($newCompany);
         return true;
     }
+
     /**
      * 
      * @param mixed $company 
      * @return void 
      * @throws Exception 
      */
-    public function removeCompanyPayments( $company
-    ) {
+    public function removeCompanyPayments($company) {
         /** @var \Magento\CompanyPayment\Model\CompanyPaymentMethod $paymentSettings */
         $paymentSettings = $this->companyPaymentMethodFactory->create();
         $paymentSettings->setCompanyId($company->getId());
         $this->companyPaymentMethodResource->delete($paymentSettings);
     }
-
-
 
     /**
      * Get company structure

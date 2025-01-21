@@ -6,6 +6,7 @@
 
 namespace MagentoEse\DataInstall\Model;
 
+use DomainException;
 use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Exception\CouldNotDeleteException;
@@ -17,6 +18,7 @@ use MagentoEse\DataInstall\Model\ResourceModel\Logger;
 use MagentoEse\DataInstall\Model\ResourceModel\Logger\CollectionFactory;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\LocalizedException;
+use Zend_Db_Select_Exception;
 
 class LoggerRepository implements LoggerRepositoryInterface
 {
@@ -121,6 +123,25 @@ class LoggerRepository implements LoggerRepositoryInterface
         $select = $connection->select()
         ->from($tableName)
         ->where('job_id = ?', $jobId)
+        ->order('id', 'asc');
+        $logs = $connection->fetchAll($select);
+        return $logs;
+    }
+
+    /**
+     * Get installed data packs
+     *
+     * @return LoggerInterface
+     * @throws DomainException
+     * @throws Zend_Db_Select_Exception
+     */
+    public function getInstalledDataPacks()
+    {
+        $connection = $this->LoggerResource->getConnection();
+        $tableName = $connection->getTableName(self::LOGGER_TABLE);
+        $select = $connection->select()
+        ->from($tableName)
+        ->where('message = ?', 'Start Data Installer process')
         ->order('id', 'asc');
         $logs = $connection->fetchAll($select);
         return $logs;

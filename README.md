@@ -120,6 +120,17 @@ If you have a data pack that creates a new website, you can have the option to h
 ###### Observers
 There are observers written for each of the events. They are used to log when the event has been dispatched
 
+### Meta Data
+Data packs can include a file that contains meta data about the pack, such as name, description, etc.The installation process will look for a `datapack_info.json` file. If that file exists, that data contained in the file as the logging message add will be logged as level `meta-data` in the log and db.
+
+Example file contents:
+`{
+"name": "CitiSignal",
+"description" : "CitiSignal is a data pack that provides data for the CitiSignal website."
+}`
+
+If the contents of the file aren't valid json, a warning will be logged. There is no validation for the content itself. The only element that will be use initially is the `name` for display in the DSC UI to show installed data packs. The name is also used in logging - `Installing CitiSignal`. That logging is skipped if the name is not present
+
 ## Data Files
 
 Each element of potential sample data is encapsulated in its own file. Below is the list of .csv files that are supported.  If you are using the results from the supported GraphQL queries, see the [Data Installer GraphQL ](https://github.com/PMET-public/module-data-install-graphql)module )

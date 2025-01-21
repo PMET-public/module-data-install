@@ -36,6 +36,14 @@ interface LoggerRepositoryInterface
     public function getByDataPack($dataPack);
 
     /**
+     * Get Installed Data Packs
+     *
+     * @return \MagentoEse\DataInstall\Api\Data\LoggerInterface
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getInstalledDataPacks();
+
+    /**
      * Save Log entry
      *
      * @param \MagentoEse\DataInstall\Api\Data\LoggerInterface $logger

@@ -199,6 +199,14 @@ class Process
             $fileOrder=$this->conf->getProcessConfiguration();
         }
 
+        //retrieve and log metadata if file exists
+        $metaData = $this->getMetaData($filePath, $fixtureDirectory, $dataPack);
+        $this->logMetaData($metaData);
+
+        if (array_key_exists('name', $metaData)) {
+            $this->helper->logMessage("Installing ".$metaData['name'], "info");
+        }
+
         $this->helper->logMessage("Copying Media", "info");
 
         $this->copyMedia->moveFiles($filePath);
@@ -559,6 +567,49 @@ class Process
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * Get Meta Data From File if Exists
+     *
+     * @param string $filePath
+     * @param string $fixtureDirectory
+     * @param DataPackInterface $dataPack
+     * @return array
+     */
+    private function getMetaData(string $filePath, string $fixtureDirectory, DataPackInterface $dataPack): array
+    {
+        $metaData = [];
+        try {
+            $metaDataJson = $this->driverInterface->fileGetContents($filePath.$fixtureDirectory.'/datapack_info.json');
+            $metaData = json_decode($metaDataJson, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \RuntimeException('Invalid JSON data: ' . json_last_error_msg());
+            }
+        // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock.DetectedCatch  
+        } catch (FileSystemException $fe) {
+            // Ignore if file does not exist
+        } catch (\RuntimeException $re) {
+            // report if json is invalid
+            $this->helper->logMessage("contents of datapack_info.json are not valid", "warning");
+            return [];
+        }
+        return $metaData;
+    }
+
+    /**
+     * Log Meta Data
+     *
+     * @param array $metaData
+     * @return void
+     * @throws CouldNotSaveException
+     */
+    private function logMetaData(array $metaData): void
+    {
+        if (!empty($metaData)) {
+            $this->helper->logMessage(json_encode($metaData), "meta-data", true);
         }
     }
 

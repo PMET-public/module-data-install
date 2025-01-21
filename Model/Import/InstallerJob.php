@@ -15,6 +15,18 @@ class InstallerJob implements InstallerJobInterface
 
     /** @var ScheduleBulk */
     protected $scheduleBulk;
+    
+    /** @var string */
+    protected $jobId;
+
+    /** @var string */
+    protected $status;
+
+    /** @var string */
+    protected $statusMessage;
+
+    /** @var DataPackInterface */
+    protected $dataPack;
 
     /**
      *

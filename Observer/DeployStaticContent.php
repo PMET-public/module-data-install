@@ -59,8 +59,8 @@ class DeployStaticContent implements ObserverInterface
     {
         $cmd = $this->functionCallPath . 'setup:static-content:deploy -f';
         try {
-        $execOutput = $this->shell->execute($cmd);
-        $this->helper->logMessage($execOutput, "info");
+            $execOutput = $this->shell->execute($cmd);
+            $this->helper->logMessage($execOutput, "info");
         } catch (\Exception $exception) {
             $this->helper->logMessage($exception->getMessage(), "error");
         }

@@ -408,15 +408,11 @@ class Customers
                 [$importerModel, 'processImport'],
                 [$customerArray]
             );
-            //$importerModel->processImport($customerArray);
         } catch (\Exception $e) {
             $this->helper->logMessage($e->getMessage(), "warning");
         }
         $errors = $importerModel->getErrorMessages();
         $this->helper->logMessage($importerModel->getLogTrace());
-        //if ($importerModel->getErrorMessages()!="") {
-            //$this->helper->logMessage($importerModel->getErrorMessages(), "warning");
-        //}
         unset($importerModel);
     }
 

@@ -28,6 +28,7 @@ use Magento\Company\Api\Data\StructureInterfaceFactory;
  use Magento\Company\Api\Data\StructureInterface;
  use Magento\CompanyPayment\Model\ResourceModel\CompanyPaymentMethod;
  use Magento\CompanyPayment\Model\CompanyPaymentMethodFactory;
+
 class Companies
 {
 
@@ -84,7 +85,6 @@ class Companies
 
     /** @var CompanyPaymentMethodFactory */
     protected $companyPaymentMethodFactory;
-
 
     /**
      * Companies constructor
@@ -313,12 +313,13 @@ class Companies
     }
 
     /**
-     * 
-     * @param mixed $company 
-     * @return void 
-     * @throws Exception 
+     *
+     * @param mixed $company
+     * @return void
+     * @throws Exception
      */
-    public function removeCompanyPayments($company) {
+    public function removeCompanyPayments($company)
+    {
         /** @var \Magento\CompanyPayment\Model\CompanyPaymentMethod $paymentSettings */
         $paymentSettings = $this->companyPaymentMethodFactory->create();
         $paymentSettings->setCompanyId($company->getId());

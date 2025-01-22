@@ -121,7 +121,7 @@ If you have a data pack that creates a new website, you can have the option to h
 There are observers written for each of the events. They are used to log when the event has been dispatched
 
 ### Meta Data
-Data packs can include a file that contains meta data about the pack, such as name, description, etc.The installation process will look for a `datapack_info.json` file. If that file exists, that data contained in the file as the logging message add will be logged as level `meta-data` in the log and db.
+Data packs can include a file that contains meta data about the pack, such as name, description, etc.The installation process will look for a `datapack_info.json` file. If that file exists, that data contained in the file as the logging message add will be logged as level `metadata` in the log and db.
 
 Example file contents:
 `{

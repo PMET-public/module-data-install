@@ -139,11 +139,37 @@ class LoggerRepository implements LoggerRepositoryInterface
     {
         $connection = $this->LoggerResource->getConnection();
         $tableName = $connection->getTableName(self::LOGGER_TABLE);
-        $select = $connection->select()
-        ->from($tableName)
-        ->where('message = ?', 'Start Data Installer process')
-        ->order('id', 'asc');
-        $logs = $connection->fetchAll($select);
+        // $select = $connection->select()
+        $queryString = "SELECT log.id, log.datapack, log.message, log.level, log.add_date, log.job_id, 
+                        log.datapack as 'datapack_name', log.message as 'metadata'
+                        FROM magentoese_data_installer_log log LEFT JOIN magentoese_data_installer_log meta_log 
+                        ON log.datapack = meta_log.datapack AND meta_log.level = 'metadata' 
+                        LEFT JOIN magentoese_data_installer_log start_log ON log.datapack = start_log.datapack 
+                        AND start_log.message = 'Start Data Installer Process' WHERE log.id = 
+                        (SELECT id FROM magentoese_data_installer_log WHERE datapack = log.datapack 
+                        AND level = 'metadata' ORDER BY add_date DESC LIMIT 1) OR (log.id = 
+                        (SELECT id FROM magentoese_data_installer_log WHERE datapack = log.datapack
+                        AND message = 'Start Data Installer Process' ORDER BY add_date DESC LIMIT 1) AND NOT EXISTS 
+                        (SELECT 1 FROM magentoese_data_installer_log WHERE datapack = log.datapack 
+                        AND level = 'metadata')) GROUP BY log.datapack ORDER BY log.id asc";
+        $select = $connection->query($queryString);
+        $logs =  $select->fetchAll();
+
+        // Process the logs to extract the required data
+        foreach ($logs as &$log) {
+            if ($log['level'] === 'metadata') {
+                $metaData = json_decode($log['message'], true);
+                if (json_last_error() === JSON_ERROR_NONE && isset($metaData['datapack_name'])) {
+                    $log['datapack_name'] = $metaData['datapack_name'];
+                } else {
+                    $log['datapack_name'] = basename($log['datapack']);
+                }
+            } else {
+                $log['datapack_name'] = basename($log['datapack']);
+                $log['metadata'] = null;
+            }
+        }
+    
         return $logs;
     }
 

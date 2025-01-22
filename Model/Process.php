@@ -203,8 +203,8 @@ class Process
         $metaData = $this->getMetaData($filePath, $fixtureDirectory, $dataPack);
         $this->logMetaData($metaData);
 
-        if (array_key_exists('name', $metaData)) {
-            $this->helper->logMessage("Installing ".$metaData['name'], "info");
+        if (array_key_exists('datapack_name', $metaData)) {
+            $this->helper->logMessage("Installing ".$metaData['datapack_name'], "info");
         }
 
         $this->helper->logMessage("Copying Media", "info");
@@ -609,7 +609,7 @@ class Process
     private function logMetaData(array $metaData): void
     {
         if (!empty($metaData)) {
-            $this->helper->logMessage(json_encode($metaData), "meta-data", true);
+            $this->helper->logMessage(json_encode($metaData), "metadata", true);
         }
     }
 

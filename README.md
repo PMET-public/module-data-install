@@ -125,7 +125,7 @@ Data packs can include a file that contains meta data about the pack, such as na
 
 Example file contents:
 `{
-"name": "CitiSignal",
+"datapack_name": "CitiSignal",
 "description" : "CitiSignal is a data pack that provides data for the CitiSignal website."
 }`
 

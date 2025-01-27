@@ -34,8 +34,6 @@ interface LoggerInterface extends ExtensibleDataInterface
     /** @var string  */
     public const METADATA = 'metadata';
 
-
-
     /**
      * Get Id
      *

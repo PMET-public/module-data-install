@@ -360,13 +360,31 @@ class Customers
                 //try to load with the given website id. Then fail back to null (website id 1)
                 //in case the customer was loaded outside of the current data load
                 try {
-                    $customer = $this->customerRepositoryInterface->get(
+                    /* 2.4.8 fix area code not set */
+                    $customer = $this->appState->emulateAreaCode(
+                        AppArea::AREA_ADMINHTML,
+                        [$this->customerRepositoryInterface, 'get'],
+                        [
+                            $rewardCustomer['email'],
+                            $this->stores->getWebsiteId($rewardCustomer['_website'])
+                        ]
+                    );
+
+                    /*$customer = $this->customerRepositoryInterface->get(
                         $rewardCustomer['email'],
                         $this->stores->getWebsiteId($rewardCustomer['_website'])
-                    );
+                    );*/
                 } catch (NoSuchEntityException $e) {
                     try {
-                        $customer = $this->customerRepositoryInterface->get($rewardCustomer['email']);
+                        $customer = $this->appState->emulateAreaCode(
+                            AppArea::AREA_ADMINHTML,
+                            [$this->customerRepositoryInterface, 'get'],
+                            [
+                                $rewardCustomer['email']
+                            ]
+                        );
+
+                        /*$customer = $this->customerRepositoryInterface->get($rewardCustomer['email']);*/
                     } catch (NoSuchEntityException $e) {
                         $this->helper->logMessage("Rewards points cannot be added to customer: "
                         .$e->getMessage(), "warning");

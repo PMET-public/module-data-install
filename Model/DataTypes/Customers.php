@@ -202,10 +202,19 @@ class Customers
        
         foreach ($cleanCustomerArray as $row) {
             try {
-                $customer = $this->customerRepositoryInterface->get(
+                /* 2.4.8 fix area code not set */
+                $customer = $this->appState->emulateAreaCode(
+                    AppArea::AREA_ADMINHTML,
+                    [$this->customerRepositoryInterface, 'get'],
+                    [
+                        $row['email'],
+                        $this->stores->getWebsiteId($row['_website'])
+                    ]
+                );
+                /*$customer = $this->customerRepositoryInterface->get(
                     $row['email'],
                     $this->stores->getWebsiteId($row['_website'])
-                );
+                );*/
 
                 if (!empty($row['store_view_code'])) {
                     $customer->setCreatedIn($this->stores->getViewName($row['store_view_code']));

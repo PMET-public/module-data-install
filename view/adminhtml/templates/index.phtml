@@ -6,9 +6,9 @@
 ?>
 <?php /** @var \MagentoEse\DataInstall\Block\Adminhtml\Index $block */ ?>
 <div
-    data-base-url="<?= $block->escapeUrl($block->getBaseUrl()); ?>"
+    data-base-url="<?= $escaper->escapeUrl($block->getBaseUrl()); ?>"
     id="root"
 ></div>
 
-<script src="<?= $block->escapeUrl($block->getAppUrl()) ?>"></script>
+<script src="<?= $escaper->escapeUrl($block->getAppUrl()) ?>"></script>
 

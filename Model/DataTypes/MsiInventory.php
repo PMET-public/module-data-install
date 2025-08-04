@@ -83,7 +83,6 @@ class MsiInventory
                 [$importerModel, 'processImport'],
                 [$productsArray]
             );
-            //$importerModel->processImport($productsArray);
         } catch (\Exception $e) {
             $this->helper->logMessage($e->getMessage());
         }

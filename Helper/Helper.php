@@ -178,11 +178,14 @@ class Helper extends AbstractHelper
      *
      * @param string $string
      * @param string $messageType
+     * @param bool $logOnly
      */
-    public function logMessage($string, $messageType = 'info')
+    public function logMessage($string, $messageType = 'info', $logOnly = false)
     {
         //print to terminal
-        $this->printMessage($string, $messageType);
+        if (!$logOnly) {
+            $this->printMessage($string, $messageType);
+        }
         //write to log
         $foreground_color = ($foreground_color='header')?'info':$foreground_color;
         $this->logger->$foreground_color($string);

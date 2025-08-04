@@ -28,6 +28,12 @@ interface LoggerInterface extends ExtensibleDataInterface
     /** @var string  */
     public const ADDDATE = 'add_date';
 
+    /** @var string  */
+    public const DATAPACKNAME = 'datapack_name';
+
+    /** @var string  */
+    public const METADATA = 'metadata';
+
     /**
      * Get Id
      *

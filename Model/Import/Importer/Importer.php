@@ -16,9 +16,9 @@ class Importer
     protected $errorHelper;
 
     /**
-     * @var mixed
+     * @var string
      */
-    protected $errorMessages;
+    protected $errorMessages = "";
 
     /**
      * @var ArrayAdapterFactory
